@@ -128,6 +128,7 @@ const Connections = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [showQuickActions, setShowQuickActions] = useState(null);
 
+  // Connections data with proper key naming
   const connections = [
     {
       id: 1,
