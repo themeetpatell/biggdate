@@ -24,7 +24,7 @@ const Connections = lazy(() => import('./components/Connections.jsx'));
 const Events = lazy(() => import('./components/Events.jsx'));
 const Auth = lazy(() => import('./components/Auth.jsx'));
 const Pitches = lazy(() => import('./components/Pitches.jsx'));
-const Messages = lazy(() => import('./components/Messages.jsx'));
+const Messages = lazy(() => import('./components/Messages'));
 const AIMatchingInterface = lazy(() => import('./components/AIMatchingInterface.jsx'));
 const GamificationDashboard = lazy(() => import('./components/GamificationDashboard.jsx'));
 const PremiumFeatures = lazy(() => import('./components/PremiumFeatures.jsx'));
