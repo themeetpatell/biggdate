@@ -1,9 +1,9 @@
-import React, { useState, useEffect, Suspense, lazy, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, Suspense, lazy, memo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
-import { setupGlobalErrorHandlers, PerformanceMonitor } from './utils/errorHandler.js';
+import { setupGlobalErrorHandlers } from './utils/errorHandler.js';
 import { initializeAnalytics } from './utils/analytics.js';
 
 // Performance optimizations
@@ -33,7 +33,6 @@ const LandingPage = lazy(() => import('./components/LandingPage.jsx'));
 // Services (keep synchronous for now)
 import { AIPsychologyService } from './services/aiPsychologyService.js';
 import { GamificationService } from './services/gamificationService.js';
-import { UniqueMatchingService } from './services/uniqueMatchingService.js';
 
 const AppContent = () => {
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
@@ -53,7 +52,6 @@ const AppContent = () => {
   // Initialize services
   const aiPsychologyService = AIPsychologyService.getInstance();
   const gamificationService = GamificationService.getInstance();
-  const uniqueMatchingService = UniqueMatchingService.getInstance();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -408,7 +406,6 @@ const AppContent = () => {
   };
 
   const handleLike = (match) => {
-    console.log('Liked match:', match.id);
     // Update gamification
     if (gamificationProfile) {
       const updatedProfile = gamificationService.awardExperience(gamificationProfile, 'match_made', 25);
@@ -417,11 +414,10 @@ const AppContent = () => {
   };
 
   const handlePass = (match) => {
-    console.log('Passed match:', match.id);
+    // Handle pass action
   };
 
   const handleSuperLike = (match) => {
-    console.log('Super liked match:', match.id);
     // Update gamification
     if (gamificationProfile) {
       const updatedProfile = gamificationService.awardExperience(gamificationProfile, 'super_like', 50);
@@ -430,7 +426,7 @@ const AppContent = () => {
   };
 
   const handleViewProfile = (match) => {
-    console.log('View profile:', match.id);
+    // Handle view profile action
   };
 
   const handleRefresh = () => {
@@ -438,7 +434,6 @@ const AppContent = () => {
   };
 
   const handleUpgrade = (tier) => {
-    console.log('Upgrade to:', tier);
     if (currentUser) {
       setCurrentUser({ ...currentUser, premiumTier: tier });
     }
@@ -524,10 +519,10 @@ const AppContent = () => {
                   <GamificationDashboard
                     profile={gamificationProfile}
                     onAchievementUnlocked={(achievement) => {
-                      console.log('Achievement unlocked:', achievement);
+                      // Handle achievement unlocked
                     }}
                     onBadgeEarned={(badge) => {
-                      console.log('Badge earned:', badge);
+                      // Handle badge earned
                     }}
                   />
                 ) : (
@@ -568,10 +563,10 @@ const AppContent = () => {
               <GamificationDashboard
                 profile={gamificationProfile}
                 onAchievementUnlocked={(achievement) => {
-                  console.log('Achievement unlocked:', achievement);
+                  // Handle achievement unlocked
                 }}
                 onBadgeEarned={(badge) => {
-                  console.log('Badge earned:', badge);
+                  // Handle badge earned
                 }}
               />
             </div>

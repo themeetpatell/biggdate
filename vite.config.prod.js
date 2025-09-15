@@ -23,7 +23,7 @@ export default defineConfig({
           router: ['react-router-dom'],
           redux: ['@reduxjs/toolkit', 'react-redux'],
           ui: ['framer-motion', 'lucide-react'],
-          utils: ['next-themes']
+          utils: []
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
