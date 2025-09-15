@@ -105,7 +105,7 @@ const LandingPage = () => {
       role: "Software Engineer",
       location: "San Francisco, CA",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      content: "MindMate's AI matching is incredible! I met my partner within a week of joining. The compatibility analysis was spot-on.",
+      content: "BiggDate's AI matching is incredible! I met my partner within a week of joining. The compatibility analysis was spot-on.",
       rating: 5
     },
     {
@@ -121,7 +121,7 @@ const LandingPage = () => {
       role: "Graphic Designer",
       location: "Austin, TX",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      content: "The community events are amazing! I've made so many friends and found my soulmate through MindMate.",
+      content: "The community events are amazing! I've made so many friends and found my soulmate through BiggDate.",
       rating: 5
     }
   ];
@@ -198,7 +198,7 @@ const LandingPage = () => {
                 <Heart className="w-5 h-5 text-white" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                MindMate
+                BiggDate
               </span>
             </div>
 
@@ -269,7 +269,7 @@ const LandingPage = () => {
                   with AI
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  MindMate uses advanced artificial intelligence to analyze compatibility, 
+                  BiggDate uses advanced artificial intelligence to analyze compatibility, 
                   personality traits, and shared values to connect you with your ideal partner.
                 </p>
               </div>
@@ -377,7 +377,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-fade-in">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 text-gradient">
-              Why Choose MindMate?
+              Why Choose BiggDate?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Our AI-powered platform goes beyond traditional dating apps to create meaningful connections 
@@ -407,7 +407,7 @@ const LandingPage = () => {
               How It Works
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Getting started with MindMate is simple. Follow these three easy steps to find your perfect match.
+              Getting started with BiggDate is simple. Follow these three easy steps to find your perfect match.
             </p>
           </div>
 
@@ -456,7 +456,7 @@ const LandingPage = () => {
               Success Stories
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join thousands of couples who found love through MindMate's AI-powered matching.
+              Join thousands of couples who found love through BiggDate's AI-powered matching.
             </p>
           </div>
 
@@ -562,7 +562,7 @@ const LandingPage = () => {
             Ready to Find Your Perfect Match?
           </h2>
           <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of singles who have already found love through MindMate's AI-powered matching.
+            Join thousands of singles who have already found love through BiggDate's AI-powered matching.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
@@ -589,7 +589,7 @@ const LandingPage = () => {
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
                   <Heart className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-2xl font-bold">MindMate</span>
+                <span className="text-2xl font-bold">BiggDate</span>
               </div>
               <p className="text-gray-400">
                 AI-powered dating platform that connects compatible souls through advanced matching algorithms.
@@ -628,7 +628,7 @@ const LandingPage = () => {
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 MindMate. All rights reserved.</p>
+            <p>&copy; 2024 BiggDate. All rights reserved.</p>
           </div>
         </div>
       </footer>

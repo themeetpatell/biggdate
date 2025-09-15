@@ -368,57 +368,80 @@ const AIMatchingInterface = ({
   }
 
   return (
-    <div className="main-content">
-      <div className="container">
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
-        <div className="section">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">AI Matching</h1>
-              <p className="text-gray-600 mt-2">Find your perfect match with AI-powered compatibility</p>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">AI Matching</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Find your perfect match with AI-powered compatibility</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="btn btn-outline"
+                className="btn btn-outline text-xs sm:text-sm whitespace-nowrap px-3 py-2"
               >
-                <Filter className="w-5 h-5" />
-                Filters
+                <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Filters</span>
               </button>
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="btn btn-outline"
+                className="btn btn-outline text-xs sm:text-sm whitespace-nowrap px-3 py-2"
               >
-                <Settings className="w-5 h-5" />
-                Settings
+                <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Settings</span>
               </button>
               <button
                 onClick={handleRefresh}
-                className="btn btn-outline"
+                className="btn btn-outline text-xs sm:text-sm whitespace-nowrap px-3 py-2"
               >
-                <RefreshCw className="w-5 h-5" />
-                Refresh
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Refresh</span>
               </button>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalMatches}</div>
-              <div className="text-sm text-gray-600">Total Matches</div>
+          <div className="mb-6 sm:mb-8">
+            {/* Mobile: Horizontal scrollable stats */}
+            <div className="flex space-x-3 overflow-x-auto scrollbar-hide sm:hidden pb-2 -mx-4 px-4">
+              <div className="flex-shrink-0 bg-white p-4 rounded-xl shadow-sm border min-w-[100px] text-center">
+                <div className="text-2xl font-bold text-blue-600">{stats.totalMatches}</div>
+                <div className="text-xs text-gray-600">Total</div>
+              </div>
+              <div className="flex-shrink-0 bg-white p-4 rounded-xl shadow-sm border min-w-[100px] text-center">
+                <div className="text-2xl font-bold text-green-600">{stats.likes}</div>
+                <div className="text-xs text-gray-600">Likes</div>
+              </div>
+              <div className="flex-shrink-0 bg-white p-4 rounded-xl shadow-sm border min-w-[100px] text-center">
+                <div className="text-2xl font-bold text-yellow-600">{stats.superLikes}</div>
+                <div className="text-xs text-gray-600">Super</div>
+              </div>
+              <div className="flex-shrink-0 bg-white p-4 rounded-xl shadow-sm border min-w-[100px] text-center">
+                <div className="text-2xl font-bold text-red-600">{stats.passes}</div>
+                <div className="text-xs text-gray-600">Passes</div>
+              </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <div className="text-2xl font-bold text-green-600">{stats.likes}</div>
-              <div className="text-sm text-gray-600">Likes</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <div className="text-2xl font-bold text-yellow-600">{stats.superLikes}</div>
-              <div className="text-sm text-gray-600">Super Likes</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <div className="text-2xl font-bold text-red-600">{stats.passes}</div>
-              <div className="text-sm text-gray-600">Passes</div>
+            
+            {/* Desktop: Grid layout */}
+            <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <div className="text-3xl font-bold text-blue-600">{stats.totalMatches}</div>
+                <div className="text-sm text-gray-600">Total Matches</div>
+              </div>
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <div className="text-3xl font-bold text-green-600">{stats.likes}</div>
+                <div className="text-sm text-gray-600">Likes</div>
+              </div>
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <div className="text-3xl font-bold text-yellow-600">{stats.superLikes}</div>
+                <div className="text-sm text-gray-600">Super Likes</div>
+              </div>
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <div className="text-3xl font-bold text-red-600">{stats.passes}</div>
+                <div className="text-sm text-gray-600">Passes</div>
+              </div>
             </div>
           </div>
 
@@ -643,41 +666,41 @@ const AIMatchingInterface = ({
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               {/* Match Header */}
-              <div className="relative h-96 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+              <div className="relative h-64 sm:h-80 lg:h-96 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
                 <div className="absolute inset-0 bg-black/20"></div>
                 <div className="absolute top-4 right-4 flex gap-2">
                   <button
                     onClick={() => handleAction('viewProfile', currentMatch)}
                     className="p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-all"
                   >
-                    <Eye className="w-5 h-5" />
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
                 
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="flex items-end gap-4">
+                <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6">
+                  <div className="flex items-end gap-3 sm:gap-4">
                     <div className="relative">
                       <img
                         src={currentMatch.photo}
                         alt={currentMatch.name}
-                        className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                        className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full border-2 sm:border-4 border-white object-cover"
                       />
                       {currentMatch.isOnline && (
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full" />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 bg-green-500 border-2 border-white rounded-full" />
                       )}
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                         {safeRender(currentMatch.name)}, {safeRender(currentMatch.age)}
                       </h2>
-                      <div className="flex items-center gap-2 text-white/80">
-                        <MapPin className="w-4 h-4" />
-                        <span>{safeRender(currentMatch.location)} • {safeRender(currentMatch.distance)} away</span>
+                      <div className="flex items-center gap-2 text-white/80 mt-1">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="text-xs sm:text-sm truncate">{safeRender(currentMatch.location)} • {safeRender(currentMatch.distance)} away</span>
                       </div>
                       {currentMatch.verified && (
                         <div className="flex items-center gap-1 mt-1">
-                          <CheckCircle className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="text-sm text-yellow-400">Verified</span>
+                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current flex-shrink-0" />
+                          <span className="text-xs sm:text-sm text-yellow-400">Verified</span>
                         </div>
                       )}
                     </div>
@@ -686,20 +709,20 @@ const AIMatchingInterface = ({
               </div>
 
               {/* Match Content */}
-              <div className="p-8">
+              <div className="p-4 sm:p-6 lg:p-8">
                 {/* Compatibility Scores */}
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">{currentMatch.compatibilityScore}%</div>
-                    <div className="text-sm text-gray-600">Overall Match</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  <div className="text-center bg-gray-50 rounded-xl p-4 sm:p-6">
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">{currentMatch.compatibilityScore}%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Overall Match</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-600">{currentMatch.personalityMatch}</div>
-                    <div className="text-sm text-gray-600">Personality</div>
+                  <div className="text-center bg-gray-50 rounded-xl p-4 sm:p-6">
+                    <div className="text-2xl sm:text-3xl font-bold text-purple-600">{currentMatch.personalityMatch}</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Personality</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">{currentMatch.lifestyleMatch}</div>
-                    <div className="text-sm text-gray-600">Lifestyle</div>
+                  <div className="text-center bg-gray-50 rounded-xl p-4 sm:p-6">
+                    <div className="text-2xl sm:text-3xl font-bold text-green-600">{currentMatch.lifestyleMatch}</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Lifestyle</div>
                   </div>
                 </div>
 

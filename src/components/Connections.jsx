@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { 
   Search, 
   Filter, 
@@ -37,7 +37,80 @@ import {
   Grid,
   List,
   Plus,
-  X
+  X,
+  Sparkles,
+  ThumbsUp,
+  Send,
+  ExternalLink,
+  Activity,
+  Shield,
+  Coffee,
+  Briefcase as BriefcaseIcon,
+  GraduationCap,
+  Building2,
+  MapPin as LocationIcon,
+  Calendar as CalendarIcon,
+  Clock as ClockIcon,
+  Star as StarIcon,
+  Heart as HeartIcon,
+  MessageCircle as MessageIcon,
+  Phone as PhoneIcon,
+  Video as VideoIcon,
+  Mail as MailIcon,
+  Globe as GlobeIcon,
+  Linkedin,
+  Twitter,
+  Instagram,
+  Github,
+  ArrowRight,
+  ChevronRight,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  RefreshCw,
+  Download,
+  Upload,
+  Copy,
+  Link as LinkIcon,
+  ExternalLink as ExternalLinkIcon,
+  Info,
+  HelpCircle,
+  Settings,
+  Bell,
+  BellOff,
+  Archive,
+  ArchiveRestore,
+  Trash,
+  Ban,
+  UserCheck,
+  UserX,
+  UserPlus as UserPlusIcon,
+  UserMinus as UserMinusIcon,
+  Crown as CrownIcon,
+  Award as AwardIcon,
+  Target as TargetIcon,
+  Zap as ZapIcon,
+  Clock as ClockIconAlt,
+  TrendingUp as TrendingUpIcon,
+  Eye as EyeIcon,
+  Edit as EditIcon,
+  Trash2 as TrashIcon,
+  Share as ShareIcon,
+  Bookmark as BookmarkIcon,
+  Flag as FlagIcon,
+  AlertCircle as AlertCircleIcon,
+  ChevronDown as ChevronDownIcon,
+  ChevronUp as ChevronUpIcon,
+  SortAsc as SortAscIcon,
+  SortDesc as SortDescIcon,
+  Grid as GridIcon,
+  List as ListIcon,
+  Plus as PlusIcon,
+  X as XIcon
 } from 'lucide-react';
 import ProfileModal from './ProfileModal.jsx';
 
@@ -52,6 +125,8 @@ const Connections = () => {
   const [sortOrder, setSortOrder] = useState('desc'); // asc or desc
   const [selectedConnections, setSelectedConnections] = useState([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [showQuickActions, setShowQuickActions] = useState(null);
 
   const connections = [
     {
@@ -81,7 +156,88 @@ const Connections = () => {
       recentActivity: 'Posted about new AI breakthrough in medical diagnosis',
       lastInteraction: '2024-01-20',
       interactionType: 'message',
-      priority: 'high'
+      priority: 'high',
+      coverImage: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=200&fit=crop',
+      profileImage: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+      achievements: ['Forbes 30 Under 30', 'TechCrunch Disrupt Winner'],
+      education: 'Stanford University - Computer Science',
+      experience: '10+ years in tech',
+      languages: ['English', 'Spanish', 'French'],
+      availability: 'Available for coffee chats',
+      timezone: 'EST',
+      industry: 'Healthcare Technology',
+      companySize: '11-50 employees',
+      funding: 'Series A',
+      revenue: '$1M - $10M',
+      socialMedia: {
+        linkedin: 'sarah-johnson-healthai',
+        twitter: '@sarahj_healthai',
+        instagram: '@sarahj_health',
+        github: 'sarahj-healthai'
+      },
+      contactPreferences: {
+        email: true,
+        phone: false,
+        linkedin: true,
+        twitter: true
+      },
+      meetingPreferences: {
+        coffee: true,
+        lunch: true,
+        video: true,
+        phone: false
+      },
+      expertise: ['Machine Learning', 'Healthcare AI', 'Product Strategy', 'Team Leadership'],
+      lookingFor: ['Partnerships', 'Advisors', 'Investors', 'Talent'],
+      offering: ['Technical Consulting', 'Mentoring', 'Speaking', 'Advisory'],
+      recentPosts: [
+        'Just launched our AI-powered diagnostic tool! 🚀',
+        'Excited to speak at the Healthcare AI Summit next month',
+        'Looking for talented ML engineers to join our team'
+      ],
+      mutualInterests: ['Artificial Intelligence', 'Healthcare Innovation', 'Startup Culture'],
+      connectionStrength: 'Strong',
+      lastMeeting: '2024-01-15',
+      nextMeeting: '2024-02-01',
+      relationshipNotes: 'Great potential for collaboration on healthcare AI projects',
+      referralPotential: 'High',
+      collaborationHistory: ['Joint webinar on AI in healthcare', 'Mutual introductions to 3 contacts'],
+      sharedConnections: ['John Smith', 'Emily Chen', 'Michael Brown'],
+      commonGroups: ['Healthcare AI Network', 'Boston Tech Leaders', 'Women in Tech'],
+      eventHistory: ['TechCrunch Disrupt 2023', 'Healthcare AI Summit 2023', 'Boston Tech Meetup'],
+      communicationStyle: 'Direct and technical',
+      responseTime: 'Within 2 hours',
+      meetingFrequency: 'Monthly',
+      preferredMeetingTime: 'Morning',
+      meetingDuration: '30-60 minutes',
+      location: 'Boston area or video',
+      networkingGoals: ['Expand healthcare AI network', 'Find potential partners', 'Share knowledge'],
+      personalInterests: ['Running', 'Photography', 'Cooking', 'Travel'],
+      personality: ['Analytical', 'Innovative', 'Collaborative', 'Ambitious'],
+      workStyle: ['Remote-friendly', 'Flexible hours', 'Results-oriented'],
+      values: ['Innovation', 'Impact', 'Collaboration', 'Growth'],
+      goals: ['Scale HealthAI globally', 'Improve healthcare outcomes', 'Build diverse team'],
+      challenges: ['Talent acquisition', 'Regulatory compliance', 'Market education'],
+      opportunities: ['International expansion', 'New product lines', 'Strategic partnerships'],
+      riskTolerance: 'Medium-High',
+      decisionMaking: 'Data-driven',
+      communicationFrequency: 'Weekly',
+      relationshipType: 'Professional',
+      trustLevel: 'High',
+      influence: 'High',
+      networkValue: 'High',
+      potentialValue: 'Very High',
+      urgency: 'Medium',
+      followUpRequired: true,
+      followUpDate: '2024-01-25',
+      followUpNotes: 'Discuss potential partnership opportunities',
+      tags: ['AI', 'Healthcare', 'Startup', 'Leadership', 'Innovation'],
+      customFields: {
+        'Investment Interest': 'Yes',
+        'Partnership Potential': 'High',
+        'Speaking Opportunities': 'Yes',
+        'Mentoring Interest': 'Yes'
+      }
     },
     {
       id: 2,
@@ -326,174 +482,180 @@ const Connections = () => {
       <div className="container">
         <div className="section">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Connections</h1>
-                <p className="text-lg text-gray-600">Manage your professional network and relationships</p>
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Connections</h1>
+                <p className="text-base sm:text-lg text-gray-600">Manage your professional network and relationships</p>
               </div>
-              <div className="flex items-center space-x-3">
-                <button className="btn btn-secondary">
-                  <Plus className="w-5 h-5" />
-                  Add Connection
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                <button className="btn btn-secondary text-sm sm:text-base">
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden xs:inline">Add Connection</span>
+                  <span className="xs:hidden">Add</span>
                 </button>
-                <button className="btn btn-primary">
-                  <UserPlus className="w-5 h-5" />
-                  Import Contacts
+                <button className="btn btn-primary text-sm sm:text-base">
+                  <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden xs:inline">Import Contacts</span>
+                  <span className="xs:hidden">Import</span>
                 </button>
               </div>
             </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-blue-500">
-                  <Users className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="card p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg bg-blue-500">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">{connections.length}</span>
+                <span className="text-xl sm:text-2xl font-bold text-gray-900">{connections.length}</span>
               </div>
-              <h3 className="text-sm text-gray-600">Total Connections</h3>
+              <h3 className="text-xs sm:text-sm text-gray-600">Total Connections</h3>
             </div>
 
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-green-500">
-                  <CheckCircle className="w-6 h-6 text-white" />
+            <div className="card p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg bg-green-500">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-xl sm:text-2xl font-bold text-gray-900">
                   {connections.filter(c => c.status === 'connected').length}
                 </span>
               </div>
-              <h3 className="text-sm text-gray-600">Connected</h3>
+              <h3 className="text-xs sm:text-sm text-gray-600">Connected</h3>
             </div>
 
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-orange-500">
-                  <Clock className="w-6 h-6 text-white" />
+            <div className="card p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg bg-orange-500">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-xl sm:text-2xl font-bold text-gray-900">
                   {connections.filter(c => c.status === 'pending').length}
                 </span>
               </div>
-              <h3 className="text-sm text-gray-600">Pending</h3>
+              <h3 className="text-xs sm:text-sm text-gray-600">Pending</h3>
             </div>
 
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-purple-500">
-                  <Star className="w-6 h-6 text-white" />
+            <div className="card p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg bg-purple-500">
+                  <Star className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-xl sm:text-2xl font-bold text-gray-900">
                   {connections.filter(c => c.mutualConnections > 10).length}
                 </span>
               </div>
-              <h3 className="text-sm text-gray-600">Mutual</h3>
+              <h3 className="text-xs sm:text-sm text-gray-600">Mutual</h3>
             </div>
           </div>
 
           {/* Search and Filters */}
-          <div className="card mb-6">
-            <div className="card-body">
-              <div className="flex flex-col lg:flex-row gap-4">
+          <div className="card mb-4 sm:mb-6">
+            <div className="card-body p-4 sm:p-6">
+              <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:gap-4">
                 {/* Search Bar */}
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search connections, companies, or tags..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="input pl-10"
+                    className="input pl-9 sm:pl-10 text-sm sm:text-base"
                   />
                 </div>
                 
-                {/* Sort Dropdown */}
-                <div className="flex items-center space-x-2">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="input"
-                  >
-                    {sortOptions.map(option => (
-                      <option key={option.id} value={option.id}>{option.label}</option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
-                  </button>
-                </div>
+                {/* Controls Row */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+                  {/* Sort Dropdown */}
+                  <div className="flex items-center space-x-2">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="input text-sm sm:text-base flex-1 sm:flex-none"
+                    >
+                      {sortOptions.map(option => (
+                        <option key={option.id} value={option.id}>{option.label}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="btn btn-ghost btn-sm"
+                    >
+                      {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+                    </button>
+                  </div>
 
-                {/* View Mode Toggle */}
-                <div className="flex items-center space-x-2">
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
+                    >
+                      <Grid className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`btn btn-sm ${viewMode === 'list' ? 'btn-primary' : 'btn-ghost'}`}
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  {/* Filter Button */}
                   <button
-                    onClick={() => setViewMode('grid')}
-                    className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="btn btn-secondary text-sm sm:text-base"
                   >
-                    <Grid className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`btn btn-sm ${viewMode === 'list' ? 'btn-primary' : 'btn-ghost'}`}
-                  >
-                    <List className="w-4 h-4" />
+                    <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden xs:inline">Filters</span>
+                    <span className="xs:hidden">Filter</span>
                   </button>
                 </div>
-                
-                {/* Filter Button */}
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="btn btn-secondary"
-                >
-                  <Filter className="w-5 h-5" />
-                  Filters
-                </button>
               </div>
             </div>
           </div>
 
           {/* Bulk Actions */}
           {selectedConnections.length > 0 && (
-            <div className="card mb-6 bg-blue-50 border-blue-200">
-              <div className="card-body">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+            <div className="card mb-4 sm:mb-6 bg-blue-50 border-blue-200">
+              <div className="card-body p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                     <span className="text-sm font-medium text-blue-900">
                       {selectedConnections.length} connection{selectedConnections.length > 1 ? 's' : ''} selected
                     </span>
                     <button
                       onClick={handleSelectAll}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-blue-600 hover:text-blue-800 text-left sm:text-center"
                     >
                       {selectedConnections.length === filteredConnections.length ? 'Deselect All' : 'Select All'}
                     </button>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => handleBulkAction('message')}
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-sm btn-secondary text-xs sm:text-sm"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                      Message
+                      <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Message</span>
                     </button>
                     <button
                       onClick={() => handleBulkAction('export')}
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-sm btn-secondary text-xs sm:text-sm"
                     >
-                      <Share className="w-4 h-4" />
-                      Export
+                      <Share className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Export</span>
                     </button>
                     <button
                       onClick={() => handleBulkAction('tag')}
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-sm btn-secondary text-xs sm:text-sm"
                     >
-                      <Bookmark className="w-4 h-4" />
-                      Tag
+                      <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Tag</span>
                     </button>
                     <button
                       onClick={() => setSelectedConnections([])}
@@ -508,20 +670,20 @@ const Connections = () => {
           )}
 
           {/* Tabs */}
-          <div className="card mb-6">
-            <div className="card-header">
-              <div className="flex items-center space-x-8 overflow-x-auto">
+          <div className="card mb-4 sm:mb-6">
+            <div className="card-header p-4 sm:p-6">
+              <div className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8 overflow-x-auto scrollbar-hide">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 pb-2 border-b-2 transition-colors whitespace-nowrap ${
+                    className={`flex items-center space-x-2 pb-2 border-b-2 transition-colors whitespace-nowrap min-w-max ${
                       activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    <span className="font-medium">{tab.label}</span>
+                    <span className="font-medium text-sm sm:text-base">{tab.label}</span>
                     <span className="badge badge-secondary text-xs">{tab.count}</span>
                   </button>
                 ))}
@@ -529,96 +691,112 @@ const Connections = () => {
             </div>
           </div>
 
-          {/* Connections List */}
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-            {filteredConnections.map((connection) => (
-              <div key={connection.id} className={`card hover:shadow-lg transition-shadow ${selectedConnections.includes(connection.id) ? 'ring-2 ring-blue-500' : ''}`}>
-                <div className="card-body">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start space-x-4">
-                      {/* Avatar */}
-                      <div className="relative">
-                        <div className="avatar avatar-lg">
-                          <span>{connection.avatar}</span>
-                        </div>
-                        {connection.online && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                        )}
-                        <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${getPriorityColor(connection.priority)}`}></div>
+          {/* Enhanced Connections Grid */}
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8' : 'space-y-4 sm:space-y-6'}>
+            {filteredConnections.map((connection, index) => (
+              <div 
+                key={connection.id} 
+                className={`connection-card ${
+                  selectedConnections.includes(connection.id) ? 'ring-4 ring-blue-400 ring-opacity-50' : ''
+                }`}
+                onMouseEnter={() => setHoveredCard(connection.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animation: 'fadeInUp 0.6s ease-out forwards'
+                }}
+              >
+                {/* Header with gradient background */}
+                <div className="connection-card-header">
+                  <div className="connection-card-status">
+                    {connection.verified && (
+                      <div className="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-blue-500" />
                       </div>
-
-                      {/* Connection Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{connection.name}</h3>
-                          {connection.verified && (
-                            <CheckCircle className="w-5 h-5 text-blue-500" />
-                          )}
-                          <span className={`badge text-xs ${getStatusColor(connection.status)}`}>
-                            {connection.status}
-                          </span>
-                        </div>
-                        
-                        <p className="text-gray-600 mb-2">{connection.title} at {connection.company}</p>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{connection.location}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Users className="w-4 h-4" />
-                            <span>{connection.mutualConnections} mutual</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4" />
-                            <span>{connection.compatibility}% match</span>
-                          </div>
-                        </div>
-
-                        {/* Bio */}
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{connection.bio}</p>
-
-                        {/* Skills */}
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {connection.skills.slice(0, 3).map((skill, index) => (
-                            <span key={index} className="badge badge-secondary text-xs">
-                              {skill}
-                            </span>
-                          ))}
-                          {connection.skills.length > 3 && (
-                            <span className="badge badge-secondary text-xs">
-                              +{connection.skills.length - 3} more
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Recent Activity */}
-                        <div className="text-xs text-gray-500 mb-3">
-                          <div className="flex items-center space-x-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>{connection.recentActivity}</span>
-                          </div>
-                        </div>
-
-                        {/* Notes */}
-                        {connection.notes && (
-                          <p className="text-sm text-gray-600 italic mb-3">"{connection.notes}"</p>
-                        )}
+                    )}
+                    {connection.online && (
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
                       </div>
+                    )}
+                    <span className="card-status card-status-accepted">Connected</span>
+                  </div>
+                  
+                  {/* Avatar */}
+                  <div className="connection-card-avatar bg-gradient-to-r from-blue-500 to-purple-500">
+                    {connection.avatar}
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="connection-card-body">
+                  {/* Profile Info */}
+                  <div className="connection-card-info">
+                    <h3 className="connection-card-name">{connection.name}</h3>
+                    <p className="connection-card-title">{connection.title}</p>
+                    <p className="connection-card-company">{connection.company}</p>
+                  </div>
+
+                  {/* Meta Information */}
+                  <div className="connection-card-meta">
+                    <div className="connection-card-location">
+                      <MapPin className="w-4 h-4" />
+                      <span>{connection.location}</span>
                     </div>
+                    <div className="connection-card-mutual">
+                      <Users className="w-4 h-4" />
+                      <span>{connection.mutualConnections} mutual</span>
+                    </div>
+                    <div className="connection-card-score">
+                      <Star className="w-4 h-4" />
+                      <span>{connection.compatibility}% match</span>
+                    </div>
+                  </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedConnections.includes(connection.id)}
-                        onChange={() => handleSelectConnection(connection.id)}
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
+                  {/* Bio */}
+                  <p className="connection-card-bio">{connection.bio}</p>
+
+                  {/* Skills */}
+                  <div className="connection-card-skills">
+                    {connection.skills.slice(0, 3).map((skill, skillIndex) => (
+                      <span key={skillIndex} className="connection-card-skill">
+                        {skill}
+                      </span>
+                    ))}
+                    {connection.skills.length > 3 && (
+                      <span className="connection-card-skill">
+                        +{connection.skills.length - 3} more
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Recent Achievement */}
+                  <div className="connection-card-achievement">
+                    <p className="connection-card-quote">"{connection.recentActivity}"</p>
+                  </div>
+
+                  {/* Activity Info */}
+                  <div className="connection-card-activity">
+                    <div>Connected: {new Date(connection.connectionDate).toLocaleDateString()}</div>
+                    <div>Last active: {connection.lastActive}</div>
+                    <div>Last interaction: {connection.lastInteraction}</div>
+                  </div>
+
+                  {/* Interaction Tags */}
+                  <div className="connection-card-tags">
+                    {connection.interactionTags?.map((tag, tagIndex) => (
+                      <span key={tagIndex} className="connection-card-tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="connection-card-actions">
+                    <div className="flex space-x-2">
                       <button
                         onClick={() => handleViewProfile(connection)}
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-primary btn-icon-only btn-sm"
                         title="View Profile"
                       >
                         <Eye className="w-4 h-4" />
@@ -626,66 +804,102 @@ const Connections = () => {
                       
                       <button
                         onClick={() => handleConnectionAction(connection.id, 'message')}
-                        className="btn btn-ghost btn-sm"
-                        title="Send Message"
+                        className="btn btn-info btn-icon-only btn-sm"
+                        title="Message"
                       >
                         <MessageCircle className="w-4 h-4" />
                       </button>
                       
                       <button
                         onClick={() => handleConnectionAction(connection.id, 'call')}
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-success btn-icon-only btn-sm"
                         title="Call"
                       >
                         <Phone className="w-4 h-4" />
                       </button>
-                      
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedConnections.includes(connection.id)}
+                        onChange={() => handleSelectConnection(connection.id)}
+                        className="connection-card-checkbox"
+                      />
                       <button
-                        onClick={() => handleConnectionAction(connection.id, 'video')}
-                        className="btn btn-ghost btn-sm"
-                        title="Video Call"
+                        onClick={() => setShowQuickActions(showQuickActions === connection.id ? null : connection.id)}
+                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                       >
-                        <Video className="w-4 h-4" />
+                        <MoreVertical className="w-4 h-4" />
                       </button>
-                      
-                      <div className="relative">
-                        <button
-                          onClick={() => handleConnectionAction(connection.id, 'more')}
-                          className="btn btn-ghost btn-sm"
-                          title="More Options"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-                      </div>
                     </div>
                   </div>
 
-                  {/* Connection Date and Tags */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>Connected: {new Date(connection.connectionDate).toLocaleDateString()}</span>
-                      <span>Last active: {connection.lastActive}</span>
-                      <span>Last interaction: {new Date(connection.lastInteraction).toLocaleDateString()}</span>
+                  {/* Quick Actions Dropdown */}
+                  {showQuickActions === connection.id && (
+                    <div className="absolute top-full right-2 sm:right-4 mt-2 w-40 sm:w-48 bg-white rounded-lg sm:rounded-xl shadow-xl border border-gray-200 py-2 z-10">
+                      <button className="btn btn-ghost w-full justify-start btn-sm btn-icon">
+                        <Video className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>Video Call</span>
+                      </button>
+                      <button className="btn btn-ghost w-full justify-start btn-sm btn-icon">
+                        <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>Send Email</span>
+                      </button>
+                      <button className="btn btn-ghost w-full justify-start btn-sm btn-icon">
+                        <Share className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>Share Profile</span>
+                      </button>
+                      <button className="btn btn-ghost w-full justify-start btn-sm btn-icon">
+                        <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>Save Contact</span>
+                      </button>
+                      <hr className="my-2" />
+                      <button className="btn btn-danger w-full justify-start btn-sm btn-icon">
+                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>Remove Connection</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Connection Info Footer */}
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 space-y-1 sm:space-y-0">
+                      <span className="truncate">Connected {new Date(connection.connectionDate).toLocaleDateString()}</span>
+                      <span className="truncate">Last active {connection.lastActive}</span>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1">
-                      {connection.tags.map((tag, index) => (
-                        <span key={index} className="badge badge-primary text-xs">
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {connection.tags.slice(0, 2).map((tag, tagIndex) => (
+                        <span 
+                          key={tagIndex} 
+                          className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
+                        >
                           {tag}
                         </span>
                       ))}
+                      {connection.tags.length > 2 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          +{connection.tags.length - 2}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             ))}
           </div>
 
           {/* Load More */}
-          <div className="text-center mt-8">
-            <button className="btn btn-primary btn-lg">
-              <Zap className="w-5 h-5" />
-              Load More Connections
+          <div className="text-center mt-6 sm:mt-8">
+            <button className="btn btn-primary btn-lg text-sm sm:text-base">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">Load More Connections</span>
+              <span className="xs:hidden">Load More</span>
             </button>
           </div>
         </div>
@@ -704,4 +918,4 @@ const Connections = () => {
   );
 };
 
-export default Connections;
+export default memo(Connections);

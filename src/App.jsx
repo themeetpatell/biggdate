@@ -453,7 +453,7 @@ const AppContent = () => {
             <div className="w-8 h-8 text-white animate-spin">🧠</div>
           </div>
           <h2 className="apple-text-title-2 mb-4" style={{ color: 'var(--apple-gray-11)' }}>
-            Loading MindMate...
+            Loading BiggDate...
           </h2>
           <p className="apple-text-body" style={{ color: 'var(--apple-gray-6)' }}>
             AI is analyzing your compatibility profile

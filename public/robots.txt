@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://biggdate.com/sitemap.xml
+
+# Disallow private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# Allow important pages
+Allow: /
+Allow: /home
+Allow: /profile
+Allow: /connections
+Allow: /events
+Allow: /pitches
+Allow: /matching
+Allow: /ai-matching
+Allow: /auth
+
+# Crawl delay (optional)
+Crawl-delay: 1

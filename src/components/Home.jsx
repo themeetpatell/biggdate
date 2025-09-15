@@ -22,7 +22,14 @@ import {
   Target,
   Plus,
   Send,
-  ThumbsUp
+  ThumbsUp,
+  User,
+  Clock,
+  AlertCircle,
+  TrendingUp,
+  FileText,
+  MapPin,
+  Bell
 } from 'lucide-react';
 
 const Home = () => {
@@ -104,9 +111,59 @@ const Home = () => {
   const stats = {
     totalMatches: connections?.length || 24,
     newMatches: connections?.filter(c => c.status === 'pending')?.length || 3,
-    messages: 156,
+    newPitches: 12,
     profileViews: 89
   };
+
+  // Quick actions data
+  const quickActions = [
+    {
+      id: 'profile-completion',
+      title: 'Complete Profile',
+      description: 'Add missing information to boost your visibility',
+      icon: User,
+      color: 'blue',
+      status: 'incomplete',
+      progress: 75,
+      action: () => console.log('Navigate to profile completion'),
+      urgent: true
+    },
+    {
+      id: 'pending-pitches',
+      title: 'Respond to Pitches',
+      description: '3 pitches waiting for your response',
+      icon: Send,
+      color: 'orange',
+      status: 'pending',
+      count: 3,
+      action: () => console.log('Navigate to pending pitches'),
+      urgent: true
+    },
+    {
+      id: 'upcoming-events',
+      title: 'Join Event',
+      description: 'TechCrunch Disrupt starts in 2 days',
+      icon: Calendar,
+      color: 'green',
+      status: 'upcoming',
+      timeLeft: '2 days',
+      action: () => console.log('Navigate to events'),
+      urgent: false
+    },
+    {
+      id: 'network-growth',
+      title: 'Expand Network',
+      description: 'Connect with 5 new people this week',
+      icon: TrendingUp,
+      color: 'purple',
+      status: 'goal',
+      progress: 60,
+      target: 5,
+      current: 3,
+      action: () => console.log('Navigate to discovery'),
+      urgent: false
+    }
+  ];
 
   return (
     <div className="main-content">
@@ -147,11 +204,11 @@ const Home = () => {
             <div className="card p-6 animate-scale-in" style={{ animationDelay: '0.4s' }}>
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 rounded-lg bg-blue-500">
-                  <MessageCircle className="w-6 h-6 text-white" />
+                  <Send className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">{stats.messages}</span>
+                <span className="text-2xl font-bold text-gray-900">{stats.newPitches}</span>
               </div>
-              <h3 className="text-sm text-gray-600">Messages</h3>
+              <h3 className="text-sm text-gray-600">New Pitches</h3>
             </div>
 
             <div className="card p-6 animate-scale-in" style={{ animationDelay: '0.5s' }}>
@@ -213,34 +270,112 @@ const Home = () => {
 
         {/* Quick Actions */}
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 animate-slide-up">Quick Actions</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link to="/matching" className="card p-6 text-center hover:shadow-md transition-shadow animate-scale-in" style={{ animationDelay: '0.8s' }}>
-                <div className="p-3 rounded-lg bg-blue-100 mx-auto mb-3 w-fit">
-                  <Brain className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900">AI Matching</h3>
-                </Link>
-              <Link to="/discovery" className="card p-6 text-center hover:shadow-md transition-shadow animate-scale-in" style={{ animationDelay: '0.9s' }}>
-                <div className="p-3 rounded-lg bg-purple-100 mx-auto mb-3 w-fit">
-                  <Search className="w-6 h-6 text-purple-600" />
-          </div>
-                <h3 className="font-semibold text-gray-900">Discovery</h3>
-              </Link>
-              <Link to="/messages" className="card p-6 text-center hover:shadow-md transition-shadow animate-scale-in" style={{ animationDelay: '1.0s' }}>
-                <div className="p-3 rounded-lg bg-pink-100 mx-auto mb-3 w-fit">
-                  <Heart className="w-6 h-6 text-pink-600" />
-        </div>
-                <h3 className="font-semibold text-gray-900">Messages</h3>
-              </Link>
-              <Link to="/events" className="card p-6 text-center hover:shadow-md transition-shadow animate-scale-in" style={{ animationDelay: '1.1s' }}>
-                <div className="p-3 rounded-lg bg-green-100 mx-auto mb-3 w-fit">
-                  <MessageCircle className="w-6 h-6 text-green-600" />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 animate-slide-up">Quick Actions</h2>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Bell className="w-4 h-4" />
+                <span>2 urgent tasks</span>
+              </div>
             </div>
-                <h3 className="font-semibold text-gray-900">Events</h3>
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {quickActions.map((action, index) => {
+                const IconComponent = action.icon;
+                const colorClasses = {
+                  blue: 'bg-blue-100 text-blue-600',
+                  orange: 'bg-orange-100 text-orange-600',
+                  green: 'bg-green-100 text-green-600',
+                  purple: 'bg-purple-100 text-purple-600'
+                };
+                
+                return (
+                  <div 
+                    key={action.id}
+                    className={`card p-6 hover:shadow-lg transition-all duration-200 cursor-pointer animate-scale-in ${
+                      action.urgent ? 'ring-2 ring-orange-200 bg-orange-50/30' : ''
+                    }`}
+                    style={{ animationDelay: `${0.8 + index * 0.1}s` }}
+                    onClick={action.action}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`p-3 rounded-lg ${colorClasses[action.color]}`}>
+                        <IconComponent className="w-6 h-6" />
+                      </div>
+                      {action.urgent && (
+                        <div className="flex items-center space-x-1 text-orange-600">
+                          <AlertCircle className="w-4 h-4" />
+                          <span className="text-xs font-medium">Urgent</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="mb-3">
+                      <h3 className="font-semibold text-gray-900 mb-1">{action.title}</h3>
+                      <p className="text-sm text-gray-600">{action.description}</p>
+                    </div>
+                    
+                    {/* Progress or Status Indicators */}
+                    {action.status === 'incomplete' && (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                          <span>Profile Completion</span>
+                          <span>{action.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${action.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {action.status === 'pending' && (
+                      <div className="mb-3">
+                        <div className="flex items-center space-x-2 text-orange-600">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-sm font-medium">{action.count} pending</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {action.status === 'upcoming' && (
+                      <div className="mb-3">
+                        <div className="flex items-center space-x-2 text-green-600">
+                          <Calendar className="w-4 h-4" />
+                          <span className="text-sm font-medium">Starts in {action.timeLeft}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {action.status === 'goal' && (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                          <span>Weekly Goal</span>
+                          <span>{action.current}/{action.target} connections</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-purple-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${action.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">
+                        {action.urgent ? 'Click to take action' : 'Click to view details'}
+                      </span>
+                      <div className="flex items-center space-x-1 text-gray-400">
+                        <span className="text-xs">View</span>
+                        <Target className="w-3 h-3" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
           {/* Recent Matches */}
           <div className="mb-8">

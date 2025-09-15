@@ -1,4 +1,4 @@
-# 🧠 MindMate - AI-Powered Dating Revolution
+# 💕 BiggDate - AI-Powered Dating Revolution
 
 A revolutionary React/Node.js dating application that goes beyond typical matching with deep psychological profiling, cosmic compatibility, and gamified experiences.
 
@@ -73,7 +73,7 @@ A revolutionary React/Node.js dating application that goes beyond typical matchi
 ## 🏗️ Project Structure
 
 ```
-mindmate-complete/
+biggdate-complete/
 ├── src/                          # Frontend React app
 │   ├── components/               # React components
 │   │   ├── AnimatedProfileCard.tsx
@@ -111,8 +111,8 @@ mindmate-complete/
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/yourusername/mindmate-complete.git
-   cd mindmate-complete
+   git clone https://github.com/yourusername/biggdate-complete.git
+   cd biggdate-complete
 ```
 
 2. **Install dependencies**
@@ -285,9 +285,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Email**: support@mindmate.app
-- **Discord**: [Join our community](https://discord.gg/mindmate)
-- **Documentation**: [docs.mindmate.app](https://docs.mindmate.app)
+- **Email**: support@biggdate.com
+- **Discord**: [Join our community](https://discord.gg/biggdate)
+- **Documentation**: [docs.biggdate.com](https://docs.biggdate.com)
 
 ---
 

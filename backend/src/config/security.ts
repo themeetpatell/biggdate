@@ -5,8 +5,8 @@ export const securityConfig = {
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
     accessTokenExpiry: '15m',
     refreshTokenExpiry: '7d',
-    issuer: 'mindmate-app',
-    audience: 'mindmate-users'
+    issuer: 'biggdate-app',
+    audience: 'biggdate-users'
   },
 
   // Password Configuration

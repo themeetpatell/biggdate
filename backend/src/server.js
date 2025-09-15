@@ -17,7 +17,7 @@ const startupRoutes = require('./routes/startups');
 const matchRoutes = require('./routes/matches');
 const chatRoutes = require('./routes/chat');
 const syncRoutes = require('./routes/sync');
-const mindmateRoutes = require('./routes/mindmate');
+const biggdateRoutes = require('./routes/biggdate');
 
 // Import middleware
 const { errorHandler } = require('./middleware/errorHandler');
@@ -136,7 +136,7 @@ app.use('/api/startups', authMiddleware, startupRoutes);
 app.use('/api/matches', authMiddleware, matchRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/sync', authMiddleware, syncRoutes);
-app.use('/api/mindmate', authMiddleware, mindmateRoutes);
+app.use('/api/biggdate', authMiddleware, biggdateRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

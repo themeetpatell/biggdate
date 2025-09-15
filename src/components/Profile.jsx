@@ -185,22 +185,45 @@ const Profile = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-gray-200">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userProfile.stats.connections}</div>
-                <div className="text-sm text-gray-600">Connections</div>
+            <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+              {/* Mobile: Horizontal scrollable metrics */}
+              <div className="flex space-x-4 overflow-x-auto scrollbar-hide sm:hidden pb-2">
+                <div className="flex-shrink-0 text-center min-w-[80px]">
+                  <div className="text-xl font-bold text-gray-900">{userProfile.stats.connections}</div>
+                  <div className="text-xs text-gray-600">Connections</div>
+                </div>
+                <div className="flex-shrink-0 text-center min-w-[80px]">
+                  <div className="text-xl font-bold text-gray-900">{userProfile.stats.matches}</div>
+                  <div className="text-xs text-gray-600">Matches</div>
+                </div>
+                <div className="flex-shrink-0 text-center min-w-[80px]">
+                  <div className="text-xl font-bold text-gray-900">{userProfile.stats.events}</div>
+                  <div className="text-xs text-gray-600">Events</div>
+                </div>
+                <div className="flex-shrink-0 text-center min-w-[80px]">
+                  <div className="text-xl font-bold text-gray-900">{userProfile.stats.posts}</div>
+                  <div className="text-xs text-gray-600">Posts</div>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userProfile.stats.matches}</div>
-                <div className="text-sm text-gray-600">Matches</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userProfile.stats.events}</div>
-                <div className="text-sm text-gray-600">Events</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userProfile.stats.posts}</div>
-                <div className="text-sm text-gray-600">Posts</div>
+              
+              {/* Desktop: Grid layout */}
+              <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{userProfile.stats.connections}</div>
+                  <div className="text-sm text-gray-600">Connections</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{userProfile.stats.matches}</div>
+                  <div className="text-sm text-gray-600">Matches</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{userProfile.stats.events}</div>
+                  <div className="text-sm text-gray-600">Events</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{userProfile.stats.posts}</div>
+                  <div className="text-sm text-gray-600">Posts</div>
+                </div>
               </div>
             </div>
           </div>

@@ -202,7 +202,7 @@ const Auth = ({ onAuthSuccess }) => {
             </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            MindMate
+            BiggDate
           </h1>
           <p className="text-gray-600 text-lg">
             AI-powered dating for meaningful connections

@@ -231,7 +231,7 @@ const initializeDatabase = async () => {
       });
     }
 
-    // MindMate specific tables
+    // BiggDate specific tables
     const hasFounders = await db.schema.hasTable('founders');
     if (!hasFounders) {
       logger.info('Creating founders table...');
