@@ -107,23 +107,6 @@ export const discoveryApi = {
   },
 };
 
-// Mock Messages API
-export const messagesApi = {
-  getConversations: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { conversations: [] };
-  },
-
-  getMessages: async (conversationId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { messages: [] };
-  },
-
-  sendMessage: async (conversationId, content) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { success: true, message: 'Message sent successfully' };
-  },
-};
 
 // Mock Pitches API
 export const pitchesApi = {
