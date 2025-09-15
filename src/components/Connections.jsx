@@ -210,7 +210,7 @@ const Connections = () => {
       meetingFrequency: 'Monthly',
       preferredMeetingTime: 'Morning',
       meetingDuration: '30-60 minutes',
-      location: 'Boston area or video',
+      meetingLocation: 'Boston area or video',
       networkingGoals: ['Expand healthcare AI network', 'Find potential partners', 'Share knowledge'],
       personalInterests: ['Running', 'Photography', 'Cooking', 'Travel'],
       personality: ['Analytical', 'Innovative', 'Collaborative', 'Ambitious'],
@@ -231,7 +231,7 @@ const Connections = () => {
       followUpRequired: true,
       followUpDate: '2024-01-25',
       followUpNotes: 'Discuss potential partnership opportunities',
-      tags: ['AI', 'Healthcare', 'Startup', 'Leadership', 'Innovation'],
+      meetingTags: ['AI', 'Healthcare', 'Startup', 'Leadership', 'Innovation'],
       customFields: {
         'Investment Interest': 'Yes',
         'Partnership Potential': 'High',

@@ -204,4 +204,5 @@ const authSlice = createSlice({
 });
 
 export const { clearError, setCredentials, clearCredentials } = authSlice.actions;
+export const logout = clearCredentials;
 export default authSlice.reducer;

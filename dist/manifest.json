@@ -1,6 +1,6 @@
 {
-  "name": "MindMate - AI-Powered Dating Platform",
-  "short_name": "MindMate",
+  "name": "BiggDate - AI-Powered Dating Platform",
+  "short_name": "BiggDate",
   "description": "Find meaningful connections through AI-powered matching and psychological compatibility analysis",
   "start_url": "/",
   "display": "standalone",
@@ -136,7 +136,7 @@
   ],
   "protocol_handlers": [
     {
-      "protocol": "web+mindmate",
+      "protocol": "web+biggdate",
       "url": "/?action=%s"
     }
   ]
