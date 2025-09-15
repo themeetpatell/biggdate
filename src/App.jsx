@@ -28,6 +28,8 @@ const AIMatchingInterface = lazy(() => import('./components/AIMatchingInterface.
 const GamificationDashboard = lazy(() => import('./components/GamificationDashboard.jsx'));
 const PremiumFeatures = lazy(() => import('./components/PremiumFeatures.jsx'));
 const LandingPage = lazy(() => import('./components/LandingPage.jsx'));
+const Settings = lazy(() => import('./components/Settings.jsx'));
+const DatingSchool = lazy(() => import('./components/DatingSchool.jsx'));
 
 // Services (keep synchronous for now)
 import { AIPsychologyService } from './services/aiPsychologyService.js';
@@ -493,6 +495,8 @@ const AppContent = () => {
                 <Route path="/events" element={<Events />} />
                 <Route path="/pitches" element={<Pitches />} />
                 <Route path="/pitching" element={<Pitches />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/dating-school" element={<DatingSchool />} />
               <Route 
                 path="/matching" 
                 element={

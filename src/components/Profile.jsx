@@ -134,7 +134,7 @@ const Profile = () => {
                 {userProfile.isOnline && (
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full" />
                 )}
-                <button className="absolute -bottom-2 -right-2 btn btn-sm btn-primary rounded-full p-2">
+                <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
                   <Camera className="w-4 h-4" />
                 </button>
               </div>
@@ -162,20 +162,20 @@ const Profile = () => {
                 
                 {/* Action Buttons */}
                 <div className="flex items-center space-x-3">
-                  <button className="btn btn-primary">
+                  <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg">
                     <Edit className="w-4 h-4" />
                     Edit Profile
                   </button>
-                  <button className="btn btn-secondary">
+                  <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:bg-gray-200">
                     <Share className="w-4 h-4" />
                     Share
                   </button>
-                  <button className="btn btn-ghost">
+                  <button className="flex items-center gap-2 px-3 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-300 hover:scale-105">
                     <Settings className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="btn btn-ghost text-red-600 hover:bg-red-50"
+                    className="flex items-center gap-2 px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 hover:scale-105"
                     title="Logout"
                   >
                     <LogOut className="w-4 h-4" />

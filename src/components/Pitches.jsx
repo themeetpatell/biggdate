@@ -168,7 +168,7 @@ const Pitches = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-white rounded-lg p-1 shadow-md mb-6 sm:mb-8">
+        <div className="flex space-x-1 bg-white rounded-2xl p-1.5 shadow-lg mb-6 sm:mb-8 border border-gray-100">
           {[
             { id: 'pitches', label: 'Proposals', icon: Send },
             { id: 'conversations', label: 'Conversations', icon: MessageCircle }
@@ -178,10 +178,10 @@ const Pitches = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 btn btn-icon ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 ${
                   activeTab === tab.id
-                    ? 'btn-primary'
-                    : 'btn-ghost'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -200,7 +200,7 @@ const Pitches = () => {
               placeholder="Search proposals..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+              className="w-full pl-8 sm:pl-10 pr-4 py-3 sm:py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base shadow-sm hover:shadow-md transition-all duration-300"
             />
           </div>
           
@@ -208,7 +208,7 @@ const Pitches = () => {
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value)}
-              className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="px-4 sm:px-6 py-3 sm:py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base shadow-sm hover:shadow-md transition-all duration-300 bg-white"
             >
               <option value="all">All Proposals</option>
               <option value="pending">Pending</option>
@@ -225,7 +225,7 @@ const Pitches = () => {
             {pitches.map((pitch) => (
               <div key={pitch.id} className="proposal-card">
                 {/* Header with gradient background */}
-                <div className="relative h-20 sm:h-24 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 overflow-hidden">
+                <div className="relative h-20 sm:h-24 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 overflow-hidden rounded-t-lg">
                   <div className="absolute inset-0 bg-black/10"></div>
                   <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
                     <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
@@ -314,7 +314,7 @@ const Pitches = () => {
                         setSelectedPitch(pitch);
                         setShowPitchModal(true);
                       }}
-                      className="btn btn-secondary w-full btn-icon"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm transition-all duration-300 hover:bg-gray-200 hover:scale-105"
                     >
                       <Eye className="w-4 h-4" />
                       <span>View Details</span>
@@ -328,12 +328,12 @@ const Pitches = () => {
                             setSelectedPitch(pitch);
                             setShowResponseModal(true);
                           }}
-                          className="btn btn-success btn-sm btn-icon"
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg"
                         >
                           <Check className="w-4 h-4" />
                           <span>Accept</span>
                         </button>
-                        <button className="btn btn-danger btn-sm btn-icon">
+                        <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg">
                           <X className="w-4 h-4" />
                           <span>Reject</span>
                         </button>
@@ -342,11 +342,11 @@ const Pitches = () => {
                     
                     {pitch.status === 'accepted' && (
                       <div className="space-y-2">
-                        <div className="btn btn-status btn-status-accepted w-full btn-sm btn-icon">
+                        <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-xl font-semibold text-sm border border-green-200">
                           <Check className="w-4 h-4" />
                           <span>Accepted</span>
                         </div>
-                        <button className="btn btn-info w-full btn-sm btn-icon">
+                        <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg">
                           <MessageCircle className="w-4 h-4" />
                           <span>Continue Chat</span>
                         </button>
@@ -354,7 +354,7 @@ const Pitches = () => {
                     )}
                     
                     {pitch.status === 'rejected' && (
-                      <div className="btn btn-status btn-status-rejected w-full btn-sm btn-icon">
+                      <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-100 to-pink-100 text-red-800 rounded-xl font-semibold text-sm border border-red-200">
                         <X className="w-4 h-4" />
                         <span>Rejected</span>
                       </div>
@@ -384,10 +384,10 @@ const Pitches = () => {
                   </div>
                 </div>
                 <div className="conversation-card-actions">
-                  <span className="card-status card-status-accepted">Accepted</span>
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-xl font-semibold text-sm border border-green-200">Accepted</span>
                   <button 
                     onClick={() => handleOpenChat({ id: 2, sender: 'Mike Rodriguez', title: 'Sustainable Business Model' })}
-                    className="btn btn-info btn-sm btn-icon"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Continue Chat</span>
@@ -408,10 +408,10 @@ const Pitches = () => {
                   </div>
                 </div>
                 <div className="conversation-card-actions">
-                  <span className="card-status card-status-accepted">Accepted</span>
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-xl font-semibold text-sm border border-green-200">Accepted</span>
                   <button 
                     onClick={() => handleOpenChat({ id: 1, sender: 'Sarah Johnson', title: 'AI-Powered Dating Revolution' })}
-                    className="btn btn-info btn-sm btn-icon"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Continue Chat</span>
@@ -560,43 +560,43 @@ const Pitches = () => {
 
         {/* Chat Modal */}
         {showChatModal && selectedPitch && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-4xl w-full h-[80vh] flex flex-col">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl max-w-4xl w-full h-[85vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
               {/* Chat Header */}
-              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="flex items-center justify-between p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
                     {selectedPitch.sender?.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{selectedPitch.sender}</h3>
-                    <p className="text-sm text-gray-500">{selectedPitch.title}</p>
+                    <h3 className="text-xl font-bold text-gray-900">{selectedPitch.sender}</h3>
+                    <p className="text-sm text-gray-600 font-medium">{selectedPitch.title}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowChatModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {chatMessages[selectedPitch.id]?.map((message) => (
                   <div
                     key={message.id}
                     className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-2 rounded-lg ${
+                      className={`max-w-xs sm:max-w-md lg:max-w-lg px-5 py-3 rounded-2xl shadow-sm ${
                         message.isOwn
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                          : 'bg-gray-100 text-gray-900'
+                          : 'bg-gray-50 text-gray-900 border border-gray-100'
                       }`}
                     >
-                      <p className="text-sm">{message.message}</p>
-                      <p className={`text-xs mt-1 ${
+                      <p className="text-sm leading-relaxed">{message.message}</p>
+                      <p className={`text-xs mt-2 ${
                         message.isOwn ? 'text-purple-100' : 'text-gray-500'
                       }`}>
                         {message.timestamp}
@@ -607,19 +607,19 @@ const Pitches = () => {
               </div>
 
               {/* Chat Input */}
-              <div className="p-4 sm:p-6 border-t border-gray-200">
-                <div className="flex space-x-3">
+              <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
+                <div className="flex space-x-4">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(selectedPitch.id)}
                     placeholder="Type your message..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 px-5 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm hover:shadow-md transition-all duration-200"
                   />
                   <button
                     onClick={() => handleSendMessage(selectedPitch.id)}
-                    className="btn btn-primary btn-icon"
+                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-semibold"
                   >
                     <Send className="w-4 h-4" />
                     <span>Send</span>
