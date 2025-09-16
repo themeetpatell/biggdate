@@ -151,6 +151,9 @@ const AIMatchingInterface = ({
   const [activeTab, setActiveTab] = useState('matches'); // matches, liked, passed, superliked
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('compatibility'); // compatibility, distance, age, activity
+  const [showPitchModal, setShowPitchModal] = useState(false);
+  const [pitchMessage, setPitchMessage] = useState('');
+  const [isSendingPitch, setIsSendingPitch] = useState(false);
   const [stats, setStats] = useState({
     totalMatches: 0,
     likes: 0,
@@ -271,6 +274,27 @@ const AIMatchingInterface = ({
   const handleRefresh = () => {
     setCurrentMatchIndex(0);
     onRefresh?.();
+  };
+
+  const handleSendPitch = async () => {
+    if (!pitchMessage.trim() || isSendingPitch) return;
+    
+    setIsSendingPitch(true);
+    try {
+      // Simulate sending pitch
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setPitchMessage('');
+      setShowPitchModal(false);
+      
+      // Show success message
+      alert('Pitch sent successfully! 🚀');
+    } catch (error) {
+      console.error('Error sending pitch:', error);
+      alert('Failed to send pitch. Please try again.');
+    } finally {
+      setIsSendingPitch(false);
+    }
   };
 
   // Helper function to extract numeric value from percentage string
@@ -783,29 +807,37 @@ const AIMatchingInterface = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-3 sm:gap-4">
                   <button
                     onClick={() => handleAction('pass', currentMatch)}
                     disabled={loading}
-                    className="w-16 h-16 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                    className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
                   >
-                    <X className="w-8 h-8" />
+                    <X className="w-6 h-6 sm:w-8 sm:h-8" />
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowPitchModal(true)}
+                    disabled={loading}
+                    className="w-14 h-14 sm:w-16 sm:h-16 bg-purple-500 hover:bg-purple-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                  >
+                    <Target className="w-6 h-6 sm:w-8 sm:h-8" />
                   </button>
                   
                   <button
                     onClick={() => handleAction('superLike', currentMatch)}
                     disabled={loading}
-                    className="w-16 h-16 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                    className="w-14 h-14 sm:w-16 sm:h-16 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
                   >
-                    <Star className="w-8 h-8" />
+                    <Star className="w-6 h-6 sm:w-8 sm:h-8" />
                   </button>
                   
                   <button
                     onClick={() => handleAction('like', currentMatch)}
                     disabled={loading}
-                    className="w-16 h-16 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                    className="w-14 h-14 sm:w-16 sm:h-16 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-50"
                   >
-                    <Heart className="w-8 h-8" />
+                    <Heart className="w-6 h-6 sm:w-8 sm:h-8" />
                   </button>
                 </div>
 
@@ -836,6 +868,66 @@ const AIMatchingInterface = ({
           </div>
         </div>
       </div>
+
+      {/* Pitch Modal */}
+      {showPitchModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Pitch {currentMatch?.name?.split(' ')[0] || 'them'}
+              </h2>
+              <button
+                onClick={() => setShowPitchModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Pitch
+              </label>
+              <textarea
+                value={pitchMessage}
+                onChange={(e) => setPitchMessage(e.target.value)}
+                placeholder="Share your vision, ideas, or what you'd like to collaborate on..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm"
+                rows={4}
+                disabled={isSendingPitch}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Be specific about what you're looking for and what you can offer.
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPitchModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                disabled={isSendingPitch}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendPitch}
+                disabled={isSendingPitch || !pitchMessage.trim()}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+              >
+                {isSendingPitch ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Sending...
+                  </div>
+                ) : (
+                  'Send Pitch'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

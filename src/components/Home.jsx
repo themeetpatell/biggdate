@@ -1,435 +1,374 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import HowItWorks from './HowItWorks';
 import { 
-  Users, 
-  Search, 
-  Heart,
-  MessageCircle,
-  Calendar,
-  Star,
-  CheckCircle,
-  Eye,
-  Trophy,
-  Mountain,
-  X,
-  Brain,
-  Sparkles,
-  Zap,
-  Crown,
-  Shield,
-  Globe,
-  Target,
-  Plus,
   Send,
-  ThumbsUp,
+  Heart,
+  Calendar,
+  GraduationCap,
   User,
+  Plus,
+  Zap,
+  Star,
   Clock,
-  AlertCircle,
+  Eye,
+  MessageCircle,
   TrendingUp,
-  FileText,
+  Users,
+  Sparkles,
+  Target,
+  Award,
+  Globe,
+  Bell,
   MapPin,
-  Bell
+  ChevronRight,
+  Info,
+  ArrowRight,
+  Crown,
+  Rocket,
+  Diamond,
+  Flame,
+  Shield
 } from 'lucide-react';
 
 const Home = () => {
-  const [activeTab, setActiveTab] = useState('discover');
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  
-  // Get user data from Redux store
   const { user } = useSelector((state) => state.auth);
-  const { profile } = useSelector((state) => state.profile);
+  const dispatch = useDispatch();
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   
-  // Use Redux data or fallback to default values
-  const userProfile = {
-    name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Alex Chen',
-    title: profile?.title || 'CEO & Co-Founder',
-    company: profile?.company || 'TechFlow Solutions',
-    location: profile?.location || 'San Francisco, CA',
-    bio: profile?.bio || 'Passionate about building products that matter. Love hiking, cooking, and connecting with like-minded entrepreneurs.',
-    avatar: user?.firstName && user?.lastName ? `${user.firstName[0]}${user.lastName[0]}` : 'AC',
-    verified: true,
-    points: 1250,
-    level: 'Expert',
-    badges: ['Early Adopter', 'Networker', 'Visionary'],
-    interests: profile?.values || ['Hiking', 'Cooking', 'Photography', 'Startups', 'AI/ML'],
-    achievements: [
-      { title: 'Raised $15M Series A', year: 2023, icon: Trophy },
-      { title: 'Built 50+ person team', year: 2022, icon: Users },
-      { title: 'Hiked 20+ 14ers', year: 2023, icon: Mountain }
-    ]
+  // State for real-time data
+  const [stats, setStats] = useState({
+    activePitches: 0,
+    matches: 0,
+    upcomingEvents: 0,
+    courses: 0
+  });
+  
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Get user data from localStorage (set during onboarding)
+  const userRole = localStorage.getItem('userRole') || 'founder';
+  const whyHere = localStorage.getItem('whyHere') || 'Building the future of technology';
+  const selectedValues = JSON.parse(localStorage.getItem('selectedValues') || '[]');
+  const userMask = localStorage.getItem('userMask') || 'rocket';
+  const pitchSlot = localStorage.getItem('pitchSlot') || 'Looking for a co-founder who shares my vision...';
+
+  const masks = {
+    rocket: { emoji: '🚀', color: 'from-blue-500 to-cyan-500', name: 'The Innovator' },
+    diamond: { emoji: '💎', color: 'from-purple-500 to-pink-500', name: 'The Rare Gem' },
+    flame: { emoji: '🔥', color: 'from-orange-500 to-red-500', name: 'The Passionate' },
+    crown: { emoji: '👑', color: 'from-yellow-500 to-orange-500', name: 'The Leader' },
+    star: { emoji: '⭐', color: 'from-indigo-500 to-purple-500', name: 'The Shining Light' },
+    shield: { emoji: '🛡️', color: 'from-green-500 to-emerald-500', name: 'The Protector' }
   };
 
-  // Get matches from Redux store or use defaults
-  const { profiles } = useSelector((state) => state.discovery);
-  const matches = profiles?.length > 0 ? profiles.slice(0, 6).map(profile => ({
-    id: profile.founder.id,
-    name: `${profile.founder.title} at ${profile.founder.company}`,
-    title: profile.founder.title,
-    company: profile.founder.company,
-    location: profile.founder.location,
-    bio: profile.founder.bio,
-    avatar: profile.founder.title[0] + profile.founder.company[0],
-    compatibility: Math.round(profile.compatibilityScore),
-    lastActive: '2 hours ago',
-    verified: profile.founder.verification.overallScore > 0.7,
-    interests: profile.founder.values || [],
-    online: true
-  })) : [
+  const currentMask = masks[userMask] || masks.rocket;
+
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      // Simulate API calls
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setStats({
+        activePitches: 12,
+        matches: 8,
+        upcomingEvents: 3,
+        courses: 5
+      });
+      
+      setRecentActivity([
     {
       id: 1,
-      name: 'Sarah Johnson',
-      title: 'CTO & Co-Founder',
-      company: 'HealthAI',
-      location: 'Boston, MA',
-      bio: 'AI researcher turned entrepreneur. Love music, cooking, and building healthcare solutions.',
-      avatar: 'SJ',
-      compatibility: 92,
-      lastActive: '2 hours ago',
-      verified: true,
-      interests: ['Music', 'Cooking', 'AI/ML', 'Healthcare'],
-      online: true
+          type: 'pitch',
+          title: 'New pitch received from Sarah',
+          description: 'Looking for a technical co-founder...',
+          time: '2 hours ago',
+          icon: Send,
+          color: 'from-blue-500 to-cyan-500'
     },
     {
       id: 2,
-      name: 'Mike Rodriguez',
-      title: 'CEO & Founder',
-      company: 'EcoTech',
-      location: 'Austin, TX',
-      bio: 'Environmentalist turned entrepreneur. Rock climbing, yoga, and sustainable living enthusiast.',
-      avatar: 'MR',
-      compatibility: 88,
-      lastActive: '1 day ago',
-      verified: true,
-      interests: ['Rock Climbing', 'Yoga', 'Sustainability', 'Adventure'],
-      online: false
-    }
-  ];
+          type: 'match',
+          title: 'You matched with Alex!',
+          description: 'Both interested in AI and sustainability',
+          time: '4 hours ago',
+          icon: Heart,
+          color: 'from-pink-500 to-rose-500'
+        },
+        {
+          id: 3,
+          type: 'event',
+          title: 'Pitch Night tomorrow',
+          description: 'TechCrunch Disrupt - San Francisco',
+          time: '1 day ago',
+          icon: Calendar,
+          color: 'from-green-500 to-emerald-500'
+        },
+        {
+          id: 4,
+          type: 'course',
+          title: 'New course available',
+          description: 'Mastering the Art of Pitching',
+          time: '2 days ago',
+          icon: GraduationCap,
+          color: 'from-purple-500 to-indigo-500'
+        }
+      ]);
+      
+      setIsLoading(false);
+    };
+    
+    loadData();
+  }, []);
 
-  // Get stats from Redux store or use defaults
-  const { connections } = useSelector((state) => state.connections);
-  const stats = {
-    totalMatches: connections?.length || 24,
-    newMatches: connections?.filter(c => c.status === 'pending')?.length || 3,
-    newPitches: 12,
-    profileViews: 89
-  };
-
-  // Quick actions data
   const quickActions = [
     {
-      id: 'profile-completion',
-      title: 'Complete Profile',
-      description: 'Add missing information to boost your visibility',
-      icon: User,
-      color: 'blue',
-      status: 'incomplete',
-      progress: 75,
-      action: () => console.log('Navigate to profile completion'),
-      urgent: true
-    },
-    {
-      id: 'pending-pitches',
-      title: 'Respond to Pitches',
-      description: '3 pitches waiting for your response',
+      title: 'Send Pitch',
+      description: 'Create and send a new pitch',
       icon: Send,
-      color: 'orange',
-      status: 'pending',
-      count: 3,
-      action: () => console.log('Navigate to pending pitches'),
-      urgent: true
+      color: 'from-blue-500 to-cyan-500',
+      link: '/pitches'
     },
     {
-      id: 'upcoming-events',
-      title: 'Join Event',
-      description: 'TechCrunch Disrupt starts in 2 days',
+      title: 'View Matches',
+      description: 'See your current matches',
+      icon: Heart,
+      color: 'from-pink-500 to-rose-500',
+      link: '/matching'
+    },
+    {
+      title: 'Browse Events',
+      description: 'Find networking events',
       icon: Calendar,
-      color: 'green',
-      status: 'upcoming',
-      timeLeft: '2 days',
-      action: () => console.log('Navigate to events'),
-      urgent: false
+      color: 'from-green-500 to-emerald-500',
+      link: '/events'
     },
     {
-      id: 'network-growth',
-      title: 'Expand Network',
-      description: 'Connect with 5 new people this week',
-      icon: TrendingUp,
-      color: 'purple',
-      status: 'goal',
-      progress: 60,
-      target: 5,
-      current: 3,
-      action: () => console.log('Navigate to discovery'),
-      urgent: false
+      title: 'Dating School',
+      description: 'Learn and improve',
+      icon: GraduationCap,
+      color: 'from-purple-500 to-indigo-500',
+      link: '/dating-school'
     }
   ];
 
+  if (isLoading) {
   return (
-    <div className="main-content">
-      <div className="container">
-        {/* Welcome Section */}
-        <div className="section">
-        <div className="mb-8 animate-fade-in">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4 animate-slide-up">
-            Welcome back, {userProfile.name.split(' ')[0]}! 👋
-          </h1>
-            <p className="text-lg text-gray-600 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Discover amazing people, connect with like-minded individuals, and grow your network.
-          </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
         </div>
+      </div>
+    );
+  }
 
-        {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="card p-6 animate-scale-in" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-pink-500">
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-600 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-r ${currentMask.color}`}>
+                  <span className="text-2xl">{currentMask.emoji}</span>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold">Welcome back!</h1>
+                  <p className="text-purple-100">{currentMask.name}</p>
+                </div>
+              </div>
+              <p className="text-xl text-purple-100 mb-6 max-w-2xl">
+                {whyHere}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {selectedValues.slice(0, 3).map((value, index) => (
+                  <span key={index} className="px-3 py-1 bg-white/20 text-white text-sm rounded-full">
+                    {value}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden lg:block">
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
+              >
+                <Info className="w-5 h-5" />
+                How It Works
+              </button>
+            </div>
+          </div>
+        </div>
+                </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+                <div>
+                <p className="text-gray-600 text-sm font-medium">Active Pitches</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.activePitches}</p>
+          </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <Send className="w-6 h-6 text-white" />
+              </div>
+                </div>
+            <div className="mt-4 flex items-center text-sm text-green-600">
+              <TrendingUp className="w-4 h-4 mr-1" />
+              +2 this week
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Matches</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.matches}</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
                 <Heart className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{stats.totalMatches}</span>
-              </div>
-              <h3 className="text-sm text-gray-600">Total Matches</h3>
-          </div>
-
-            <div className="card p-6 animate-scale-in" style={{ animationDelay: '0.3s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-orange-500">
-                  <Star className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{stats.newMatches}</span>
-              </div>
-              <h3 className="text-sm text-gray-600">New Matches</h3>
-            </div>
-
-            <div className="card p-6 animate-scale-in" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-blue-500">
-                  <Send className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{stats.newPitches}</span>
-              </div>
-              <h3 className="text-sm text-gray-600">New Pitches</h3>
-            </div>
-
-            <div className="card p-6 animate-scale-in" style={{ animationDelay: '0.5s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-green-500">
-                  <Eye className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{stats.profileViews}</span>
-              </div>
-              <h3 className="text-sm text-gray-600">Profile Views</h3>
-            </div>
-          </div>
-
-          {/* AI-Powered Dating Revolution Card */}
-          <div className="card-elevated p-8 mb-8 animate-slide-up" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)', animationDelay: '0.6s' }}>
-            <div className="flex items-center mb-6">
-              <div className="p-3 rounded-lg bg-white/20 mr-4">
-                <Brain className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-white">AI-Powered Dating Revolution</h2>
-        </div>
-            <p className="text-white/90 text-lg mb-6">
-              Experience the future of dating with deep psychological profiling and cosmic compatibility
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 rounded-lg bg-white/20">
-                  <Brain className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-1">Deep Psychology</h3>
-                  <p className="text-white/80 text-sm">Advanced AI analyzes personality traits, attachment styles, and emotional intelligence</p>
-          </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="p-2 rounded-lg bg-white/20">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-1">Cosmic Alignment</h3>
-                  <p className="text-white/80 text-sm">Discover soulmate connections through zodiac compatibility and energy matching</p>
-            </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="p-2 rounded-lg bg-white/20">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-1">Unique Matching</h3>
-                  <p className="text-white/80 text-sm">Beyond typical dating apps - find twin flames, growth partners, and karmic connections</p>
-            </div>
               </div>
             </div>
-            <button className="btn btn-primary btn-lg">
-              <Brain className="w-5 h-5" />
-              Start AI Matching
-            </button>
+            <div className="mt-4 flex items-center text-sm text-green-600">
+              <TrendingUp className="w-4 h-4 mr-1" />
+              +3 this week
+            </div>
         </div>
 
-        {/* Quick Actions */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 animate-slide-up">Quick Actions</h2>
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <Bell className="w-4 h-4" />
-                <span>2 urgent tasks</span>
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Events</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.upcomingEvents}</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-white" />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {quickActions.map((action, index) => {
-                const IconComponent = action.icon;
-                const colorClasses = {
-                  blue: 'bg-blue-100 text-blue-600',
-                  orange: 'bg-orange-100 text-orange-600',
-                  green: 'bg-green-100 text-green-600',
-                  purple: 'bg-purple-100 text-purple-600'
-                };
-                
-                return (
-                  <div 
-                    key={action.id}
-                    className={`card p-6 hover:shadow-lg transition-all duration-200 cursor-pointer animate-scale-in ${
-                      action.urgent ? 'ring-2 ring-orange-200 bg-orange-50/30' : ''
-                    }`}
-                    style={{ animationDelay: `${0.8 + index * 0.1}s` }}
-                    onClick={action.action}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 rounded-lg ${colorClasses[action.color]}`}>
-                        <IconComponent className="w-6 h-6" />
-                      </div>
-                      {action.urgent && (
-                        <div className="flex items-center space-x-1 text-orange-600">
-                          <AlertCircle className="w-4 h-4" />
-                          <span className="text-xs font-medium">Urgent</span>
+            <div className="mt-4 flex items-center text-sm text-blue-600">
+              <Clock className="w-4 h-4 mr-1" />
+              Next in 2 days
                         </div>
-                      )}
                     </div>
                     
-                    <div className="mb-3">
-                      <h3 className="font-semibold text-gray-900 mb-1">{action.title}</h3>
-                      <p className="text-sm text-gray-600">{action.description}</p>
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Courses</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.courses}</p>
                     </div>
-                    
-                    {/* Progress or Status Indicators */}
-                    {action.status === 'incomplete' && (
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                          <span>Profile Completion</span>
-                          <span>{action.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${action.progress}%` }}
-                          ></div>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-white" />
                         </div>
                       </div>
-                    )}
-                    
-                    {action.status === 'pending' && (
-                      <div className="mb-3">
-                        <div className="flex items-center space-x-2 text-orange-600">
-                          <Clock className="w-4 h-4" />
-                          <span className="text-sm font-medium">{action.count} pending</span>
+            <div className="mt-4 flex items-center text-sm text-purple-600">
+              <Star className="w-4 h-4 mr-1" />
+              2 new this week
+            </div>
                         </div>
                       </div>
-                    )}
-                    
-                    {action.status === 'upcoming' && (
-                      <div className="mb-3">
-                        <div className="flex items-center space-x-2 text-green-600">
-                          <Calendar className="w-4 h-4" />
-                          <span className="text-sm font-medium">Starts in {action.timeLeft}</span>
-                        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Recent Activity */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+                <Link to="/connections" className="text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
+                  View All
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
                       </div>
-                    )}
-                    
-                    {action.status === 'goal' && (
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                          <span>Weekly Goal</span>
-                          <span>{action.current}/{action.target} connections</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${action.progress}%` }}
-                          ></div>
-                        </div>
+              
+              <div className="space-y-4">
+                {recentActivity.map((activity) => {
+                  const Icon = activity.icon;
+                  return (
+                    <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r ${activity.color}`}>
+                        <Icon className="w-5 h-5 text-white" />
                       </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        {action.urgent ? 'Click to take action' : 'Click to view details'}
-                      </span>
-                      <div className="flex items-center space-x-1 text-gray-400">
-                        <span className="text-xs">View</span>
-                        <Target className="w-3 h-3" />
-                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{activity.title}</h3>
+                        <p className="text-gray-600 text-sm">{activity.description}</p>
+                        <p className="text-gray-400 text-xs mt-1">{activity.time}</p>
                     </div>
                   </div>
                 );
               })}
+              </div>
             </div>
           </div>
 
-          {/* Recent Matches */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Recent Matches</h2>
-              <Link to="/matching" className="text-primary-blue hover:text-primary-purple font-medium">
-                View All
-              </Link>
-                </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {matches.map((match) => (
-                <div key={match.id} className="card p-6 hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="avatar avatar-lg">
-                      <span>{match.avatar}</span>
+          {/* Quick Actions */}
+          <div>
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+              
+              <div className="space-y-4">
+                {quickActions.map((action, index) => {
+                  const Icon = action.icon;
+                  return (
+                    <Link
+                      key={index}
+                      to={action.link}
+                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105"
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${action.color}`}>
+                        <Icon className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold text-gray-900">{match.name}</h3>
-                        {match.verified && (
-                          <CheckCircle className="w-4 h-4 text-blue-500" />
-                        )}
+                        <h3 className="font-semibold text-gray-900">{action.title}</h3>
+                        <p className="text-gray-600 text-sm">{action.description}</p>
                       </div>
-                      <p className="text-sm text-gray-600">{match.location}</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-green-600">{match.compatibility}%</div>
-                      <div className="text-xs text-gray-500">Match</div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">{match.bio}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {match.interests.slice(0, 3).map((interest, index) => (
-                      <span key={index} className="badge badge-secondary text-xs">
-                        {interest}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button className="btn btn-primary btn-sm flex-1">
-                      <Heart className="w-4 h-4" />
-                      Like
-                    </button>
-                    <button className="btn btn-secondary btn-sm flex-1">
-                      <MessageCircle className="w-4 h-4" />
-                      Message
-                    </button>
-                  </div>
+                      <ArrowRight className="w-5 h-5 text-gray-400" />
+                    </Link>
+                  );
+                })}
                 </div>
-              ))}
             </div>
           </div>
         </div>
+
+        {/* CTA Section */}
+        <div className="mt-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-8 text-white text-center">
+          <h2 className="text-2xl font-bold mb-4">Ready to Make Your Move?</h2>
+          <p className="text-purple-100 mb-6 max-w-2xl mx-auto">
+            Your next great connection is just one pitch away. Start building meaningful relationships today.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/pitches"
+              className="px-8 py-3 bg-white text-purple-600 rounded-xl hover:bg-gray-100 transition-all duration-300 font-semibold flex items-center justify-center gap-2"
+            >
+              <Send className="w-5 h-5" />
+              Send Your First Pitch
+            </Link>
+            <Link
+              to="/matching"
+              className="px-8 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-semibold flex items-center justify-center gap-2"
+            >
+              <Heart className="w-5 h-5" />
+              Browse Matches
+            </Link>
+          </div>
+        </div>
       </div>
+
+      {/* How It Works Modal */}
+      <HowItWorks
+        isOpen={showHowItWorks}
+        onClose={() => setShowHowItWorks(false)}
+      />
     </div>
   );
 };

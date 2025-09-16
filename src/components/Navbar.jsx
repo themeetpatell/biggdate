@@ -24,14 +24,18 @@ import {
   TrendingUp,
   Globe,
   Moon,
-  Sun
+  Sun,
+  Info
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../store/slices/authSlice';
+import { logoutUser } from '../store/slices/authSlice';
+import HowItWorks from './HowItWorks';
+import { persistor } from '../store';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,9 +102,20 @@ const Navbar = () => {
     }
   ];
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      console.log('Navbar - starting logout');
+      await dispatch(logoutUser()).unwrap();
+      console.log('Navbar - logout successful, purging persisted state');
+      await persistor.purge();
+      console.log('Navbar - persisted state purged, redirecting to /');
+      navigate('/');
+    } catch (error) {
+      console.error('Navbar - logout failed:', error);
+      // Even if logout fails, purge and redirect to home
+      await persistor.purge();
+      navigate('/');
+    }
   };
 
   // Close menus when clicking outside
@@ -275,6 +290,17 @@ const Navbar = () => {
               )}
             </div>
 
+            {/* How It Works */}
+            <div className="relative">
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105"
+                title="How BiggDate Works"
+              >
+                <Info className="w-5 h-5" />
+              </button>
+            </div>
+
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
               <button 
@@ -427,6 +453,23 @@ const Navbar = () => {
                 );
               })}
               
+              {/* How It Works - Mobile */}
+              <button
+                onClick={() => {
+                  setShowHowItWorks(true);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-4 p-4 rounded-2xl text-gray-700 hover:bg-gray-50 transition-all duration-300 w-full"
+              >
+                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500">
+                  <Info className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="font-semibold">How It Works</span>
+                  <p className="text-xs opacity-75">Learn about our 3-level system</p>
+                </div>
+              </button>
+              
               {/* Mobile User Section */}
               <div className="pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-4 p-4 mb-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
@@ -490,6 +533,12 @@ const Navbar = () => {
           onClick={() => setShowSearch(false)}
         ></div>
       )}
+
+      {/* How It Works Modal */}
+      <HowItWorks 
+        isOpen={showHowItWorks} 
+        onClose={() => setShowHowItWorks(false)} 
+      />
     </>
   );
 };

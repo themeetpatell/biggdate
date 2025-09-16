@@ -85,7 +85,9 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
+      console.log('loginUser thunk - credentials:', credentials);
       const data = await mockAuthApi.login(credentials);
+      console.log('loginUser thunk - data received:', data);
       
       // Store tokens in localStorage
       localStorage.setItem('accessToken', data.accessToken);
@@ -93,6 +95,7 @@ export const loginUser = createAsyncThunk(
       
       return data;
     } catch (error) {
+      console.error('loginUser thunk - error:', error);
       return rejectWithValue(error.message || 'Login failed');
     }
   }
@@ -119,12 +122,16 @@ export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, { rejectWithValue }) => {
     try {
+      console.log('logoutUser thunk - starting logout');
       await mockAuthApi.logout();
+      console.log('logoutUser thunk - API logout successful');
       
       // Clear tokens from localStorage
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      console.log('logoutUser thunk - localStorage cleared');
     } catch (error) {
+      console.error('logoutUser thunk - error:', error);
       // Even if API call fails, clear local state
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
@@ -193,6 +200,7 @@ const authSlice = createSlice({
       })
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {
+        console.log('logoutUser.fulfilled - resetting auth state');
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
@@ -204,5 +212,4 @@ const authSlice = createSlice({
 });
 
 export const { clearError, setCredentials, clearCredentials } = authSlice.actions;
-export const logout = clearCredentials;
 export default authSlice.reducer;
