@@ -30,46 +30,63 @@ const QuickSetup = () => {
   const navigate = useNavigate();
 
   const missionPrompts = [
-    "I'm building the future of...",
-    "I believe love is like...",
-    "What I want most is...",
-    "My superpower is...",
-    "I'm here to...",
-    "The world needs more..."
+    "I'm creating the future of...",
+    "My life's purpose is to...",
+    "The impact I want to make is...",
+    "What drives me every day is...",
+    "I'm on a mission to...",
+    "My core belief is that..."
   ];
 
   const values = [
-    { id: 'innovation', name: 'Innovation', icon: Zap, color: 'from-blue-500 to-cyan-500' },
-    { id: 'growth', name: 'Growth', icon: Target, color: 'from-green-500 to-emerald-500' },
-    { id: 'adventure', name: 'Adventure', icon: Globe, color: 'from-purple-500 to-pink-500' },
-    { id: 'authenticity', name: 'Authenticity', icon: Heart, color: 'from-red-500 to-rose-500' },
-    { id: 'impact', name: 'Impact', icon: Star, color: 'from-yellow-500 to-orange-500' },
-    { id: 'freedom', name: 'Freedom', icon: Crown, color: 'from-indigo-500 to-purple-500' },
-    { id: 'legacy', name: 'Legacy', icon: CheckCircle, color: 'from-gray-500 to-gray-600' },
-    { id: 'connection', name: 'Connection', icon: Heart, color: 'from-pink-500 to-purple-500' }
+    { id: 'innovation', name: 'Innovation', color: 'from-blue-500 to-cyan-500' },
+    { id: 'growth', name: 'Growth', color: 'from-green-500 to-emerald-500' },
+    { id: 'adventure', name: 'Adventure', color: 'from-purple-500 to-pink-500' },
+    { id: 'authenticity', name: 'Authenticity', color: 'from-red-500 to-rose-500' },
+    { id: 'impact', name: 'Impact', color: 'from-yellow-500 to-orange-500' },
+    { id: 'freedom', name: 'Freedom', color: 'from-indigo-500 to-purple-500' },
+    { id: 'legacy', name: 'Legacy', color: 'from-gray-500 to-gray-600' },
+    { id: 'connection', name: 'Connection', color: 'from-pink-500 to-purple-500' },
+    { id: 'creativity', name: 'Creativity', color: 'from-pink-500 to-rose-500' },
+    { id: 'excellence', name: 'Excellence', color: 'from-yellow-500 to-amber-500' },
+    { id: 'integrity', name: 'Integrity', color: 'from-blue-500 to-indigo-500' },
+    { id: 'passion', name: 'Passion', color: 'from-red-500 to-pink-500' },
+    { id: 'wisdom', name: 'Wisdom', color: 'from-purple-500 to-indigo-500' },
+    { id: 'courage', name: 'Courage', color: 'from-orange-500 to-red-500' },
+    { id: 'compassion', name: 'Compassion', color: 'from-green-500 to-teal-500' },
+    { id: 'balance', name: 'Balance', color: 'from-cyan-500 to-blue-500' },
+    { id: 'ambition', name: 'Ambition', color: 'from-purple-500 to-pink-500' },
+    { id: 'humility', name: 'Humility', color: 'from-gray-500 to-slate-500' },
+    { id: 'resilience', name: 'Resilience', color: 'from-orange-500 to-yellow-500' },
+    { id: 'curiosity', name: 'Curiosity', color: 'from-cyan-500 to-teal-500' },
+    { id: 'empathy', name: 'Empathy', color: 'from-pink-500 to-purple-500' },
+    { id: 'discipline', name: 'Discipline', color: 'from-slate-500 to-gray-500' },
+    { id: 'optimism', name: 'Optimism', color: 'from-yellow-500 to-orange-500' },
+    { id: 'gratitude', name: 'Gratitude', color: 'from-green-500 to-emerald-500' },
+    { id: 'leadership', name: 'Leadership', color: 'from-indigo-500 to-purple-500' }
   ];
 
   const intents = [
     {
-      id: 'love',
-      title: 'Love / Relationship',
-      description: 'Finding my life partner',
+      id: 'co-lover',
+      title: 'Co-Lover',
+      description: 'Focus on personal connection, romance, and life partnership',
       icon: Heart,
       color: 'from-red-500 to-pink-500'
     },
     {
-      id: 'life-work-partner',
-      title: 'Life + Work Partner',
-      description: 'Someone to build with',
+      id: 'co-builder',
+      title: 'Co-Builder',
+      description: 'Looking for someone to build businesses and careers together',
       icon: Target,
       color: 'from-blue-500 to-cyan-500'
     },
     {
-      id: 'exploration',
-      title: 'Exploration / Networking',
-      description: 'Meeting amazing people',
-      icon: Globe,
-      color: 'from-green-500 to-emerald-500'
+      id: 'co-lifer',
+      title: 'Co-Lifer',
+      description: 'A life partner who shares your vision, supports your dreams, and grows with you in both love and ambition',
+      icon: Crown,
+      color: 'from-purple-500 to-indigo-500'
     }
   ];
 
@@ -77,7 +94,7 @@ const QuickSetup = () => {
     setIsAnimating(true);
     if (selectedValues.includes(valueId)) {
       setSelectedValues(selectedValues.filter(id => id !== valueId));
-    } else if (selectedValues.length < 3) {
+    } else if (selectedValues.length < 5) {
       setSelectedValues([...selectedValues, valueId]);
     }
     setTimeout(() => setIsAnimating(false), 200);
@@ -128,22 +145,22 @@ const QuickSetup = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6">
             <Heart className="w-6 h-6 text-pink-400" />
-            <span className="text-white font-semibold">Behind Every Pitch is a Why</span>
+            <span className="text-white font-semibold">Your Story Matters</span>
           </div>
           <h1 className="text-5xl font-bold text-white mb-4">
-            Why Are You Here?
+            What's Your Mission?
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            You're not filling a form, you're declaring your Why.
+            Share your vision, values, and what drives you. Your Co-Lifer is waiting to hear your story.
           </p>
         </div>
 
         {/* Mission Statement */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Your Mission Statement</h2>
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">Share Your Vision</h2>
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Complete this thought:</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">What drives you? Complete this thought:</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {missionPrompts.map((prompt, index) => (
                   <button
@@ -162,11 +179,11 @@ const QuickSetup = () => {
             </div>
             
             <div className="mb-6">
-              <label className="block text-white font-semibold mb-3">Your complete statement:</label>
+              <label className="block text-white font-semibold mb-3">Share your complete vision:</label>
               <textarea
                 value={missionStatement}
                 onChange={(e) => setMissionStatement(e.target.value)}
-                placeholder="Tell us your mission..."
+                placeholder="Tell your Co-Lifer what you're building and why it matters..."
                 className="w-full h-32 p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               />
             </div>
@@ -196,7 +213,7 @@ const QuickSetup = () => {
                 ) : (
                   <>
                     <Mic className="w-5 h-5" />
-                    Add Voice Note (20s)
+                    Record Your Pitch (20s)
                   </>
                 )}
               </button>
@@ -211,36 +228,30 @@ const QuickSetup = () => {
 
         {/* Core Values */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Core Values (Rank Top 3)</h2>
-          <p className="text-gray-300 text-center mb-8">Drag and drop to rank your values</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">What Drives You? (Select Up to 5)</h2>
+          <p className="text-gray-300 text-center mb-8">Choose the values that define who you are and what you stand for</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {values.map((value) => {
-              const Icon = value.icon;
               const isSelected = selectedValues.includes(value.id);
               const rank = selectedValues.indexOf(value.id) + 1;
-              const isDisabled = !isSelected && selectedValues.length >= 3;
+              const isDisabled = !isSelected && selectedValues.length >= 5;
               
               return (
                 <button
                   key={value.id}
                   onClick={() => handleValueToggle(value.id)}
                   disabled={isDisabled}
-                  className={`relative p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`relative p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isSelected
                       ? `bg-gradient-to-r ${value.color} border-white shadow-xl`
                       : 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/20'
                   }`}
                 >
                   <div className="text-center">
-                    <div className={`w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center ${
-                      isSelected ? 'bg-white/20' : `bg-gradient-to-r ${value.color}`
-                    }`}>
-                      <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-white'}`} />
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-1">{value.name}</h3>
+                    <h3 className="text-sm font-bold text-white mb-1">{value.name}</h3>
                     {isSelected && (
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                        <span className="text-gray-900 font-bold text-sm">{rank}</span>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                        <span className="text-gray-900 font-bold text-xs">{rank}</span>
                       </div>
                     )}
                   </div>
@@ -252,7 +263,7 @@ const QuickSetup = () => {
 
         {/* Intent Choice */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Your Intent</h2>
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">Why You're Here?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {intents.map((intent) => {
               const Icon = intent.icon;
@@ -303,7 +314,7 @@ const QuickSetup = () => {
               onClick={handleContinue}
               className="px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 hover:scale-105 flex items-center gap-3"
             >
-              <span>I'm Here For This →</span>
+              <span>I am finding someone like →</span>
               <ArrowRight className="w-6 h-6" />
             </button>
           )}

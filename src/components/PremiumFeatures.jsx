@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { 
   Crown, 
   Star, 
@@ -164,12 +163,7 @@ const PremiumFeatures = ({ currentTier, onUpgrade, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white dark:bg-gray-800 rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
-      >
+      <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300">
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
@@ -258,10 +252,9 @@ const PremiumFeatures = ({ currentTier, onUpgrade, onClose }) => {
               const savings = getSavings(tier.price.monthly, tier.price.yearly);
               
               return (
-                <motion.div
+                <div
                   key={tier.id}
-                  whileHover={{ scale: 1.02 }}
-                  className={`relative bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 transition-all cursor-pointer ${
+                  className={`relative bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 transition-all cursor-pointer hover:scale-105 ${
                     isSelected
                       ? 'border-purple-500 shadow-xl'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -338,7 +331,7 @@ const PremiumFeatures = ({ currentTier, onUpgrade, onClose }) => {
                       {tier.price[billingCycle] === 0 ? 'Get Started' : 'Upgrade'}
                     </button>
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -417,7 +410,7 @@ const PremiumFeatures = ({ currentTier, onUpgrade, onClose }) => {
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Heart,
   Sparkles,
-  Crown
+  Crown,
+  Briefcase
 } from 'lucide-react';
 import { loginUser, registerUser, clearError } from '../store/slices/authSlice.js';
 
@@ -28,7 +29,8 @@ const Auth = () => {
     email: '',
     password: '',
     firstName: '',
-    lastName: ''
+    lastName: '',
+    role: ''
   });
   const [errors, setErrors] = useState({});
 
@@ -85,6 +87,9 @@ const Auth = () => {
       if (!formData.lastName) {
         newErrors.lastName = 'Last name is required';
       }
+      if (!formData.role) {
+        newErrors.role = 'Please select your role';
+      }
     }
 
     setErrors(newErrors);
@@ -139,12 +144,12 @@ const Auth = () => {
             <span className="text-white font-semibold">Welcome to BiggDate</span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">
-            {isSignUp ? 'Join the Movement' : 'Welcome Back'}
+            {isSignUp ? 'Let\'s Find your Co-Lifer' : 'Welcome Back'}
           </h1>
           <p className="text-gray-300">
             {isSignUp 
               ? 'Start your journey to meaningful connections' 
-              : 'Continue building your professional network'
+              : 'Continue building your personal life'
             }
           </p>
         </div>
@@ -153,49 +158,78 @@ const Auth = () => {
         <div className={`bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <form onSubmit={handleSubmit} className="space-y-6">
             {isSignUp && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white font-semibold mb-2">First Name</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
-                        errors.firstName ? 'border-red-500' : 'border-white/20'
-                      }`}
-                      placeholder="John"
-                    />
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-white font-semibold mb-2">First Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
+                          errors.firstName ? 'border-red-500' : 'border-white/20'
+                        }`}
+                        placeholder="John"
+                      />
+                    </div>
+                    {errors.firstName && (
+                      <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.firstName}
+                      </p>
+                    )}
                   </div>
-                  {errors.firstName && (
-                    <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.firstName}
-                    </p>
-                  )}
+                  
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Last Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
+                          errors.lastName ? 'border-red-500' : 'border-white/20'
+                        }`}
+                        placeholder="Doe"
+                      />
+                    </div>
+                    {errors.lastName && (
+                      <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.lastName}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 
-            <div>
-                  <label className="block text-white font-semibold mb-2">Last Name</label>
+                {/* Role Selection */}
+                <div>
+                  <label className="block text-white font-semibold mb-2">Your Role</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
+                    <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <select
+                      name="role"
+                      value={formData.role}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
-                        errors.lastName ? 'border-red-500' : 'border-white/20'
+                      className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none ${
+                        errors.role ? 'border-red-500' : 'border-white/20'
                       }`}
-                      placeholder="Doe"
-                    />
+                    >
+                      <option value="" className="bg-gray-800">Select your role</option>
+                      <option value="Founder" className="bg-gray-800">Founder</option>
+                      <option value="Investor" className="bg-gray-800">Investor</option>
+                      <option value="Builder" className="bg-gray-800">Builder</option>
+                    </select>
                   </div>
-                  {errors.lastName && (
+                  {errors.role && (
                     <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
-                      {errors.lastName}
+                      {errors.role}
                     </p>
                   )}
                 </div>
@@ -298,15 +332,15 @@ const Auth = () => {
         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
             <Heart className="w-6 h-6 text-pink-400 mx-auto mb-2" />
-            <p className="text-white text-sm font-semibold">Smart Matching</p>
+            <p className="text-white text-sm font-semibold">AI Powered</p>
               </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
             <Sparkles className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-            <p className="text-white text-sm font-semibold">AI Powered</p>
+            <p className="text-white text-sm font-semibold">Pitch Based</p>
           </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
             <Crown className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-            <p className="text-white text-sm font-semibold">Elite Community</p>
+            <p className="text-white text-sm font-semibold">Biggies</p>
           </div>
         </div>
       </div>

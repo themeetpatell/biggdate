@@ -52,7 +52,7 @@ export default defineConfig({
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           redux: ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
-          ui: ['lucide-react', 'framer-motion'],
+          ui: ['lucide-react'],
           utils: ['lodash', 'date-fns'],
         },
         // Optimize chunk names
@@ -74,7 +74,6 @@ export default defineConfig({
       'react-redux',
       'redux-persist',
       'lucide-react',
-      'framer-motion',
     ],
     exclude: ['@vite/client', '@vite/env'],
   },

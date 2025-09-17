@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { 
   Trophy, 
   Star, 
@@ -245,12 +244,10 @@ const GamificationDashboard = ({
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Your Achievements</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {profile.achievements.map((achievement, index) => (
-                    <motion.div
+                    <div
                       key={achievement.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`bg-gradient-to-r ${getRarityColor(achievement.rarity)} rounded-lg p-4 text-white cursor-pointer hover:shadow-lg transition-all duration-200`}
+                      className={`bg-gradient-to-r ${getRarityColor(achievement.rarity)} rounded-lg p-4 text-white cursor-pointer hover:shadow-lg transition-all duration-200 animate-in fade-in-0 slide-in-from-bottom-4`}
+                      style={{ animationDelay: `${index * 100}ms` }}
                       onClick={() => {
                         setSelectedAchievement(achievement);
                         setShowAchievementModal(true);
@@ -266,7 +263,7 @@ const GamificationDashboard = ({
                         <span className="text-xs">+{achievement.points} XP</span>
                         <span className="text-xs">{new Date(achievement.unlockedAt).toLocaleDateString()}</span>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -278,17 +275,15 @@ const GamificationDashboard = ({
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Your Badges</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {profile.badges.map((badge, index) => (
-                    <motion.div
+                    <div
                       key={badge.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`bg-gradient-to-r ${getBadgeRarityColor(badge.rarity)} rounded-lg p-4 text-white text-center hover:shadow-lg transition-all duration-200`}
+                      className={`bg-gradient-to-r ${getBadgeRarityColor(badge.rarity)} rounded-lg p-4 text-white text-center hover:shadow-lg transition-all duration-200 animate-in fade-in-0 zoom-in-95`}
+                      style={{ animationDelay: `${index * 100}ms` }}
                     >
                       <div className="text-3xl mb-2">{badge.icon}</div>
                       <h4 className="text-sm font-semibold mb-1">{badge.name}</h4>
                       <p className="text-xs opacity-90">{badge.description}</p>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -373,10 +368,8 @@ const GamificationDashboard = ({
       {/* Achievement Modal */}
       {showAchievementModal && selectedAchievement && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full text-center"
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full text-center animate-in fade-in-0 zoom-in-95 duration-300"
           >
             <div className={`w-20 h-20 bg-gradient-to-r ${getRarityColor(selectedAchievement.rarity)} rounded-full flex items-center justify-center mx-auto mb-4`}>
               <Trophy className="w-10 h-10 text-white" />
@@ -399,7 +392,7 @@ const GamificationDashboard = ({
             >
               Awesome!
             </button>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

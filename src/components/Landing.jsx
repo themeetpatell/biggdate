@@ -12,13 +12,17 @@ import {
   Sparkles,
   Crown,
   Target,
-  Globe
+  Globe,
+  UserPlus,
+  TrendingUp
 } from 'lucide-react';
+import WaitlistPopup from './WaitlistPopup';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [isVisible, setIsVisible] = useState(false);
+  const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -38,34 +42,46 @@ const Landing = () => {
     navigate('/auth');
   };
 
+  const handleJoinWaitlist = () => {
+    setIsWaitlistOpen(true);
+  };
+
+  const handleWaitlistSubmit = (formData) => {
+    console.log('Waitlist submission:', formData);
+    // Here you would typically send the data to your backend
+    // For now, we'll just log it
+  };
+
+  const handleCloseWaitlist = () => {
+    setIsWaitlistOpen(false);
+  };
+
   const features = [
     {
       icon: Target,
-      title: "Pitch-First Dating",
-      description: "Connect through ideas, not just photos. Share your vision and find someone who gets it."
+      title: "Pitch-First Matching",
+      description: "Every connection begins with vision, values, and ambition — not swipes."
     },
     {
       icon: Users,
       title: "3-Level System",
-      description: "Pitch → Reveal → Journey. Progressive connection that builds real relationships."
+      description: "Relationships progress step by step: Pitch → Reveal → Journey. Built for trust, depth, and momentum."
     },
     {
-      icon: Zap,
-      title: "Smart Matching",
-      description: "AI-powered compatibility based on values, goals, and professional alignment."
+      icon: TrendingUp,
+      title: "Personalized Path",
+      description: "AI guides each couple through milestones, shared goals, and curated experiences."
     },
     {
       icon: Globe,
-      title: "Global Community",
-      description: "Connect with ambitious professionals worldwide who share your drive and vision."
+      title: "Premium Community",
+      description: "Ambitious professionals, founders, and builders — an exclusive global tribe driven by purpose."
     }
   ];
 
   const stats = [
-    { number: "10K+", label: "Active Users" },
-    { number: "500+", label: "Matches Made" },
-    { number: "95%", label: "Success Rate" },
-    { number: "50+", label: "Countries" }
+    { number: "20 October 2025", label: "Launch Date", icon: "🚀" },
+    { number: "500+", label: "People Awaiting", icon: "✨" },
   ];
 
   if (isAuthenticated) {
@@ -83,76 +99,125 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900">
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
+        {/* Enhanced Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="floating-shape shape-1"></div>
+          <div className="floating-shape shape-2"></div>
+          <div className="floating-shape shape-3"></div>
+          <div className="floating-shape shape-4"></div>
+          <div className="floating-shape shape-5"></div>
+          <div className="floating-shape shape-6"></div>
+        </div>
+        
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
           <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full mb-8">
-              <Crown className="w-6 h-6 text-yellow-400" />
-              <span className="text-white font-semibold">The Future of Professional Dating</span>
+            <div className="inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-6 sm:mb-8 border border-orange-400/30 hover:border-orange-400/50 transition-all duration-300 group">
+              <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-orange-400 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-white font-semibold text-sm sm:text-base group-hover:text-orange-100 transition-colors duration-300">🚀 Join the Waitlist - Launching Oct 20th, 2025</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              Where
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"> Ideas </span>
-              Meet
-              <span className="bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent"> Hearts</span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+              Find Your
+              <span className="shimmer-text block sm:inline"> Co-Lifer</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              The first dating app for ambitious professionals. Connect through pitches, not just photos. 
-              Build relationships that matter.
+            <div className="mb-6 sm:mb-8">
+              <p className="text-lg sm:text-xl md:text-2xl text-white font-semibold tracking-wide bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                One Connection Can Change Your Life.
+              </p>
+            </div>
+            
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
+              The first dating app for ambitious professionals. Every profile begins with a pitch, every match begins with vision. Find your Co-Lifer who wants to build a meaningful life with you.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            {/* Social Proof */}
+            <div className="mb-8 sm:mb-12">
+              <div className="flex items-center justify-center gap-6 sm:gap-8 text-gray-400 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>500+ on waitlist</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                  <span>Launching Oct 20th</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                  <span>Global community</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4">
               <button
-                onClick={handleGetStarted}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 hover:scale-105 flex items-center gap-3"
+                onClick={handleJoinWaitlist}
+                className="glow-button w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-2xl hover:from-purple-600 hover:via-pink-600 hover:to-purple-700 transition-all duration-500 font-bold text-base sm:text-lg shadow-2xl hover:shadow-purple-500/40 hover:scale-110 flex items-center justify-center gap-2 sm:gap-3 group"
               >
-                <span>Start Your Journey</span>
-                <ArrowRight className="w-6 h-6" />
+                <span className="relative z-10">Join WaitList</span>
+                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
               
-              <button className="px-8 py-4 bg-white/10 text-white rounded-2xl hover:bg-white/20 transition-all duration-300 font-semibold text-lg flex items-center gap-3">
-                <Play className="w-5 h-5" />
-                <span>Watch Demo</span>
+              <button 
+                onClick={handleGetStarted}
+                className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-white/10 backdrop-blur-sm text-white rounded-2xl hover:bg-white/20 hover:backdrop-blur-md transition-all duration-300 font-semibold text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 group border border-white/20 hover:border-white/40"
+              >
+                <UserPlus className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                <span>Start Dating</span>
               </button>
             </div>
             
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.number}</div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                <div key={index} className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:shadow-xl group">
+                  <div className="text-xl sm:text-2xl mb-1 group-hover:scale-110 transition-transform duration-300">{stat.icon}</div>
+                  <div className="text-base sm:text-lg font-bold text-white mb-1 group-hover:text-purple-200 transition-colors duration-300">{stat.number}</div>
+                  <div className="text-gray-300 text-xs font-medium group-hover:text-white transition-colors duration-300">{stat.label}</div>
                 </div>
               ))}
+            </div>
+            
+            {/* Co-Lifer Concept */}
+            <div className="mt-8 sm:mt-12 max-w-4xl mx-auto px-4">
+              <div className="text-center mb-6 sm:mb-8">
+                <span className="text-white/90 text-lg sm:text-xl font-bold tracking-wide uppercase bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">What is a Co-Lifer?</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-500 group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <p className="text-gray-300 text-center leading-relaxed text-sm sm:text-base group-hover:text-white transition-colors duration-300 relative z-10">
+                  A <span className="text-purple-400 font-semibold group-hover:text-pink-400 transition-colors duration-300">Co-Lifer</span> is the partner who stands with you through every chapter of life, sharing your values, vision for the future, and drive to create something meaningful. They give you strength in the hard moments, believe in your dreams, and grow with you in love, ambition, and life.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="py-20 bg-white/5 backdrop-blur-sm">
+      <div id="features" className="py-16 sm:py-20 bg-white/5 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Why BiggDate?</h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              We're not just another dating app. We're building the future of meaningful connections.
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Why BiggDate?</h2>
+            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+              We're not just another BS dating app. <br></br> We're building the future of meaningful connections.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
-                    <Icon className="w-8 h-8 text-white" />
+                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl group">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white group-hover:scale-110 transition-transform duration-300" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
-                  <p className="text-gray-300">{feature.description}</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 group-hover:text-purple-200 transition-colors duration-300">{feature.title}</h3>
+                  <p className="text-gray-300 text-sm sm:text-base group-hover:text-white transition-colors duration-300 leading-relaxed">{feature.description}</p>
                 </div>
               );
             })}
@@ -160,42 +225,70 @@ const Landing = () => {
         </div>
       </div>
 
+
+
       {/* CTA Section */}
-      <div className="py-20">
+      <div id="about" className="py-16 sm:py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Find Your
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"> Perfect Match</span>?
-          </h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Join thousands of professionals who've found meaningful connections through BiggDate.
-          </p>
-          <button
-            onClick={handleGetStarted}
-            className="px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 hover:scale-105 flex items-center gap-3 mx-auto"
-          >
-            <span>Get Started Now</span>
-            <ArrowRight className="w-6 h-6" />
-          </button>
+            <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/20 mb-8">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                Join WaitList - Launching Oct 20th, 2025
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
+                Ready to Find Your
+                <span className="shimmer-text block sm:inline"> Perfect Co-Lifer</span>?
+              </h2>
+              <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
+                Join our waitlist and be the first to experience the future of professional dating. Find your perfect Co-Lifer when we launch on October 20th, 2025.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+                <button
+                  onClick={handleJoinWaitlist}
+                  className="glow-button w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-2xl hover:from-purple-600 hover:via-pink-600 hover:to-purple-700 transition-all duration-500 font-bold text-base sm:text-lg shadow-2xl hover:shadow-purple-500/40 hover:scale-110 flex items-center justify-center gap-2 sm:gap-3 group"
+                >
+                  <span className="relative z-10">Join WaitList</span>
+                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
+                <div className="text-gray-400 text-xs sm:text-sm">
+                  <span className="inline-flex items-center gap-2 hover:text-white transition-colors duration-300">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400" />
+                    Free to join • No spam • Launch Oct 20th, 2025
+                  </span>
+                </div>
+              </div>
+            </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="py-12 border-t border-white/10">
+      <div className="py-8 sm:py-12 border-t border-white/10 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg font-bold">B</span>
+            <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                <span className="text-white text-sm sm:text-lg font-bold">B</span>
               </div>
-              <span className="text-white text-xl font-bold">BiggDate</span>
+              <span className="text-white text-lg sm:text-xl font-bold hover:text-purple-200 transition-colors duration-300">BiggDate</span>
             </div>
-            <p className="text-gray-400 text-sm">
-              © 2024 BiggDate. Building meaningful connections, one pitch at a time.
+            <p className="text-gray-400 text-xs sm:text-sm hover:text-gray-300 transition-colors duration-300">
+              © 2025 BiggBizz. Find your Co-Lifer - Building meaningful connections, for life and business.
             </p>
+            <div className="mt-4 flex justify-center gap-4 text-gray-500 text-xs">
+              <span className="hover:text-purple-400 transition-colors duration-300 cursor-pointer">Privacy Policy</span>
+              <span className="hover:text-purple-400 transition-colors duration-300 cursor-pointer">Terms of Service</span>
+              <span className="hover:text-purple-400 transition-colors duration-300 cursor-pointer">Contact</span>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Waitlist Popup */}
+      <WaitlistPopup 
+        isOpen={isWaitlistOpen}
+        onClose={handleCloseWaitlist}
+        onSubmit={handleWaitlistSubmit}
+      />
     </div>
   );
 };

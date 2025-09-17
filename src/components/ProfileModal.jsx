@@ -29,9 +29,11 @@ const ProfileModal = ({
           <div className="absolute -bottom-16 left-6">
             <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden">
               <img
-                src={profile.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face'}
+                src={profile.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face&auto=format&q=80'}
                 alt={profile.name}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>

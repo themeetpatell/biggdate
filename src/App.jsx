@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import { setupGlobalErrorHandlers } from './utils/errorHandler.js';
 import { initializeAnalytics } from './utils/analytics.js';
+import { performanceMonitor } from './utils/performanceMonitor.js';
 
 // Performance optimizations
 const LoadingFallback = memo(() => (
@@ -71,6 +72,7 @@ const AppContent = () => {
   useEffect(() => {
     setupGlobalErrorHandlers();
     initializeAnalytics();
+    performanceMonitor.trackBundleSize();
   }, []);
 
   // Load user data when authenticated

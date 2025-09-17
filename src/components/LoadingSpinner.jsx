@@ -1,9 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const LoadingSpinner = ({ 
   size = 'medium', 
-  color = 'var(--apple-blue)', 
+  color = '#007AFF', 
   text = 'Loading...',
   showText = true 
 }) => {
@@ -15,37 +14,27 @@ const LoadingSpinner = ({
   };
 
   const textSizes = {
-    small: 'apple-text-caption',
-    medium: 'apple-text-callout',
-    large: 'apple-text-body',
-    xlarge: 'apple-text-headline'
+    small: 'text-xs',
+    medium: 'text-sm',
+    large: 'text-base',
+    xlarge: 'text-lg'
   };
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4">
-      <motion.div
-        className={`${sizeClasses[size]} border-4 border-gray-200 rounded-full`}
+      <div
+        className={`${sizeClasses[size]} border-4 border-gray-200 rounded-full animate-spin`}
         style={{
           borderTopColor: color,
           borderRightColor: color
         }}
-        animate={{ rotate: 360 }}
-        transition={{
-          duration: 1,
-          repeat: Infinity,
-          ease: 'linear'
-        }}
       />
       {showText && (
-        <motion.p
-          className={textSizes[size]}
-          style={{ color: 'var(--apple-gray-6)' }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
+        <p
+          className={`${textSizes[size]} text-gray-600 animate-pulse`}
         >
           {text}
-        </motion.p>
+        </p>
       )}
     </div>
   );
