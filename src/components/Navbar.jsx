@@ -14,7 +14,6 @@ import {
   ChevronDown, 
   Menu, 
   X,
-  Search,
   Plus,
   Heart,
   MessageCircle,
@@ -25,7 +24,10 @@ import {
   Globe,
   Moon,
   Sun,
-  Info
+  Info,
+  Clock,
+  CheckCircle,
+  Crown as CrownIcon
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
@@ -37,10 +39,9 @@ const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const userMenuRef = useRef(null);
+  const notificationRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -90,15 +91,43 @@ const Navbar = () => {
   const notifications = [
     {
       id: 1,
-      title: 'New Match!',
-      message: 'You have a new potential match',
-      time: '2 minutes ago'
+      title: 'New Match! 🎉',
+      message: 'You matched with Alex Chen - AI & Sustainability enthusiast',
+      time: '2 minutes ago',
+      type: 'match',
+      isRead: false
     },
     {
       id: 2,
       title: 'Message Received',
-      message: 'Sarah sent you a message',
-      time: '1 hour ago'
+      message: 'Sarah Johnson sent you a message about your startup pitch',
+      time: '1 hour ago',
+      type: 'message',
+      isRead: false
+    },
+    {
+      id: 3,
+      title: 'Pitch Response',
+      message: 'Your pitch to TechStars got a positive response!',
+      time: '3 hours ago',
+      type: 'pitch',
+      isRead: true
+    },
+    {
+      id: 4,
+      title: 'Event Reminder',
+      message: 'Pitch Night SF starts in 2 hours - Don\'t forget!',
+      time: '4 hours ago',
+      type: 'event',
+      isRead: true
+    },
+    {
+      id: 5,
+      title: 'Profile View',
+      message: '3 people viewed your profile today',
+      time: '6 hours ago',
+      type: 'profile',
+      isRead: true
     }
   ];
 
@@ -123,6 +152,9 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
       }
     };
 
@@ -201,45 +233,16 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-4">
-              {/* Search */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowSearch(!showSearch)}
-                  className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105"
-                >
-                  <Search className="w-5 h-5" />
-            </button>
-                
-                {showSearch && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 z-50">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search matches, proposals, events..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="mt-3 text-sm text-gray-500">
-                      Press <kbd className="px-2 py-1 bg-gray-100 rounded">Enter</kbd> to search
-                    </div>
-                  </div>
-                )}
-              </div>
-            
             {/* Notifications */}
-            <div className="relative">
+            <div className="relative" ref={notificationRef}>
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
                   className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105 relative group"
               >
                   <Bell className="w-5 h-5 group-hover:animate-bounce" />
-                {notifications.length > 0 && (
+                {notifications.filter(n => !n.isRead).length > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse shadow-lg">
-                    {notifications.length}
+                    {notifications.filter(n => !n.isRead).length}
                   </span>
                 )}
               </button>
@@ -251,7 +254,7 @@ const Navbar = () => {
                         <h3 className="font-bold text-gray-900 text-lg">Notifications</h3>
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
-                            {notifications.length} new
+                            {notifications.filter(n => !n.isRead).length} new
                           </span>
                           <button className="text-gray-400 hover:text-gray-600">
                             <Settings className="w-4 h-4" />
@@ -260,26 +263,54 @@ const Navbar = () => {
                       </div>
                   </div>
                     <div className="max-h-80 overflow-y-auto">
-                      {notifications.map((notification, index) => (
-                        <div key={notification.id} className="p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 group">
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
-                              <Bell className="w-5 h-5 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
-                                {notification.title}
-                              </p>
-                              <p className="text-sm text-gray-600 mt-1 leading-relaxed">{notification.message}</p>
-                              <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {notification.time}
-                              </p>
+                      {notifications.map((notification, index) => {
+                        const getNotificationIcon = (type) => {
+                          switch (type) {
+                            case 'match': return <Heart className="w-5 h-5 text-white" />;
+                            case 'message': return <MessageCircle className="w-5 h-5 text-white" />;
+                            case 'pitch': return <Send className="w-5 h-5 text-white" />;
+                            case 'event': return <Calendar className="w-5 h-5 text-white" />;
+                            case 'profile': return <User className="w-5 h-5 text-white" />;
+                            default: return <Bell className="w-5 h-5 text-white" />;
+                          }
+                        };
+
+                        const getNotificationColor = (type) => {
+                          switch (type) {
+                            case 'match': return 'from-pink-500 to-rose-500';
+                            case 'message': return 'from-blue-500 to-cyan-500';
+                            case 'pitch': return 'from-green-500 to-emerald-500';
+                            case 'event': return 'from-orange-500 to-red-500';
+                            case 'profile': return 'from-purple-500 to-indigo-500';
+                            default: return 'from-gray-500 to-gray-600';
+                          }
+                        };
+
+                        return (
+                          <div key={notification.id} className={`p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 group ${!notification.isRead ? 'bg-blue-50/50' : ''}`}>
+                            <div className="flex items-start gap-4">
+                              <div className={`w-10 h-10 bg-gradient-to-r ${getNotificationColor(notification.type)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
+                                {getNotificationIcon(notification.type)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between">
+                                  <p className="text-sm font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                                    {notification.title}
+                                  </p>
+                                  {!notification.isRead && (
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1 leading-relaxed">{notification.message}</p>
+                                <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {notification.time}
+                                </p>
+                              </div>
                             </div>
-                            <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0 mt-2"></div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       </div>
                     <div className="p-4 bg-gray-50 border-t border-gray-100">
                       <button className="w-full text-center text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors">
@@ -308,19 +339,21 @@ const Navbar = () => {
                 className="flex items-center gap-3 p-2.5 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105 group"
               >
                 <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-2xl flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:shadow-xl transition-all duration-300">
-                  {user?.firstName?.charAt(0) || 'U'}
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <img
+                    src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=8B5CF6&color=fff&size=40&rounded=true`}
+                    alt={`${user?.firstName} ${user?.lastName}`}
+                    className="w-10 h-10 rounded-2xl object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
+                  />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                    <CheckCircle className="w-2.5 h-2.5 text-white" />
                   </div>
                 </div>
                 <div className="text-left">
                   <div className="text-sm font-semibold text-gray-900 truncate max-w-32 group-hover:text-purple-600 transition-colors">
-                    {user?.firstName || 'User'}
+                    {user?.firstName || 'John'} {user?.lastName || 'Doe'}
                   </div>
                   <div className="text-xs text-gray-500 truncate max-w-32">
-                    {user?.email || 'user@example.com'}
+                    @{user?.username || 'johndoe123'}
                   </div>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
@@ -331,20 +364,27 @@ const Navbar = () => {
                   {/* User Info Header */}
                   <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                        {user?.firstName?.charAt(0) || 'U'}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 text-lg">{user?.firstName || 'User'}</h3>
-                        <p className="text-sm text-gray-500">{user?.email || 'user@example.com'}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                            Premium
-                          </span>
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
-                            Verified
-                          </span>
+                      <div className="relative">
+                        <img
+                          src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=8B5CF6&color=fff&size=48&rounded=true`}
+                          alt={`${user?.firstName} ${user?.lastName}`}
+                          className="w-12 h-12 rounded-2xl object-cover shadow-lg"
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                          <CheckCircle className="w-2.5 h-2.5 text-white" />
                         </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-gray-900 text-lg truncate">
+                            {user?.firstName || 'John'} {user?.lastName || 'Doe'}
+                          </h3>
+                          <div className="flex items-center gap-1">
+                            <CrownIcon className="w-4 h-4 text-yellow-500" />
+                            <CheckCircle className="w-4 h-4 text-purple-500" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate">@{user?.username || 'johndoe123'}</p>
                       </div>
                     </div>
                   </div>
@@ -408,7 +448,7 @@ const Navbar = () => {
           >
               <div className="relative">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                {notifications.length > 0 && !isMenuOpen && (
+                {notifications.filter(n => !n.isRead).length > 0 && !isMenuOpen && (
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
                 )}
               </div>
@@ -474,22 +514,27 @@ const Navbar = () => {
               <div className="pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-4 p-4 mb-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                    {user?.firstName?.charAt(0) || 'U'}
+                    <img
+                      src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=8B5CF6&color=fff&size=48&rounded=true`}
+                      alt={`${user?.firstName} ${user?.lastName}`}
+                      className="w-12 h-12 rounded-2xl object-cover shadow-lg"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                      <CheckCircle className="w-2.5 h-2.5 text-white" />
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold text-gray-900 truncate">
-                      {user?.firstName || 'User'}
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-bold text-gray-900 truncate">
+                        {user?.firstName || 'John'} {user?.lastName || 'Doe'}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CrownIcon className="w-3 h-3 text-yellow-500" />
+                        <CheckCircle className="w-3 h-3 text-purple-500" />
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 truncate">
-                      {user?.email || 'user@example.com'}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                        Premium
-                      </span>
+                    <div className="text-xs text-gray-600 truncate">
+                      @{user?.username || 'johndoe123'}
                     </div>
                   </div>
                 </div>
@@ -525,14 +570,6 @@ const Navbar = () => {
           </div>
         )}
     </nav>
-      
-      {/* Search Overlay */}
-      {showSearch && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-          onClick={() => setShowSearch(false)}
-        ></div>
-      )}
 
       {/* How It Works Modal */}
       <HowItWorks 

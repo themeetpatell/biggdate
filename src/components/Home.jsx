@@ -180,7 +180,7 @@ const Home = () => {
                   <span className="text-2xl">{currentMask.emoji}</span>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">Welcome back!</h1>
+                  <h1 className="text-2xl font-bold">Welcome back!</h1>
                   <p className="text-purple-100">{currentMask.name}</p>
                 </div>
               </div>
@@ -215,8 +215,8 @@ const Home = () => {
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
                 <div>
-                <p className="text-gray-600 text-sm font-medium">Active Pitches</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.activePitches}</p>
+                <p className="text-gray-600 text-xs font-medium">Active Pitches</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.activePitches}</p>
           </div>
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
                 <Send className="w-6 h-6 text-white" />
@@ -231,8 +231,8 @@ const Home = () => {
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Matches</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.matches}</p>
+                <p className="text-gray-600 text-xs font-medium">Matches</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.matches}</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
                 <Heart className="w-6 h-6 text-white" />
@@ -247,8 +247,8 @@ const Home = () => {
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Events</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.upcomingEvents}</p>
+                <p className="text-gray-600 text-xs font-medium">Events</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.upcomingEvents}</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
@@ -263,8 +263,8 @@ const Home = () => {
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Courses</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.courses}</p>
+                <p className="text-gray-600 text-xs font-medium">Courses</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.courses}</p>
                     </div>
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-white" />
@@ -282,7 +282,7 @@ const Home = () => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+                <h2 className="text-lg font-bold text-gray-900">Recent Activity</h2>
                 <Link to="/connections" className="text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
                   View All
                   <ChevronRight className="w-4 h-4" />
@@ -298,7 +298,7 @@ const Home = () => {
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{activity.title}</h3>
+                        <h3 className="font-medium text-gray-900 text-sm">{activity.title}</h3>
                         <p className="text-gray-600 text-sm">{activity.description}</p>
                         <p className="text-gray-400 text-xs mt-1">{activity.time}</p>
                     </div>
@@ -312,7 +312,7 @@ const Home = () => {
           {/* Quick Actions */}
           <div>
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-6">Quick Actions</h2>
               
               <div className="space-y-4">
                 {quickActions.map((action, index) => {
@@ -327,7 +327,7 @@ const Home = () => {
                         <Icon className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{action.title}</h3>
+                        <h3 className="font-medium text-gray-900 text-sm">{action.title}</h3>
                         <p className="text-gray-600 text-sm">{action.description}</p>
                       </div>
                       <ArrowRight className="w-5 h-5 text-gray-400" />
@@ -341,7 +341,7 @@ const Home = () => {
 
         {/* CTA Section */}
         <div className="mt-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-8 text-white text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to Make Your Move?</h2>
+          <h2 className="text-xl font-bold mb-4">Ready to Make Your Move?</h2>
           <p className="text-purple-100 mb-6 max-w-2xl mx-auto">
             Your next great connection is just one pitch away. Start building meaningful relationships today.
           </p>

@@ -60,37 +60,37 @@ const RoleSelection = () => {
       bgColor: 'from-purple-50 to-pink-50',
       stages: [
         {
-          id: 'idea',
-          title: 'Idea Stage',
-          description: 'Dreaming it, shaping it, pitching napkin sketches',
+          id: 'dreamer',
+          title: 'Dreamer',
+          description: 'Sparks the vision, shaping the "what if."',
           icon: Lightbulb,
           color: 'from-yellow-500 to-orange-500'
         },
         {
-          id: 'seed',
-          title: 'Seed Stage',
-          description: 'Built an MVP, chasing early users and funding',
+          id: 'starter',
+          title: 'Starter',
+          description: 'Raises the first capital, assembles the founding team.',
           icon: Target,
           color: 'from-green-500 to-emerald-500'
         },
         {
-          id: 'growth',
-          title: 'Growth Stage',
-          description: 'Scaling users, hiring team, sleepless nights',
+          id: 'driver',
+          title: 'Driver',
+          description: 'Pushes traction, builds product-market fit.',
           icon: TrendingUp,
           color: 'from-blue-500 to-cyan-500'
         },
         {
-          id: 'scale',
-          title: 'Scale Stage',
-          description: 'Global expansion, market dominance, building empire',
+          id: 'scaler',
+          title: 'Scaler',
+          description: 'Expands across markets, builds organization depth.',
           icon: Globe,
           color: 'from-indigo-500 to-purple-500'
         },
         {
-          id: 'exit',
-          title: 'Exit Stage',
-          description: 'Exited, mentoring, angel investing, maybe starting again',
+          id: 'exitor',
+          title: 'Exitor',
+          description: 'Prepares for IPO, M&A, or next big leap.',
           icon: Crown,
           color: 'from-purple-500 to-indigo-500'
         }
@@ -107,30 +107,37 @@ const RoleSelection = () => {
         {
           id: 'angel',
           title: 'Angel',
-          description: 'Backing bold dreamers, writing the first checks',
+          description: 'Backs the person and the dream at napkin stage.',
           icon: Heart,
           color: 'from-pink-500 to-rose-500'
         },
         {
-          id: 'vc-seed',
-          title: 'VC Seed',
-          description: 'Hunting the next big wave, funding early believers',
+          id: 'seed-vc',
+          title: 'Seed VC',
+          description: 'Catalyzes the first real funding round, fueling early momentum.',
           icon: Zap,
           color: 'from-blue-500 to-cyan-500'
         },
         {
           id: 'growth-capital',
           title: 'Growth Capital',
-          description: 'Scaling rockets, chasing unicorns',
+          description: 'Provides scale-up funds, drives market dominance.',
           icon: TrendingUp,
           color: 'from-orange-500 to-red-500'
         },
         {
           id: 'family-office',
-          title: 'Family Office / LP / Exited Operator',
-          description: 'Legacy building, shaping futures',
+          title: 'Family Office',
+          description: 'Long-term capital with strategic patience.',
           icon: Crown,
           color: 'from-purple-500 to-indigo-500'
+        },
+        {
+          id: 'institutions',
+          title: 'Institutions',
+          description: 'PE/late-stage VC shaping billion-dollar outcomes.',
+          icon: Award,
+          color: 'from-indigo-500 to-purple-500'
         }
       ]
     },
@@ -145,30 +152,37 @@ const RoleSelection = () => {
         {
           id: 'early-builder',
           title: 'Early Builder',
-          description: 'First 10 hires, wearing 10 hats',
+          description: 'The first hands-on doer who sets foundations.',
           icon: Users,
           color: 'from-blue-500 to-cyan-500'
         },
         {
           id: 'scaling-operator',
           title: 'Scaling Operator',
-          description: 'Building systems, leading teams, sweating OKRs',
+          description: 'Brings systems, process, and repeatability.',
           icon: Target,
           color: 'from-green-500 to-emerald-500'
         },
         {
-          id: 'growth-leader',
-          title: 'Growth Leader',
-          description: 'Managing orgs, driving culture, steering scale-ups',
+          id: 'growth-manager',
+          title: 'Growth Manager',
+          description: 'Leads teams, drives cross-functional expansion.',
           icon: TrendingUp,
           color: 'from-purple-500 to-pink-500'
         },
         {
-          id: 'veteran-operator',
-          title: 'Veteran Operator',
-          description: 'Exited, advising, angel building, teaching the next gen',
+          id: 'veteran-leader',
+          title: 'Veteran Leader',
+          description: 'Brings wisdom, credibility, and scale playbooks.',
           icon: Award,
           color: 'from-indigo-500 to-purple-500'
+        },
+        {
+          id: 'legacy-architect',
+          title: 'Legacy Architect',
+          description: 'Shapes culture, leaves behind institutions that last.',
+          icon: Shield,
+          color: 'from-purple-500 to-indigo-500'
         }
       ]
     }
@@ -178,43 +192,67 @@ const RoleSelection = () => {
     {
       id: 'rocket',
       title: 'Rocket',
+      subtitle: 'The Visionary',
       emoji: '🚀',
-      description: 'The innovator, always reaching for the stars',
+      description: 'Always dreaming of what\'s next, chasing horizons with fearless energy.',
+      symbolism: 'Adventure, ambition, limitless possibility.',
+      datingVibe: 'Wants a partner to build galaxies with, not just grab coffee.',
+      motto: 'Let\'s shoot for the stars, together.',
       color: 'from-blue-500 to-cyan-500'
     },
     {
       id: 'diamond',
       title: 'Diamond',
+      subtitle: 'The Grounded Treasure',
       emoji: '💎',
-      description: 'The rare gem, valuable and multifaceted',
+      description: 'Rare, self-aware, and built through resilience.',
+      symbolism: 'Depth, clarity, inner value.',
+      datingVibe: 'Chooses quality over quantity, looking for someone who truly sees them.',
+      motto: 'I shine brighter with the right match.',
       color: 'from-purple-500 to-pink-500'
     },
     {
       id: 'flame',
       title: 'Flame',
+      subtitle: 'The Spark',
       emoji: '🔥',
-      description: 'The passionate one, burning bright with purpose',
+      description: 'Passionate, magnetic, impossible to ignore.',
+      symbolism: 'Energy, intimacy, intensity.',
+      datingVibe: 'Sets hearts racing, lives for connection that burns real.',
+      motto: 'If it\'s not fire, it\'s not love.',
       color: 'from-orange-500 to-red-500'
     },
     {
       id: 'crown',
       title: 'Crown',
+      subtitle: 'The Builder of Empires',
       emoji: '👑',
-      description: 'The leader, born to rule and inspire',
+      description: 'Ambitious, driven, knows where they\'re headed.',
+      symbolism: 'Purpose, leadership, legacy.',
+      datingVibe: 'Wants a co-creator to build life\'s empire with.',
+      motto: 'I don\'t just date. I build dynasties.',
       color: 'from-yellow-500 to-orange-500'
     },
     {
       id: 'star',
       title: 'Star',
+      subtitle: 'The Dreamer Guide',
       emoji: '⭐',
-      description: 'The shining light, guiding others forward',
+      description: 'Hopeful, radiant, inspiring others with light.',
+      symbolism: 'Destiny, faith, optimism.',
+      datingVibe: 'Believes in soul connections and guiding love forward.',
+      motto: 'Every love story is written in the stars.',
       color: 'from-indigo-500 to-purple-500'
     },
     {
       id: 'shield',
       title: 'Shield',
+      subtitle: 'The Protector',
       emoji: '🛡️',
-      description: 'The protector, building safe spaces for growth',
+      description: 'Loyal, steady, and safe — the rock in the storm.',
+      symbolism: 'Trust, stability, reliability.',
+      datingVibe: 'Wants to create a safe haven for love to grow.',
+      motto: 'With me, you\'ll always feel at home.',
       color: 'from-green-500 to-emerald-500'
     }
   ];
@@ -359,25 +397,47 @@ const RoleSelection = () => {
           <div className="mb-6 sm:mb-8 lg:mb-12">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6 text-center px-4">Step 2: Choose Your Mask</h2>
             <p className="text-gray-300 text-center mb-6 sm:mb-8 text-sm sm:text-base px-4">
-              You're masked until you pitch. Choose your symbolic identity.
+              You're masked until you pitch. Choose your symbolic identity that represents your dating personality.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 px-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
               {masks.map((mask) => {
                 const isSelected = selectedMask === mask.id;
                 return (
                   <button
                     key={mask.id}
                     onClick={() => handleMaskSelect(mask.id)}
-                    className={`p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
+                    className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 hover:scale-105 text-left ${
                       isSelected
                         ? `bg-gradient-to-r ${mask.color} border-white shadow-xl`
                         : 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/20'
                     }`}
                   >
-                    <div className="text-center">
-                      <div className="text-2xl sm:text-4xl mb-2 sm:mb-3">{mask.emoji}</div>
-                      <h3 className="text-sm sm:text-lg font-bold text-white mb-1">{mask.title}</h3>
-                      <p className="text-gray-300 text-xs">{mask.description}</p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="text-3xl sm:text-4xl">{mask.emoji}</div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white">{mask.title}</h3>
+                          <p className="text-sm text-white/80 font-medium italic">"{mask.motto}"</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm text-white/90 leading-relaxed">{mask.description}</p>
+                        
+                        <div className="bg-white/10 rounded-lg p-3">
+                          <div className="space-y-1">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-white/70 min-w-[60px]">Symbolism:</span>
+                              <span className="text-xs text-white/80">{mask.symbolism}</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-semibold text-white/70 min-w-[60px]">Dating Vibe:</span>
+                              <span className="text-xs text-white/80">{mask.datingVibe}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                      </div>
                     </div>
                   </button>
                 );

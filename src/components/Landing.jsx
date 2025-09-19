@@ -140,15 +140,15 @@ const Landing = () => {
               <div className="flex items-center justify-center gap-6 sm:gap-8 text-gray-400 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>500+ on waitlist</span>
+                  <span>No Swipes</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span>Launching Oct 20th</span>
+                  <span>Build Your Life</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                  <span>Global community</span>
+                  <span>Startup Culture</span>
                 </div>
               </div>
             </div>
@@ -253,7 +253,7 @@ const Landing = () => {
                 <div className="text-gray-400 text-xs sm:text-sm">
                   <span className="inline-flex items-center gap-2 hover:text-white transition-colors duration-300">
                     <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400" />
-                    Free to join • No spam • Launch Oct 20th, 2025
+                    Free to join • Dating Events • Verified Profiles Only
                   </span>
                 </div>
               </div>
@@ -272,7 +272,7 @@ const Landing = () => {
               <span className="text-white text-lg sm:text-xl font-bold hover:text-purple-200 transition-colors duration-300">BiggDate</span>
             </div>
             <p className="text-gray-400 text-xs sm:text-sm hover:text-gray-300 transition-colors duration-300">
-              © 2025 BiggBizz. Find your Co-Lifer - Building meaningful connections, for life and business.
+              © 2025 BiggBizz. Find your Co-Lifer - Building meaningful connections, for life and career.
             </p>
             <div className="mt-4 flex justify-center gap-4 text-gray-500 text-xs">
               <span className="hover:text-purple-400 transition-colors duration-300 cursor-pointer">Privacy Policy</span>

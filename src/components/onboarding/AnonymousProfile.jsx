@@ -41,13 +41,17 @@ const AnonymousProfile = () => {
     careerField: [],
     education: [],
     location: [],
-    lifestyle: []
+    lifestyle: [],
+    lifePriorities: [],
+    relationshipGoals: []
   });
   const [openDropdowns, setOpenDropdowns] = useState({
     careerField: false,
     education: false,
     location: false,
-    lifestyle: false
+    lifestyle: false,
+    lifePriorities: false,
+    relationshipGoals: false
   });
   const navigate = useNavigate();
 
@@ -88,6 +92,15 @@ const AnonymousProfile = () => {
   const lifestyleOptions = [
     'Early Bird', 'Night Owl', 'Homebody', 'Social Butterfly', 'Adventure Seeker',
     'Workaholic', 'Balanced', 'Minimalist', 'Luxury Lover', 'Fitness Enthusiast'
+  ];
+
+  const lifePriorities = [
+    'Family', 'Career', 'Travel', 'Health', 'Spirituality', 
+    'Impact', 'Wealth', 'Creativity'
+  ];
+
+  const relationshipGoals = [
+    'Exploring', 'Long-term partnership', 'Marriage-minded', 'Family-focused'
   ];
 
   const cities = [
@@ -150,6 +163,13 @@ const AnonymousProfile = () => {
       [field]: prev[field].includes(value) 
         ? prev[field].filter(item => item !== value)
         : [...prev[field], value]
+    }));
+  };
+
+  const handleSingleSelect = (field, value) => {
+    setPartnerPreferences(prev => ({
+      ...prev,
+      [field]: [value]
     }));
   };
 
@@ -333,14 +353,14 @@ const AnonymousProfile = () => {
       <div className="mb-12">
         <h2 className="text-2xl font-bold text-white mb-6 text-center">What Are You Looking For?</h2>
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-2xl">
+          <div className="bg-gradient-to-br from-white/20 to-white/15 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-2xl">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column */}
               <div className="space-y-6">
                 {/* Age Range Slider */}
                 <div>
                   <label className="block text-white font-semibold mb-4 text-sm">Age Range</label>
-                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                  <div className="bg-white/15 rounded-xl p-6 border border-white/20">
                     <div className="flex items-center justify-between mb-6">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-purple-400">{partnerPreferences.ageRange[0]}</div>
@@ -398,12 +418,12 @@ const AnonymousProfile = () => {
                   <label className="block text-white font-semibold mb-3 text-sm">Career Fields</label>
                   <button
                     onClick={() => toggleDropdown('careerField')}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 hover:bg-white/15 flex items-center justify-between group"
+                    className="w-full p-4 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 hover:bg-white/25 flex items-center justify-between group"
                   >
                     <div className="flex flex-wrap gap-1">
                       {partnerPreferences.careerField.length > 0 ? (
                         partnerPreferences.careerField.slice(0, 2).map((field, index) => (
-                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/20 text-purple-200 text-xs rounded-md border border-purple-400/30">
+                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/30 text-purple-100 text-xs rounded-md border border-purple-400/50">
                             {field}
                           </span>
                         ))
@@ -418,18 +438,18 @@ const AnonymousProfile = () => {
                   </button>
                   
                   {openDropdowns.careerField && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white/15 backdrop-blur-md border border-white/30 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-white/50 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto ring-1 ring-white/20">
                       <div className="p-3">
-                        <div className="text-xs text-gray-300 mb-2 px-2">Select multiple options</div>
+                        <div className="text-xs text-gray-200 mb-2 px-2 font-medium">Select multiple options</div>
                         {careerFields.map((field) => (
-                          <label key={field} className="flex items-center p-3 hover:bg-white/10 rounded-lg cursor-pointer transition-colors duration-200 group">
+                          <label key={field} className="flex items-center p-3 hover:bg-white/30 rounded-lg cursor-pointer transition-colors duration-200 group">
                             <input
                               type="checkbox"
                               checked={partnerPreferences.careerField.includes(field)}
                               onChange={() => handleMultiSelect('careerField', field)}
-                              className="mr-3 w-4 h-4 text-purple-500 bg-white/10 border-white/30 rounded focus:ring-purple-500 focus:ring-2"
+                              className="mr-3 w-4 h-4 text-purple-500 bg-white/20 border-white/40 rounded focus:ring-purple-500 focus:ring-2"
                             />
-                            <span className="text-white text-sm group-hover:text-purple-200 transition-colors duration-200">{field}</span>
+                            <span className="text-white text-sm group-hover:text-purple-200 transition-colors duration-200 font-medium">{field}</span>
                             {partnerPreferences.careerField.includes(field) && (
                               <CheckCircle className="w-4 h-4 text-purple-400 ml-auto" />
                             )}
@@ -445,12 +465,12 @@ const AnonymousProfile = () => {
                   <label className="block text-white font-semibold mb-3 text-sm">Education Levels</label>
                   <button
                     onClick={() => toggleDropdown('education')}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-white/15 flex items-center justify-between group"
+                    className="w-full p-4 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-white/25 flex items-center justify-between group"
                   >
                     <div className="flex flex-wrap gap-1">
                       {partnerPreferences.education.length > 0 ? (
                         partnerPreferences.education.slice(0, 2).map((level, index) => (
-                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-200 text-xs rounded-md border border-blue-400/30">
+                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/30 text-blue-100 text-xs rounded-md border border-blue-400/50">
                             {level}
                           </span>
                         ))
@@ -465,18 +485,18 @@ const AnonymousProfile = () => {
                   </button>
                   
                   {openDropdowns.education && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white/15 backdrop-blur-md border border-white/30 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-white/50 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto ring-1 ring-white/20">
                       <div className="p-3">
-                        <div className="text-xs text-gray-300 mb-2 px-2">Select multiple options</div>
+                        <div className="text-xs text-gray-200 mb-2 px-2 font-medium">Select multiple options</div>
                         {educationLevels.map((level) => (
-                          <label key={level} className="flex items-center p-3 hover:bg-white/10 rounded-lg cursor-pointer transition-colors duration-200 group">
+                          <label key={level} className="flex items-center p-3 hover:bg-white/30 rounded-lg cursor-pointer transition-colors duration-200 group">
                             <input
                               type="checkbox"
                               checked={partnerPreferences.education.includes(level)}
                               onChange={() => handleMultiSelect('education', level)}
-                              className="mr-3 w-4 h-4 text-blue-500 bg-white/10 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                              className="mr-3 w-4 h-4 text-blue-500 bg-white/20 border-white/40 rounded focus:ring-blue-500 focus:ring-2"
                             />
-                            <span className="text-white text-sm group-hover:text-blue-200 transition-colors duration-200">{level}</span>
+                            <span className="text-white text-sm group-hover:text-blue-200 transition-colors duration-200 font-medium">{level}</span>
                             {partnerPreferences.education.includes(level) && (
                               <CheckCircle className="w-4 h-4 text-blue-400 ml-auto" />
                             )}
@@ -495,7 +515,7 @@ const AnonymousProfile = () => {
                   <label className="block text-white font-semibold mb-3 text-sm">Preferred Locations</label>
                   <button
                     onClick={() => toggleDropdown('location')}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 hover:bg-white/15 flex items-center justify-between group"
+                    className="w-full p-4 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 hover:bg-white/25 flex items-center justify-between group"
                   >
                     <div className="flex flex-wrap gap-1">
                       {partnerPreferences.location.length > 0 ? (
@@ -503,7 +523,7 @@ const AnonymousProfile = () => {
                           const [city, country] = location.split(', ');
                           const cityData = cities.find(c => c.name === city && c.country === country);
                           return (
-                            <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-200 text-xs rounded-md border border-green-400/30">
+                            <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/30 text-green-100 text-xs rounded-md border border-green-400/50">
                               <span>{cityData?.flag || '🌍'}</span>
                               <span>{city}</span>
                             </span>
@@ -520,18 +540,18 @@ const AnonymousProfile = () => {
                   </button>
                   
                   {openDropdowns.location && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white/15 backdrop-blur-md border border-white/30 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-white/50 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto ring-1 ring-white/20">
                       <div className="p-3">
-                        <div className="text-xs text-gray-300 mb-2 px-2">Select multiple locations</div>
+                        <div className="text-xs text-gray-200 mb-2 px-2 font-medium">Select multiple locations</div>
                         {cities.map((city) => (
-                          <label key={`${city.name}-${city.country}`} className="flex items-center p-3 hover:bg-white/10 rounded-lg cursor-pointer transition-colors duration-200 group">
+                          <label key={`${city.name}-${city.country}`} className="flex items-center p-3 hover:bg-white/30 rounded-lg cursor-pointer transition-colors duration-200 group">
                             <input
                               type="checkbox"
                               checked={partnerPreferences.location.includes(`${city.name}, ${city.country}`)}
                               onChange={() => handleMultiSelect('location', `${city.name}, ${city.country}`)}
-                              className="mr-3 w-4 h-4 text-green-500 bg-white/10 border-white/30 rounded focus:ring-green-500 focus:ring-2"
+                              className="mr-3 w-4 h-4 text-green-500 bg-white/20 border-white/40 rounded focus:ring-green-500 focus:ring-2"
                             />
-                            <span className="text-white text-sm flex items-center gap-2 group-hover:text-green-200 transition-colors duration-200">
+                            <span className="text-white text-sm flex items-center gap-2 group-hover:text-green-200 transition-colors duration-200 font-medium">
                               <span>{city.flag}</span>
                               <span>{city.name}, {city.country}</span>
                             </span>
@@ -550,12 +570,12 @@ const AnonymousProfile = () => {
                   <label className="block text-white font-semibold mb-3 text-sm">Lifestyle Preferences</label>
                   <button
                     onClick={() => toggleDropdown('lifestyle')}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 hover:bg-white/15 flex items-center justify-between group"
+                    className="w-full p-4 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 hover:bg-white/25 flex items-center justify-between group"
                   >
                     <div className="flex flex-wrap gap-1">
                       {partnerPreferences.lifestyle.length > 0 ? (
                         partnerPreferences.lifestyle.slice(0, 2).map((option, index) => (
-                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-orange-500/20 text-orange-200 text-xs rounded-md border border-orange-400/30">
+                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-orange-500/30 text-orange-100 text-xs rounded-md border border-orange-400/50">
                             {option}
                           </span>
                         ))
@@ -570,20 +590,110 @@ const AnonymousProfile = () => {
                   </button>
                   
                   {openDropdowns.lifestyle && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white/15 backdrop-blur-md border border-white/30 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-white/50 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto ring-1 ring-white/20">
                       <div className="p-3">
-                        <div className="text-xs text-gray-300 mb-2 px-2">Select multiple options</div>
+                        <div className="text-xs text-gray-200 mb-2 px-2 font-medium">Select multiple options</div>
                         {lifestyleOptions.map((option) => (
-                          <label key={option} className="flex items-center p-3 hover:bg-white/10 rounded-lg cursor-pointer transition-colors duration-200 group">
+                          <label key={option} className="flex items-center p-3 hover:bg-white/30 rounded-lg cursor-pointer transition-colors duration-200 group">
                             <input
                               type="checkbox"
                               checked={partnerPreferences.lifestyle.includes(option)}
                               onChange={() => handleMultiSelect('lifestyle', option)}
-                              className="mr-3 w-4 h-4 text-orange-500 bg-white/10 border-white/30 rounded focus:ring-orange-500 focus:ring-2"
+                              className="mr-3 w-4 h-4 text-orange-500 bg-white/20 border-white/40 rounded focus:ring-orange-500 focus:ring-2"
                             />
-                            <span className="text-white text-sm group-hover:text-orange-200 transition-colors duration-200">{option}</span>
+                            <span className="text-white text-sm group-hover:text-orange-200 transition-colors duration-200 font-medium">{option}</span>
                             {partnerPreferences.lifestyle.includes(option) && (
                               <CheckCircle className="w-4 h-4 text-orange-400 ml-auto" />
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Life Priorities - Dropdown Multi Select */}
+                <div className="relative">
+                  <label className="block text-white font-semibold mb-3 text-sm">Life Priorities / Values</label>
+                  <button
+                    onClick={() => toggleDropdown('lifePriorities')}
+                    className="w-full p-4 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 hover:bg-white/25 flex items-center justify-between group"
+                  >
+                    <div className="flex flex-wrap gap-1">
+                      {partnerPreferences.lifePriorities.length > 0 ? (
+                        partnerPreferences.lifePriorities.slice(0, 2).map((priority, index) => (
+                          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-pink-500/30 text-pink-100 text-xs rounded-md border border-pink-400/50">
+                            {priority}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-400">Select top 2-3 priorities</span>
+                      )}
+                      {partnerPreferences.lifePriorities.length > 2 && (
+                        <span className="text-pink-300 text-xs">+{partnerPreferences.lifePriorities.length - 2} more</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${openDropdowns.lifePriorities ? 'rotate-180' : ''} group-hover:scale-110`} />
+                  </button>
+                  
+                  {openDropdowns.lifePriorities && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-white/50 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto ring-1 ring-white/20">
+                      <div className="p-3">
+                        <div className="text-xs text-gray-200 mb-2 px-2 font-medium">Select top 2-3 priorities</div>
+                        {lifePriorities.map((priority) => (
+                          <label key={priority} className="flex items-center p-3 hover:bg-white/30 rounded-lg cursor-pointer transition-colors duration-200 group">
+                            <input
+                              type="checkbox"
+                              checked={partnerPreferences.lifePriorities.includes(priority)}
+                              onChange={() => handleMultiSelect('lifePriorities', priority)}
+                              className="mr-3 w-4 h-4 text-pink-500 bg-white/20 border-white/40 rounded focus:ring-pink-500 focus:ring-2"
+                            />
+                            <span className="text-white text-sm group-hover:text-pink-200 transition-colors duration-200 font-medium">{priority}</span>
+                            {partnerPreferences.lifePriorities.includes(priority) && (
+                              <CheckCircle className="w-4 h-4 text-pink-400 ml-auto" />
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Relationship Goals - Single Select */}
+                <div className="relative">
+                  <label className="block text-white font-semibold mb-3 text-sm">Relationship Intentions / Timeline</label>
+                  <button
+                    onClick={() => toggleDropdown('relationshipGoals')}
+                    className="w-full p-4 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 hover:bg-white/25 flex items-center justify-between group"
+                  >
+                    <div className="flex flex-wrap gap-1">
+                      {partnerPreferences.relationshipGoals.length > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-500/30 text-indigo-100 text-xs rounded-md border border-indigo-400/50">
+                          {partnerPreferences.relationshipGoals[0]}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">Select relationship intention</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${openDropdowns.relationshipGoals ? 'rotate-180' : ''} group-hover:scale-110`} />
+                  </button>
+                  
+                  {openDropdowns.relationshipGoals && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-white/50 rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto ring-1 ring-white/20">
+                      <div className="p-3">
+                        <div className="text-xs text-gray-200 mb-2 px-2 font-medium">Select one option</div>
+                        {relationshipGoals.map((goal) => (
+                          <label key={goal} className="flex items-center p-3 hover:bg-white/30 rounded-lg cursor-pointer transition-colors duration-200 group">
+                            <input
+                              type="radio"
+                              name="relationshipGoals"
+                              checked={partnerPreferences.relationshipGoals.includes(goal)}
+                              onChange={() => handleSingleSelect('relationshipGoals', goal)}
+                              className="mr-3 w-4 h-4 text-indigo-500 bg-white/20 border-white/40 focus:ring-indigo-500 focus:ring-2"
+                            />
+                            <span className="text-white text-sm group-hover:text-indigo-200 transition-colors duration-200 font-medium">{goal}</span>
+                            {partnerPreferences.relationshipGoals.includes(goal) && (
+                              <CheckCircle className="w-4 h-4 text-indigo-400 ml-auto" />
                             )}
                           </label>
                         ))}

@@ -46,6 +46,8 @@ const EventsModule = () => {
   const [actionLoading, setActionLoading] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showUpcomingModal, setShowUpcomingModal] = useState(false);
+  const [isComingSoon, setIsComingSoon] = useState(true);
 
   const eventTypes = ['all', 'Pitch Night', 'Retreat', 'Dinner', 'Workshop', 'Networking', 'Conference'];
   const locations = ['all', 'San Francisco', 'New York', 'Los Angeles', 'Austin', 'Seattle', 'Online'];
@@ -80,7 +82,7 @@ const EventsModule = () => {
         id: 1,
         title: "Pitch Night SF",
         type: "Pitch Night",
-        date: "2024-01-25",
+        date: "2024-12-25",
         time: "7:00 PM",
         location: "San Francisco",
         address: "123 Startup Street, SF, CA",
@@ -98,7 +100,7 @@ const EventsModule = () => {
         id: 2,
         title: "Founder Retreat",
         type: "Retreat",
-        date: "2024-02-15",
+        date: "2024-12-28",
         time: "9:00 AM",
         location: "Napa Valley",
         address: "456 Vineyard Road, Napa, CA",
@@ -116,7 +118,7 @@ const EventsModule = () => {
         id: 3,
         title: "Tech Dinner Series",
         type: "Dinner",
-        date: "2024-01-30",
+        date: "2024-12-30",
         time: "6:30 PM",
         location: "San Francisco",
         address: "789 Tech Avenue, SF, CA",
@@ -134,7 +136,7 @@ const EventsModule = () => {
         id: 4,
         title: "Startup Workshop",
         type: "Workshop",
-        date: "2024-02-05",
+        date: "2025-01-05",
         time: "10:00 AM",
         location: "Online",
         address: "Virtual Event",
@@ -147,13 +149,121 @@ const EventsModule = () => {
         tags: ["Workshop", "Learning", "Mentorship"],
         isRSVPed: true,
         qrCode: "EVENT_004_STARTUP_WORKSHOP"
+      },
+      {
+        id: 5,
+        title: "AI Innovation Summit",
+        type: "Conference",
+        date: "2025-10-15",
+        time: "9:00 AM",
+        location: "New York",
+        address: "Times Square Convention Center, NYC",
+        price: "$199",
+        capacity: 500,
+        attendees: 342,
+        description: "Join leading AI researchers and entrepreneurs for a day of innovation, networking, and breakthrough discussions.",
+        organizer: "AI Innovation Hub",
+        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop",
+        tags: ["AI", "Innovation", "Conference"],
+        isRSVPed: false,
+        qrCode: "EVENT_005_AI_SUMMIT"
+      },
+      {
+        id: 6,
+        title: "Co-founder Speed Dating",
+        type: "Networking",
+        date: "2025-01-20",
+        time: "6:00 PM",
+        location: "Austin",
+        address: "South by Southwest Venue, Austin, TX",
+        price: "$35",
+        capacity: 80,
+        attendees: 45,
+        description: "Fast-paced networking event where founders meet potential co-founders in 5-minute speed sessions.",
+        organizer: "Austin Startup Scene",
+        image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&h=300&fit=crop",
+        tags: ["Networking", "Co-founder", "Speed Dating"],
+        isRSVPed: false,
+        qrCode: "EVENT_006_COFOUNDER_SPEED_DATING"
+      },
+      {
+        id: 7,
+        title: "Venture Capital Mixer",
+        type: "Networking",
+        date: "2025-01-25",
+        time: "5:30 PM",
+        location: "Los Angeles",
+        address: "Beverly Hills Hotel, LA, CA",
+        price: "$75",
+        capacity: 120,
+        attendees: 89,
+        description: "Exclusive mixer connecting entrepreneurs with top-tier VCs and angel investors.",
+        organizer: "LA Venture Network",
+        image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=300&fit=crop",
+        tags: ["VC", "Investment", "Networking"],
+        isRSVPed: true,
+        qrCode: "EVENT_007_VC_MIXER"
+      },
+      {
+        id: 8,
+        title: "Sustainability Tech Meetup",
+        type: "Workshop",
+        date: "2025-02-01",
+        time: "2:00 PM",
+        location: "Seattle",
+        address: "Amazon Spheres, Seattle, WA",
+        price: "Free",
+        capacity: 150,
+        attendees: 98,
+        description: "Exploring sustainable technology solutions and green innovation in the tech industry.",
+        organizer: "Green Tech Seattle",
+        image: "https://images.unsplash.com/photo-1569163139394-de446b5a1b0c?w=400&h=300&fit=crop",
+        tags: ["Sustainability", "Green Tech", "Innovation"],
+        isRSVPed: false,
+        qrCode: "EVENT_008_SUSTAINABILITY_MEETUP"
+      },
+      {
+        id: 9,
+        title: "TechCrunch Disrupt 2024",
+        type: "Conference",
+        date: "2024-10-15",
+        time: "9:00 AM",
+        location: "San Francisco",
+        address: "Moscone Center, SF, CA",
+        price: "$299",
+        capacity: 1000,
+        attendees: 950,
+        description: "The world's leading startup conference featuring the latest in tech innovation and entrepreneurship.",
+        organizer: "TechCrunch",
+        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop",
+        tags: ["Conference", "Startup", "Innovation"],
+        isRSVPed: false,
+        qrCode: "EVENT_009_TECHCRUNCH_DISRUPT"
+      },
+      {
+        id: 10,
+        title: "Founder Dating Mixer",
+        type: "Networking",
+        date: "2024-11-20",
+        time: "6:00 PM",
+        location: "New York",
+        address: "WeWork Times Square, NYC",
+        price: "$45",
+        capacity: 200,
+        attendees: 180,
+        description: "Connect with fellow entrepreneurs and potential co-founders in an intimate networking setting.",
+        organizer: "NYC Startup Community",
+        image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop",
+        tags: ["Networking", "Co-founder", "Mixer"],
+        isRSVPed: true,
+        qrCode: "EVENT_010_FOUNDER_MIXER"
       }
     ];
   };
 
   const loadRSVPs = async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
-    return [2, 4]; // Event IDs that user has RSVPed to
+    return [2, 4, 7, 10]; // Event IDs that user has RSVPed to
   };
 
   const handleRSVP = async (eventId) => {
@@ -252,6 +362,14 @@ const EventsModule = () => {
   const handleQRCheckIn = (eventId) => {
     console.log('QR Check-in for event:', eventId);
     setShowQRScanner(true);
+  };
+
+  const handleShowUpcomingEvents = () => {
+    setShowUpcomingModal(true);
+  };
+
+  const handleCloseUpcomingModal = () => {
+    setShowUpcomingModal(false);
   };
 
   const renderEventCard = (event) => (
@@ -378,13 +496,70 @@ const EventsModule = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-white ${isComingSoon ? 'blur-sm' : ''}`}>
       {/* Success Message */}
       {showSuccessMessage && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg animate-slide-in">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5" />
             <span>{successMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Coming Soon Overlay */}
+      {isComingSoon && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl max-w-2xl w-full p-8 text-center border border-white/20">
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Zap className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Events Module</h2>
+              <p className="text-xl text-purple-600 font-semibold mb-4">Coming Soon!</p>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                We're working hard to bring you an amazing events experience. 
+                Soon you'll be able to discover, join, and create incredible networking events, 
+                pitch nights, and founder meetups.
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">What's Coming:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-purple-500" />
+                  <span>Event Discovery & RSVP</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-500" />
+                  <span>Networking & Matching</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-purple-500" />
+                  <span>Location-based Events</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <QrCode className="w-4 h-4 text-purple-500" />
+                  <span>QR Check-in System</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => setIsComingSoon(false)}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-semibold"
+              >
+                Preview Feature
+              </button>
+              <button
+                onClick={() => window.history.back()}
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-semibold"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -401,6 +576,13 @@ const EventsModule = () => {
               <Calendar className="w-5 h-5 text-green-600" />
               <span className="font-semibold text-green-700">{myEvents.length} RSVPed</span>
             </div>
+            <button 
+              onClick={handleShowUpcomingEvents}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+            >
+              <Zap className="w-5 h-5" />
+              Coming Soon
+            </button>
             <button className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-2xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300">
               <Plus className="w-5 h-5" />
               Create Event
@@ -492,6 +674,90 @@ const EventsModule = () => {
           </div>
         )}
       </div>
+
+      {/* Upcoming Events Modal */}
+      {showUpcomingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+            onClick={handleCloseUpcomingModal}
+          ></div>
+          
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Upcoming Events</h2>
+                  <p className="text-blue-100">Discover amazing events happening soon</p>
+                </div>
+                <button
+                  onClick={handleCloseUpcomingModal}
+                  className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div className="text-center py-12">
+                <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Zap className="w-12 h-12 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Events Feature Preview</h3>
+                <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto">
+                  This feature is currently in development. You'll soon be able to discover and join amazing events!
+                </p>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Preview Features:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-blue-500" />
+                      <span>Event Discovery & RSVP</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 text-blue-500" />
+                      <span>Networking Events</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-5 h-5 text-blue-500" />
+                      <span>Location-based Search</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <QrCode className="w-5 h-5 text-blue-500" />
+                      <span>QR Check-in</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={handleCloseUpcomingModal}
+                className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('upcoming');
+                  handleCloseUpcomingModal();
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
+              >
+                View All Events
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
