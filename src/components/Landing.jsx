@@ -59,23 +59,23 @@ const Landing = () => {
   const features = [
     {
       icon: Target,
-      title: "Pitch-First Matching",
-      description: "Every connection begins with vision, values, and ambition — not swipes."
+      title: "Pitch-First Dating for Founders",
+      description: "Every connection begins with vision, values, and ambition — not swipes. Perfect for startup founders and entrepreneurs seeking meaningful relationships."
     },
     {
       icon: Users,
-      title: "3-Level System",
-      description: "Relationships progress step by step: Pitch → Reveal → Journey. Built for trust, depth, and momentum."
+      title: "3-Level Founder Dating System",
+      description: "Relationships progress step by step: Pitch → Reveal → Journey. Built for trust, depth, and momentum in the startup community."
     },
     {
       icon: TrendingUp,
-      title: "Personalized Path",
-      description: "AI guides each couple through milestones, shared goals, and curated experiences."
+      title: "AI-Powered Professional Matching",
+      description: "Advanced AI guides each couple through milestones, shared goals, and curated experiences tailored for ambitious professionals."
     },
     {
       icon: Globe,
-      title: "Premium Community",
-      description: "Ambitious professionals, founders, and builders — an exclusive global tribe driven by purpose."
+      title: "Exclusive Founder Community",
+      description: "Ambitious professionals, startup founders, and entrepreneurs — an exclusive global tribe driven by purpose and innovation."
     }
   ];
 
@@ -127,12 +127,12 @@ const Landing = () => {
             
             <div className="mb-6 sm:mb-8">
               <p className="text-lg sm:text-xl md:text-2xl text-white font-semibold tracking-wide bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                One Connection Can Change Your Life.
+                The Premier Dating App for Founders & Startup Professionals
               </p>
             </div>
             
             <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
-              The first dating app for ambitious professionals. Every profile begins with a pitch, every match begins with vision. Find your Co-Lifer who wants to build a meaningful life with you.
+              BiggDate is the first dating app built specifically for founders, entrepreneurs, and startup professionals. Every profile begins with a pitch, every match begins with vision. Find your Co-Lifer who shares your ambition to build something meaningful together. Created by TheMeetPatel for the startup community.
             </p>
             
             {/* Social Proof */}
@@ -140,11 +140,11 @@ const Landing = () => {
               <div className="flex items-center justify-center gap-6 sm:gap-8 text-gray-400 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>No Swipes</span>
+                  <span>Pitch-First Dating</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span>Build Your Life</span>
+                  <span>Founder Community</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
@@ -202,9 +202,9 @@ const Landing = () => {
       <div id="features" className="py-16 sm:py-20 bg-white/5 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Why BiggDate?</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Why BiggDate for Founders & Startups?</h2>
             <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-              We're not just another BS dating app. <br></br> We're building the future of meaningful connections.
+              We're not just another dating app. <br></br> We're building the future of meaningful connections for the startup community and ambitious professionals.
             </p>
           </div>
           
@@ -240,7 +240,7 @@ const Landing = () => {
                 <span className="shimmer-text block sm:inline"> Perfect Co-Lifer</span>?
               </h2>
               <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
-                Join our waitlist and be the first to experience the future of professional dating. Find your perfect Co-Lifer when we launch on October 20th, 2025.
+                Join our waitlist and be the first to experience the future of founder dating and startup professional relationships. Find your perfect Co-Lifer when we launch on October 20th, 2025. Built by TheMeetPatel for the entrepreneurial community.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
                 <button
@@ -272,7 +272,7 @@ const Landing = () => {
               <span className="text-white text-lg sm:text-xl font-bold hover:text-purple-200 transition-colors duration-300">BiggDate</span>
             </div>
             <p className="text-gray-400 text-xs sm:text-sm hover:text-gray-300 transition-colors duration-300">
-              © 2025 BiggBizz. Find your Co-Lifer - Building meaningful connections, for life and career.
+              © 2025 BiggBizz. Find your Co-Lifer - Building meaningful connections for founders, entrepreneurs, and startup professionals. Created by TheMeetPatel.
             </p>
             <div className="mt-4 flex justify-center gap-4 text-gray-500 text-xs">
               <span className="hover:text-purple-400 transition-colors duration-300 cursor-pointer">Privacy Policy</span>

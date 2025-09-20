@@ -12,7 +12,25 @@ import {
   Sparkles,
   Crown,
   Globe,
-  X
+  X,
+  Coffee,
+  Music,
+  Camera,
+  Gift,
+  Star,
+  Trophy,
+  Zap,
+  BookOpen,
+  Video,
+  Mic,
+  TrendingUp,
+  Eye,
+  Users,
+  Briefcase,
+  Wine,
+  ChefHat,
+  Building,
+  Gamepad2
 } from 'lucide-react';
 
 const JourneyMode = () => {
@@ -40,9 +58,54 @@ const JourneyMode = () => {
     loadJourneyData();
   }, []);
 
+  // Refresh data when component becomes visible (handles navigation back from pitch mode)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const storedMatches = JSON.parse(localStorage.getItem('journeyMatches') || '[]');
+        if (storedMatches.length > 0) {
+          setJourneyMatches(storedMatches);
+          setCurrentMatch(storedMatches[0] || null);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // Listen for storage changes to refresh data when returning from pitch mode
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedMatches = JSON.parse(localStorage.getItem('journeyMatches') || '[]');
+      if (storedMatches.length > 0) {
+        setJourneyMatches(storedMatches);
+        setCurrentMatch(storedMatches[0] || null);
+      }
+    };
+
+    const handleFocus = () => {
+      const storedMatches = JSON.parse(localStorage.getItem('journeyMatches') || '[]');
+      if (storedMatches.length > 0) {
+        setJourneyMatches(storedMatches);
+        setCurrentMatch(storedMatches[0] || null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
   const loadJourneyData = async () => {
     setIsLoading(true);
     try {
+      // Check localStorage for matches first
+      const storedMatches = JSON.parse(localStorage.getItem('journeyMatches') || '[]');
+      
       // Simulate API calls
       const [matchesData, messagesData, milestonesData, featuresData, datesData, eventsData, virtualData] = await Promise.all([
         loadJourneyMatches(),
@@ -54,8 +117,11 @@ const JourneyMode = () => {
         loadVirtualDateOptions()
       ]);
       
-      setJourneyMatches(matchesData);
-      setCurrentMatch(matchesData[0] || null);
+      // Use stored matches if available, otherwise use default data
+      const finalMatches = storedMatches.length > 0 ? storedMatches : matchesData;
+      
+      setJourneyMatches(finalMatches);
+      setCurrentMatch(finalMatches[0] || null);
       setChatMessages(messagesData);
       setJourneyMilestones(milestonesData);
       setUnlockedFeatures(featuresData);
@@ -788,7 +854,15 @@ const JourneyMode = () => {
   const renderMilestonesTab = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-        <h3 className="text-xl font-semibold text-gray-900 mb-6">Journey Milestones</h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-gray-900">Journey Milestones</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Total Points:</span>
+            <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-bold rounded-full">
+              {milestones.reduce((total, milestone) => milestone.completed ? total + milestone.points : total, 0)}
+            </span>
+          </div>
+        </div>
         <div className="space-y-4">
           {milestones.map((milestone, index) => {
             const Icon = milestone.icon;
@@ -809,7 +883,12 @@ const JourneyMode = () => {
                   <h4 className="font-medium text-gray-900 text-sm">{milestone.title}</h4>
                   <p className="text-xs text-gray-600">{milestone.description}</p>
                   {milestone.completed && (
-                    <p className="text-xs text-green-600">Completed {milestone.date}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-green-600">Completed {milestone.date}</p>
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                        +{milestone.points} pts
+                      </span>
+                    </div>
                   )}
                   {milestone.progress && (
                     <div className="mt-2">
@@ -823,6 +902,13 @@ const JourneyMode = () => {
                           style={{ width: `${milestone.progress}%` }}
                         ></div>
                       </div>
+                    </div>
+                  )}
+                  {!milestone.completed && !milestone.progress && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
+                        +{milestone.points} pts available
+                      </span>
                     </div>
                   )}
                 </div>

@@ -231,7 +231,9 @@ const PitchMode = () => {
     return [
       {
         id: 'accepted-1',
+        name: 'Sarah Chen',
         role: 'Founder',
+        company: 'EcoTech Solutions',
         stage: 'Seed',
         timeAgo: '1 day ago',
         location: 'San Francisco, CA',
@@ -248,11 +250,14 @@ const PitchMode = () => {
         values: ['Growth', 'Authenticity', 'Adventure'],
         status: 'accepted',
         acceptedAt: '1 day ago',
+        photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
         pitch: "I'm a passionate entrepreneur who believes in building meaningful connections, both in business and life. I love deep conversations about ideas, late-night coding sessions, and exploring new cities. I'm looking for someone who shares my curiosity about the world and isn't afraid to challenge my thinking. Let's build something beautiful together, whether it's a startup or a relationship."
       },
       {
         id: 'accepted-2',
+        name: 'Michael Rodriguez',
         role: 'Investor',
+        company: 'Venture Capital Partners',
         stage: 'Series A',
         timeAgo: '2 days ago',
         location: 'Austin, TX',
@@ -269,15 +274,69 @@ const PitchMode = () => {
         values: ['Mentorship', 'Growth', 'Adventure'],
         status: 'accepted',
         acceptedAt: '2 days ago',
+        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
         pitch: "I'm an investor by day, but my real passion is discovering hidden gems in both startups and people. I believe the best relationships are built on mutual respect, shared values, and the willingness to grow together. I'm seeking someone who's not just looking for a partner, but a teammate for life's adventures."
       }
     ];
   };
 
-  const handleAcceptPitch = (pitchId) => {
+  const handleAcceptPitch = async (pitchId) => {
     console.log('Accepted pitch:', pitchId);
-    // Move to Journey Mode
-    navigate('/journey');
+    
+    // Find the accepted pitch
+    const acceptedPitch = acceptedPitches.find(pitch => pitch.id === pitchId);
+    if (!acceptedPitch) return;
+    
+    // Show loading state
+    setActionLoading(prev => ({ ...prev, [pitchId]: true }));
+    
+    try {
+      // Simulate API call to add to journey
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Store the match in localStorage for JourneyMode to pick up
+      const journeyMatch = {
+        id: `journey_${Date.now()}`,
+        name: acceptedPitch.name,
+        role: acceptedPitch.role,
+        company: acceptedPitch.company,
+        photo: acceptedPitch.photo,
+        avatar: acceptedPitch.photo,
+        status: "online",
+        isOnline: true,
+        lastSeen: "just now",
+        compatibility: 92,
+        sharedInterests: acceptedPitch.values || ["Startups", "Innovation", "Technology"],
+        interests: acceptedPitch.interests ? acceptedPitch.interests.split(', ') : ["Startups", "Innovation", "Technology", "Networking", "Growth"],
+        mutualConnections: 8,
+        location: acceptedPitch.location,
+        age: acceptedPitch.age,
+        bio: acceptedPitch.pitch,
+        currentMilestone: "Getting to Know Each Other",
+        progress: 25,
+        addedFrom: "pitch_mode",
+        addedAt: new Date().toISOString()
+      };
+      
+      // Get existing journey matches from localStorage
+      const existingMatches = JSON.parse(localStorage.getItem('journeyMatches') || '[]');
+      existingMatches.push(journeyMatch);
+      localStorage.setItem('journeyMatches', JSON.stringify(existingMatches));
+      
+      // Remove from accepted pitches
+      setAcceptedPitches(prev => prev.filter(pitch => pitch.id !== pitchId));
+      
+      // Show success message
+      alert('Match added to Journey Mode! 🚀');
+      
+      // Navigate to Journey Mode
+      navigate('/journey');
+    } catch (error) {
+      console.error('Error adding to journey:', error);
+      alert('Failed to add to journey. Please try again.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [pitchId]: false }));
+    }
   };
 
   const handlePitchBack = (pitch) => {
