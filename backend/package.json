@@ -13,7 +13,13 @@
     "lint": "eslint src/ --ext .ts",
     "lint:fix": "eslint src/ --ext .ts --fix",
     "migrate": "knex migrate:latest",
-    "seed": "knex seed:run"
+    "migrate:rollback": "knex migrate:rollback",
+    "seed": "knex seed:run",
+    "seed:reset": "knex seed:run --specific=001_skills.js && knex seed:run --specific=002_users.js && knex seed:run --specific=003_profiles.js",
+    "db:setup": "node scripts/setup-database.js",
+    "db:reset": "knex migrate:rollback --all && knex migrate:latest && npm run seed",
+    "db:status": "knex migrate:status",
+    "db:test": "node scripts/test-connection.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1531.0",

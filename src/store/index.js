@@ -8,7 +8,6 @@ import authReducer from './slices/authSlice.js';
 import profileReducer from './slices/profileSlice.js';
 import discoveryReducer from './slices/discoverySlice.js';
 import connectionsReducer from './slices/connectionsSlice.js';
-import eventsReducer from './slices/eventsSlice.js';
 
 // Persist config
 const persistConfig = {
@@ -22,7 +21,6 @@ const rootReducer = combineReducers({
   profile: profileReducer,
   discovery: discoveryReducer,
   connections: connectionsReducer,
-  events: eventsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

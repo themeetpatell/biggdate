@@ -34,7 +34,6 @@ const Auth = () => {
     countryCode: '+1',
     whatsappNumber: '',
     username: '',
-    role: '',
     password: '',
     confirmPassword: ''
   });
@@ -69,7 +68,7 @@ const Auth = () => {
       if (onboardingComplete === 'true') {
         navigate('/home');
       } else {
-        navigate('/onboarding/role');
+        navigate('/onboarding/mission');
       }
     }
   }, [isAuthenticated, navigate]);
@@ -115,9 +114,6 @@ const Auth = () => {
         newErrors.username = 'Username is required';
       } else if (formData.username.length < 3) {
         newErrors.username = 'Username must be at least 3 characters';
-      }
-      if (!formData.role) {
-        newErrors.role = 'Please select your role';
       }
       if (!formData.password) {
         newErrors.password = 'Password is required';
@@ -276,17 +272,17 @@ const Auth = () => {
           <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6">
             <Crown className="w-6 h-6 text-yellow-400" />
             <span className="text-white font-semibold">
-              {authMode === 'reset' ? 'Reset Account' : 'Welcome to BiggDate'}
+              {authMode === 'reset' ? 'Reset Account' : 'Welcome to Co-Builders'}
             </span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">
-            {authMode === 'signup' ? 'Let\'s Find Your Co-Lifer' : 
-             authMode === 'signin' ? 'We Were Missing You!' : 
+            {authMode === 'signup' ? 'Let\'s Find Your Cofounder' : 
+             authMode === 'signin' ? 'Welcome Back!' : 
              'Reset Username or Password'}
           </h1>
           <p className="text-gray-300">
-            {authMode === 'signup' ? 'Start Your Journey to a Meaningful Connection' : 
-             authMode === 'signin' ? 'Continue Building Your Personal Life' : 
+            {authMode === 'signup' ? 'Start Your Journey to Building the Next Unicorn' : 
+             authMode === 'signin' ? 'Continue Building Your Startup Empire' : 
              'Enter WhatsApp Number and OTP'}
           </p>
         </div>
@@ -642,31 +638,6 @@ const Auth = () => {
                     )}
                   </div>
                   
-                  <div>
-                    <label className="block text-white font-semibold mb-2">Your Role</label>
-                    <div className="relative">
-                      <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleInputChange}
-                        className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none ${
-                          errors.role ? 'border-red-500' : 'border-white/20'
-                        }`}
-                      >
-                        <option value="" className="bg-gray-800">Select your role</option>
-                        <option value="Founder" className="bg-gray-800">Founder</option>
-                        <option value="Investor" className="bg-gray-800">Investor</option>
-                        <option value="Builder" className="bg-gray-800">Builder</option>
-                      </select>
-                    </div>
-                    {errors.role && (
-                      <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.role}
-                      </p>
-                    )}
-                  </div>
                 </div>
               )}
 
@@ -809,7 +780,7 @@ const Auth = () => {
           <div className="mt-8 grid grid-cols-3 gap-4 text-center">
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
               <Heart className="w-6 h-6 text-pink-400 mx-auto mb-2" />
-              <p className="text-white text-sm font-semibold">AI Powered</p>
+              <p className="text-white text-sm font-semibold">AI Matching</p>
             </div>
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
               <Sparkles className="w-6 h-6 text-purple-400 mx-auto mb-2" />
@@ -817,7 +788,7 @@ const Auth = () => {
             </div>
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
               <Crown className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-              <p className="text-white text-sm font-semibold">Biggies</p>
+              <p className="text-white text-sm font-semibold">Startup Ready</p>
             </div>
           </div>
         )}

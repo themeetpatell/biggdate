@@ -27,17 +27,17 @@ import {
   Info,
   Clock,
   CheckCircle,
-  Crown as CrownIcon
+  Crown as CrownIcon,
+  Rocket,
+  Target
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
-import HowItWorks from './HowItWorks';
 import { persistor } from '../store';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const userMenuRef = useRef(null);
@@ -52,31 +52,33 @@ const Navbar = () => {
       path: '/home', 
       label: 'Home', 
       icon: Home, 
-      description: 'Dashboard & Overview',
-      color: 'from-blue-500 to-cyan-500'
-    },
-    { 
-      path: '/matching', 
-      label: 'AI Matches', 
-      icon: Sparkles, 
-      description: 'Find Your Perfect Match',
-      color: 'from-purple-500 to-pink-500',
+      description: 'Discover Pitches & Find Cofounders',
       isHighlighted: true
     },
     { 
-      path: '/pitches', 
-      label: 'Pitches', 
-      icon: Send, 
-      description: 'Business Proposals',
-      color: 'from-green-500 to-emerald-500'
+      path: '/my-pitches', 
+      label: 'My Pitches', 
+      icon: MessageCircle, 
+      description: 'Manage Your Pitches'
     },
     { 
-      path: '/events', 
-      label: 'Events', 
-      icon: Calendar, 
-      description: 'Networking Events',
-      color: 'from-orange-500 to-red-500'
+      path: '/cofounders', 
+      label: 'Cofounders', 
+      icon: Sparkles, 
+      description: 'Find Your Perfect Cofounder'
     },
+    { 
+      path: '/startup-workspace', 
+      label: 'Startup Workspace', 
+      icon: Rocket, 
+      description: 'Build Your Startup'
+    },
+    { 
+      path: '/launch', 
+      label: 'Launch', 
+      icon: Target, 
+      description: 'Prepare for Launch'
+    }
   ];
 
   // Handle scroll effect
@@ -91,16 +93,16 @@ const Navbar = () => {
   const notifications = [
     {
       id: 1,
-      title: 'New Match! 🎉',
-      message: 'You matched with Alex Chen - AI & Sustainability enthusiast',
+      title: 'New Cofounder Match! 🎉',
+      message: 'You matched with Alex Chen - Technical Co-founder with AI expertise',
       time: '2 minutes ago',
       type: 'match',
       isRead: false
     },
     {
       id: 2,
-      title: 'Message Received',
-      message: 'Sarah Johnson sent you a message about your startup pitch',
+      title: 'Pitch-Back Received',
+      message: 'Sarah Johnson sent you a pitch-back for your fintech startup',
       time: '1 hour ago',
       type: 'message',
       isRead: false
@@ -108,15 +110,15 @@ const Navbar = () => {
     {
       id: 3,
       title: 'Pitch Response',
-      message: 'Your pitch to TechStars got a positive response!',
+      message: 'Your startup pitch got 5 positive responses!',
       time: '3 hours ago',
       type: 'pitch',
       isRead: true
     },
     {
       id: 4,
-      title: 'Event Reminder',
-      message: 'Pitch Night SF starts in 2 hours - Don\'t forget!',
+      title: 'Project Update',
+      message: 'MVP development milestone completed - 75% done',
       time: '4 hours ago',
       type: 'event',
       isRead: true
@@ -124,7 +126,7 @@ const Navbar = () => {
     {
       id: 5,
       title: 'Profile View',
-      message: '3 people viewed your profile today',
+      message: '3 entrepreneurs viewed your profile today',
       time: '6 hours ago',
       type: 'profile',
       isRead: true
@@ -177,18 +179,18 @@ const Navbar = () => {
           {/* Logo */}
             <Link to="/home" className="flex items-center gap-3 flex-shrink-0 group">
               <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                   <Brain className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center">
                   <Star className="w-2.5 h-2.5 text-white" />
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-gradient font-bold text-xl sm:text-2xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  BiggDate
+                <span className="font-bold text-xl sm:text-2xl text-gray-900">
+                  Co-Builders
                 </span>
-                <span className="text-xs text-gray-500 -mt-1 hidden sm:block">AI-Powered Dating</span>
+                <span className="text-xs text-gray-500 -mt-1 hidden sm:block">Cofounder Matching</span>
             </div>
           </Link>
 
@@ -203,7 +205,7 @@ const Navbar = () => {
                   to={item.path}
                     className={`group relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 ${
                     isActive 
-                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                        ? 'bg-black text-white shadow-lg' 
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
@@ -211,13 +213,13 @@ const Navbar = () => {
                       <div className={`p-1.5 rounded-2xl transition-all duration-300 ${
                         isActive 
                           ? 'bg-white/20' 
-                          : `bg-gradient-to-r ${item.color} group-hover:scale-110`
+                          : 'bg-gray-200 group-hover:bg-gray-300 group-hover:scale-110'
                       }`}>
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-white'}`} />
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-700'}`} />
                       </div>
                       <span className="font-semibold">{item.label}</span>
                     {item.isHighlighted && (
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div>
                     )}
                   </div>
                     
@@ -241,7 +243,7 @@ const Navbar = () => {
               >
                   <Bell className="w-5 h-5 group-hover:animate-bounce" />
                 {notifications.filter(n => !n.isRead).length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse shadow-lg">
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-black text-white text-xs rounded-full flex items-center justify-center animate-pulse shadow-lg">
                     {notifications.filter(n => !n.isRead).length}
                   </span>
                 )}
@@ -249,11 +251,11 @@ const Navbar = () => {
               
               {showNotifications && (
                   <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
+                    <div className="p-6 border-b border-gray-100 bg-gray-50">
                       <div className="flex items-center justify-between">
                         <h3 className="font-bold text-gray-900 text-lg">Notifications</h3>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">
                             {notifications.filter(n => !n.isRead).length} new
                           </span>
                           <button className="text-gray-400 hover:text-gray-600">
@@ -277,28 +279,28 @@ const Navbar = () => {
 
                         const getNotificationColor = (type) => {
                           switch (type) {
-                            case 'match': return 'from-pink-500 to-rose-500';
-                            case 'message': return 'from-blue-500 to-cyan-500';
-                            case 'pitch': return 'from-green-500 to-emerald-500';
-                            case 'event': return 'from-orange-500 to-red-500';
-                            case 'profile': return 'from-purple-500 to-indigo-500';
-                            default: return 'from-gray-500 to-gray-600';
+                            case 'match': return 'bg-black';
+                            case 'message': return 'bg-gray-600';
+                            case 'pitch': return 'bg-gray-700';
+                            case 'event': return 'bg-gray-800';
+                            case 'profile': return 'bg-gray-900';
+                            default: return 'bg-gray-500';
                           }
                         };
 
                         return (
-                          <div key={notification.id} className={`p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 group ${!notification.isRead ? 'bg-blue-50/50' : ''}`}>
+                          <div key={notification.id} className={`p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 group ${!notification.isRead ? 'bg-gray-50/50' : ''}`}>
                             <div className="flex items-start gap-4">
-                              <div className={`w-10 h-10 bg-gradient-to-r ${getNotificationColor(notification.type)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
+                              <div className={`w-10 h-10 ${getNotificationColor(notification.type)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                                 {getNotificationIcon(notification.type)}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between">
-                                  <p className="text-sm font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                                  <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-600 transition-colors">
                                     {notification.title}
                                   </p>
                                   {!notification.isRead && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                                    <div className="w-2 h-2 bg-black rounded-full flex-shrink-0 mt-1"></div>
                                   )}
                                 </div>
                                 <p className="text-sm text-gray-600 mt-1 leading-relaxed">{notification.message}</p>
@@ -313,7 +315,7 @@ const Navbar = () => {
                       })}
                       </div>
                     <div className="p-4 bg-gray-50 border-t border-gray-100">
-                      <button className="w-full text-center text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors">
+                      <button className="w-full text-center text-sm font-medium text-gray-600 hover:text-gray-700 transition-colors">
                         View All Notifications
                       </button>
                   </div>
@@ -321,16 +323,6 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* How It Works */}
-            <div className="relative">
-              <button
-                onClick={() => setShowHowItWorks(true)}
-                className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105"
-                title="How BiggDate Works"
-              >
-                <Info className="w-5 h-5" />
-              </button>
-            </div>
 
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
@@ -340,16 +332,16 @@ const Navbar = () => {
               >
                 <div className="relative">
                   <img
-                    src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=8B5CF6&color=fff&size=40&rounded=true`}
+                    src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=40&rounded=true`}
                     alt={`${user?.firstName} ${user?.lastName}`}
                     className="w-10 h-10 rounded-2xl object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
                   />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center border-2 border-white">
                     <CheckCircle className="w-2.5 h-2.5 text-white" />
                   </div>
                 </div>
                 <div className="text-left">
-                  <div className="text-sm font-semibold text-gray-900 truncate max-w-32 group-hover:text-purple-600 transition-colors">
+                  <div className="text-sm font-semibold text-gray-900 truncate max-w-32 group-hover:text-gray-600 transition-colors">
                     {user?.firstName || 'John'} {user?.lastName || 'Doe'}
                   </div>
                   <div className="text-xs text-gray-500 truncate max-w-32">
@@ -362,15 +354,15 @@ const Navbar = () => {
               {isUserMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
                   {/* User Info Header */}
-                  <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100">
+                  <div className="p-6 bg-gray-50 border-b border-gray-100">
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <img
-                          src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=8B5CF6&color=fff&size=48&rounded=true`}
+                          src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=48&rounded=true`}
                           alt={`${user?.firstName} ${user?.lastName}`}
                           className="w-12 h-12 rounded-2xl object-cover shadow-lg"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center border-2 border-white">
                           <CheckCircle className="w-2.5 h-2.5 text-white" />
                         </div>
                       </div>
@@ -380,8 +372,8 @@ const Navbar = () => {
                             {user?.firstName || 'John'} {user?.lastName || 'Doe'}
                           </h3>
                           <div className="flex items-center gap-1">
-                            <CrownIcon className="w-4 h-4 text-yellow-500" />
-                            <CheckCircle className="w-4 h-4 text-purple-500" />
+                            <CrownIcon className="w-4 h-4 text-black" />
+                            <CheckCircle className="w-4 h-4 text-black" />
                           </div>
                         </div>
                         <p className="text-sm text-gray-600 truncate">@{user?.username || 'johndoe123'}</p>
@@ -391,8 +383,8 @@ const Navbar = () => {
                   
                   {/* Menu Items */}
                   <div className="p-2">
-                    <Link to="/profile" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-purple-50 rounded-xl transition-all duration-200 group">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <Link to="/profile" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group">
+                      <div className="w-8 h-8 bg-gray-700 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                         <User className="w-4 h-4 text-white" />
                       </div>
                       <div>
@@ -401,8 +393,8 @@ const Navbar = () => {
                       </div>
                     </Link>
                     
-                    <Link to="/settings" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-purple-50 rounded-xl transition-all duration-200 group">
-                      <div className="w-8 h-8 bg-gradient-to-r from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <Link to="/settings" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group">
+                      <div className="w-8 h-8 bg-gray-800 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                         <Settings className="w-4 h-4 text-white" />
                       </div>
                       <div>
@@ -411,28 +403,17 @@ const Navbar = () => {
                       </div>
                     </Link>
                     
-                    <Link to="/dating-school" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-purple-50 rounded-xl transition-all duration-200 group">
-                      <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <Crown className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <span className="font-medium">Dating School</span>
-                        <p className="text-xs text-gray-500">Learn dating skills</p>
-                      </div>
-                    </Link>
-                    
-                    <div className="border-t border-gray-100 my-2"></div>
                     
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center gap-4 p-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 w-full text-left group"
+                      className="flex items-center gap-4 p-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-200 w-full text-left group"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-pink-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <div className="w-8 h-8 bg-gray-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                         <LogOut className="w-4 h-4 text-white" />
                       </div>
                       <div>
                         <span className="font-medium">Logout</span>
-                        <p className="text-xs text-red-500">Sign out of your account</p>
+                        <p className="text-xs text-gray-500">Sign out of your account</p>
                       </div>
                     </button>
                   </div>
@@ -449,7 +430,7 @@ const Navbar = () => {
               <div className="relative">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 {notifications.filter(n => !n.isRead).length > 0 && !isMenuOpen && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-black rounded-full"></div>
                 )}
               </div>
           </button>
@@ -471,55 +452,39 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(false)}
                     className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${
                       isActive 
-                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                        ? 'bg-black text-white shadow-lg' 
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     <div className={`p-2 rounded-xl ${
                       isActive 
                         ? 'bg-white/20' 
-                        : `bg-gradient-to-r ${item.color}`
+                        : 'bg-gray-200'
                     }`}>
-                      <Icon className="w-5 h-5 text-white" />
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-700'}`} />
                     </div>
                     <div className="flex-1">
                       <span className="font-semibold">{item.label}</span>
                       <p className="text-xs opacity-75">{item.description}</p>
                     </div>
                     {item.isHighlighted && (
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
                     )}
                   </Link>
                 );
               })}
               
-              {/* How It Works - Mobile */}
-              <button
-                onClick={() => {
-                  setShowHowItWorks(true);
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center gap-4 p-4 rounded-2xl text-gray-700 hover:bg-gray-50 transition-all duration-300 w-full"
-              >
-                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500">
-                  <Info className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <span className="font-semibold">How It Works</span>
-                  <p className="text-xs opacity-75">Learn about our 3-level system</p>
-                </div>
-              </button>
               
               {/* Mobile User Section */}
               <div className="pt-4 border-t border-gray-200">
-                <div className="flex items-center gap-4 p-4 mb-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
+                <div className="flex items-center gap-4 p-4 mb-4 bg-gray-50 rounded-2xl">
                   <div className="relative">
                     <img
-                      src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=8B5CF6&color=fff&size=48&rounded=true`}
+                      src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=48&rounded=true`}
                       alt={`${user?.firstName} ${user?.lastName}`}
                       className="w-12 h-12 rounded-2xl object-cover shadow-lg"
                     />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center border-2 border-white">
                       <CheckCircle className="w-2.5 h-2.5 text-white" />
                     </div>
                   </div>
@@ -529,8 +494,8 @@ const Navbar = () => {
                         {user?.firstName || 'John'} {user?.lastName || 'Doe'}
                       </div>
                       <div className="flex items-center gap-1">
-                        <CrownIcon className="w-3 h-3 text-yellow-500" />
-                        <CheckCircle className="w-3 h-3 text-purple-500" />
+                        <CrownIcon className="w-3 h-3 text-black" />
+                        <CheckCircle className="w-3 h-3 text-black" />
                       </div>
                     </div>
                     <div className="text-xs text-gray-600 truncate">
@@ -560,7 +525,7 @@ const Navbar = () => {
                 
                 <button 
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 p-4 text-red-600 hover:bg-red-50 rounded-xl transition-colors mt-2"
+                  className="w-full flex items-center gap-3 p-4 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors mt-2"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="font-medium">Logout</span>
@@ -571,11 +536,6 @@ const Navbar = () => {
         )}
     </nav>
 
-      {/* How It Works Modal */}
-      <HowItWorks 
-        isOpen={showHowItWorks} 
-        onClose={() => setShowHowItWorks(false)} 
-      />
     </>
   );
 };

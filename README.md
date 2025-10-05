@@ -1,15 +1,21 @@
-# 🚀 BiggDate - AI-Powered Dating Platform
+# 🚀 Co-Builders - Cofounder Startup Building Platform
 
-A modern, AI-driven dating platform built with React, Vite, and advanced matching algorithms.
+A comprehensive platform for finding cofounders, building startups, and launching successful ventures together.
 
 ## ✨ Features
 
-- **AI-Powered Matching**: Advanced psychological profiling and compatibility analysis
-- **Real-time Messaging**: Built-in chat system with match management
-- **Gamification**: Achievement system and user engagement features
-- **Premium Features**: Subscription tiers with enhanced functionality
-- **Responsive Design**: Mobile-first design with Apple-inspired UI
-- **Performance Optimized**: Code splitting, lazy loading, and production optimizations
+- **Entrepreneur Profiles**: Detailed profiles with background, skills, and startup experience
+- **Pitch Creation**: Video/audio recording and detailed business concept presentation
+- **Pitch Discovery**: Advanced filtering by industry, skills needed, and location
+- **Pitch-Back System**: Express interest with specific role proposals and collaboration offers
+- **AI Matching**: Cofounder matching algorithm based on complementary skills and vision alignment
+- **Startup Roadmap**: Customized milestone generator for each startup idea
+- **Project Board**: Interactive execution board with tasks, deadlines, and progress tracking
+- **Team Workspace**: Document sharing, meeting scheduler, and decision logging
+- **MVP Tracker**: Feature planning and launch countdown with development milestones
+- **Equity Framework**: Templates and guidance for role and equity discussions
+- **Collaboration Tools**: Real-time wireframing, planning, and execution tools
+- **Launch Prep**: Go-to-market planning and investor readiness preparation
 
 ## 🛠️ Tech Stack
 

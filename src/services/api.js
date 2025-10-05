@@ -148,49 +148,6 @@ export const pitchesApi = {
   },
 };
 
-// Mock Events API
-export const eventsApi = {
-  getEvents: async () => {
-    await new Promise(resolve => setTimeout(resolve, 700));
-    return { 
-      events: [
-        {
-          id: '1',
-          title: 'Founder Mastermind Retreat',
-          description: 'Join 20 handpicked founders for a 3-day intensive mastermind in Napa Valley.',
-          type: 'retreat',
-          location: 'Napa Valley, CA',
-          startDate: new Date('2024-02-15T09:00:00'),
-          endDate: new Date('2024-02-17T17:00:00'),
-          maxAttendees: 20,
-          attendees: ['15'],
-          organizerId: '1',
-          isActive: true,
-          createdAt: new Date(),
-          isMyEvent: false,
-          status: 'upcoming',
-          price: 0,
-          tags: ['Retreat', 'Mastermind', 'Networking']
-        }
-      ]
-    };
-  },
-
-  createEvent: async (eventData) => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return { success: true, event: { id: Date.now(), ...eventData } };
-  },
-
-  joinEvent: async (eventId) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { success: true, message: 'Joined event successfully' };
-  },
-
-  leaveEvent: async (eventId) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { success: true, message: 'Left event successfully' };
-  },
-};
 
 // Mock Profile API
 export const profileApi = {

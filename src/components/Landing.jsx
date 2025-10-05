@@ -16,14 +16,11 @@ import {
   UserPlus,
   TrendingUp
 } from 'lucide-react';
-import WaitlistPopup from './WaitlistPopup';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [isVisible, setIsVisible] = useState(false);
-  const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
-
   useEffect(() => {
     setIsVisible(true);
     
@@ -33,7 +30,7 @@ const Landing = () => {
       if (onboardingComplete === 'true') {
         navigate('/home', { replace: true });
       } else {
-        navigate('/onboarding/role', { replace: true });
+        navigate('/onboarding/mission', { replace: true });
       }
     }
   }, [isAuthenticated, navigate]);
@@ -42,46 +39,32 @@ const Landing = () => {
     navigate('/auth');
   };
 
-  const handleJoinWaitlist = () => {
-    setIsWaitlistOpen(true);
-  };
-
-  const handleWaitlistSubmit = (formData) => {
-    console.log('Waitlist submission:', formData);
-    // Here you would typically send the data to your backend
-    // For now, we'll just log it
-  };
-
-  const handleCloseWaitlist = () => {
-    setIsWaitlistOpen(false);
-  };
-
   const features = [
     {
       icon: Target,
-      title: "Pitch-First Dating for Founders",
-      description: "Every connection begins with vision, values, and ambition — not swipes. Perfect for startup founders and entrepreneurs seeking meaningful relationships."
+      title: "Find Your Perfect Cofounder",
+      description: "Connect with like-minded entrepreneurs who share your vision, skills, and ambition. Build the next unicorn together."
     },
     {
       icon: Users,
-      title: "3-Level Founder Dating System",
-      description: "Relationships progress step by step: Pitch → Reveal → Journey. Built for trust, depth, and momentum in the startup community."
+      title: "Pitch & Pitch-Back System",
+      description: "Share your startup ideas and find cofounders who want to join your journey. Express interest with specific role proposals."
     },
     {
       icon: TrendingUp,
-      title: "AI-Powered Professional Matching",
-      description: "Advanced AI guides each couple through milestones, shared goals, and curated experiences tailored for ambitious professionals."
+      title: "AI-Powered Matching Algorithm",
+      description: "Our advanced AI matches you with cofounders based on complementary skills, vision alignment, and startup compatibility."
     },
     {
       icon: Globe,
-      title: "Exclusive Founder Community",
-      description: "Ambitious professionals, startup founders, and entrepreneurs — an exclusive global tribe driven by purpose and innovation."
+      title: "Complete Startup Journey",
+      description: "From idea to IPO - get roadmap generation, project tracking, team workspace, and launch preparation tools."
     }
   ];
 
   const stats = [
-    { number: "20 October 2025", label: "Launch Date", icon: "🚀" },
-    { number: "500+", label: "People Awaiting", icon: "✨" },
+    { number: "1000+", label: "Active Entrepreneurs", icon: "🚀" },
+    { number: "500+", label: "Startups Founded", icon: "✨" },
   ];
 
   if (isAuthenticated) {
@@ -89,7 +72,7 @@ const Landing = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-white text-2xl font-bold">B</span>
+            <span className="text-white text-2xl font-bold">CB</span>
           </div>
           <p className="text-gray-600 font-medium">Redirecting...</p>
         </div>
@@ -117,22 +100,22 @@ const Landing = () => {
           <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-6 sm:mb-8 border border-orange-400/30 hover:border-orange-400/50 transition-all duration-300 group">
               <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-orange-400 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-white font-semibold text-sm sm:text-base group-hover:text-orange-100 transition-colors duration-300">🚀 Join the Waitlist - Launching Oct 20th, 2025</span>
+              <span className="text-white font-semibold text-sm sm:text-base group-hover:text-orange-100 transition-colors duration-300">🚀 Build Your Startup Dream Team</span>
             </div>
             
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
               Find Your
-              <span className="shimmer-text block sm:inline"> Co-Lifer</span>
+              <span className="shimmer-text block sm:inline"> Cofounder</span>
             </h1>
             
             <div className="mb-6 sm:mb-8">
               <p className="text-lg sm:text-xl md:text-2xl text-white font-semibold tracking-wide bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                The Premier Dating App for Founders & Startup Professionals
+                The Premier Platform for Startup Cofounders & Entrepreneurs
               </p>
             </div>
             
             <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
-              BiggDate is the first dating app built specifically for founders, entrepreneurs, and startup professionals. Every profile begins with a pitch, every match begins with vision. Find your Co-Lifer who shares your ambition to build something meaningful together. Created by TheMeetPatel for the startup community.
+              Co-Builders is the first platform built specifically for finding cofounders, building startups, and launching successful ventures together. Every connection begins with a pitch, every match begins with vision. Find your perfect cofounder who shares your ambition to build something meaningful together.
             </p>
             
             {/* Social Proof */}
@@ -140,25 +123,25 @@ const Landing = () => {
               <div className="flex items-center justify-center gap-6 sm:gap-8 text-gray-400 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>Pitch-First Dating</span>
+                  <span>Pitch-First Matching</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span>Founder Community</span>
+                  <span>Entrepreneur Community</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                  <span>Startup Culture</span>
+                  <span>Startup Journey</span>
                 </div>
               </div>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4">
               <button
-                onClick={handleJoinWaitlist}
+                onClick={handleGetStarted}
                 className="glow-button w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-2xl hover:from-purple-600 hover:via-pink-600 hover:to-purple-700 transition-all duration-500 font-bold text-base sm:text-lg shadow-2xl hover:shadow-purple-500/40 hover:scale-110 flex items-center justify-center gap-2 sm:gap-3 group"
               >
-                <span className="relative z-10">Join WaitList</span>
+                <span className="relative z-10">Get Started</span>
                 <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
               
@@ -167,7 +150,7 @@ const Landing = () => {
                 className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-white/10 backdrop-blur-sm text-white rounded-2xl hover:bg-white/20 hover:backdrop-blur-md transition-all duration-300 font-semibold text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 group border border-white/20 hover:border-white/40"
               >
                 <UserPlus className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                <span>Start Dating</span>
+                <span>Find Cofounders</span>
               </button>
             </div>
             
@@ -182,15 +165,15 @@ const Landing = () => {
               ))}
             </div>
             
-            {/* Co-Lifer Concept */}
+            {/* Cofounder Concept */}
             <div className="mt-8 sm:mt-12 max-w-4xl mx-auto px-4">
               <div className="text-center mb-6 sm:mb-8">
-                <span className="text-white/90 text-lg sm:text-xl font-bold tracking-wide uppercase bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">What is a Co-Lifer?</span>
+                <span className="text-white/90 text-lg sm:text-xl font-bold tracking-wide uppercase bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">What is a Cofounder?</span>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-500 group relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <p className="text-gray-300 text-center leading-relaxed text-sm sm:text-base group-hover:text-white transition-colors duration-300 relative z-10">
-                  A <span className="text-purple-400 font-semibold group-hover:text-pink-400 transition-colors duration-300">Co-Lifer</span> is the partner who stands with you through every chapter of life, sharing your values, vision for the future, and drive to create something meaningful. They give you strength in the hard moments, believe in your dreams, and grow with you in love, ambition, and life.
+                  A <span className="text-purple-400 font-semibold group-hover:text-pink-400 transition-colors duration-300">Cofounder</span> is the partner who stands with you through every chapter of your startup journey, sharing your vision, complementary skills, and drive to build something meaningful. They give you strength in the hard moments, believe in your dreams, and grow with you in ambition, innovation, and success.
                 </p>
               </div>
             </div>
@@ -202,9 +185,9 @@ const Landing = () => {
       <div id="features" className="py-16 sm:py-20 bg-white/5 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Why BiggDate for Founders & Startups?</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Why Co-Builders for Entrepreneurs?</h2>
             <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-              We're not just another dating app. <br></br> We're building the future of meaningful connections for the startup community and ambitious professionals.
+              We're not just another networking platform. <br></br> We're building the future of cofounder matching and startup success for the entrepreneurial community.
             </p>
           </div>
           
@@ -233,27 +216,27 @@ const Landing = () => {
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/20 mb-8">
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4">
                 <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                Join WaitList - Launching Oct 20th, 2025
+                Start Building Today
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
                 Ready to Find Your
-                <span className="shimmer-text block sm:inline"> Perfect Co-Lifer</span>?
+                <span className="shimmer-text block sm:inline"> Perfect Cofounder</span>?
               </h2>
               <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
-                Join our waitlist and be the first to experience the future of founder dating and startup professional relationships. Find your perfect Co-Lifer when we launch on October 20th, 2025. Built by TheMeetPatel for the entrepreneurial community.
+                Join Co-Builders and be the first to experience the future of cofounder matching and startup success. Find your perfect cofounder and build the next unicorn together.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
                 <button
-                  onClick={handleJoinWaitlist}
+                  onClick={handleGetStarted}
                   className="glow-button w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-2xl hover:from-purple-600 hover:via-pink-600 hover:to-purple-700 transition-all duration-500 font-bold text-base sm:text-lg shadow-2xl hover:shadow-purple-500/40 hover:scale-110 flex items-center justify-center gap-2 sm:gap-3 group"
                 >
-                  <span className="relative z-10">Join WaitList</span>
+                  <span className="relative z-10">Get Started</span>
                   <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform duration-300" />
                 </button>
                 <div className="text-gray-400 text-xs sm:text-sm">
                   <span className="inline-flex items-center gap-2 hover:text-white transition-colors duration-300">
                     <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400" />
-                    Free to join • Dating Events • Verified Profiles Only
+                    Free to join • Startup Tools • Verified Entrepreneurs Only
                   </span>
                 </div>
               </div>
@@ -267,12 +250,12 @@ const Landing = () => {
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
-                <span className="text-white text-sm sm:text-lg font-bold">B</span>
+                <span className="text-white text-sm sm:text-lg font-bold">CB</span>
               </div>
-              <span className="text-white text-lg sm:text-xl font-bold hover:text-purple-200 transition-colors duration-300">BiggDate</span>
+              <span className="text-white text-lg sm:text-xl font-bold hover:text-purple-200 transition-colors duration-300">Co-Builders</span>
             </div>
             <p className="text-gray-400 text-xs sm:text-sm hover:text-gray-300 transition-colors duration-300">
-              © 2025 BiggBizz. Find your Co-Lifer - Building meaningful connections for founders, entrepreneurs, and startup professionals. Created by TheMeetPatel.
+              © 2025 Co-Builders. Find your Cofounder - Building successful startups through meaningful connections and partnerships.
             </p>
             <div className="mt-4 flex justify-center gap-4 text-gray-500 text-xs">
               <span className="hover:text-purple-400 transition-colors duration-300 cursor-pointer">Privacy Policy</span>
@@ -282,13 +265,6 @@ const Landing = () => {
           </div>
         </div>
       </div>
-
-      {/* Waitlist Popup */}
-      <WaitlistPopup 
-        isOpen={isWaitlistOpen}
-        onClose={handleCloseWaitlist}
-        onSubmit={handleWaitlistSubmit}
-      />
     </div>
   );
 };

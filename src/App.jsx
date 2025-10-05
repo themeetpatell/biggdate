@@ -20,20 +20,22 @@ const LoadingFallback = memo(() => (
 // Lazy load components for better performance
 const Navbar = lazy(() => import('./components/Navbar.jsx'));
 const Home = lazy(() => import('./components/Home.jsx'));
-const Connections = lazy(() => import('./components/Connections.jsx'));
 const Auth = lazy(() => import('./components/Auth.jsx'));
-const AIMatchingInterface = lazy(() => import('./components/AIMatchingInterface.jsx'));
-const GamificationDashboard = lazy(() => import('./components/GamificationDashboard.jsx'));
-const PremiumFeatures = lazy(() => import('./components/PremiumFeatures.jsx'));
-const Settings = lazy(() => import('./components/Settings.jsx'));
 const Landing = lazy(() => import('./components/Landing.jsx'));
 const Onboarding = lazy(() => import('./components/onboarding/Onboarding.jsx'));
-const PitchMode = lazy(() => import('./components/PitchMode.jsx'));
-const RevealMode = lazy(() => import('./components/RevealMode.jsx'));
-const JourneyMode = lazy(() => import('./components/JourneyMode.jsx'));
-const EventsModule = lazy(() => import('./components/EventsModule.jsx'));
-const Academy = lazy(() => import('./components/Academy.jsx'));
-const ProfileRedesign = lazy(() => import('./components/ProfileRedesign.jsx'));
+const StartupPitchCreator = lazy(() => import('./components/StartupPitchCreator.jsx'));
+const PitchBackSystem = lazy(() => import('./components/PitchBackSystem.jsx'));
+const CofounderMatching = lazy(() => import('./components/CofounderMatching.jsx'));
+const StartupRoadmap = lazy(() => import('./components/StartupRoadmap.jsx'));
+const ProjectBoard = lazy(() => import('./components/ProjectBoard.jsx'));
+const TeamWorkspace = lazy(() => import('./components/TeamWorkspace.jsx'));
+const MVPTracker = lazy(() => import('./components/MVPTracker.jsx'));
+const EquityFramework = lazy(() => import('./components/EquityFramework.jsx'));
+const CollaborationTools = lazy(() => import('./components/CollaborationTools.jsx'));
+const LaunchPreparation = lazy(() => import('./components/LaunchPreparation.jsx'));
+const EntrepreneurProfile = lazy(() => import('./components/EntrepreneurProfile.jsx'));
+const StartupWorkspace = lazy(() => import('./components/StartupWorkspace.jsx'));
+const MyPitches = lazy(() => import('./components/MyPitches.jsx'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -66,7 +68,6 @@ const AppContent = () => {
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const [currentUser, setCurrentUser] = useState(null);
   const [matches, setMatches] = useState([]);
-  const [gamificationProfile, setGamificationProfile] = useState(null);
 
   // Initialize performance monitoring and analytics
   useEffect(() => {
@@ -81,82 +82,73 @@ const AppContent = () => {
       // Load current user data
       setCurrentUser({
         id: '1',
-        name: 'John Doe',
-        age: 28,
-        bio: 'Passionate about technology and innovation',
-        photos: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face'],
-        interests: ['Technology', 'Travel', 'Fitness'],
-        location: 'San Francisco, CA'
+        name: 'Alex Chen',
+        role: 'Technical Co-founder',
+        bio: 'Full-stack developer with 8 years experience building scalable web applications. Passionate about AI and fintech.',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+        skills: ['React', 'Node.js', 'Python', 'AWS', 'Machine Learning'],
+        experience: '8 years',
+        previousStartups: ['TechCorp (Acquired)', 'DataFlow (Series A)'],
+        location: 'San Francisco, CA',
+        lookingFor: ['Business Co-founder', 'Marketing Expert', 'Designer'],
+        industries: ['Fintech', 'AI/ML', 'SaaS']
       });
 
-      // Load matches
+      // Load potential cofounders
       setMatches([
         {
           id: '1',
-          name: 'Sarah Johnson',
-          age: 26,
-          bio: 'Love hiking and photography',
-          photos: ['https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face'],
-          interests: ['Photography', 'Hiking', 'Art'],
+          name: 'Sarah Martinez',
+          role: 'Business Co-founder',
+          bio: 'Former McKinsey consultant with 6 years in strategy and operations. Led 3 successful product launches.',
+          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
+          skills: ['Business Strategy', 'Operations', 'Fundraising', 'Product Management'],
+          experience: '6 years',
+          previousStartups: ['GrowthCo (Series B)', 'ScaleUp (Acquired)'],
           location: 'San Francisco, CA',
-          compatibility: 95
+          lookingFor: ['Technical Co-founder', 'CTO'],
+          industries: ['Fintech', 'SaaS', 'E-commerce'],
+          compatibility: 92
         },
         {
           id: '2',
-          name: 'Emily Chen',
-          age: 29,
-          bio: 'Tech entrepreneur and fitness enthusiast',
-          photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face'],
-          interests: ['Technology', 'Fitness', 'Cooking'],
+          name: 'David Kim',
+          role: 'Product Designer',
+          bio: 'Award-winning designer with expertise in UX/UI and brand design. Worked at Apple and Google.',
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+          skills: ['UI/UX Design', 'Brand Design', 'Figma', 'User Research', 'Prototyping'],
+          experience: '7 years',
+          previousStartups: ['DesignStudio (Acquired)', 'CreativeLab (Series A)'],
           location: 'San Francisco, CA',
+          lookingFor: ['Technical Co-founder', 'Business Co-founder'],
+          industries: ['AI/ML', 'SaaS', 'Mobile Apps'],
           compatibility: 88
         }
       ]);
 
-      // Load gamification profile
-      setGamificationProfile({
-        level: 5,
-        xp: 1250,
-        nextLevelXp: 1500,
-        achievements: [
-          { id: '1', name: 'First Match', description: 'Got your first match!', unlocked: true, date: '2024-01-15' },
-          { id: '2', name: 'Profile Complete', description: 'Completed your profile', unlocked: true, date: '2024-01-10' },
-          { id: '3', name: 'Chat Master', description: 'Sent 100 messages', unlocked: false, date: null }
-        ],
-        badges: [
-          { id: '1', name: 'Newcomer', description: 'Welcome to the app!', icon: '🌟', unlocked: true },
-          { id: '2', name: 'Social Butterfly', description: 'Active in conversations', icon: '🦋', unlocked: false }
-        ],
-        stats: {
-          matches: 12,
-          messages: 45,
-          profileViews: 89,
-          likes: 23
-        }
-      });
     }
   }, [isAuthenticated]);
 
-  // Handle AI matching actions
-  const handleLike = (matchId) => {
-    console.log('Liked match:', matchId);
+  // Handle cofounder matching actions
+  const handleConnect = (matchId) => {
+    console.log('Connecting with cofounder:', matchId);
   };
 
   const handlePass = (matchId) => {
-    console.log('Passed on match:', matchId);
+    console.log('Passed on cofounder:', matchId);
     setMatches(prev => prev.filter(match => match.id !== matchId));
   };
 
-  const handleSuperLike = (matchId) => {
-    console.log('Super liked match:', matchId);
+  const handlePitch = (matchId, message) => {
+    console.log('Sending pitch to:', matchId, 'Message:', message);
   };
 
   const handleViewProfile = (matchId) => {
-    console.log('Viewing profile:', matchId);
+    console.log('Viewing cofounder profile:', matchId);
   };
 
   const handleRefresh = () => {
-    console.log('Refreshing matches...');
+    console.log('Refreshing cofounder matches...');
   };
 
   // Show loading screen
@@ -187,7 +179,7 @@ const AppContent = () => {
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <ProfileRedesign />
+                    <EntrepreneurProfile />
                   </MainLayout>
                 </ProtectedRoute>
               } />
@@ -195,37 +187,37 @@ const AppContent = () => {
               <Route path="/connections" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <Connections />
+                    <PitchBackSystem />
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/events" element={
+              <Route path="/workspace" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <EventsModule />
+                    <TeamWorkspace />
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/pitches" element={
+              <Route path="/create-pitch" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <PitchMode />
+                    <StartupPitchCreator />
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/matching" element={
+              <Route path="/cofounders" element={
                 <ProtectedRoute>
                   <MainLayout>
                     {currentUser ? (
-                      <AIMatchingInterface
+                      <CofounderMatching
                         currentUser={currentUser}
                         matches={matches}
-                        onLike={handleLike}
+                        onConnect={handleConnect}
                         onPass={handlePass}
-                        onSuperLike={handleSuperLike}
+                        onPitch={handlePitch}
                         onViewProfile={handleViewProfile}
                         onRefresh={handleRefresh}
                       />
@@ -236,50 +228,42 @@ const AppContent = () => {
                 </ProtectedRoute>
               } />
               
-              <Route path="/reveal" element={
+              <Route path="/projects" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <RevealMode />
+                    <ProjectBoard />
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/journey" element={
+              <Route path="/mvp-tracker" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <JourneyMode />
+                    <MVPTracker />
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/gamification" element={
+              <Route path="/equity" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    {gamificationProfile ? (
-                      <GamificationDashboard
-                        profile={gamificationProfile}
-                        onAchievementUnlocked={(achievement) => {
-                          console.log('Achievement unlocked:', achievement);
-                        }}
-                        onBadgeEarned={(badge) => {
-                          console.log('Badge earned:', badge);
-                        }}
-                      />
-                    ) : (
-                      <LoadingFallback />
-                    )}
+                    <EquityFramework />
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/premium" element={
+              <Route path="/collaboration" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <PremiumFeatures
-                      onUpgrade={(plan) => {
-                        console.log('Upgrading to:', plan);
-                      }}
-                    />
+                    <CollaborationTools />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/launch-prep" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <LaunchPreparation />
                   </MainLayout>
                 </ProtectedRoute>
               } />
@@ -287,15 +271,36 @@ const AppContent = () => {
               <Route path="/settings" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <Settings />
+                    <div className="p-8">
+                      <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+                      <div className="bg-white rounded-2xl p-6 shadow-lg">
+                        <p className="text-gray-600">Settings page coming soon...</p>
+                      </div>
+                    </div>
                   </MainLayout>
                 </ProtectedRoute>
               } />
               
-              <Route path="/dating-school" element={
+              <Route path="/startup-workspace" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <Academy />
+                    <StartupWorkspace />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/my-pitches" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <MyPitches />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/launch" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <LaunchPreparation />
                   </MainLayout>
                 </ProtectedRoute>
               } />

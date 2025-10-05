@@ -34,6 +34,19 @@ const QuickSetup = () => {
   const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
 
+  // Set default role values if not already set
+  React.useEffect(() => {
+    if (!localStorage.getItem('userRole')) {
+      localStorage.setItem('userRole', 'founder');
+    }
+    if (!localStorage.getItem('userStage')) {
+      localStorage.setItem('userStage', 'idea-stage');
+    }
+    if (!localStorage.getItem('userMask')) {
+      localStorage.setItem('userMask', 'rocket');
+    }
+  }, []);
+
   const missionPrompts = [
     "I'm creating the future of...",
     "My life's purpose is to...",
@@ -73,23 +86,23 @@ const QuickSetup = () => {
 
   const intents = [
     {
-      id: 'co-lover',
-      title: 'Co-Lover',
-      description: 'Focus on personal connection, romance, and life partnership',
-      icon: Heart,
-      color: 'from-red-500 to-pink-500'
-    },
-    {
-      id: 'co-builder',
-      title: 'Co-Builder',
-      description: 'Looking for someone to build businesses and careers together',
+      id: 'technical-cofounder',
+      title: 'Technical Cofounder',
+      description: 'Looking for a technical partner to build and scale the product',
       icon: Target,
       color: 'from-blue-500 to-cyan-500'
     },
     {
-      id: 'co-lifer',
-      title: 'Co-Lifer',
-      description: 'A life partner who shares your vision, supports your dreams, and grows with you in both love and ambition',
+      id: 'business-cofounder',
+      title: 'Business Cofounder',
+      description: 'Seeking a business partner for strategy, operations, and growth',
+      icon: Heart,
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      id: 'co-founder',
+      title: 'Co-Founder',
+      description: 'Looking for a true co-founder who shares your vision and complements your skills',
       icon: Crown,
       color: 'from-purple-500 to-indigo-500'
     }
@@ -169,7 +182,7 @@ const QuickSetup = () => {
   };
 
   const handleBack = () => {
-    navigate('/onboarding/role');
+    navigate('/home');
   };
 
   const isComplete = selectedValues.length >= 1 && selectedIntent;
@@ -198,14 +211,14 @@ const QuickSetup = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6">
-            <Heart className="w-6 h-6 text-pink-400" />
-            <span className="text-white font-semibold">Your Story Matters</span>
+            <Target className="w-6 h-6 text-blue-400" />
+            <span className="text-white font-semibold">Your Vision Matters</span>
           </div>
           <h1 className="text-5xl font-bold text-white mb-4">
-            What's Your Mission?
+            What's Your Startup Vision?
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Share your vision, values, and what drives you. Your Co-Lifer is waiting to hear your story.
+            Share your startup idea, values, and what drives you. Your cofounder is waiting to hear your story.
           </p>
         </div>
 
@@ -214,7 +227,7 @@ const QuickSetup = () => {
           <h2 className="text-2xl font-bold text-white mb-6 text-center">Share Your Vision</h2>
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-white mb-4">What drives you? Complete this thought:</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">What's your startup idea? Complete this thought:</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {missionPrompts.map((prompt, index) => (
                   <button
@@ -237,7 +250,7 @@ const QuickSetup = () => {
               <textarea
                 value={missionStatement}
                 onChange={(e) => setMissionStatement(e.target.value)}
-                placeholder="Tell your Co-Lifer what you're building and why it matters..."
+                placeholder="Tell your cofounder what you're building and why it matters..."
                 className="w-full h-32 p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               />
             </div>
@@ -439,7 +452,7 @@ const QuickSetup = () => {
               onClick={handleContinue}
               className="px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 hover:scale-105 flex items-center gap-3"
             >
-              <span>I am finding someone like →</span>
+              <span>Find My Cofounder →</span>
               <ArrowRight className="w-6 h-6" />
             </button>
           )}

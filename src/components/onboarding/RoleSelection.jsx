@@ -60,127 +60,127 @@ const RoleSelection = () => {
       bgColor: 'from-purple-50 to-pink-50',
       stages: [
         {
-          id: 'dreamer',
-          title: 'Dreamer',
-          description: 'Sparks the vision, shaping the "what if."',
+          id: 'idea-stage',
+          title: 'Idea Stage',
+          description: 'Have a startup idea and looking for cofounders',
           icon: Lightbulb,
           color: 'from-yellow-500 to-orange-500'
         },
         {
-          id: 'starter',
-          title: 'Starter',
-          description: 'Raises the first capital, assembles the founding team.',
+          id: 'mvp-stage',
+          title: 'MVP Stage',
+          description: 'Building MVP and need technical/business cofounders',
           icon: Target,
           color: 'from-green-500 to-emerald-500'
         },
         {
-          id: 'driver',
-          title: 'Driver',
-          description: 'Pushes traction, builds product-market fit.',
+          id: 'growth-stage',
+          title: 'Growth Stage',
+          description: 'Have traction and scaling, need operational expertise',
           icon: TrendingUp,
           color: 'from-blue-500 to-cyan-500'
         },
         {
-          id: 'scaler',
-          title: 'Scaler',
-          description: 'Expands across markets, builds organization depth.',
+          id: 'scale-stage',
+          title: 'Scale Stage',
+          description: 'Expanding globally, need leadership and strategic partners',
           icon: Globe,
           color: 'from-indigo-500 to-purple-500'
         },
         {
-          id: 'exitor',
-          title: 'Exitor',
-          description: 'Prepares for IPO, M&A, or next big leap.',
+          id: 'exit-stage',
+          title: 'Exit Stage',
+          description: 'Preparing for IPO, acquisition, or next big venture',
           icon: Crown,
           color: 'from-purple-500 to-indigo-500'
         }
       ]
     },
     {
-      id: 'investor',
-      title: 'Investor',
-      description: 'The backer, the believer, the one who sees potential',
-      icon: Diamond,
+      id: 'cofounder',
+      title: 'Cofounder',
+      description: 'The partner, the collaborator, the one who joins the journey',
+      icon: Users,
       color: 'from-green-500 to-emerald-500',
       bgColor: 'from-green-50 to-emerald-50',
       stages: [
         {
-          id: 'angel',
-          title: 'Angel',
-          description: 'Backs the person and the dream at napkin stage.',
-          icon: Heart,
-          color: 'from-pink-500 to-rose-500'
-        },
-        {
-          id: 'seed-vc',
-          title: 'Seed VC',
-          description: 'Catalyzes the first real funding round, fueling early momentum.',
-          icon: Zap,
+          id: 'technical-cofounder',
+          title: 'Technical Cofounder',
+          description: 'Full-stack developer, CTO, or technical lead',
+          icon: Code,
           color: 'from-blue-500 to-cyan-500'
         },
         {
-          id: 'growth-capital',
-          title: 'Growth Capital',
-          description: 'Provides scale-up funds, drives market dominance.',
-          icon: TrendingUp,
-          color: 'from-orange-500 to-red-500'
-        },
-        {
-          id: 'family-office',
-          title: 'Family Office',
-          description: 'Long-term capital with strategic patience.',
-          icon: Crown,
-          color: 'from-purple-500 to-indigo-500'
-        },
-        {
-          id: 'institutions',
-          title: 'Institutions',
-          description: 'PE/late-stage VC shaping billion-dollar outcomes.',
-          icon: Award,
-          color: 'from-indigo-500 to-purple-500'
-        }
-      ]
-    },
-    {
-      id: 'builder',
-      title: 'Builder',
-      description: 'The executor, the maker, the one who turns ideas into reality',
-      icon: Flame,
-      color: 'from-orange-500 to-red-500',
-      bgColor: 'from-orange-50 to-red-50',
-      stages: [
-        {
-          id: 'early-builder',
-          title: 'Early Builder',
-          description: 'The first hands-on doer who sets foundations.',
-          icon: Users,
-          color: 'from-blue-500 to-cyan-500'
-        },
-        {
-          id: 'scaling-operator',
-          title: 'Scaling Operator',
-          description: 'Brings systems, process, and repeatability.',
+          id: 'business-cofounder',
+          title: 'Business Cofounder',
+          description: 'CEO, business development, or operations expert',
           icon: Target,
           color: 'from-green-500 to-emerald-500'
         },
         {
-          id: 'growth-manager',
-          title: 'Growth Manager',
-          description: 'Leads teams, drives cross-functional expansion.',
+          id: 'marketing-cofounder',
+          title: 'Marketing Cofounder',
+          description: 'CMO, growth hacker, or marketing specialist',
           icon: TrendingUp,
           color: 'from-purple-500 to-pink-500'
         },
         {
-          id: 'veteran-leader',
-          title: 'Veteran Leader',
-          description: 'Brings wisdom, credibility, and scale playbooks.',
-          icon: Award,
+          id: 'design-cofounder',
+          title: 'Design Cofounder',
+          description: 'UI/UX designer, product designer, or creative director',
+          icon: Palette,
+          color: 'from-pink-500 to-rose-500'
+        },
+        {
+          id: 'finance-cofounder',
+          title: 'Finance Cofounder',
+          description: 'CFO, financial strategist, or fundraising expert',
+          icon: DollarSign,
+          color: 'from-yellow-500 to-orange-500'
+        }
+      ]
+    },
+    {
+      id: 'advisor',
+      title: 'Advisor',
+      description: 'The mentor, the guide, the one who provides wisdom',
+      icon: Award,
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'from-orange-50 to-red-50',
+      stages: [
+        {
+          id: 'industry-expert',
+          title: 'Industry Expert',
+          description: 'Deep domain knowledge in specific industry',
+          icon: Brain,
+          color: 'from-blue-500 to-cyan-500'
+        },
+        {
+          id: 'serial-entrepreneur',
+          title: 'Serial Entrepreneur',
+          description: 'Multiple successful exits and startup experience',
+          icon: Rocket,
+          color: 'from-green-500 to-emerald-500'
+        },
+        {
+          id: 'investor-advisor',
+          title: 'Investor Advisor',
+          description: 'VC, angel investor, or funding expert',
+          icon: Diamond,
+          color: 'from-purple-500 to-pink-500'
+        },
+        {
+          id: 'executive-coach',
+          title: 'Executive Coach',
+          description: 'Leadership development and team building expert',
+          icon: Users,
           color: 'from-indigo-500 to-purple-500'
         },
         {
-          id: 'legacy-architect',
-          title: 'Legacy Architect',
-          description: 'Shapes culture, leaves behind institutions that last.',
+          id: 'board-member',
+          title: 'Board Member',
+          description: 'Strategic advisor and governance expert',
           icon: Shield,
           color: 'from-purple-500 to-indigo-500'
         }
@@ -196,7 +196,7 @@ const RoleSelection = () => {
       emoji: '🚀',
       description: 'Always dreaming of what\'s next, chasing horizons with fearless energy.',
       symbolism: 'Adventure, ambition, limitless possibility.',
-      datingVibe: 'Wants a partner to build galaxies with, not just grab coffee.',
+      cofounderVibe: 'Wants a cofounder to build galaxies with, not just grab coffee.',
       motto: 'Let\'s shoot for the stars, together.',
       color: 'from-blue-500 to-cyan-500'
     },
@@ -207,8 +207,8 @@ const RoleSelection = () => {
       emoji: '💎',
       description: 'Rare, self-aware, and built through resilience.',
       symbolism: 'Depth, clarity, inner value.',
-      datingVibe: 'Chooses quality over quantity, looking for someone who truly sees them.',
-      motto: 'I shine brighter with the right match.',
+      cofounderVibe: 'Chooses quality over quantity, looking for someone who truly sees the vision.',
+      motto: 'I shine brighter with the right cofounder.',
       color: 'from-purple-500 to-pink-500'
     },
     {
@@ -217,9 +217,9 @@ const RoleSelection = () => {
       subtitle: 'The Spark',
       emoji: '🔥',
       description: 'Passionate, magnetic, impossible to ignore.',
-      symbolism: 'Energy, intimacy, intensity.',
-      datingVibe: 'Sets hearts racing, lives for connection that burns real.',
-      motto: 'If it\'s not fire, it\'s not love.',
+      symbolism: 'Energy, intensity, drive.',
+      cofounderVibe: 'Sets teams racing, lives for partnerships that burn real.',
+      motto: 'If it\'s not fire, it\'s not worth building.',
       color: 'from-orange-500 to-red-500'
     },
     {
@@ -229,8 +229,8 @@ const RoleSelection = () => {
       emoji: '👑',
       description: 'Ambitious, driven, knows where they\'re headed.',
       symbolism: 'Purpose, leadership, legacy.',
-      datingVibe: 'Wants a co-creator to build life\'s empire with.',
-      motto: 'I don\'t just date. I build dynasties.',
+      cofounderVibe: 'Wants a co-creator to build startup empires with.',
+      motto: 'I don\'t just work. I build dynasties.',
       color: 'from-yellow-500 to-orange-500'
     },
     {
@@ -240,8 +240,8 @@ const RoleSelection = () => {
       emoji: '⭐',
       description: 'Hopeful, radiant, inspiring others with light.',
       symbolism: 'Destiny, faith, optimism.',
-      datingVibe: 'Believes in soul connections and guiding love forward.',
-      motto: 'Every love story is written in the stars.',
+      cofounderVibe: 'Believes in soul partnerships and guiding startups forward.',
+      motto: 'Every success story is written in the stars.',
       color: 'from-indigo-500 to-purple-500'
     },
     {
@@ -251,8 +251,8 @@ const RoleSelection = () => {
       emoji: '🛡️',
       description: 'Loyal, steady, and safe — the rock in the storm.',
       symbolism: 'Trust, stability, reliability.',
-      datingVibe: 'Wants to create a safe haven for love to grow.',
-      motto: 'With me, you\'ll always feel at home.',
+      cofounderVibe: 'Wants to create a safe haven for startups to grow.',
+      motto: 'With me, you\'ll always feel secure.',
       color: 'from-green-500 to-emerald-500'
     }
   ];
@@ -328,13 +328,13 @@ const RoleSelection = () => {
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <div className="inline-flex items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-4 sm:mb-6">
             <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-400" />
-            <span className="text-white font-semibold text-sm sm:text-base">Welcome to the Inner Circle</span>
+            <span className="text-white font-semibold text-sm sm:text-base">Welcome to Co-Builders</span>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-4">
-            Let's get started
+            Let's find your cofounder
           </h1>
           <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-300 max-w-4xl mx-auto px-4 whitespace-nowrap">
-            Let's personalize your journey by choosing your stage, mask and birth details.
+            Let's personalize your journey by choosing your role, stage, and personality.
           </p>
         </div>
 
@@ -397,7 +397,7 @@ const RoleSelection = () => {
           <div className="mb-6 sm:mb-8 lg:mb-12">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6 text-center px-4">Step 2: Choose Your Mask</h2>
             <p className="text-gray-300 text-center mb-6 sm:mb-8 text-sm sm:text-base px-4">
-              You're masked until you pitch. Choose your symbolic identity that represents your dating personality.
+              You're masked until you pitch. Choose your symbolic identity that represents your cofounder personality.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
               {masks.map((mask) => {
@@ -431,8 +431,8 @@ const RoleSelection = () => {
                               <span className="text-xs text-white/80">{mask.symbolism}</span>
                             </div>
                             <div className="flex items-start gap-2">
-                              <span className="text-xs font-semibold text-white/70 min-w-[60px]">Dating Vibe:</span>
-                              <span className="text-xs text-white/80">{mask.datingVibe}</span>
+                              <span className="text-xs font-semibold text-white/70 min-w-[60px]">Cofounder Vibe:</span>
+                              <span className="text-xs text-white/80">{mask.cofounderVibe}</span>
                             </div>
                           </div>
                         </div>
@@ -451,7 +451,7 @@ const RoleSelection = () => {
           <div className="mb-6 sm:mb-8 lg:mb-12">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6 text-center px-4">Step 3: Birth Details</h2>
             <p className="text-gray-300 text-center mb-6 sm:mb-8 text-sm sm:text-base px-4">
-              Share your birth information for astrological compatibility matching.
+              Share your birth information for personality compatibility matching.
             </p>
             <div className="max-w-6xl mx-auto px-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -546,7 +546,7 @@ const RoleSelection = () => {
               onClick={handleContinue}
               className="px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl sm:rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-bold text-base sm:text-lg shadow-2xl hover:shadow-purple-500/25 hover:scale-105 flex items-center gap-2 sm:gap-3 mx-auto"
             >
-              <span>Define My Story →</span>
+              <span>Create My Profile →</span>
               <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
           </div>
