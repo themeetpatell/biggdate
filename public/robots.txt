@@ -1,0 +1,53 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://biggdate.com/sitemap.xml
+
+# Disallow private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /_next/
+Disallow: /static/
+
+# Allow important pages for SEO
+Allow: /
+Allow: /home
+Allow: /profile
+Allow: /connections
+Allow: /events
+Allow: /pitches
+Allow: /matching
+Allow: /ai-matching
+Allow: /auth
+Allow: /about
+Allow: /features
+Allow: /community
+Allow: /success-stories
+
+# Special instructions for search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Crawl delay for all other bots
+Crawl-delay: 2
