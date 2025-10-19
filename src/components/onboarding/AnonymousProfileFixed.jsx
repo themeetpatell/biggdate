@@ -4,6 +4,7 @@ import {
   ArrowRight, 
   ArrowLeft,
   Target,
+  Star,
   Briefcase,
   MapPin,
   Users,
