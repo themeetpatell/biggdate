@@ -361,12 +361,12 @@ const QuickSetup = () => {
                   disabled={isDisabled}
                   className={`relative p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed ${
                     isSelected
-                      ? 'bg-gray-900 border-gray-900 text-white shadow-md'
-                      : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                      ? 'bg-gray-900 border-gray-900 shadow-md'
+                      : 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex flex-col items-center justify-center">
-                    <h3 className="font-medium text-sm text-center">
+                    <h3 className={`font-medium text-sm text-center ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                       {value.name}
                     </h3>
                     {isSelected && (
