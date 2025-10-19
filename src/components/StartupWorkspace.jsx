@@ -2109,7 +2109,7 @@ const StartupWorkspace = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">{startupData.cofounders.length}</span>
@@ -2157,7 +2157,7 @@ const StartupWorkspace = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h2>
         <div className="space-y-4">
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
@@ -2171,7 +2171,7 @@ const StartupWorkspace = () => {
           </div>
 
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
@@ -2185,7 +2185,7 @@ const StartupWorkspace = () => {
           </div>
 
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
