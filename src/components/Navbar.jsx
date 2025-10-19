@@ -124,8 +124,43 @@ const Navbar = () => {
     }
   ];
 
+  // Skills user navigation
+  const skillsNavItems = [
+    { 
+      path: '/home', 
+      label: 'Skills Dashboard', 
+      icon: Sparkles, 
+      description: 'Manage Your Services',
+      isHighlighted: true
+    },
+    { 
+      path: '/skills/showcase', 
+      label: 'Portfolio', 
+      icon: Star, 
+      description: 'Your Skills Showcase'
+    },
+    { 
+      path: '/skills/projects', 
+      label: 'Projects', 
+      icon: Briefcase, 
+      description: 'Active Projects'
+    },
+    { 
+      path: '/skills/clients', 
+      label: 'Clients', 
+      icon: Users, 
+      description: 'Manage Clients'
+    },
+    { 
+      path: '/cofounders', 
+      label: 'Find Startups', 
+      icon: Target, 
+      description: 'Browse Opportunities'
+    }
+  ];
+
   // Select nav items based on user type
-  const navItems = userIntent === 'idea-sprint' ? sprintNavItems : defaultNavItems;
+  const navItems = userIntent === 'idea-sprint' ? sprintNavItems : userIntent === 'offer-skills' ? skillsNavItems : defaultNavItems;
 
   // Handle scroll effect
   useEffect(() => {

@@ -44,6 +44,14 @@ const MarketResearch = lazy(() => import('./components/sprint-tools/MarketResear
 const PitchDeckBuilder = lazy(() => import('./components/sprint-tools/PitchDeckBuilder.jsx'));
 const PitchPrep = lazy(() => import('./components/sprint-tools/PitchPrep.jsx'));
 
+// Skills Tools
+const SkillsDashboard = lazy(() => import('./components/SkillsDashboard.jsx'));
+const SkillsShowcase = lazy(() => import('./components/skills-tools/SkillsShowcase.jsx'));
+const ServicePackages = lazy(() => import('./components/skills-tools/ServicePackages.jsx'));
+const ProjectTracker = lazy(() => import('./components/skills-tools/ProjectTracker.jsx'));
+const ClientManagement = lazy(() => import('./components/skills-tools/ClientManagement.jsx'));
+const AvailabilityRates = lazy(() => import('./components/skills-tools/AvailabilityRates.jsx'));
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
@@ -82,6 +90,10 @@ const HomeRouter = () => {
 
   if (userIntent === 'idea-sprint') {
     return <SprintDashboard />;
+  }
+
+  if (userIntent === 'offer-skills') {
+    return <SkillsDashboard />;
   }
 
   return <Home />;
@@ -371,6 +383,47 @@ const AppContent = () => {
                 <ProtectedRoute>
                   <MainLayout>
                     <PitchPrep />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Skills Tools Routes */}
+              <Route path="/skills/showcase" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <SkillsShowcase />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/skills/packages" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ServicePackages />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/skills/projects" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ProjectTracker />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/skills/clients" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ClientManagement />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/skills/availability" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <AvailabilityRates />
                   </MainLayout>
                 </ProtectedRoute>
               } />
