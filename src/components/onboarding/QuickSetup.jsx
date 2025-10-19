@@ -458,7 +458,7 @@ const QuickSetup = () => {
               {/* Your Experience Level */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Your Experience Level</h3>
-                <p className="text-gray-600 text-sm mb-4">How many years of professional experience do you have?</p>
+                <p className="text-gray-600 text-sm mb-4">Years of professional experience</p>
                 <select
                   value={yourExperience}
                   onChange={(e) => setYourExperience(e.target.value)}
