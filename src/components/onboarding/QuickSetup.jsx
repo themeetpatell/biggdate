@@ -51,15 +51,6 @@ const QuickSetup = () => {
     }
   }, []);
 
-  const missionPrompts = [
-    "I'm creating the future of...",
-    "My life's purpose is to...",
-    "The impact I want to make is...",
-    "What drives me every day is...",
-    "I'm on a mission to...",
-    "My core belief is that..."
-  ];
-
   const values = [
     { id: 'innovation', name: 'Innovation', color: 'from-blue-500 to-cyan-500' },
     { id: 'growth', name: 'Growth', color: 'from-green-500 to-emerald-500' },
