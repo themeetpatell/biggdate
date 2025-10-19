@@ -178,6 +178,30 @@ const QuickSetup = () => {
     );
   };
 
+  const handleIndustrySelect = (e) => {
+    const value = e.target.value;
+    if (value && !yourIndustries.includes(value)) {
+      setYourIndustries(prev => [...prev, value]);
+    }
+    e.target.value = '';
+  };
+
+  const handleSkillSelect = (e) => {
+    const value = e.target.value;
+    if (value && !yourSkills.includes(value)) {
+      setYourSkills(prev => [...prev, value]);
+    }
+    e.target.value = '';
+  };
+
+  const removeIndustry = (industry) => {
+    setYourIndustries(prev => prev.filter(i => i !== industry));
+  };
+
+  const removeSkill = (skill) => {
+    setYourSkills(prev => prev.filter(s => s !== skill));
+  };
+
   const handleContinue = () => {
     if (selectedValues.length >= 1 && selectedIntent) {
       // Save to localStorage
@@ -373,23 +397,39 @@ const QuickSetup = () => {
           <div className="bg-white rounded-3xl p-8 border border-gray-200 mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Your Industry & Background</h3>
             <p className="text-gray-600 text-sm mb-4">Select the industries you have experience in</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+            
+            <select
+              onChange={handleIndustrySelect}
+              className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent mb-4"
+            >
+              <option value="">+ Add Industry</option>
               {['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'Education', 'SaaS', 'AI/ML', 'Blockchain', 
                 'Real Estate', 'Food & Beverage', 'Transportation', 'Energy', 'Entertainment', 'Manufacturing', 
-                'Retail', 'Media', 'Travel', 'Sports', 'Gaming', 'Fashion'].map((industry) => (
-                <button
-                  key={industry}
-                  onClick={() => handleYourIndustryToggle(industry)}
-                  className={`p-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${
-                    yourIndustries.includes(industry)
-                      ? 'bg-gray-900 border-gray-900 text-white shadow-md'
-                      : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
-                  }`}
-                >
-                  {industry}
-                </button>
-              ))}
-            </div>
+                'Retail', 'Media', 'Travel', 'Sports', 'Gaming', 'Fashion']
+                .filter(ind => !yourIndustries.includes(ind))
+                .map((industry) => (
+                  <option key={industry} value={industry}>{industry}</option>
+                ))}
+            </select>
+
+            {yourIndustries.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {yourIndustries.map((industry) => (
+                  <span
+                    key={industry}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium"
+                  >
+                    {industry}
+                    <button
+                      onClick={() => removeIndustry(industry)}
+                      className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Background Description */}
             <div>
@@ -407,56 +447,56 @@ const QuickSetup = () => {
           <div className="bg-white rounded-3xl p-8 border border-gray-200 mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Your Key Skills & Expertise</h3>
             <p className="text-gray-600 text-sm mb-4">What are you great at? Select all that apply</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            
+            <select
+              onChange={handleSkillSelect}
+              className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent mb-4"
+            >
+              <option value="">+ Add Skill</option>
               {['Technical Development', 'Product Management', 'Marketing', 'Sales', 'Operations', 'Finance', 
                 'Design', 'Business Strategy', 'Fundraising', 'Legal', 'HR', 'Data Analysis', 'AI/ML', 
                 'Blockchain', 'Mobile Development', 'Backend Development', 'Frontend Development', 'DevOps', 
-                'UX/UI Design', 'Growth Hacking', 'Content Marketing', 'SEO/SEM', 'Social Media', 'PR'].map((skill) => (
-                <button
-                  key={skill}
-                  onClick={() => handleYourSkillToggle(skill)}
-                  className={`p-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${
-                    yourSkills.includes(skill)
-                      ? 'bg-gray-900 border-gray-900 text-white shadow-md'
-                      : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
-                  }`}
-                >
-                  {skill}
-                </button>
-              ))}
-            </div>
+                'UX/UI Design', 'Growth Hacking', 'Content Marketing', 'SEO/SEM', 'Social Media', 'PR']
+                .filter(sk => !yourSkills.includes(sk))
+                .map((skill) => (
+                  <option key={skill} value={skill}>{skill}</option>
+                ))}
+            </select>
+
+            {yourSkills.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {yourSkills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium"
+                  >
+                    {skill}
+                    <button
+                      onClick={() => removeSkill(skill)}
+                      className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Your Experience Level */}
           <div className="bg-white rounded-3xl p-8 border border-gray-200">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Your Experience Level</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[
-                { id: 'entry', label: 'Entry Level', desc: '0-2 years' },
-                { id: 'mid', label: 'Mid Level', desc: '3-5 years' },
-                { id: 'senior', label: 'Senior Level', desc: '6-10 years' },
-                { id: 'executive', label: 'Executive', desc: '10+ years' }
-              ].map((exp) => (
-                <button
-                  key={exp.id}
-                  onClick={() => setYourExperience(exp.id)}
-                  className={`p-6 rounded-2xl border-2 transition-all duration-200 ${
-                    yourExperience === exp.id
-                      ? 'bg-gray-900 border-gray-900 shadow-md'
-                      : 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="text-center">
-                    <h4 className={`text-lg font-semibold mb-1 ${yourExperience === exp.id ? 'text-white' : 'text-gray-900'}`}>
-                      {exp.label}
-                    </h4>
-                    <p className={`text-sm ${yourExperience === exp.id ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {exp.desc}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <select
+              value={yourExperience}
+              onChange={(e) => setYourExperience(e.target.value)}
+              className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            >
+              <option value="">Select experience level</option>
+              <option value="entry">Entry Level (0-2 years)</option>
+              <option value="mid">Mid Level (3-5 years)</option>
+              <option value="senior">Senior Level (6-10 years)</option>
+              <option value="executive">Executive (10+ years)</option>
+            </select>
           </div>
         </div>
 
