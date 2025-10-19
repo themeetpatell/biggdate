@@ -29,7 +29,9 @@ import {
   CheckCircle,
   Crown as CrownIcon,
   Rocket,
-  Target
+  Target,
+  Briefcase,
+  Users
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
