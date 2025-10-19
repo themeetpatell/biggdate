@@ -492,13 +492,30 @@ const QuickSetup = () => {
 
         {/* Core Values */}
         <div className="mb-12">
-          <h2 className="text-2xl font-normal text-gray-900 mb-6 text-center">What Drives You? (Select Up to 5)</h2>
-          <p className="text-gray-600 text-center mb-8">Choose the values that define who you are and what you stand for</p>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-normal text-gray-900">What Drives You?</h2>
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-medium ${selectedValues.length >= 5 ? 'text-green-600' : 'text-gray-600'}`}>
+                {selectedValues.length}/5 selected
+              </span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <div
+                    key={num}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      num <= selectedValues.length ? 'bg-gray-900' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="text-gray-600 mb-8">Choose up to 5 values across all categories that define who you are</p>
           
-          <div className="space-y-8">
+          <div className="space-y-6">
             {valueGroups.map((group) => (
               <div key={group.category}>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">{group.category}</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">{group.category}</h3>
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                   {group.values.map((value) => {
                     const isSelected = selectedValues.includes(value.id);
