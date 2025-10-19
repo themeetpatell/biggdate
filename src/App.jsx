@@ -82,11 +82,17 @@ const MainLayout = ({ children }) => (
 // Home Router - Routes to correct dashboard based on user type
 const HomeRouter = () => {
   const [userIntent, setUserIntent] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const intent = localStorage.getItem('selectedIntent');
     setUserIntent(intent);
+    setIsLoading(false);
   }, []);
+
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
 
   if (userIntent === 'idea-sprint') {
     return <SprintDashboard />;
