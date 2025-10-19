@@ -51,32 +51,47 @@ const QuickSetup = () => {
     }
   }, []);
 
-  const values = [
-    { id: 'innovation', name: 'Innovation', color: 'from-blue-500 to-cyan-500' },
-    { id: 'growth', name: 'Growth', color: 'from-green-500 to-emerald-500' },
-    { id: 'adventure', name: 'Adventure', color: 'from-purple-500 to-pink-500' },
-    { id: 'authenticity', name: 'Authenticity', color: 'from-red-500 to-rose-500' },
-    { id: 'impact', name: 'Impact', color: 'from-yellow-500 to-orange-500' },
-    { id: 'freedom', name: 'Freedom', color: 'from-indigo-500 to-purple-500' },
-    { id: 'legacy', name: 'Legacy', color: 'from-gray-500 to-gray-600' },
-    { id: 'connection', name: 'Connection', color: 'from-pink-500 to-purple-500' },
-    { id: 'creativity', name: 'Creativity', color: 'from-pink-500 to-rose-500' },
-    { id: 'excellence', name: 'Excellence', color: 'from-yellow-500 to-amber-500' },
-    { id: 'integrity', name: 'Integrity', color: 'from-blue-500 to-indigo-500' },
-    { id: 'passion', name: 'Passion', color: 'from-red-500 to-pink-500' },
-    { id: 'wisdom', name: 'Wisdom', color: 'from-purple-500 to-indigo-500' },
-    { id: 'courage', name: 'Courage', color: 'from-orange-500 to-red-500' },
-    { id: 'compassion', name: 'Compassion', color: 'from-green-500 to-teal-500' },
-    { id: 'balance', name: 'Balance', color: 'from-cyan-500 to-blue-500' },
-    { id: 'ambition', name: 'Ambition', color: 'from-purple-500 to-pink-500' },
-    { id: 'humility', name: 'Humility', color: 'from-gray-500 to-slate-500' },
-    { id: 'resilience', name: 'Resilience', color: 'from-orange-500 to-yellow-500' },
-    { id: 'curiosity', name: 'Curiosity', color: 'from-cyan-500 to-teal-500' },
-    { id: 'empathy', name: 'Empathy', color: 'from-pink-500 to-purple-500' },
-    { id: 'discipline', name: 'Discipline', color: 'from-slate-500 to-gray-500' },
-    { id: 'optimism', name: 'Optimism', color: 'from-yellow-500 to-orange-500' },
-    { id: 'gratitude', name: 'Gratitude', color: 'from-green-500 to-emerald-500' },
-    { id: 'leadership', name: 'Leadership', color: 'from-indigo-500 to-purple-500' }
+  const valueGroups = [
+    {
+      category: 'Vision & Creation',
+      values: [
+        { id: 'innovation', name: 'Innovation' },
+        { id: 'creativity', name: 'Creativity' },
+        { id: 'impact', name: 'Impact' },
+        { id: 'legacy', name: 'Legacy' },
+        { id: 'leadership', name: 'Leadership' },
+        { id: 'curiosity', name: 'Curiosity' },
+        { id: 'freedom', name: 'Freedom' }
+      ]
+    },
+    {
+      category: 'Grit & Growth',
+      values: [
+        { id: 'growth', name: 'Growth' },
+        { id: 'resilience', name: 'Resilience' },
+        { id: 'discipline', name: 'Discipline' },
+        { id: 'courage', name: 'Courage' },
+        { id: 'excellence', name: 'Excellence' },
+        { id: 'ambition', name: 'Ambition' },
+        { id: 'wisdom', name: 'Wisdom' },
+        { id: 'optimism', name: 'Optimism' }
+      ]
+    },
+    {
+      category: 'Heart & Connection',
+      values: [
+        { id: 'connection', name: 'Connection' },
+        { id: 'empathy', name: 'Empathy' },
+        { id: 'compassion', name: 'Compassion' },
+        { id: 'authenticity', name: 'Authenticity' },
+        { id: 'passion', name: 'Passion' },
+        { id: 'gratitude', name: 'Gratitude' },
+        { id: 'humility', name: 'Humility' },
+        { id: 'integrity', name: 'Integrity' },
+        { id: 'balance', name: 'Balance' },
+        { id: 'adventure', name: 'Adventure' }
+      ]
+    }
   ];
 
   const intents = [
@@ -479,36 +494,44 @@ const QuickSetup = () => {
         <div className="mb-12">
           <h2 className="text-2xl font-normal text-gray-900 mb-6 text-center">What Drives You? (Select Up to 5)</h2>
           <p className="text-gray-600 text-center mb-8">Choose the values that define who you are and what you stand for</p>
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {values.map((value, index) => {
-              const isSelected = selectedValues.includes(value.id);
-              const rank = selectedValues.indexOf(value.id) + 1;
-              const isDisabled = !isSelected && selectedValues.length >= 5;
-              
-              return (
-                <button
-                  key={value.id}
-                  onClick={() => handleValueToggle(value.id)}
-                  disabled={isDisabled}
-                  className={`relative p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed ${
-                    isSelected
-                      ? 'bg-gray-900 border-gray-900 shadow-md'
-                      : 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <h3 className={`font-medium text-sm text-center ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                      {value.name}
-                    </h3>
-                    {isSelected && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-200">
-                        <span className="text-gray-900 font-bold text-xs">{rank}</span>
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+          
+          <div className="space-y-8">
+            {valueGroups.map((group) => (
+              <div key={group.category}>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{group.category}</h3>
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {group.values.map((value) => {
+                    const isSelected = selectedValues.includes(value.id);
+                    const rank = selectedValues.indexOf(value.id) + 1;
+                    const isDisabled = !isSelected && selectedValues.length >= 5;
+                    
+                    return (
+                      <button
+                        key={value.id}
+                        onClick={() => handleValueToggle(value.id)}
+                        disabled={isDisabled}
+                        className={`relative p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed ${
+                          isSelected
+                            ? 'bg-gray-900 border-gray-900 shadow-md'
+                            : 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center justify-center">
+                          <h3 className={`font-medium text-sm text-center ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                            {value.name}
+                          </h3>
+                          {isSelected && (
+                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-200">
+                              <span className="text-gray-900 font-bold text-xs">{rank}</span>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
