@@ -271,31 +271,11 @@ const QuickSetup = () => {
           <h2 className="text-2xl font-normal text-gray-900 mb-6 text-center">Share Your Vision</h2>
           <div className="bg-white rounded-3xl p-8 border border-gray-200">
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">What's your startup idea? Complete this thought:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {missionPrompts.map((prompt, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setMissionStatement(prompt)}
-                    className={`p-3 rounded-xl text-left transition-all duration-200 ${
-                      missionStatement === prompt
-                        ? 'bg-gray-900 text-white border border-gray-900'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                    }`}
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-gray-900 font-medium mb-3">Share your complete vision:</label>
               <textarea
                 value={missionStatement}
                 onChange={(e) => setMissionStatement(e.target.value)}
-                placeholder="Tell your cofounder what you're building and why it matters..."
-                className="w-full h-32 p-4 bg-white border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+                placeholder="Tell your cofounder what you're building and why it matters... Share your startup idea, the problem you're solving, your mission, and what drives you every day."
+                className="w-full h-40 p-5 bg-white border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none text-base"
               />
             </div>
 
