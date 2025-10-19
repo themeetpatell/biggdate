@@ -36,6 +36,14 @@ const EntrepreneurProfile = lazy(() => import('./components/EntrepreneurProfile.
 const StartupWorkspace = lazy(() => import('./components/StartupWorkspace.jsx'));
 const MyPitches = lazy(() => import('./components/MyPitches.jsx'));
 
+// Sprint Tools
+const IdeaFurnishing = lazy(() => import('./components/sprint-tools/IdeaFurnishing.jsx'));
+const MVPBuilder = lazy(() => import('./components/sprint-tools/MVPBuilder.jsx'));
+const IdeaValidator = lazy(() => import('./components/sprint-tools/IdeaValidator.jsx'));
+const MarketResearch = lazy(() => import('./components/sprint-tools/MarketResearch.jsx'));
+const PitchDeckBuilder = lazy(() => import('./components/sprint-tools/PitchDeckBuilder.jsx'));
+const PitchPrep = lazy(() => import('./components/sprint-tools/PitchPrep.jsx'));
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
@@ -314,6 +322,55 @@ const AppContent = () => {
                 <ProtectedRoute>
                   <MainLayout>
                     <LaunchPreparation />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Sprint Tools Routes */}
+              <Route path="/sprint/idea-furnishing" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <IdeaFurnishing />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/mvp-builder" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <MVPBuilder />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/idea-validator" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <IdeaValidator />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/market-research" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <MarketResearch />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/pitch-deck" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PitchDeckBuilder />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/pitch-prep" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PitchPrep />
                   </MainLayout>
                 </ProtectedRoute>
               } />

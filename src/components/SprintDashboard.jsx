@@ -64,32 +64,53 @@ const SprintDashboard = () => {
 
   const quickActions = [
     {
-      title: 'Update Your Idea',
+      title: 'Idea Furnishing',
       description: 'Refine your startup concept',
       icon: Lightbulb,
-      link: '/startup-workspace',
+      link: '/sprint/idea-furnishing',
       color: 'bg-black'
     },
     {
-      title: 'Find Sprint Cofounders',
-      description: 'Connect with builders ready to sprint',
-      icon: Users,
-      link: '/cofounders',
+      title: 'Validate Idea',
+      description: 'Test your assumptions',
+      icon: Target,
+      link: '/sprint/idea-validator',
       color: 'bg-gray-900'
     },
     {
       title: 'Build MVP',
-      description: 'Start building your product',
+      description: 'Plan your product',
       icon: Rocket,
-      link: '/startup-workspace',
+      link: '/sprint/mvp-builder',
       color: 'bg-gray-800'
     },
     {
-      title: 'Track Progress',
-      description: 'View your sprint milestones',
+      title: 'Market Research',
+      description: 'Analyze your market',
       icon: BarChart3,
-      link: '/startup-workspace',
+      link: '/sprint/market-research',
       color: 'bg-gray-700'
+    },
+    {
+      title: 'Pitch Deck',
+      description: 'Create investor deck',
+      icon: FileText,
+      link: '/sprint/pitch-deck',
+      color: 'bg-gray-600'
+    },
+    {
+      title: 'Practice Pitch',
+      description: 'Perfect your pitch',
+      icon: MessageSquare,
+      link: '/sprint/pitch-prep',
+      color: 'bg-gray-500'
+    },
+    {
+      title: 'Find Sprint Partner',
+      description: 'Find your cofounder',
+      icon: Users,
+      link: '/cofounders',
+      color: 'bg-gray-900'
     }
   ];
 
