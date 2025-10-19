@@ -34,7 +34,8 @@ const AnonymousProfileFixed = () => {
     location: '',
     industry: [],
     workStyle: '',
-    availability: ''
+    availability: '',
+    commitment: ''
   });
 
   const navigate = useNavigate();
@@ -211,6 +212,27 @@ const AnonymousProfileFixed = () => {
                   <option value="hybrid">Hybrid</option>
                   <option value="office-based">Office-based</option>
                   <option value="flexible">Flexible hours</option>
+                </select>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-gray-700" />
+                  </div>
+                  Time Commitment
+                </label>
+                <select
+                  value={cofounderPreferences.commitment}
+                  onChange={(e) => setCofounderPreferences(prev => ({...prev, commitment: e.target.value}))}
+                  className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                >
+                  <option value="">Select commitment</option>
+                  <option value="full-time">Full-Time (40+ hrs/week)</option>
+                  <option value="part-time">Part-Time (20-30 hrs/week)</option>
+                  <option value="flexible">Flexible (10-20 hrs/week)</option>
+                  <option value="weekends">Weekends Only</option>
+                  <option value="evenings">Evenings Only</option>
                 </select>
               </div>
 
