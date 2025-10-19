@@ -443,60 +443,63 @@ const QuickSetup = () => {
             </div>
           </div>
 
-          {/* Your Skills */}
-          <div className="bg-white rounded-3xl p-8 border border-gray-200 mb-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Your Key Skills & Expertise</h3>
-            <p className="text-gray-600 text-sm mb-4">What are you great at? Select all that apply</p>
-            
-            <select
-              onChange={handleSkillSelect}
-              className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent mb-4"
-            >
-              <option value="">+ Add Skill</option>
-              {['Technical Development', 'Product Management', 'Marketing', 'Sales', 'Operations', 'Finance', 
-                'Design', 'Business Strategy', 'Fundraising', 'Legal', 'HR', 'Data Analysis', 'AI/ML', 
-                'Blockchain', 'Mobile Development', 'Backend Development', 'Frontend Development', 'DevOps', 
-                'UX/UI Design', 'Growth Hacking', 'Content Marketing', 'SEO/SEM', 'Social Media', 'PR']
-                .filter(sk => !yourSkills.includes(sk))
-                .map((skill) => (
-                  <option key={skill} value={skill}>{skill}</option>
-                ))}
-            </select>
+          {/* Skills and Experience Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Your Skills */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Your Key Skills & Expertise</h3>
+              <p className="text-gray-600 text-sm mb-4">What are you great at? Select all that apply</p>
+              
+              <select
+                onChange={handleSkillSelect}
+                className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent mb-4"
+              >
+                <option value="">+ Add Skill</option>
+                {['Technical Development', 'Product Management', 'Marketing', 'Sales', 'Operations', 'Finance', 
+                  'Design', 'Business Strategy', 'Fundraising', 'Legal', 'HR', 'Data Analysis', 'AI/ML', 
+                  'Blockchain', 'Mobile Development', 'Backend Development', 'Frontend Development', 'DevOps', 
+                  'UX/UI Design', 'Growth Hacking', 'Content Marketing', 'SEO/SEM', 'Social Media', 'PR']
+                  .filter(sk => !yourSkills.includes(sk))
+                  .map((skill) => (
+                    <option key={skill} value={skill}>{skill}</option>
+                  ))}
+              </select>
 
-            {yourSkills.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {yourSkills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium"
-                  >
-                    {skill}
-                    <button
-                      onClick={() => removeSkill(skill)}
-                      className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+              {yourSkills.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {yourSkills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium"
                     >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+                      {skill}
+                      <button
+                        onClick={() => removeSkill(skill)}
+                        className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Your Experience Level */}
-          <div className="bg-white rounded-3xl p-8 border border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Your Experience Level</h3>
-            <select
-              value={yourExperience}
-              onChange={(e) => setYourExperience(e.target.value)}
-              className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            >
-              <option value="">Select experience level</option>
-              <option value="entry">Entry Level (0-2 years)</option>
-              <option value="mid">Mid Level (3-5 years)</option>
-              <option value="senior">Senior Level (6-10 years)</option>
-              <option value="executive">Executive (10+ years)</option>
-            </select>
+            {/* Your Experience Level */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Your Experience Level</h3>
+              <select
+                value={yourExperience}
+                onChange={(e) => setYourExperience(e.target.value)}
+                className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              >
+                <option value="">Select experience level</option>
+                <option value="entry">Entry Level (0-2 years)</option>
+                <option value="mid">Mid Level (3-5 years)</option>
+                <option value="senior">Senior Level (6-10 years)</option>
+                <option value="executive">Executive (10+ years)</option>
+              </select>
+            </div>
           </div>
         </div>
 
