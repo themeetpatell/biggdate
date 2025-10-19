@@ -34,8 +34,7 @@ const AnonymousProfileFixed = () => {
     location: '',
     industry: [],
     workStyle: '',
-    availability: '',
-    fundingStage: ''
+    availability: ''
   });
 
   const navigate = useNavigate();
@@ -94,9 +93,9 @@ const AnonymousProfileFixed = () => {
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column */}
-            <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Top Section - Role and Skills */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
@@ -122,56 +121,6 @@ const AnonymousProfileFixed = () => {
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
-                    <Star className="w-5 h-5 text-gray-700" />
-                  </div>
-                  Required Skills
-                </label>
-                <p className="text-gray-600 text-sm mb-4">Select the skills your ideal cofounder should have</p>
-                <div className="flex flex-wrap gap-3">
-                  {skillsOptions.map(skill => (
-                    <button
-                      key={skill}
-                      onClick={() => handleSkillToggle(skill)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                        cofounderPreferences.skills.includes(skill)
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                      }`}
-                    >
-                      {skill}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
-                    <Briefcase className="w-5 h-5 text-gray-700" />
-                  </div>
-                  Industry Focus
-                </label>
-                <p className="text-gray-600 text-sm mb-4">Choose the industries your cofounder should have experience in</p>
-                <div className="flex flex-wrap gap-3">
-                  {industryOptions.map(industry => (
-                    <button
-                      key={industry}
-                      onClick={() => handleIndustryToggle(industry)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                        cofounderPreferences.industry.includes(industry)
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                      }`}
-                    >
-                      {industry}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-gray-700" />
                   </div>
                   Experience Level
@@ -189,29 +138,62 @@ const AnonymousProfileFixed = () => {
                 </select>
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-gray-700" />
-                  </div>
-                  Location Preference
-                </label>
-                <select
-                  value={cofounderPreferences.location}
-                  onChange={(e) => setCofounderPreferences(prev => ({...prev, location: e.target.value}))}
-                  className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                >
-                  <option value="">Select location</option>
-                  <option value="same-city">Same City</option>
-                  <option value="same-country">Same Country</option>
-                  <option value="remote">Remote OK</option>
-                  <option value="anywhere">Anywhere</option>
-                </select>
+            </div>
+
+            {/* Industry Focus - Full Width */}
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+              <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-gray-700" />
+                </div>
+                Industry Focus
+              </label>
+              <p className="text-gray-600 text-sm mb-4">Choose the industries your cofounder should have experience in</p>
+              <div className="flex flex-wrap gap-3">
+                {industryOptions.map(industry => (
+                  <button
+                    key={industry}
+                    onClick={() => handleIndustryToggle(industry)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      cofounderPreferences.industry.includes(industry)
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                    }`}
+                  >
+                    {industry}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
+            {/* Required Skills - Full Width */}
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+              <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
+                  <Star className="w-5 h-5 text-gray-700" />
+                </div>
+                Required Skills
+              </label>
+              <p className="text-gray-600 text-sm mb-4">Select the skills your ideal cofounder should have</p>
+              <div className="flex flex-wrap gap-3">
+                {skillsOptions.map(skill => (
+                  <button
+                    key={skill}
+                    onClick={() => handleSkillToggle(skill)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      cofounderPreferences.skills.includes(skill)
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                    }`}
+                  >
+                    {skill}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Preferences Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
@@ -255,25 +237,26 @@ const AnonymousProfileFixed = () => {
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-gray-700" />
+                    <MapPin className="w-5 h-5 text-gray-700" />
                   </div>
-                  Funding Stage
+                  Location
                 </label>
                 <select
-                  value={cofounderPreferences.fundingStage}
-                  onChange={(e) => setCofounderPreferences(prev => ({...prev, fundingStage: e.target.value}))}
+                  value={cofounderPreferences.location}
+                  onChange={(e) => setCofounderPreferences(prev => ({...prev, location: e.target.value}))}
                   className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                 >
-                  <option value="">Select funding stage</option>
-                  <option value="pre-seed">Pre-seed</option>
-                  <option value="seed">Seed</option>
-                  <option value="series-a">Series A</option>
-                  <option value="series-b">Series B+</option>
-                  <option value="bootstrapped">Bootstrapped</option>
+                  <option value="">Select location</option>
+                  <option value="same-city">Same City</option>
+                  <option value="same-country">Same Country</option>
+                  <option value="remote">Remote OK</option>
+                  <option value="anywhere">Anywhere</option>
                 </select>
               </div>
+            </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+            {/* Your Pitch - Full Width */}
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
                     <Zap className="w-5 h-5 text-gray-700" />
