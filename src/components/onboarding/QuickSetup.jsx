@@ -226,8 +226,14 @@ const QuickSetup = () => {
         localStorage.setItem('pitchDeckFileSize', pitchDeckFile.size.toString());
       }
       
-      // Navigate to next step
-      navigate('/onboarding/pitch');
+      // Navigate based on selected intent
+      if (selectedIntent === 'find-cofounder') {
+        navigate('/onboarding/pitch');
+      } else if (selectedIntent === 'offer-skills') {
+        navigate('/onboarding/offer-skills');
+      } else if (selectedIntent === 'idea-sprint') {
+        navigate('/onboarding/idea-sprint');
+      }
     }
   };
 
