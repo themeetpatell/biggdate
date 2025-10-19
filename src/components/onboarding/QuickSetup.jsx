@@ -96,24 +96,24 @@ const QuickSetup = () => {
 
   const intents = [
     {
-      id: 'finding-cofounder',
-      title: 'Finding a Co-Founder',
-      description: 'Looking for a co-founder to build and grow a startup together',
+      id: 'find-cofounder',
+      title: 'Find a Cofounder',
+      description: 'Looking for the right co-founder to build and grow your startup',
       icon: Target,
       color: 'from-blue-500 to-cyan-500'
     },
     {
-      id: 'offer-freelance',
-      title: 'Offer Freelance',
-      description: 'Offer your skills and services to help co-founders build their vision',
+      id: 'offer-skills',
+      title: 'Offer Your Skills',
+      description: 'Connect with startups that need your expertise and skills',
       icon: Sparkles,
       color: 'from-green-500 to-emerald-500'
     },
     {
-      id: 'explore-opportunities',
-      title: 'Explore Opportunities',
-      description: 'Network with founders and explore joining exciting startups',
-      icon: Crown,
+      id: 'idea-sprint',
+      title: 'Start Idea Sprint',
+      description: 'Build your idea, validate it, and find the perfect cofounder',
+      icon: Zap,
       color: 'from-purple-500 to-indigo-500'
     }
   ];
