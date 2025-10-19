@@ -2,18 +2,31 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
-  ArrowLeft,
-  Target,
+  ArrowLeft, 
+  Mic, 
+  Play, 
+  Pause, 
+  RotateCcw,
+  Type,
+  CheckCircle,
   Star,
+  Zap,
+  Target,
+  Rocket,
   Briefcase,
   MapPin,
   Users,
   TrendingUp,
+  DollarSign,
   Clock,
   Calendar
 } from 'lucide-react';
 
 const AnonymousProfileFixed = () => {
+  const [pitchText, setPitchText] = useState('');
+  const [pitchFormat, setPitchFormat] = useState('text');
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasVoiceNote, setHasVoiceNote] = useState(false);
   const [cofounderPreferences, setCofounderPreferences] = useState({
     role: '',
     skills: [],
@@ -29,6 +42,8 @@ const AnonymousProfileFixed = () => {
 
   const handleContinue = () => {
     localStorage.setItem('cofounderPreferences', JSON.stringify(cofounderPreferences));
+    localStorage.setItem('pitchText', pitchText);
+    localStorage.setItem('pitchFormat', pitchFormat);
     navigate('/home');
   };
 
@@ -72,10 +87,10 @@ const AnonymousProfileFixed = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-full mb-6 border border-gray-200">
             <Target className="w-6 h-6 text-gray-700" />
-            <span className="text-gray-700 font-medium">Define Your Ideal Cofounder</span>
+            <span className="text-gray-700 font-medium">Find Your Cofounder</span>
           </div>
-          <h2 className="text-4xl font-normal text-gray-900 mb-4">What Type of Cofounder Do You Need?</h2>
-          <p className="text-gray-600 text-xl max-w-3xl mx-auto">Tell us about your ideal co-founder so we can help you find the perfect match</p>
+          <h2 className="text-4xl font-normal text-gray-900 mb-4">What Cofounder Are You Looking For?</h2>
+          <p className="text-gray-600 text-xl max-w-3xl mx-auto">Help us find the perfect cofounder match for your startup</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
@@ -261,8 +276,6 @@ const AnonymousProfileFixed = () => {
                 </select>
               </div>
             </div>
-
-          </div>
 
           <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200">
             <button
