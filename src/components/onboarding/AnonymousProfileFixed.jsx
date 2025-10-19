@@ -357,7 +357,6 @@ const AnonymousProfileFixed = () => {
                 </div>
               </div>
             </div>
-          </div>
 
           <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200">
             <button
