@@ -179,8 +179,8 @@ const Navbar = () => {
           {/* Logo */}
             <Link to="/home" className="flex items-center gap-3 flex-shrink-0 group">
               <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <Brain className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-black flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center">
                   <Star className="w-2.5 h-2.5 text-white" />
@@ -241,7 +241,7 @@ const Navbar = () => {
                 onClick={() => setShowNotifications(!showNotifications)}
                   className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105 relative group"
               >
-                  <Bell className="w-5 h-5 group-hover:animate-bounce" />
+                  <Bell className="w-4 h-4 group-hover:animate-bounce" />
                 {notifications.filter(n => !n.isRead).length > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-black text-white text-xs rounded-full flex items-center justify-center animate-pulse shadow-lg">
                     {notifications.filter(n => !n.isRead).length}
@@ -268,12 +268,12 @@ const Navbar = () => {
                       {notifications.map((notification, index) => {
                         const getNotificationIcon = (type) => {
                           switch (type) {
-                            case 'match': return <Heart className="w-5 h-5 text-white" />;
-                            case 'message': return <MessageCircle className="w-5 h-5 text-white" />;
-                            case 'pitch': return <Send className="w-5 h-5 text-white" />;
-                            case 'event': return <Calendar className="w-5 h-5 text-white" />;
-                            case 'profile': return <User className="w-5 h-5 text-white" />;
-                            default: return <Bell className="w-5 h-5 text-white" />;
+                            case 'match': return <Heart className="w-4 h-4 text-white" />;
+                            case 'message': return <MessageCircle className="w-4 h-4 text-white" />;
+                            case 'pitch': return <Send className="w-4 h-4 text-white" />;
+                            case 'event': return <Calendar className="w-4 h-4 text-white" />;
+                            case 'profile': return <User className="w-4 h-4 text-white" />;
+                            default: return <Bell className="w-4 h-4 text-white" />;
                           }
                         };
 
