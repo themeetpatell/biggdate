@@ -2,31 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
-  ArrowLeft, 
-  Mic, 
-  Play, 
-  Pause, 
-  RotateCcw,
-  Type,
-  CheckCircle,
-  Star,
-  Zap,
+  ArrowLeft,
   Target,
-  Rocket,
   Briefcase,
   MapPin,
   Users,
   TrendingUp,
-  DollarSign,
   Clock,
   Calendar
 } from 'lucide-react';
 
 const AnonymousProfileFixed = () => {
-  const [pitchText, setPitchText] = useState('');
-  const [pitchFormat, setPitchFormat] = useState('text');
-  const [isRecording, setIsRecording] = useState(false);
-  const [hasVoiceNote, setHasVoiceNote] = useState(false);
   const [cofounderPreferences, setCofounderPreferences] = useState({
     role: '',
     skills: [],
@@ -42,8 +28,6 @@ const AnonymousProfileFixed = () => {
 
   const handleContinue = () => {
     localStorage.setItem('cofounderPreferences', JSON.stringify(cofounderPreferences));
-    localStorage.setItem('pitchText', pitchText);
-    localStorage.setItem('pitchFormat', pitchFormat);
     navigate('/home');
   };
 
@@ -87,10 +71,10 @@ const AnonymousProfileFixed = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-full mb-6 border border-gray-200">
             <Target className="w-6 h-6 text-gray-700" />
-            <span className="text-gray-700 font-medium">Find Your Cofounder</span>
+            <span className="text-gray-700 font-medium">Define Your Ideal Cofounder</span>
           </div>
-          <h2 className="text-4xl font-normal text-gray-900 mb-4">What Cofounder Are You Looking For?</h2>
-          <p className="text-gray-600 text-xl max-w-3xl mx-auto">Help us find the perfect cofounder match for your startup</p>
+          <h2 className="text-4xl font-normal text-gray-900 mb-4">What Type of Cofounder Do You Need?</h2>
+          <p className="text-gray-600 text-xl max-w-3xl mx-auto">Tell us about your ideal co-founder so we can help you find the perfect match</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
@@ -277,108 +261,7 @@ const AnonymousProfileFixed = () => {
               </div>
             </div>
 
-            {/* Your Pitch - Full Width */}
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-xl flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-gray-700" />
-                  </div>
-                  Your Pitch
-                </label>
-                <div className="space-y-4">
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setPitchFormat('text')}
-                      className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
-                        pitchFormat === 'text' 
-                          ? 'bg-gray-900 text-white' 
-                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Type className="w-5 h-5" />
-                      Text
-                    </button>
-                    <button
-                      onClick={() => setPitchFormat('voice')}
-                      className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
-                        pitchFormat === 'voice' 
-                          ? 'bg-gray-900 text-white' 
-                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Mic className="w-5 h-5" />
-                      Voice
-                    </button>
-                  </div>
-
-                  {pitchFormat === 'text' ? (
-                    <div>
-                      <textarea
-                        value={pitchText}
-                        onChange={(e) => setPitchText(e.target.value)}
-                        placeholder="Describe your startup vision, the problem you're solving, and what kind of cofounder would be the perfect match..."
-                        rows={6}
-                        className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
-                      />
-                    </div>
-                  ) : (
-                    <div className="p-6 bg-white border border-gray-200 rounded-xl text-center">
-                      {!hasVoiceNote ? (
-                        <div className="space-y-4">
-                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                            <Mic className="w-8 h-8 text-gray-700" />
-                          </div>
-                          <div>
-                            <p className="text-gray-900 font-medium mb-1">Record your pitch</p>
-                            <p className="text-gray-600 text-sm">Up to 60 seconds</p>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setIsRecording(!isRecording);
-                              if (!isRecording) {
-                                setTimeout(() => {
-                                  setIsRecording(false);
-                                  setHasVoiceNote(true);
-                                }, 3000);
-                              }
-                            }}
-                            className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 mx-auto ${
-                              isRecording 
-                                ? 'bg-red-600 text-white hover:bg-red-700' 
-                                : 'bg-gray-900 text-white hover:bg-black'
-                            }`}
-                          >
-                            {isRecording ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                            {isRecording ? 'Stop Recording' : 'Start Recording'}
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                            <CheckCircle className="w-8 h-8 text-green-700" />
-                          </div>
-                          <div>
-                            <p className="text-gray-900 font-medium mb-1">Voice note recorded</p>
-                            <p className="text-gray-600 text-sm">Ready to submit</p>
-                          </div>
-                          <div className="flex gap-3 justify-center">
-                            <button
-                              onClick={() => setHasVoiceNote(false)}
-                              className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                            >
-                              <RotateCcw className="w-5 h-5" />
-                            </button>
-                            <button className="p-2 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors">
-                              <Play className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+          </div>
 
           <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200">
             <button
