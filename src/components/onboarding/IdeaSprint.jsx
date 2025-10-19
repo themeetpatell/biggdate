@@ -8,16 +8,18 @@ import {
   Users,
   Lightbulb,
   TrendingUp,
-  Calendar
+  Wallet,
+  FileText
 } from 'lucide-react';
 
 const IdeaSprint = () => {
   const [sprintDetails, setSprintDetails] = useState({
+    ideaDescription: '',
     ideaStage: '',
     validationStatus: '',
     targetMarket: '',
     cofounderNeeds: [],
-    timeline: '',
+    currentResources: '',
     commitment: ''
   });
 
@@ -62,6 +64,22 @@ const IdeaSprint = () => {
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
           <div className="space-y-8">
+            {/* Idea Description */}
+            <div>
+              <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-200">
+                  <FileText className="w-5 h-5 text-gray-700" />
+                </div>
+                Describe Your Idea
+              </label>
+              <textarea
+                value={sprintDetails.ideaDescription}
+                onChange={(e) => setSprintDetails(prev => ({...prev, ideaDescription: e.target.value}))}
+                placeholder="What's your startup idea? What problem are you solving and what's your solution..."
+                className="w-full h-32 p-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+              />
+            </div>
+
             {/* Idea Stage & Validation */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -149,25 +167,27 @@ const IdeaSprint = () => {
               </div>
             </div>
 
-            {/* Timeline & Commitment */}
+            {/* Resources & Commitment */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-gray-900 font-semibold mb-4 flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-200">
-                    <Calendar className="w-5 h-5 text-gray-700" />
+                    <Wallet className="w-5 h-5 text-gray-700" />
                   </div>
-                  Sprint Timeline
+                  Current Resources
                 </label>
                 <select
-                  value={sprintDetails.timeline}
-                  onChange={(e) => setSprintDetails(prev => ({...prev, timeline: e.target.value}))}
+                  value={sprintDetails.currentResources}
+                  onChange={(e) => setSprintDetails(prev => ({...prev, currentResources: e.target.value}))}
                   className="w-full p-4 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                 >
-                  <option value="">Select timeline</option>
-                  <option value="2-weeks">2 Weeks Sprint</option>
-                  <option value="1-month">1 Month Sprint</option>
-                  <option value="3-months">3 Months Sprint</option>
-                  <option value="flexible">Flexible Timeline</option>
+                  <option value="">Select resources</option>
+                  <option value="bootstrapping">Bootstrapping/Self-funded</option>
+                  <option value="5k-25k">$5K - $25K Budget</option>
+                  <option value="25k-100k">$25K - $100K Budget</option>
+                  <option value="100k+">$100K+ Budget</option>
+                  <option value="seeking-funding">Seeking Initial Funding</option>
+                  <option value="no-budget">No Budget (Sweat Equity)</option>
                 </select>
               </div>
 
