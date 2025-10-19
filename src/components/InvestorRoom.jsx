@@ -186,8 +186,8 @@ const InvestorRoom = () => {
     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-            <FileText className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center">
+            <FileText className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Data Room</h3>
@@ -243,8 +243,8 @@ const InvestorRoom = () => {
     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center">
+            <Calendar className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Demo Day Access</h3>
@@ -317,8 +317,8 @@ const InvestorRoom = () => {
     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-            <Users className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center">
+            <Users className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">1-Click Intros</h3>
@@ -395,8 +395,8 @@ const InvestorRoom = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Investor Room</h1>

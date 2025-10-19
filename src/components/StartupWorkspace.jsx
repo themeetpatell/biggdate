@@ -2109,8 +2109,8 @@ const StartupWorkspace = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">{startupData.cofounders.length}</span>
           </div>
@@ -2120,8 +2120,8 @@ const StartupWorkspace = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <Target className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <Target className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">{startupData.progress}%</span>
           </div>
@@ -2131,8 +2131,8 @@ const StartupWorkspace = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">${startupData.funding.raised.toLocaleString()}</span>
           </div>
@@ -2142,8 +2142,8 @@ const StartupWorkspace = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">{startupData.metrics.users}</span>
           </div>
@@ -2157,8 +2157,8 @@ const StartupWorkspace = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h2>
         <div className="space-y-4">
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">MVP Development</h3>
@@ -2171,8 +2171,8 @@ const StartupWorkspace = () => {
           </div>
 
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">Team Meeting</h3>
@@ -2185,8 +2185,8 @@ const StartupWorkspace = () => {
           </div>
 
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">Funding Update</h3>
@@ -2268,8 +2268,8 @@ const StartupWorkspace = () => {
                 <p className="text-sm text-gray-500">Current Stage</p>
                 <p className="font-semibold text-gray-900">{startupData.stage}</p>
               </div>
-              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
-                <Rocket className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                <Rocket className="w-5 h-5 text-white" />
               </div>
             </div>
           </div>

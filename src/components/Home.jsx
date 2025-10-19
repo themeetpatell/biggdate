@@ -846,7 +846,7 @@ const Home = () => {
               <div className="space-y-6">
                 {/* Pitch Header */}
                 <div className="flex items-start gap-6">
-                  <div className="w-24 h-24 bg-gray-900 rounded-2xl flex items-center justify-center">
+                  <div className="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center">
                     {selectedPitchDetails.imageUrl ? (
                       <img
                         src={selectedPitchDetails.imageUrl}
@@ -854,7 +854,7 @@ const Home = () => {
                         className="w-full h-full object-cover rounded-2xl"
                       />
                     ) : (
-                      <Rocket className="w-12 h-12 text-white" />
+                      <Rocket className="w-10 h-10 text-white" />
                     )}
                   </div>
                   <div className="flex-1">
@@ -1207,8 +1207,8 @@ const Home = () => {
               {/* Anonymous Founder Info - Clean */}
               <div className="px-6 pb-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
-                    <User className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
