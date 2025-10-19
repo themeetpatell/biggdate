@@ -40,6 +40,7 @@ const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [userIntent, setUserIntent] = useState(null);
   const userMenuRef = useRef(null);
   const notificationRef = useRef(null);
   const location = useLocation();
@@ -47,7 +48,49 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const navItems = [
+  // Check user intent from localStorage
+  useEffect(() => {
+    const intent = localStorage.getItem('selectedIntent');
+    setUserIntent(intent);
+  }, []);
+
+  // Sprint user navigation
+  const sprintNavItems = [
+    { 
+      path: '/home', 
+      label: 'Sprint Dashboard', 
+      icon: Zap, 
+      description: 'Track Your Idea Sprint Progress',
+      isHighlighted: true
+    },
+    { 
+      path: '/startup-workspace', 
+      label: 'Build MVP', 
+      icon: Rocket, 
+      description: 'Build Your Product'
+    },
+    { 
+      path: '/cofounders', 
+      label: 'Find Sprint Partner', 
+      icon: Sparkles, 
+      description: 'Find Cofounders for Your Sprint'
+    },
+    { 
+      path: '/my-pitches', 
+      label: 'My Idea', 
+      icon: Target, 
+      description: 'Manage Your Startup Idea'
+    },
+    { 
+      path: '/launch', 
+      label: 'Launch', 
+      icon: CheckCircle, 
+      description: 'Launch Your MVP'
+    }
+  ];
+
+  // Default navigation
+  const defaultNavItems = [
     { 
       path: '/home', 
       label: 'Home', 
@@ -80,6 +123,9 @@ const Navbar = () => {
       description: 'Prepare for Launch'
     }
   ];
+
+  // Select nav items based on user type
+  const navItems = userIntent === 'idea-sprint' ? sprintNavItems : defaultNavItems;
 
   // Handle scroll effect
   useEffect(() => {

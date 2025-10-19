@@ -18,6 +18,7 @@ const LoadingFallback = memo(() => (
 // Lazy load components for better performance
 const Navbar = lazy(() => import('./components/Navbar.jsx'));
 const Home = lazy(() => import('./components/Home.jsx'));
+const SprintDashboard = lazy(() => import('./components/SprintDashboard.jsx'));
 const Auth = lazy(() => import('./components/Auth.jsx'));
 const Landing = lazy(() => import('./components/Landing.jsx'));
 const Onboarding = lazy(() => import('./components/onboarding/Onboarding.jsx'));
@@ -61,6 +62,22 @@ const MainLayout = ({ children }) => (
     </main>
   </div>
 );
+
+// Home Router - Routes to correct dashboard based on user type
+const HomeRouter = () => {
+  const [userIntent, setUserIntent] = useState(null);
+
+  useEffect(() => {
+    const intent = localStorage.getItem('selectedIntent');
+    setUserIntent(intent);
+  }, []);
+
+  if (userIntent === 'idea-sprint') {
+    return <SprintDashboard />;
+  }
+
+  return <Home />;
+};
 
 const AppContent = () => {
   const dispatch = useDispatch();
@@ -167,7 +184,7 @@ const AppContent = () => {
               <Route path="/home" element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <Home />
+                    <HomeRouter />
                   </MainLayout>
                 </ProtectedRoute>
               } />
