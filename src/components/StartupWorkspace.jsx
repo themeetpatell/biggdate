@@ -2120,7 +2120,7 @@ const StartupWorkspace = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <Target className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">{startupData.progress}%</span>
@@ -2131,7 +2131,7 @@ const StartupWorkspace = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">${startupData.funding.raised.toLocaleString()}</span>
@@ -2142,7 +2142,7 @@ const StartupWorkspace = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">{startupData.metrics.users}</span>
@@ -2289,7 +2289,7 @@ const StartupWorkspace = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
                       isActive
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        ? 'bg-gray-900 text-white shadow-lg'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >

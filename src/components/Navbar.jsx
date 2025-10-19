@@ -187,10 +187,10 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-xl sm:text-2xl text-gray-900">
+                <span className="font-bold text-l sm:text-xl text-gray-900">
                   Co-Builders
                 </span>
-                <span className="text-xs text-gray-500 -mt-1 hidden sm:block">MatchingCofounder </span>
+                <span className="text-xs text-gray-500 -mt-1 hidden sm:block">Building Startups</span>
             </div>
           </Link>
 

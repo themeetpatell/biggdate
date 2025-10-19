@@ -203,31 +203,34 @@ const InvestorRoom = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-3">
         {dataRoom.documents.map(doc => (
-          <div key={doc.id} className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <div className="flex items-start gap-3 mb-3">
-              {getFileIcon(doc.type)}
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900 text-sm">{doc.name}</h4>
-                <p className="text-xs text-gray-500">{doc.size} • {doc.type.toUpperCase()}</p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-600 mb-3">{doc.description}</p>
+          <div key={doc.id} className="p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-all">
             <div className="flex items-center justify-between">
-              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(doc.status)}`}>
-                {doc.status}
-              </span>
-              <div className="flex gap-1">
-                <button className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
-                  <Download className="w-4 h-4 text-gray-600" />
-                </button>
-                <button className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
-                  <Share2 className="w-4 h-4 text-gray-600" />
-                </button>
-                <button className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
-                  <Edit3 className="w-4 h-4 text-gray-600" />
-                </button>
+              <div className="flex items-center gap-3 flex-1">
+                {getFileIcon(doc.type)}
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900">{doc.name}</h4>
+                  <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">{doc.size} • {doc.type.toUpperCase()}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(doc.status)}`}>
+                  {doc.status}
+                </span>
+                <div className="flex gap-1">
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Download className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Share2 className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Edit3 className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -402,14 +405,17 @@ const InvestorRoom = () => {
           </div>
         </div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            {renderDataRoom()}
-          </div>
-          <div className="lg:col-span-2 space-y-6">
-            {renderDemoDayAccess()}
-            {renderOneClickIntros()}
+        {/* Content */}
+        <div className="space-y-6">
+          {renderDataRoom()}
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              {renderDemoDayAccess()}
+            </div>
+            <div>
+              {renderOneClickIntros()}
+            </div>
           </div>
         </div>
       </div>
