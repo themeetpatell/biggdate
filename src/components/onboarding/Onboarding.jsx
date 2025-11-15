@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import RoleSelection from './RoleSelection';
 import QuickSetup from './QuickSetup';
 import AnonymousProfileFixed from './AnonymousProfileFixed';
@@ -7,16 +7,35 @@ import OfferSkills from './OfferSkills';
 import IdeaSprint from './IdeaSprint';
 
 const Onboarding = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/onboarding/mission" replace />} />
-      <Route path="/role" element={<RoleSelection />} />
-      <Route path="/mission" element={<QuickSetup />} />
-      <Route path="/pitch" element={<AnonymousProfileFixed />} />
-      <Route path="/offer-skills" element={<OfferSkills />} />
-      <Route path="/idea-sprint" element={<IdeaSprint />} />
-    </Routes>
-  );
+  const location = useLocation();
+  
+  // Get the current path relative to /onboarding
+  const currentPath = location.pathname.replace('/onboarding', '').replace(/^\//, '') || 'mission';
+
+  // If we're at the root onboarding path, redirect to mission
+  if (location.pathname === '/onboarding' || location.pathname === '/onboarding/') {
+    return <Navigate to="/onboarding/mission" replace />;
+  }
+
+  // Render based on current path
+  const renderComponent = () => {
+    switch (currentPath) {
+      case 'role':
+        return <RoleSelection />;
+      case 'mission':
+        return <QuickSetup />;
+      case 'pitch':
+        return <AnonymousProfileFixed />;
+      case 'offer-skills':
+        return <OfferSkills />;
+      case 'idea-sprint':
+        return <IdeaSprint />;
+      default:
+        return <Navigate to="/onboarding/mission" replace />;
+    }
+  };
+
+  return renderComponent();
 };
 
 export default Onboarding;

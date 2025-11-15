@@ -20,7 +20,9 @@ import {
   Volume2,
   Upload,
   FileText,
-  X
+  X,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 
 const QuickSetup = () => {
@@ -36,6 +38,7 @@ const QuickSetup = () => {
   const [yourSkills, setYourSkills] = useState([]);
   const [yourExperience, setYourExperience] = useState('');
   const [yourBackground, setYourBackground] = useState('');
+  const [yourSelf, setYourSelf] = useState('');
   const navigate = useNavigate();
 
   // Set default role values if not already set
@@ -209,31 +212,57 @@ const QuickSetup = () => {
   };
 
   const handleContinue = () => {
-    if (selectedValues.length >= 1 && selectedIntent) {
-      // Save to localStorage
-      localStorage.setItem('whyHere', missionStatement || 'Building the future');
-      localStorage.setItem('selectedValues', JSON.stringify(selectedValues));
-      localStorage.setItem('selectedIntent', selectedIntent);
-      localStorage.setItem('yourIndustries', JSON.stringify(yourIndustries));
-      localStorage.setItem('yourSkills', JSON.stringify(yourSkills));
-      localStorage.setItem('yourExperience', yourExperience);
-      localStorage.setItem('yourBackground', yourBackground);
-      if (hasVoiceNote) {
-        localStorage.setItem('hasVoiceNote', 'true');
-      }
-      if (pitchDeckFile) {
-        localStorage.setItem('pitchDeckFileName', pitchDeckFile.name);
-        localStorage.setItem('pitchDeckFileSize', pitchDeckFile.size.toString());
-      }
-      
-      // Navigate based on selected intent
-      if (selectedIntent === 'find-cofounder') {
-        navigate('/onboarding/pitch');
-      } else if (selectedIntent === 'offer-skills') {
-        navigate('/onboarding/offer-skills');
-      } else if (selectedIntent === 'idea-sprint') {
-        navigate('/onboarding/idea-sprint');
-      }
+    if (!missionStatement.trim()) {
+      alert('Please share your vision');
+      return;
+    }
+    if (yourIndustries.length === 0) {
+      alert('Please add at least one industry');
+      return;
+    }
+    if (!yourSelf.trim()) {
+      alert('Please describe yourself');
+      return;
+    }
+    if (yourSkills.length === 0) {
+      alert('Please add at least one skill');
+      return;
+    }
+    if (!yourExperience) {
+      alert('Please select your experience level');
+      return;
+    }
+    if (selectedValues.length === 0) {
+      alert('Please select at least one value that drives you');
+      return;
+    }
+    if (!selectedIntent) {
+      alert('Please select why you are here');
+      return;
+    }
+
+    localStorage.setItem('whyHere', missionStatement);
+    localStorage.setItem('selectedValues', JSON.stringify(selectedValues));
+    localStorage.setItem('selectedIntent', selectedIntent);
+    localStorage.setItem('yourIndustries', JSON.stringify(yourIndustries));
+    localStorage.setItem('yourSkills', JSON.stringify(yourSkills));
+    localStorage.setItem('yourExperience', yourExperience);
+    localStorage.setItem('yourBackground', yourBackground);
+    localStorage.setItem('yourSelf', yourSelf);
+    if (hasVoiceNote) {
+      localStorage.setItem('hasVoiceNote', 'true');
+    }
+    if (pitchDeckFile) {
+      localStorage.setItem('pitchDeckFileName', pitchDeckFile.name);
+      localStorage.setItem('pitchDeckFileSize', pitchDeckFile.size.toString());
+    }
+    
+    if (selectedIntent === 'find-cofounder') {
+      navigate('/onboarding/pitch');
+    } else if (selectedIntent === 'offer-skills') {
+      navigate('/onboarding/offer-skills');
+    } else if (selectedIntent === 'idea-sprint') {
+      navigate('/onboarding/idea-sprint');
     }
   };
 
@@ -241,7 +270,14 @@ const QuickSetup = () => {
     navigate('/home');
   };
 
-  const isComplete = selectedValues.length >= 1 && selectedIntent;
+  const isComplete = 
+    missionStatement.trim() &&
+    yourIndustries.length > 0 &&
+    yourSelf.trim() &&
+    yourSkills.length > 0 &&
+    yourExperience &&
+    selectedValues.length > 0 &&
+    selectedIntent;
 
   return (
     <>
@@ -271,11 +307,8 @@ const QuickSetup = () => {
             <span className="text-gray-700 font-medium">Your Vision Matters</span>
           </div>
           <h1 className="text-5xl font-normal text-gray-900 mb-4">
-            What's Your Startup Vision?
+            Biggdate
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Share your startup idea, values, and what drives you. Your cofounder is waiting to hear your story.
-          </p>
         </div>
 
         {/* Mission Statement */}
@@ -425,10 +458,10 @@ const QuickSetup = () => {
 
             {/* Background Description */}
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Describe Your Background</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Describe Yourself</h3>
               <textarea
-                value={yourBackground}
-                onChange={(e) => setYourBackground(e.target.value)}
+                value={yourSelf}
+                onChange={(e) => setYourSelf(e.target.value)}
                 placeholder="Tell cofounders about your professional journey, previous companies, achievements, or relevant experience..."
                 className="w-full h-32 p-4 bg-white border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
               />
@@ -501,14 +534,14 @@ const QuickSetup = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-normal text-gray-900">What Drives You?</h2>
             <div className="flex items-center gap-3">
-              <span className={`text-sm font-medium ${selectedValues.length >= 5 ? 'text-green-600' : 'text-gray-600'}`}>
+              <span className={`text-sm font-medium ${selectedValues.length >= 1 ? 'text-gray-900' : 'text-gray-400'}`}>
                 {selectedValues.length}/5 selected
               </span>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <div
                     key={num}
-                    className={`w-2 h-2 rounded-full transition-colors ${
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
                       num <= selectedValues.length ? 'bg-gray-900' : 'bg-gray-300'
                     }`}
                   />
@@ -516,7 +549,7 @@ const QuickSetup = () => {
               </div>
             </div>
           </div>
-          <p className="text-gray-600 mb-8">Choose up to 5 values across all categories that define who you are</p>
+          <p className="text-gray-600 mb-8">Choose 1-5 values across all categories that define who you are</p>
           
           <div className="space-y-6">
             {valueGroups.map((group) => (

@@ -6,16 +6,17 @@ A comprehensive platform for finding cofounders, building startups, and launchin
 
 - **Entrepreneur Profiles**: Detailed profiles with background, skills, and startup experience
 - **Pitch Creation**: Video/audio recording and detailed business concept presentation
-- **Pitch Discovery**: Advanced filtering by industry, skills needed, and location
 - **Pitch-Back System**: Express interest with specific role proposals and collaboration offers
-- **AI Matching**: Cofounder matching algorithm based on complementary skills and vision alignment
-- **Startup Roadmap**: Customized milestone generator for each startup idea
+- **Cofounder Matching**: AI-powered matching based on complementary skills and vision alignment
+- **Idea Sprint Tools**: Idea furnishing, validation, market research, and MVP building
+- **Skills Marketplace**: Offer skills, showcase work, manage clients, and set availability
+- **Sprint Dashboard**: Guided startup development with milestone tracking
 - **Project Board**: Interactive execution board with tasks, deadlines, and progress tracking
 - **Team Workspace**: Document sharing, meeting scheduler, and decision logging
 - **MVP Tracker**: Feature planning and launch countdown with development milestones
 - **Equity Framework**: Templates and guidance for role and equity discussions
 - **Collaboration Tools**: Real-time wireframing, planning, and execution tools
-- **Launch Prep**: Go-to-market planning and investor readiness preparation
+- **Launch Preparation**: Go-to-market planning and investor readiness preparation
 
 ## 🛠️ Tech Stack
 
@@ -103,19 +104,17 @@ Upload the `dist/` folder to any static hosting provider:
 biggdate/
 ├── src/
 │   ├── components/          # React components
-│   │   ├── Messages.jsx     # Chat functionality
+│   │   ├── onboarding/      # Onboarding flow
+│   │   ├── sprint-tools/    # Sprint development tools
+│   │   ├── skills-tools/    # Skills marketplace tools
 │   │   ├── Auth.jsx         # Authentication
 │   │   ├── Home.jsx         # Dashboard
 │   │   └── ...
-│   ├── services/            # Business logic
-│   │   ├── aiPsychologyService.js
-│   │   ├── gamificationService.js
-│   │   └── ...
 │   ├── store/               # Redux store
-│   ├── utils/               # Utility functions
 │   └── App.jsx              # Main application
 ├── public/                  # Static assets
 ├── dist/                    # Production build
+├── backend/                 # Backend API
 ├── docker-compose.yml       # Docker configuration
 ├── Dockerfile               # Frontend Docker image
 ├── nginx.conf               # Nginx configuration

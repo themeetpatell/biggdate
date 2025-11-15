@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useSelector, useDispatch } from 'react-redux';
 import { initializeAuth } from './store/slices/authSlice.js';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
-import LoadingSpinner from './components/LoadingSpinner.jsx';
 
 // Performance optimizations
 const LoadingFallback = memo(() => (
@@ -25,7 +24,6 @@ const Onboarding = lazy(() => import('./components/onboarding/Onboarding.jsx'));
 const StartupPitchCreator = lazy(() => import('./components/StartupPitchCreator.jsx'));
 const PitchBackSystem = lazy(() => import('./components/PitchBackSystem.jsx'));
 const CofounderMatching = lazy(() => import('./components/CofounderMatching.jsx'));
-const StartupRoadmap = lazy(() => import('./components/StartupRoadmap.jsx'));
 const ProjectBoard = lazy(() => import('./components/ProjectBoard.jsx'));
 const TeamWorkspace = lazy(() => import('./components/TeamWorkspace.jsx'));
 const MVPTracker = lazy(() => import('./components/MVPTracker.jsx'));
@@ -41,8 +39,11 @@ const IdeaFurnishing = lazy(() => import('./components/sprint-tools/IdeaFurnishi
 const MVPBuilder = lazy(() => import('./components/sprint-tools/MVPBuilder.jsx'));
 const IdeaValidator = lazy(() => import('./components/sprint-tools/IdeaValidator.jsx'));
 const MarketResearch = lazy(() => import('./components/sprint-tools/MarketResearch.jsx'));
+const ValidationEngine = lazy(() => import('./components/sprint-tools/ValidationEngine.jsx'));
 const PitchDeckBuilder = lazy(() => import('./components/sprint-tools/PitchDeckBuilder.jsx'));
 const PitchPrep = lazy(() => import('./components/sprint-tools/PitchPrep.jsx'));
+const ZeroToMVPBuilder = lazy(() => import('./components/sprint-tools/ZeroToMVPBuilder.jsx'));
+const RevenueModelBuilder = lazy(() => import('./components/RevenueModelBuilder.jsx'));
 
 // Skills Tools
 const SkillsDashboard = lazy(() => import('./components/SkillsDashboard.jsx'));
@@ -51,6 +52,11 @@ const ServicePackages = lazy(() => import('./components/skills-tools/ServicePack
 const ProjectTracker = lazy(() => import('./components/skills-tools/ProjectTracker.jsx'));
 const ClientManagement = lazy(() => import('./components/skills-tools/ClientManagement.jsx'));
 const AvailabilityRates = lazy(() => import('./components/skills-tools/AvailabilityRates.jsx'));
+const Marketplace = lazy(() => import('./components/Marketplace.jsx'));
+
+// AI Co-Founder
+const AICoFounder = lazy(() => import('./components/ai-cofounder/AICoFounder.jsx'));
+const StakeholderCRM = lazy(() => import('./components/StakeholderCRM.jsx'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -125,6 +131,7 @@ const AppContent = () => {
         role: 'Technical Co-founder',
         bio: 'Full-stack developer with 8 years experience building scalable web applications. Passionate about AI and fintech.',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&h=400&fit=crop',
         skills: ['React', 'Node.js', 'Python', 'AWS', 'Machine Learning'],
         experience: '8 years',
         previousStartups: ['TechCorp (Acquired)', 'DataFlow (Series A)'],
@@ -141,6 +148,7 @@ const AppContent = () => {
           role: 'Business Co-founder',
           bio: 'Former McKinsey consultant with 6 years in strategy and operations. Led 3 successful product launches.',
           avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
+          coverImage: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop',
           skills: ['Business Strategy', 'Operations', 'Fundraising', 'Product Management'],
           experience: '6 years',
           previousStartups: ['GrowthCo (Series B)', 'ScaleUp (Acquired)'],
@@ -155,6 +163,7 @@ const AppContent = () => {
           role: 'Product Designer',
           bio: 'Award-winning designer with expertise in UX/UI and brand design. Worked at Apple and Google.',
           avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+          coverImage: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop',
           skills: ['UI/UX Design', 'Brand Design', 'Figma', 'User Research', 'Prototyping'],
           experience: '7 years',
           previousStartups: ['DesignStudio (Acquired)', 'CreativeLab (Series A)'],
@@ -291,6 +300,14 @@ const AppContent = () => {
                 </ProtectedRoute>
               } />
               
+              <Route path="/ai-cofounder" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <AICoFounder />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
               <Route path="/collaboration" element={
                 <ProtectedRoute>
                   <MainLayout>
@@ -377,6 +394,14 @@ const AppContent = () => {
                 </ProtectedRoute>
               } />
               
+              <Route path="/sprint/validation-engine" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ValidationEngine />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
               <Route path="/sprint/pitch-deck" element={
                 <ProtectedRoute>
                   <MainLayout>
@@ -389,6 +414,22 @@ const AppContent = () => {
                 <ProtectedRoute>
                   <MainLayout>
                     <PitchPrep />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/zero-to-mvp" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ZeroToMVPBuilder />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/sprint/revenue-model" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <RevenueModelBuilder />
                   </MainLayout>
                 </ProtectedRoute>
               } />
@@ -430,6 +471,22 @@ const AppContent = () => {
                 <ProtectedRoute>
                   <MainLayout>
                     <AvailabilityRates />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/marketplace" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Marketplace />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/crm" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <StakeholderCRM />
                   </MainLayout>
                 </ProtectedRoute>
               } />

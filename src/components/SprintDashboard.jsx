@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Zap, Target, CheckCircle, Clock, TrendingUp, Users,
   Lightbulb, Rocket, Calendar, ArrowRight, Plus,
-  BarChart3, FileText, MessageSquare, AlertCircle
+  BarChart3, FileText, MessageSquare, AlertCircle, DollarSign
 } from 'lucide-react';
 
 const SprintDashboard = () => {
@@ -92,18 +92,25 @@ const SprintDashboard = () => {
       color: 'bg-gray-700'
     },
     {
+      title: 'Validation Engine',
+      description: '0→1 validation system',
+      icon: Target,
+      link: '/sprint/validation-engine',
+      color: 'bg-gray-600'
+    },
+    {
       title: 'Pitch Deck',
       description: 'Create investor deck',
       icon: FileText,
       link: '/sprint/pitch-deck',
-      color: 'bg-gray-600'
+      color: 'bg-gray-500'
     },
     {
       title: 'Practice Pitch',
       description: 'Perfect your pitch',
       icon: MessageSquare,
       link: '/sprint/pitch-prep',
-      color: 'bg-gray-500'
+      color: 'bg-gray-400'
     },
     {
       title: 'Find Sprint Partner',
@@ -111,6 +118,20 @@ const SprintDashboard = () => {
       icon: Users,
       link: '/cofounders',
       color: 'bg-gray-900'
+    },
+    {
+      title: 'ZERO TO MVP Builder',
+      description: 'Generate all MVP assets',
+      icon: Zap,
+      link: '/sprint/zero-to-mvp',
+      color: 'bg-black'
+    },
+    {
+      title: 'Revenue Model Builder',
+      description: 'Pricing lab & monetization',
+      icon: DollarSign,
+      link: '/sprint/revenue-model',
+      color: 'bg-gradient-to-r from-indigo-600 to-purple-600'
     }
   ];
 

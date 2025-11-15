@@ -117,14 +117,29 @@ const MyPitches = () => {
   const [selectedPitch, setSelectedPitch] = useState(null);
   const [pitchResponse, setPitchResponse] = useState('');
 
-  const tabs = [
-    { id: 'sent', label: 'Sent Pitches', icon: Send, count: 8 },
-    { id: 'received', label: 'Received Pitches', icon: MessageCircle, count: 12 },
-    { id: 'accepted', label: 'Accepted Matches', icon: CheckCircle, count: 3 }
-  ];
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return date.toLocaleDateString();
+  };
 
-  // Mock data for sent pitches
-  const sentPitches = [
+  const loadSentPitches = () => {
+    const storedPitches = JSON.parse(localStorage.getItem('sentPitches') || '[]');
+    return storedPitches.map(pitch => ({
+      ...pitch,
+      sentAt: formatTimeAgo(pitch.sentAt)
+    }));
+  };
+
+  const [sentPitches, setSentPitches] = useState(() => {
+    const stored = loadSentPitches();
+    const mock = [
     {
       id: 1,
       pitchId: 101,
@@ -161,6 +176,57 @@ const MyPitches = () => {
       response: "Thanks for reaching out, but I've decided to go in a different direction.",
       compatibility: 85
     }
+    ];
+    return [...stored, ...mock];
+  });
+
+  useEffect(() => {
+    const stored = loadSentPitches();
+    const mock = [
+      {
+        id: 1,
+        pitchId: 101,
+        title: "EcoTrack AI",
+        description: "AI-powered carbon footprint tracking for businesses",
+        author: "Sarah Martinez",
+        status: "pending",
+        sentAt: "2 hours ago",
+        message: "Hi! I'm interested in your EcoTrack AI idea. I have 5+ years in AI/ML and think we'd make great cofounders. I can help with the technical implementation and scaling.",
+        response: null,
+        compatibility: 92
+      },
+      {
+        id: 2,
+        pitchId: 102,
+        title: "HealthConnect",
+        description: "Telemedicine platform connecting patients with specialists",
+        author: "Dr. Michael Chen",
+        status: "accepted",
+        sentAt: "1 day ago",
+        message: "Your HealthConnect idea is exactly what the healthcare industry needs. I have experience in healthcare tech and would love to discuss this further.",
+        response: "Thank you for your interest! I'd love to connect and discuss this opportunity.",
+        compatibility: 88
+      },
+      {
+        id: 3,
+        pitchId: 103,
+        title: "EduFlow",
+        description: "Personalized learning platform for K-12 education",
+        author: "Emily Rodriguez",
+        status: "rejected",
+        sentAt: "2 days ago",
+        message: "I'm passionate about EdTech and your EduFlow concept is innovative. I have experience in educational technology and would be excited to collaborate.",
+        response: "Thanks for reaching out, but I've decided to go in a different direction.",
+        compatibility: 85
+      }
+    ];
+    setSentPitches([...stored, ...mock]);
+  }, []);
+
+  const tabs = [
+    { id: 'sent', label: 'Sent Pitches', icon: Send, count: sentPitches.length },
+    { id: 'received', label: 'Received Pitches', icon: MessageCircle, count: 12 },
+    { id: 'accepted', label: 'Accepted Matches', icon: CheckCircle, count: 3 }
   ];
 
   // Mock data for received pitches
@@ -346,20 +412,39 @@ const MyPitches = () => {
 
   const renderSentPitches = () => (
     <div className="space-y-4">
-      {sentPitches.map((pitch) => (
-        <div key={pitch.id} className="bg-white rounded-2xl p-6 shadow-lg">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{pitch.title}</h3>
-              <p className="text-gray-600 text-sm mb-2">{pitch.description}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span>To: {pitch.author}</span>
-                <span>•</span>
-                <span>{pitch.sentAt}</span>
-                <span>•</span>
-                <span className="text-gray-600 font-semibold">{pitch.compatibility}% match</span>
+      {sentPitches.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl">
+          <Send className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No Sent Pitches Yet</h3>
+          <p className="text-gray-600 mb-6">Start sending pitches to co-founders from the marketplace</p>
+          <button
+            onClick={() => window.location.href = '/cofounders'}
+            className="px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300"
+          >
+            Go to Marketplace
+          </button>
+        </div>
+      ) : (
+        sentPitches.map((pitch) => (
+          <div key={pitch.id} className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{pitch.title || 'My Startup Pitch'}</h3>
+                <p className="text-gray-600 text-sm mb-2">
+                  {pitch.description || (pitch.message ? pitch.message.substring(0, 100) + '...' : 'No description')}
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span>To: {pitch.author}</span>
+                  <span>•</span>
+                  <span>{pitch.sentAt}</span>
+                  {pitch.compatibility && (
+                    <>
+                      <span>•</span>
+                      <span className="text-gray-600 font-semibold">{pitch.compatibility}% match</span>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                 pitch.status === 'accepted' ? 'bg-gray-100 text-gray-700' :
@@ -400,7 +485,8 @@ const MyPitches = () => {
             </button>
           </div>
         </div>
-      ))}
+        ))
+      )}
     </div>
   );
 
@@ -795,12 +881,6 @@ const MyPitches = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Pitches</h1>
-          <p className="text-gray-600">Manage your sent and received pitches</p>
-        </div>
-
         {/* Tabs */}
         <div className="mb-8">
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl">

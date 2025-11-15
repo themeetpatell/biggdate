@@ -12,6 +12,7 @@ import {
   HelpCircle, 
   LogOut, 
   ChevronDown, 
+  ChevronRight,
   Menu, 
   X,
   Plus,
@@ -31,7 +32,8 @@ import {
   Rocket,
   Target,
   Briefcase,
-  Users
+  Users,
+  DollarSign
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
@@ -88,6 +90,13 @@ const Navbar = () => {
       label: 'Launch', 
       icon: CheckCircle, 
       description: 'Launch Your MVP'
+    },
+    { 
+      path: '/ai-cofounder', 
+      label: 'AI Co-Founder', 
+      icon: Brain, 
+      description: 'Your End-to-End AI Partner',
+      isHighlighted: true
     }
   ];
 
@@ -108,9 +117,9 @@ const Navbar = () => {
     },
     { 
       path: '/cofounders', 
-      label: 'Cofounders', 
+      label: 'VisionMatching', 
       icon: Sparkles, 
-      description: 'Find Your Perfect Cofounder'
+      description: 'Match with Co-Founders'
     },
     { 
       path: '/startup-workspace', 
@@ -123,6 +132,13 @@ const Navbar = () => {
       label: 'Launch', 
       icon: Target, 
       description: 'Prepare for Launch'
+    },
+    { 
+      path: '/ai-cofounder', 
+      label: 'AI Co-Founder', 
+      icon: Brain, 
+      description: 'Your End-to-End AI Partner',
+      isHighlighted: true
     }
   ];
 
@@ -158,6 +174,13 @@ const Navbar = () => {
       label: 'Find Startups', 
       icon: Target, 
       description: 'Browse Opportunities'
+    },
+    { 
+      path: '/ai-cofounder', 
+      label: 'AI Co-Founder', 
+      icon: Brain, 
+      description: 'Your End-to-End AI Partner',
+      isHighlighted: true
     }
   ];
 
@@ -252,155 +275,102 @@ const Navbar = () => {
   return (
     <>
       {/* Main Navbar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50' 
-          : 'bg-transparent'
+          ? 'bg-white/98 backdrop-blur-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border-b border-gray-200/80' 
+          : 'bg-white/95 backdrop-blur-lg border-b border-gray-100/60'
       }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
           {/* Logo */}
-            <Link to="/home" className="flex items-center gap-3 flex-shrink-0 group">
+            <Link to="/home" className="flex items-center flex-shrink-0 group">
               <div className="relative">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-black flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center">
-                  <Star className="w-2.5 h-2.5 text-white" />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-l sm:text-xl text-gray-900">
-                  Co-Builders
+                <div className="absolute -inset-1 bg-gradient-to-r from-gray-900/10 via-gray-800/5 to-gray-900/10 rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500"></div>
+                <span className="relative text-2xl font-extrabold tracking-tight bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent group-hover:from-gray-700 group-hover:via-gray-600 group-hover:to-gray-700 transition-all duration-500">
+                  Biggdate
                 </span>
-                <span className="text-xs text-gray-500 -mt-1 hidden sm:block">Building Startups</span>
-            </div>
+                <div className="absolute -bottom-1.5 left-0 w-0 h-[2px] bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 group-hover:w-full transition-all duration-500 rounded-full"></div>
+              </div>
           </Link>
 
           {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-2">
+            <div className="hidden lg:flex items-center space-x-0.5">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                    className={`group relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 ${
+                  className={`relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 group ${
                     isActive 
-                        ? 'bg-black text-white shadow-lg' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`p-1.5 rounded-2xl transition-all duration-300 ${
-                        isActive 
-                          ? 'bg-white/20' 
-                          : 'bg-gray-200 group-hover:bg-gray-300 group-hover:scale-110'
-                      }`}>
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-700'}`} />
-                      </div>
-                      <span className="font-semibold">{item.label}</span>
-                    {item.isHighlighted && (
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div>
-                    )}
-                  </div>
-                    
-                    {/* Hover Tooltip */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                      {item.description}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                  </div>
+                      ? 'text-gray-900' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <span className="relative z-10">{item.label}</span>
+                  {isActive ? (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"></div>
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-transparent via-gray-900 to-transparent rounded-full"></div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-gray-50/0 rounded-xl group-hover:bg-gray-50/60 transition-all duration-300"></div>
+                  )}
                 </Link>
               );
             })}
           </div>
 
           {/* Desktop Actions */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-2">
             {/* Notifications */}
             <div className="relative" ref={notificationRef}>
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105 relative group"
+                className="relative p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100/90 rounded-xl transition-all duration-300 hover:scale-105 group"
               >
-                  <Bell className="w-4 h-4 group-hover:animate-bounce" />
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <Bell className="relative w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 {notifications.filter(n => !n.isRead).length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-black text-white text-xs rounded-full flex items-center justify-center animate-pulse shadow-lg">
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.2)] ring-2 ring-white animate-pulse">
                     {notifications.filter(n => !n.isRead).length}
                   </span>
                 )}
               </button>
               
               {showNotifications && (
-                  <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-bold text-gray-900 text-lg">Notifications</h3>
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">
-                            {notifications.filter(n => !n.isRead).length} new
-                          </span>
-                          <button className="text-gray-400 hover:text-gray-600">
-                            <Settings className="w-4 h-4" />
-                          </button>
+                <div className="absolute right-0 top-full mt-3 w-[420px] bg-white/98 backdrop-blur-2xl rounded-2xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] border border-gray-200/80 z-50 overflow-hidden">
+                  <div className="p-5 border-b border-gray-100/80 bg-gradient-to-br from-gray-50/80 via-white to-gray-50/50">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-gray-900 text-lg tracking-tight">Notifications</h3>
+                      <span className="px-3 py-1.5 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white text-xs font-bold rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
+                        {notifications.filter(n => !n.isRead).length} new
+                      </span>
+                    </div>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                    {notifications.map((notification) => (
+                      <div key={notification.id} className={`p-4 hover:bg-gradient-to-r hover:from-gray-50/90 hover:via-gray-50/50 hover:to-transparent border-b border-gray-100/60 last:border-b-0 transition-all duration-200 cursor-pointer group ${!notification.isRead ? 'bg-gradient-to-r from-gray-50/40 via-gray-50/20 to-transparent' : ''}`}>
+                        <div className="flex items-start gap-3">
+                          {!notification.isRead && (
+                            <div className="w-2.5 h-2.5 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-full flex-shrink-0 mt-1.5 shadow-sm ring-1 ring-gray-900/20"></div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 leading-tight group-hover:text-gray-800 transition-colors">{notification.title}</p>
+                            <p className="text-sm text-gray-600 mt-1 leading-relaxed">{notification.message}</p>
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
+                              <Clock className="w-3 h-3 opacity-60" />
+                              {notification.time}
+                            </p>
+                          </div>
                         </div>
                       </div>
+                    ))}
                   </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      {notifications.map((notification, index) => {
-                        const getNotificationIcon = (type) => {
-                          switch (type) {
-                            case 'match': return <Heart className="w-4 h-4 text-white" />;
-                            case 'message': return <MessageCircle className="w-4 h-4 text-white" />;
-                            case 'pitch': return <Send className="w-4 h-4 text-white" />;
-                            case 'event': return <Calendar className="w-4 h-4 text-white" />;
-                            case 'profile': return <User className="w-4 h-4 text-white" />;
-                            default: return <Bell className="w-4 h-4 text-white" />;
-                          }
-                        };
-
-                        const getNotificationColor = (type) => {
-                          switch (type) {
-                            case 'match': return 'bg-black';
-                            case 'message': return 'bg-gray-600';
-                            case 'pitch': return 'bg-gray-700';
-                            case 'event': return 'bg-gray-800';
-                            case 'profile': return 'bg-gray-900';
-                            default: return 'bg-gray-500';
-                          }
-                        };
-
-                        return (
-                          <div key={notification.id} className={`p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 group ${!notification.isRead ? 'bg-gray-50/50' : ''}`}>
-                            <div className="flex items-start gap-4">
-                              <div className={`w-10 h-10 ${getNotificationColor(notification.type)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
-                                {getNotificationIcon(notification.type)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between">
-                                  <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-600 transition-colors">
-                                    {notification.title}
-                                  </p>
-                                  {!notification.isRead && (
-                                    <div className="w-2 h-2 bg-black rounded-full flex-shrink-0 mt-1"></div>
-                                  )}
-                                </div>
-                                <p className="text-sm text-gray-600 mt-1 leading-relaxed">{notification.message}</p>
-                                <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {notification.time}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      </div>
-                    <div className="p-4 bg-gray-50 border-t border-gray-100">
-                      <button className="w-full text-center text-sm font-medium text-gray-600 hover:text-gray-700 transition-colors">
-                        View All Notifications
-                      </button>
+                  <div className="p-4 border-t border-gray-100/80 bg-gradient-to-br from-gray-50/50 to-transparent">
+                    <button className="w-full text-center text-sm font-bold text-gray-700 hover:text-gray-900 transition-colors py-2.5 rounded-xl hover:bg-gray-100/60 transition-all duration-200">
+                      View All Notifications
+                    </button>
                   </div>
                 </div>
               )}
@@ -411,93 +381,141 @@ const Navbar = () => {
             <div className="relative" ref={userMenuRef}>
               <button 
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-3 p-2.5 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105 group"
+                className="flex items-center gap-2.5 p-1.5 pr-3 text-gray-700 hover:bg-gray-100/90 rounded-xl transition-all duration-300 hover:scale-105 group"
               >
                 <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <img
-                    src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=40&rounded=true`}
+                    src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=36&rounded=true`}
                     alt={`${user?.firstName} ${user?.lastName}`}
-                    className="w-10 h-10 rounded-2xl object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
+                    className="relative w-9 h-9 rounded-xl object-cover ring-2 ring-gray-200/80 group-hover:ring-gray-300 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                   />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center border-2 border-white">
-                    <CheckCircle className="w-2.5 h-2.5 text-white" />
-                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-gradient-to-br from-green-500 to-green-600 rounded-full border-2 border-white shadow-[0_2px_4px_rgba(0,0,0,0.1)] ring-1 ring-green-500/20"></div>
                 </div>
-                <div className="text-left">
-                  <div className="text-sm font-semibold text-gray-900 truncate max-w-32 group-hover:text-gray-600 transition-colors">
-                    {user?.firstName || 'John'} {user?.lastName || 'Doe'}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate max-w-32">
-                    @{user?.username || 'johndoe123'}
-                  </div>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-gray-500 transition-all duration-300 ${isUserMenuOpen ? 'rotate-180 text-gray-700' : ''}`} />
               </button>
               
               {isUserMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                <div className="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] border border-gray-200/60 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* User Info Header */}
-                  <div className="p-6 bg-gray-50 border-b border-gray-100">
+                  <div className="p-6 border-b border-gray-100 bg-gradient-to-br from-gray-50/50 via-white to-white">
                     <div className="flex items-center gap-4">
-                      <div className="relative">
+                      <div className="relative flex-shrink-0">
+                        <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent rounded-2xl"></div>
                         <img
                           src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=48&rounded=true`}
                           alt={`${user?.firstName} ${user?.lastName}`}
-                          className="w-12 h-12 rounded-2xl object-cover shadow-lg"
+                          className="relative w-14 h-14 rounded-2xl object-cover ring-2 ring-gray-200/60 shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center border-2 border-white">
-                          <CheckCircle className="w-2.5 h-2.5 text-white" />
-                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-green-500 to-green-600 rounded-full border-[3px] border-white shadow-[0_2px_8px_rgba(34,197,94,0.3)] ring-1 ring-green-500/30"></div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-gray-900 text-lg truncate">
-                            {user?.firstName || 'John'} {user?.lastName || 'Doe'}
-                          </h3>
-                          <div className="flex items-center gap-1">
-                            <CrownIcon className="w-4 h-4 text-black" />
-                            <CheckCircle className="w-4 h-4 text-black" />
-                          </div>
+                        <div className="font-bold text-gray-900 text-base truncate leading-tight">
+                          {user?.firstName || 'John'} {user?.lastName || 'Doe'}
                         </div>
-                        <p className="text-sm text-gray-600 truncate">@{user?.username || 'johndoe123'}</p>
+                        <div className="text-sm text-gray-500 truncate mt-1">@{user?.username || 'johndoe123'}</div>
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <div className="px-2 py-0.5 bg-gray-100 rounded-md">
+                            <span className="text-xs font-semibold text-gray-700">Pro</span>
+                          </div>
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span className="text-xs text-gray-500">Online</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                   
                   {/* Menu Items */}
                   <div className="p-2">
-                    <Link to="/profile" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group">
-                      <div className="w-8 h-8 bg-gray-700 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <User className="w-4 h-4 text-white" />
+                    <Link 
+                      to="/profile" 
+                      className="flex items-center gap-4 px-4 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-gray-200 transition-all duration-200 group-hover:scale-105 shadow-sm">
+                        <User className="w-4 h-4 text-gray-700" />
                       </div>
-                      <div>
-                        <span className="font-medium">Profile</span>
-                        <p className="text-xs text-gray-500">Manage your profile</p>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Profile</div>
+                        <div className="text-xs text-gray-500 mt-0.5">View and edit your profile</div>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     
-                    <Link to="/settings" className="flex items-center gap-4 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group">
-                      <div className="w-8 h-8 bg-gray-800 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <Settings className="w-4 h-4 text-white" />
+                    <Link 
+                      to="/settings" 
+                      className="flex items-center gap-4 px-4 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group mt-1"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-gray-200 transition-all duration-200 group-hover:scale-105 shadow-sm">
+                        <Settings className="w-4 h-4 text-gray-700" />
                       </div>
-                      <div>
-                        <span className="font-medium">Settings</span>
-                        <p className="text-xs text-gray-500">Account preferences</p>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Settings</div>
+                        <div className="text-xs text-gray-500 mt-0.5">Manage your preferences</div>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     
+                    <Link 
+                      to="/marketplace" 
+                      className="flex items-center gap-4 px-4 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group mt-1"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-gray-200 transition-all duration-200 group-hover:scale-105 shadow-sm">
+                        <Briefcase className="w-4 h-4 text-gray-700" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Marketplace</div>
+                        <div className="text-xs text-gray-500 mt-0.5">Find MVP builders & services</div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                    
+                    <Link 
+                      to="/crm" 
+                      className="flex items-center gap-4 px-4 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 rounded-xl transition-all duration-200 group mt-1"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <div className="p-2.5 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl group-hover:from-blue-200 group-hover:to-cyan-200 transition-all duration-200 group-hover:scale-105 shadow-sm">
+                        <Users className="w-4 h-4 text-blue-700" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Founders' CRM</div>
+                        <div className="text-xs text-gray-500 mt-0.5">Track advisors, investors & stakeholders</div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                    
+                    <Link 
+                      to="/sprint/revenue-model" 
+                      className="flex items-center gap-4 px-4 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 rounded-xl transition-all duration-200 group mt-1"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl group-hover:from-indigo-200 group-hover:to-purple-200 transition-all duration-200 group-hover:scale-105 shadow-sm">
+                        <DollarSign className="w-4 h-4 text-indigo-700" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Revenue Model Builder</div>
+                        <div className="text-xs text-gray-500 mt-0.5">Pricing lab & monetization</div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                    
+                    <div className="my-2 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
                     
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center gap-4 p-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-200 w-full text-left group"
+                      className="flex items-center gap-4 px-4 py-3.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 w-full text-left group"
                     >
-                      <div className="w-8 h-8 bg-gray-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <LogOut className="w-4 h-4 text-white" />
+                      <div className="p-2.5 bg-red-50 rounded-xl group-hover:bg-red-100 transition-all duration-200 group-hover:scale-105 shadow-sm">
+                        <LogOut className="w-4 h-4 text-red-600" />
                       </div>
-                      <div>
-                        <span className="font-medium">Logout</span>
-                        <p className="text-xs text-gray-500">Sign out of your account</p>
+                      <div className="flex-1">
+                        <div className="font-semibold text-red-600">Logout</div>
+                        <div className="text-xs text-red-500/70 mt-0.5">Sign out of your account</div>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
                   </div>
                 </div>
@@ -508,110 +526,91 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105"
+            className="lg:hidden p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100/90 rounded-xl transition-all duration-300 hover:scale-105"
           >
-              <div className="relative">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                {notifications.filter(n => !n.isRead).length > 0 && !isMenuOpen && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-black rounded-full"></div>
-                )}
-              </div>
           </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-200/50 shadow-lg">
-            <div className="px-4 py-6 space-y-2">
-              {/* Mobile Navigation */}
+          <div className="lg:hidden bg-white/98 backdrop-blur-xl border-t border-gray-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+            <div className="px-4 py-4 space-y-1">
               {navItems.map((item) => {
-                const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${
+                    className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       isActive 
-                        ? 'bg-black text-white shadow-lg' 
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'text-gray-900 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50/90'
                     }`}
                   >
-                    <div className={`p-2 rounded-xl ${
-                      isActive 
-                        ? 'bg-white/20' 
-                        : 'bg-gray-200'
-                    }`}>
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-700'}`} />
-                    </div>
-                    <div className="flex-1">
-                      <span className="font-semibold">{item.label}</span>
-                      <p className="text-xs opacity-75">{item.description}</p>
-                    </div>
-                    {item.isHighlighted && (
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                    )}
+                    {item.label}
                   </Link>
                 );
               })}
               
-              
-              {/* Mobile User Section */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="flex items-center gap-4 p-4 mb-4 bg-gray-50 rounded-2xl">
-                  <div className="relative">
-                    <img
-                      src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=000000&color=fff&size=48&rounded=true`}
-                      alt={`${user?.firstName} ${user?.lastName}`}
-                      className="w-12 h-12 rounded-2xl object-cover shadow-lg"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center border-2 border-white">
-                      <CheckCircle className="w-2.5 h-2.5 text-white" />
-                    </div>
+              <div className="pt-4 mt-4 border-t border-gray-200/80">
+                <div className="px-4 py-3 mb-2 bg-gradient-to-r from-gray-50/60 via-gray-50/40 to-transparent rounded-xl">
+                  <div className="font-bold text-gray-900 text-sm tracking-tight">
+                    {user?.firstName || 'John'} {user?.lastName || 'Doe'}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-bold text-gray-900 truncate">
-                        {user?.firstName || 'John'} {user?.lastName || 'Doe'}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <CrownIcon className="w-3 h-3 text-black" />
-                        <CheckCircle className="w-3 h-3 text-black" />
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-600 truncate">
-                      @{user?.username || 'johndoe123'}
-                    </div>
+                  <div className="text-xs text-gray-500 mt-0.5">@{user?.username || 'johndoe123'}</div>
+                </div>
+                <Link 
+                  to="/profile" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gradient-to-r hover:from-gray-50/90 hover:via-gray-50/50 hover:to-transparent rounded-xl transition-all duration-200"
+                >
+                  <div className="p-2 bg-gray-100/80 rounded-lg">
+                    <User className="w-4 h-4 text-gray-700" />
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <Link 
-                    to="/profile" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-2 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
-                  >
-                    <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">Profile</span>
-                  </Link>
-                  <Link 
-                    to="/settings" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-2 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span className="text-sm font-medium">Settings</span>
-                  </Link>
-                </div>
-                
+                  <span>Profile</span>
+                </Link>
+                <Link 
+                  to="/settings" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gradient-to-r hover:from-gray-50/90 hover:via-gray-50/50 hover:to-transparent rounded-xl transition-all duration-200"
+                >
+                  <div className="p-2 bg-gray-100/80 rounded-lg">
+                    <Settings className="w-4 h-4 text-gray-700" />
+                  </div>
+                  <span>Settings</span>
+                </Link>
+                <Link 
+                  to="/marketplace" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gradient-to-r hover:from-gray-50/90 hover:via-gray-50/50 hover:to-transparent rounded-xl transition-all duration-200"
+                >
+                  <div className="p-2 bg-gray-100/80 rounded-lg">
+                    <Briefcase className="w-4 h-4 text-gray-700" />
+                  </div>
+                  <span>Marketplace</span>
+                </Link>
+                <Link 
+                  to="/crm" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gradient-to-r hover:from-blue-50/90 hover:via-cyan-50/50 hover:to-transparent rounded-xl transition-all duration-200"
+                >
+                  <div className="p-2 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg">
+                    <Users className="w-4 h-4 text-blue-700" />
+                  </div>
+                  <span>Founders' CRM</span>
+                </Link>
+                <div className="my-2 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
                 <button 
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 p-4 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors mt-2"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-gradient-to-r hover:from-red-50/90 hover:via-red-50/50 hover:to-transparent rounded-xl transition-all duration-200 text-left"
                 >
-                  <LogOut className="w-5 h-5" />
-                  <span className="font-medium">Logout</span>
+                  <div className="p-2 bg-red-50/80 rounded-lg">
+                    <LogOut className="w-4 h-4 text-red-600" />
+                  </div>
+                  <span>Logout</span>
                 </button>
               </div>
             </div>

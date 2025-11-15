@@ -29,7 +29,7 @@ const PitchDeckBuilder = () => {
     {
       id: 'problem',
       title: 'Problem',
-      description: 'The problem you're solving',
+      description: 'The problem you are solving',
       fields: [
         { id: 'problem', label: 'The Problem', type: 'textarea', placeholder: 'Describe the problem clearly and concisely. What pain point are you addressing?' }
       ]
@@ -56,7 +56,7 @@ const PitchDeckBuilder = () => {
     {
       id: 'product',
       title: 'Product/Service',
-      description: 'What you're building',
+      description: 'What you are building',
       fields: [
         { id: 'productDescription', label: 'Product Description', type: 'textarea', placeholder: 'Describe your product/service and key features' },
         { id: 'coreFeatures', label: 'Core Features (3-5)', type: 'textarea', placeholder: 'List your core features, one per line' }
@@ -96,7 +96,7 @@ const PitchDeckBuilder = () => {
     {
       id: 'team',
       title: 'Team',
-      description: 'Who's building this',
+      description: 'Who is building this',
       fields: [
         { id: 'teamMembers', label: 'Team Members', type: 'textarea', placeholder: 'List team members and their roles/backgrounds' },
         { id: 'advisors', label: 'Advisors', type: 'textarea', placeholder: 'Key advisors and their expertise' }
@@ -116,7 +116,7 @@ const PitchDeckBuilder = () => {
     {
       id: 'ask',
       title: 'The Ask',
-      description: 'What you're looking for',
+      description: 'What you are looking for',
       fields: [
         { id: 'funding', label: 'Funding Amount', type: 'text', placeholder: 'How much are you raising?' },
         { id: 'useOfFunds', label: 'Use of Funds', type: 'textarea', placeholder: 'How will you use the investment?' },

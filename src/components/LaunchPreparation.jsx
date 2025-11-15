@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Rocket, Target, CheckCircle, Clock, AlertCircle, 
   BarChart3, TrendingUp, Award, Star, Zap, Users,
-  Calendar, FileText, MessageSquare, Video, Plus,
+  Calendar, FileText, MessageSquare, Video, Plus, MapPin,
   Edit3, Trash2, Save, Download, Share2, Eye,
   ChevronRight, ChevronDown, ChevronUp, ArrowRight,
   ArrowLeft, ArrowUp, ArrowDown, Maximize2, Minimize2,
@@ -142,9 +142,12 @@ const LaunchPreparation = () => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'pitch', label: 'Pitch & Showcase', icon: Rocket },
-    { id: 'funding', label: 'Funding Hub', icon: DollarSign },
-    { id: 'growth', label: 'Growth & Migration', icon: TrendingUp }
+    { id: 'product', label: 'Product Readiness', icon: Target },
+    { id: 'dataroom', label: 'Data Room', icon: Shield },
+    { id: 'gtm', label: 'GTM', icon: TrendingUp },
+    { id: 'pitching', label: 'Pitching', icon: Rocket },
+    { id: 'perks', label: 'Perks & Powerups', icon: Gift },
+    { id: 'visa', label: 'Visa to StartupOS', icon: Award }
   ];
 
   const gtmChannels = [
@@ -325,18 +328,11 @@ const LaunchPreparation = () => {
   };
 
   const renderOverviewTab = () => (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Startup Passport */}
       <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Startup Passport</h2>
-            <p className="text-gray-600">Auto-generated one-pager for investors</p>
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Startup Passport</h2>
+        <p className="text-gray-600 mb-6">Dynamic identity card — logo, tagline, domain, HQ, vision line, founder bios. Feeds every other tool.</p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
@@ -356,11 +352,13 @@ const LaunchPreparation = () => {
                   <span className="text-gray-600">Location:</span>
                   <span className="font-medium">San Francisco, CA</span>
                 </div>
+                </div>
               </div>
             </div>
 
+          <div className="space-y-6">
             <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Team</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Founder Bios</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
@@ -380,930 +378,2204 @@ const LaunchPreparation = () => {
                     <p className="text-sm text-gray-600">COO & Business Lead</p>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Traction</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">1,250+</div>
-                  <div className="text-sm text-gray-600">Users</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">$15K</div>
-                  <div className="text-sm text-gray-600">MRR</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">95%</div>
-                  <div className="text-sm text-gray-600">Retention</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">4.8</div>
-                  <div className="text-sm text-gray-600">Rating</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Stage Badge</h3>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
-                  <Award className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-gray-900">MVP Stage</div>
-                  <div className="text-sm text-gray-600">Product built, testing with users</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 flex gap-3">
-          <button className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
-            Generate Passport
-          </button>
-          <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold">
-            Download PDF
-          </button>
-        </div>
-      </div>
-
-      {/* Progress Meter */}
+      {/* Launch Meter */}
       <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Progress Meter</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Launch Meter</h2>
+        <p className="text-gray-600 mb-6">AI-scored readiness index (0–100%) combining progress across Product, Legal, GTM, and Events.</p>
+        
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xl font-semibold text-gray-900">Overall Readiness</h3>
+            <span className="text-3xl font-bold text-gray-900">67%</span>
+                </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className="bg-gradient-to-r from-yellow-500 to-green-500 h-4 rounded-full" style={{ width: '67%' }}></div>
+                </div>
+                </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-600 mb-2">Product</h4>
+            <div className="text-2xl font-bold text-gray-900">75%</div>
+                </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-600 mb-2">Legal</h4>
+            <div className="text-2xl font-bold text-gray-900">50%</div>
+                </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-600 mb-2">GTM</h4>
+            <div className="text-2xl font-bold text-gray-900">80%</div>
+              </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-600 mb-2">Events</h4>
+            <div className="text-2xl font-bold text-gray-900">65%</div>
+            </div>
+              </div>
+            </div>
+
+      {/* Countdown Timer */}
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-lg border border-purple-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Countdown Timer</h2>
+        <p className="text-gray-600 mb-6">Personalized "T-minus" clock — linked to public launch date. Sends automated reminders.</p>
+        
+        <div className="grid grid-cols-4 gap-4 text-center">
+          <div className="bg-white rounded-xl p-4">
+            <div className="text-3xl font-bold text-gray-900">45</div>
+            <div className="text-sm text-gray-600">Days</div>
+                </div>
+          <div className="bg-white rounded-xl p-4">
+            <div className="text-3xl font-bold text-gray-900">12</div>
+            <div className="text-sm text-gray-600">Hours</div>
+                </div>
+          <div className="bg-white rounded-xl p-4">
+            <div className="text-3xl font-bold text-gray-900">34</div>
+            <div className="text-sm text-gray-600">Minutes</div>
+              </div>
+          <div className="bg-white rounded-xl p-4">
+            <div className="text-3xl font-bold text-gray-900">56</div>
+            <div className="text-sm text-gray-600">Seconds</div>
+            </div>
+          </div>
+        </div>
+
+      {/* Mission Timeline */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Mission Timeline</h2>
+        <p className="text-gray-600 mb-6">Vertical milestones (Idea → MVP → Legal → Beta → Launch → First Customer). Auto-updates as tasks complete.</p>
+        
+        <div className="relative">
+          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+          
           {[
-            { name: 'Build', progress: 85, description: 'Vision, roles, and foundation' },
-            { name: 'Execute', progress: 70, description: 'Tasks, milestones, and team' },
-            { name: 'Fund', progress: 45, description: 'Finance, investors, and launch' }
-          ].map((section, index) => (
-            <div key={index} className="bg-gray-50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">{section.name}</h3>
-                <span className="text-2xl font-bold text-gray-900">{section.progress}%</span>
+            { stage: 'Idea', status: 'completed', date: 'Jan 2024' },
+            { stage: 'MVP', status: 'completed', date: 'Feb 2024' },
+            { stage: 'Legal', status: 'in-progress', date: 'Mar 2024' },
+            { stage: 'Beta', status: 'pending', date: 'Apr 2024' },
+            { stage: 'Launch', status: 'pending', date: 'May 2024' },
+            { stage: 'First Customer', status: 'pending', date: 'Jun 2024' }
+          ].map((milestone, index) => (
+            <div key={index} className="relative flex items-center gap-4 mb-6">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
+                milestone.status === 'completed' ? 'bg-green-500' :
+                milestone.status === 'in-progress' ? 'bg-yellow-500' :
+                'bg-gray-300'
+              }`}>
+                {milestone.status === 'completed' && <CheckCircle className="w-5 h-5 text-white" />}
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                <div 
-                  className="bg-black h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${section.progress}%` }}
-                ></div>
+              <div className="flex-1 bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">{milestone.stage}</h3>
+                  <span className="text-sm text-gray-600">{milestone.date}</span>
               </div>
-              <p className="text-sm text-gray-600">{section.description}</p>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Graduation Status */}
+      {/* Team Pulse */}
       <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-gray-600" />
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Team Pulse</h2>
+        <p className="text-gray-600 mb-6">Smart mood board — energy levels, focus streaks, accountability heatmap. (Human + AI check-ins.)</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+            <h3 className="font-semibold text-gray-900 mb-2">Energy Level</h3>
+            <div className="text-3xl font-bold text-green-600">High</div>
+            <p className="text-sm text-gray-600 mt-2">Team morale is strong</p>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Graduation Status</h2>
-          <p className="text-gray-600 mb-6">Ready to showcase your startup to the world</p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full">
-            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-            <span className="font-medium">Not Ready Yet</span>
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+            <h3 className="font-semibold text-gray-900 mb-2">Focus Streak</h3>
+            <div className="text-3xl font-bold text-blue-600">12 days</div>
+            <p className="text-sm text-gray-600 mt-2">Consistent progress</p>
           </div>
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+            <h3 className="font-semibold text-gray-900 mb-2">Accountability</h3>
+            <div className="text-3xl font-bold text-purple-600">95%</div>
+            <p className="text-sm text-gray-600 mt-2">Tasks completed on time</p>
         </div>
       </div>
     </div>
-  );
 
-  const renderPitchTab = () => (
-    <div className="space-y-8">
-      {/* Pitch Deck Upload */}
+      {/* Launch Story */}
       <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Pitch Deck Upload</h2>
-            <p className="text-gray-600">Version control, AI feedback, shareable links</p>
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Launch Story</h2>
+        <p className="text-gray-600 mb-6">Press-ready 100-word story auto-generated from Passport & MVP data. Editable by founders.</p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Pitch Deck</h3>
-              <p className="text-gray-600 mb-4">Drag & drop your presentation or click to browse</p>
-              <button className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
-                Choose File
-              </button>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h4 className="font-semibold text-gray-900 mb-2">Current Version</h4>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">pitch-deck-v2.1.pdf</span>
-                <span className="text-xs text-gray-500">2 days ago</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
             <div className="bg-gray-50 rounded-xl p-6">
-              <h4 className="font-semibold text-gray-900 mb-4">AI Feedback</h4>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-sm text-gray-600">Strong problem statement and solution clarity</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                  <p className="text-sm text-gray-600">Consider adding more traction metrics</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                  <p className="text-sm text-gray-600">Financial projections need more detail</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-semibold">
-                Share Link
-              </button>
-              <button className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                Get AI Review
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Demo Video */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-600 rounded-2xl flex items-center justify-center">
-            <Video className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Demo Video</h2>
-            <p className="text-gray-600">2-minute video pitch showcasing your product</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
-              <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Demo Video</h3>
-              <p className="text-gray-600 mb-4">MP4, MOV, or AVI up to 100MB</p>
-              <button className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
-                Upload Video
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-gray-900 rounded-xl p-4 aspect-video flex items-center justify-center">
-              <Play className="w-12 h-12 text-white" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">No video uploaded yet</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Startup Profile Page */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-700 rounded-2xl flex items-center justify-center">
-            <Globe className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Startup Profile Page</h2>
-            <p className="text-gray-600">Public-facing page for discovery and showcase</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h4 className="font-semibold text-gray-900 mb-4">Profile Preview</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Status:</span>
-                  <span className="text-green-600 font-medium">Live</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Views:</span>
-                  <span className="font-medium">1,247</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">URL:</span>
-                  <span className="text-blue-600 font-medium">cobuilders.com/startup/techflow-ai</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h4 className="font-semibold text-gray-900 mb-4">Launch Events Access</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                  <span className="text-sm font-medium">Demo Day 2024</span>
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Applied</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                  <span className="text-sm font-medium">Pitch Night SF</span>
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Available</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                  <span className="text-sm font-medium">AMA Session</span>
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Available</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex gap-3">
-          <button className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
-            View Profile
-          </button>
-          <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold">
-            Edit Profile
+          <p className="text-gray-700 leading-relaxed mb-4">
+            TechFlow AI is revolutionizing remote work with AI-powered workflow automation. Founded by Alex Chen (ex-Google) and Sarah Martinez (ex-McKinsey), we're on a mission to help distributed teams work smarter, not harder. After 6 months of development and beta testing with 1,250+ users, we're launching our MVP this May. Join us in building the future of work.
+          </p>
+          <button className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
+            Edit Story
           </button>
         </div>
       </div>
     </div>
   );
 
-  const renderLaunchesTab = () => (
+  const renderProductTab = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Launch Plans</h2>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all font-semibold"
-        >
-          <Plus className="w-5 h-5 inline mr-2" />
-          Create Launch Plan
-        </button>
-      </div>
-
-      <div className="space-y-6">
-        {launches.map(launch => (
-          <div key={launch.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{launch.name}</h3>
-                <p className="text-gray-600 mb-4">{launch.description}</p>
-                
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                  <span>Launch: {launch.launchDate}</span>
-                  <span>{launch.channels.length} channels</span>
-                  <span>{launch.checklist.filter(item => item.completed).length}/{launch.checklist.length} tasks</span>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-semibold">
-                  Edit
-                </button>
-                <button className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                  Launch
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h4 className="font-semibold text-gray-900 mb-2">Target Audience</h4>
-                <p className="text-sm text-gray-600">{launch.targetAudience}</p>
-              </div>
-              
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h4 className="font-semibold text-gray-900 mb-2">Channels</h4>
-                <div className="flex flex-wrap gap-1">
-                  {launch.channels.map((channel, index) => (
-                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                      {channel}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h4 className="font-semibold text-gray-900 mb-2">Progress</h4>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-black h-2 rounded-full"
-                    style={{ width: `${(launch.checklist.filter(item => item.completed).length / launch.checklist.length) * 100}%` }}
-                  ></div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {launch.checklist.filter(item => item.completed).length}/{launch.checklist.length} tasks completed
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderFundingTab = () => (
-    <div className="space-y-8">
-      {/* Investor Room */}
+      {/* MVP Tracker */}
       <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-white" />
-          </div>
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Investor Room</h2>
-            <p className="text-gray-600">Secure data room with deck, traction, financials, team info</p>
+            <h2 className="text-2xl font-bold text-gray-900">MVP Tracker</h2>
+            <p className="text-gray-600 mt-2">Visual progress from prototype → beta → public. Auto-sync with GitHub / Notion / ClickUp.</p>
+          </div>
+              <div className="flex items-center gap-3">
+            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+              Sync GitHub
+            </button>
+            <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+              + Add Milestone
+            </button>
+                </div>
+        </div>
+
+        {/* Overall Progress */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 mb-6">
+          <div className="flex items-center justify-between mb-4">
+                <div>
+              <h3 className="text-lg font-semibold text-gray-900">Overall MVP Progress</h3>
+              <p className="text-sm text-gray-600 mt-1">58% Complete • 12 of 21 tasks done</p>
+                </div>
+            <div className="text-3xl font-bold text-blue-600">58%</div>
+              </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-4 rounded-full transition-all duration-500" style={{ width: '58%' }}></div>
+            </div>
+        </div>
+
+        {/* Milestone Stages */}
+        <div className="space-y-6">
+          {/* Prototype Stage */}
+          <div className="bg-green-50 rounded-xl p-6 border border-green-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Prototype</h3>
+                  <p className="text-sm text-gray-600">Core concept validation</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 bg-green-600 text-white rounded-full text-sm font-semibold">✓ Completed</span>
+            </div>
+            <div className="w-full bg-green-200 rounded-full h-3 mb-4">
+              <div className="bg-green-600 h-3 rounded-full" style={{ width: '100%' }}></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { task: 'Wireframes', status: 'done' },
+                { task: 'User Flow', status: 'done' },
+                { task: 'Basic UI', status: 'done' },
+                { task: 'Core Features', status: 'done' }
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-gray-700">{item.task}</span>
+                </div>
+              ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Data Room Contents</h3>
+          {/* Beta Stage */}
+          <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Beta</h3>
+                  <p className="text-sm text-gray-600">Testing with early users</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-semibold">In Progress</span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-3 mb-4">
+              <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{ width: '75%' }}></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {[
+                { task: 'User Authentication', status: 'done' },
+                { task: 'Payment Integration', status: 'done' },
+                { task: 'Analytics Setup', status: 'done' },
+                { task: 'Email Notifications', status: 'in-progress' },
+                { task: 'Mobile Responsive', status: 'in-progress' },
+                { task: 'Bug Fixes', status: 'pending' }
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  {item.status === 'done' ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : item.status === 'in-progress' ? (
+                    <Clock className="w-4 h-4 text-blue-600" />
+                  ) : (
+                    <div className="w-4 h-4 border-2 border-gray-300 rounded-full" />
+                  )}
+                  <span className={item.status === 'done' ? 'text-gray-700 line-through' : 'text-gray-700'}>
+                    {item.task}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Users className="w-4 h-4" />
+              <span>47 beta testers providing feedback</span>
+            </div>
+          </div>
+
+          {/* Public Launch Stage */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
+                  <Rocket className="w-6 h-6 text-gray-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Public Launch</h3>
+                  <p className="text-sm text-gray-600">Full production release</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm font-semibold">Pending</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div className="bg-gray-400 h-3 rounded-full" style={{ width: '0%' }}></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {[
+                { task: 'Security Audit', status: 'pending' },
+                { task: 'Performance Testing', status: 'pending' },
+                { task: 'Documentation', status: 'pending' },
+                { task: 'Marketing Materials', status: 'pending' },
+                { task: 'Support System', status: 'pending' },
+                { task: 'Launch Plan', status: 'pending' }
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 border-2 border-gray-300 rounded-full" />
+                  <span className="text-gray-500">{item.task}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Calendar className="w-4 h-4" />
+              <span>Target: March 2024</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Integration Status */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                <Link className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Auto-Sync Enabled</h4>
+                <p className="text-sm text-gray-600">Connected to GitHub, Notion, ClickUp</p>
+              </div>
+            </div>
+            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold">
+              Manage Integrations
+          </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature Matrix */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Feature Matrix</h2>
+            <p className="text-gray-600 mt-2">Kanban board — Core, Nice-to-Have, Deferred — tied to readiness scoring.</p>
+          </div>
+          <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+            + Add Feature
+          </button>
+        </div>
+
+        {/* Readiness Score */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Launch Readiness Score</h3>
+              <p className="text-sm text-gray-600">Based on core features completion</p>
+            </div>
+            <div className="text-right">
+              <div className="text-4xl font-bold text-green-600">85%</div>
+              <p className="text-sm text-gray-600 mt-1">Ready to launch</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Core Features */}
+          <div className="bg-green-50 rounded-xl p-6 border border-green-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Core</h3>
+              <span className="px-3 py-1 bg-green-600 text-white rounded-full text-xs font-semibold">6 features</span>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">Must-have for launch</p>
             <div className="space-y-3">
               {[
-                { name: 'Pitch Deck', status: 'completed', size: '2.4 MB' },
-                { name: 'Financial Model', status: 'completed', size: '1.8 MB' },
-                { name: 'Market Analysis', status: 'completed', size: '3.2 MB' },
-                { name: 'Legal Documents', status: 'pending', size: '0 MB' },
-                { name: 'Team Bios', status: 'completed', size: '1.1 MB' },
-                { name: 'Product Demo', status: 'in_progress', size: '0 MB' }
-              ].map((doc, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-gray-600" />
-                    <div>
-                      <p className="font-medium text-gray-900">{doc.name}</p>
-                      <p className="text-sm text-gray-500">{doc.size}</p>
-                    </div>
+                { name: 'User Authentication', status: 'done', priority: 'critical' },
+                { name: 'Dashboard', status: 'done', priority: 'critical' },
+                { name: 'Payment Integration', status: 'done', priority: 'critical' },
+                { name: 'User Profile', status: 'in-progress', priority: 'high' },
+                { name: 'Search Functionality', status: 'in-progress', priority: 'high' },
+                { name: 'Notifications', status: 'pending', priority: 'medium' }
+              ].map((feature, index) => (
+                <div key={index} className="bg-white p-4 rounded-lg border border-green-200 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">{feature.name}</h4>
+                    {feature.status === 'done' ? (
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    ) : feature.status === 'in-progress' ? (
+                      <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    ) : (
+                      <div className="w-5 h-5 border-2 border-gray-300 rounded-full flex-shrink-0" />
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      doc.status === 'completed' ? 'bg-gray-100 text-gray-800' :
-                      doc.status === 'in_progress' ? 'bg-gray-100 text-gray-700' :
-                      'bg-gray-100 text-gray-600'
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      feature.priority === 'critical' ? 'bg-red-100 text-red-700' :
+                      feature.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                      'bg-yellow-100 text-yellow-700'
                     }`}>
-                      {doc.status}
+                      {feature.priority}
                     </span>
-                    <button className="p-1 text-gray-400 hover:text-gray-600">
-                      <Download className="w-4 h-4" />
-                    </button>
+                    <span className={`text-xs font-semibold ${
+                      feature.status === 'done' ? 'text-green-600' :
+                      feature.status === 'in-progress' ? 'text-blue-600' :
+                      'text-gray-500'
+                    }`}>
+                      {feature.status === 'done' ? '✓ Done' :
+                       feature.status === 'in-progress' ? 'In Progress' :
+                       'To Do'}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Access Control</h3>
-            <div className="bg-gray-50 rounded-xl p-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Public Access:</span>
-                  <span className="text-red-600 font-medium">Disabled</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Password Protected:</span>
-                  <span className="text-green-600 font-medium">Enabled</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">View Tracking:</span>
-                  <span className="text-green-600 font-medium">Enabled</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Download Tracking:</span>
-                  <span className="text-green-600 font-medium">Enabled</span>
-                </div>
+          {/* Nice-to-Have Features */}
+          <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+              <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Nice-to-Have</h3>
+              <span className="px-3 py-1 bg-yellow-600 text-white rounded-full text-xs font-semibold">5 features</span>
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                Generate Link
-              </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-semibold">
-                Upload Files
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Fundraising Tracker */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-600 rounded-2xl flex items-center justify-center">
-            <DollarSign className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Fundraising Tracker</h2>
-            <p className="text-gray-600">Track committed $, open $ target, round type</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Round Details</h3>
+            <p className="text-sm text-gray-600 mb-4">Enhance user experience</p>
             <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Round Type:</span>
-                <span className="font-medium">Pre-seed</span>
+              {[
+                { name: 'Social Login', status: 'in-progress', priority: 'medium' },
+                { name: 'Dark Mode', status: 'pending', priority: 'low' },
+                { name: 'Mobile App', status: 'pending', priority: 'medium' },
+                { name: 'Export Data', status: 'pending', priority: 'low' },
+                { name: 'Advanced Filters', status: 'pending', priority: 'medium' }
+              ].map((feature, index) => (
+                <div key={index} className="bg-white p-4 rounded-lg border border-yellow-200 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">{feature.name}</h4>
+                    {feature.status === 'done' ? (
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    ) : feature.status === 'in-progress' ? (
+                      <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    ) : (
+                      <div className="w-5 h-5 border-2 border-gray-300 rounded-full flex-shrink-0" />
+                    )}
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Target Amount:</span>
-                <span className="font-medium">$500K</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Committed:</span>
-                <span className="font-medium text-green-600">$150K</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Remaining:</span>
-                <span className="font-medium">$350K</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Progress</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-600">Fundraising Progress</span>
-                  <span className="text-sm font-medium">30%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div className="bg-black h-3 rounded-full" style={{ width: '30%' }}></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">$150K</div>
-                <div className="text-sm text-gray-600">of $500K raised</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Investors</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Lead Investor:</span>
-                <span className="text-sm font-medium">TBD</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Angel Investors:</span>
-                <span className="text-sm font-medium">3</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">VC Interest:</span>
-                <span className="text-sm font-medium">5</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* VC & Angel Access */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-700 rounded-2xl flex items-center justify-center">
-            <Users className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">VC & Angel Access</h2>
-            <p className="text-gray-600">Directory of partnered investors and accelerators</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            { name: 'Y Combinator', type: 'Accelerator', status: 'Available', tier: 'Premium' },
-            { name: 'Sequoia Capital', type: 'VC', status: 'Available', tier: 'Premium' },
-            { name: 'Andreessen Horowitz', type: 'VC', status: 'Available', tier: 'Premium' },
-            { name: 'Antler', type: 'Accelerator', status: 'Available', tier: 'Free' },
-            { name: 'Entrepreneur First', type: 'Accelerator', status: 'Available', tier: 'Free' },
-            { name: 'Techstars', type: 'Accelerator', status: 'Available', tier: 'Premium' }
-          ].map((investor, index) => (
-            <div key={index} className="bg-gray-50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-gray-900">{investor.name}</h3>
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  investor.tier === 'Premium' ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {investor.tier}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">{investor.type}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">{investor.status}</span>
-                <button className="px-3 py-1 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-xs font-semibold">
-                  Apply
-                </button>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      feature.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {feature.priority}
+                    </span>
+                    <span className={`text-xs font-semibold ${
+                      feature.status === 'done' ? 'text-green-600' :
+                      feature.status === 'in-progress' ? 'text-blue-600' :
+                      'text-gray-500'
+                    }`}>
+                      {feature.status === 'done' ? '✓ Done' :
+                       feature.status === 'in-progress' ? 'In Progress' :
+                       'To Do'}
+                    </span>
+                  </div>
             </div>
           ))}
         </div>
+      </div>
+
+          {/* Deferred Features */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Deferred</h3>
+              <span className="px-3 py-1 bg-gray-600 text-white rounded-full text-xs font-semibold">4 features</span>
+          </div>
+            <p className="text-sm text-gray-600 mb-4">Post-launch roadmap</p>
+            <div className="space-y-3">
+              {[
+                { name: 'API Access', status: 'pending', priority: 'low', version: 'v2.0' },
+                { name: 'White Label', status: 'pending', priority: 'low', version: 'v2.0' },
+                { name: 'Enterprise SSO', status: 'pending', priority: 'low', version: 'v2.5' },
+                { name: 'Advanced Analytics', status: 'pending', priority: 'low', version: 'v2.0' }
+              ].map((feature, index) => (
+                <div key={index} className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all cursor-pointer opacity-75">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-700 text-sm">{feature.name}</h4>
+                    <div className="w-5 h-5 border-2 border-gray-300 rounded-full flex-shrink-0" />
+          </div>
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-semibold">
+                      {feature.version}
+                    </span>
+                    <span className="text-xs font-semibold text-gray-400">
+                      Planned
+                    </span>
+        </div>
+      </div>
+              ))}
+    </div>
+          </div>
+        </div>
+
+        {/* Feature Stats */}
+        <div className="mt-6 grid grid-cols-4 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-gray-900">15</div>
+            <div className="text-xs text-gray-600 mt-1">Total Features</div>
+          </div>
+          <div className="bg-green-50 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">4</div>
+            <div className="text-xs text-gray-600 mt-1">Completed</div>
+          </div>
+          <div className="bg-blue-50 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">4</div>
+            <div className="text-xs text-gray-600 mt-1">In Progress</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-gray-600">7</div>
+            <div className="text-xs text-gray-600 mt-1">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      {/* User Feedback Tracker Board */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">User Feedback Tracker Board</h2>
+            <p className="text-gray-600 mt-2">Collect, organize, and prioritize user feedback across all channels.</p>
+          </div>
+          <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+            + Add Feedback
+          </button>
+        </div>
+
+        {/* Feedback Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-900">Total Feedback</h3>
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">127</div>
+            <p className="text-xs text-gray-600 mt-1">+23 this week</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-900">Implemented</h3>
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">45</div>
+            <p className="text-xs text-gray-600 mt-1">35% completion</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-900">In Progress</h3>
+              <Clock className="w-5 h-5 text-yellow-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">28</div>
+            <p className="text-xs text-gray-600 mt-1">Being worked on</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-900">Backlog</h3>
+              <AlertCircle className="w-5 h-5 text-purple-600" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">54</div>
+            <p className="text-xs text-gray-600 mt-1">Pending review</p>
+          </div>
+        </div>
+
+        {/* Feedback Kanban Board */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* New Column */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">New</h3>
+              <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-semibold">54</span>
+            </div>
+            <div className="space-y-3">
+              {[
+                { 
+                  title: 'Add dark mode toggle', 
+                  user: 'Sarah M.', 
+                  votes: 23, 
+                  priority: 'high',
+                  category: 'Feature',
+                  date: '2 hours ago'
+                },
+                { 
+                  title: 'Export data to CSV', 
+                  user: 'Mike T.', 
+                  votes: 18, 
+                  priority: 'medium',
+                  category: 'Feature',
+                  date: '5 hours ago'
+                },
+                { 
+                  title: 'Mobile app version', 
+                  user: 'Emma R.', 
+                  votes: 45, 
+                  priority: 'high',
+                  category: 'Feature',
+                  date: '1 day ago'
+                }
+              ].map((feedback, index) => (
+                <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">{feedback.title}</h4>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                      feedback.priority === 'high' ? 'bg-red-100 text-red-700' :
+                      feedback.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {feedback.priority}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-600">{feedback.user}</span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{feedback.date}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                      {feedback.category}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <ThumbsUp className="w-3 h-3" />
+                      {feedback.votes}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* In Progress Column */}
+          <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+              <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">In Progress</h3>
+              <span className="px-2 py-1 bg-yellow-200 text-yellow-700 rounded-full text-xs font-semibold">28</span>
+              </div>
+            <div className="space-y-3">
+              {[
+                { 
+                  title: 'Improve search speed', 
+                  user: 'Alex K.', 
+                  votes: 34, 
+                  priority: 'high',
+                  category: 'Bug',
+                  assignee: 'Dev Team',
+                  date: '3 days ago'
+                },
+                { 
+                  title: 'Add keyboard shortcuts', 
+                  user: 'Lisa P.', 
+                  votes: 12, 
+                  priority: 'medium',
+                  category: 'Feature',
+                  assignee: 'Frontend',
+                  date: '1 week ago'
+                }
+              ].map((feedback, index) => (
+                <div key={index} className="bg-white rounded-lg p-3 border border-yellow-300 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">{feedback.title}</h4>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                      feedback.priority === 'high' ? 'bg-red-100 text-red-700' :
+                      feedback.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {feedback.priority}
+                    </span>
+              </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-600">{feedback.user}</span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{feedback.date}</span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                      {feedback.category}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <ThumbsUp className="w-3 h-3" />
+                      {feedback.votes}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                    <Users className="w-3 h-3" />
+                    {feedback.assignee}
+                  </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+          {/* Under Review Column */}
+          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Under Review</h3>
+              <span className="px-2 py-1 bg-blue-200 text-blue-700 rounded-full text-xs font-semibold">15</span>
+          </div>
+            <div className="space-y-3">
+              {[
+                { 
+                  title: 'Bulk actions support', 
+                  user: 'Tom H.', 
+                  votes: 28, 
+                  priority: 'medium',
+                  category: 'Feature',
+                  date: '2 weeks ago'
+                },
+                { 
+                  title: 'Email notifications', 
+                  user: 'Nina S.', 
+                  votes: 19, 
+                  priority: 'low',
+                  category: 'Feature',
+                  date: '3 weeks ago'
+                }
+              ].map((feedback, index) => (
+                <div key={index} className="bg-white rounded-lg p-3 border border-blue-300 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">{feedback.title}</h4>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                      feedback.priority === 'high' ? 'bg-red-100 text-red-700' :
+                      feedback.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {feedback.priority}
+                    </span>
+          </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-600">{feedback.user}</span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{feedback.date}</span>
+        </div>
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                      {feedback.category}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <ThumbsUp className="w-3 h-3" />
+                      {feedback.votes}
+      </div>
+    </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Implemented Column */}
+          <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Implemented</h3>
+              <span className="px-2 py-1 bg-green-200 text-green-700 rounded-full text-xs font-semibold">45</span>
+            </div>
+            <div className="space-y-3">
+              {[
+                { 
+                  title: 'Two-factor authentication', 
+                  user: 'David L.', 
+                  votes: 56, 
+                  priority: 'high',
+                  category: 'Security',
+                  completed: '1 week ago'
+                },
+                { 
+                  title: 'Profile customization', 
+                  user: 'Rachel B.', 
+                  votes: 31, 
+                  priority: 'medium',
+                  category: 'Feature',
+                  completed: '2 weeks ago'
+                }
+              ].map((feedback, index) => (
+                <div key={index} className="bg-white rounded-lg p-3 border border-green-300 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm line-through opacity-75">{feedback.title}</h4>
+                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-600">{feedback.user}</span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-green-600">✓ {feedback.completed}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">
+                      {feedback.category}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <ThumbsUp className="w-3 h-3" />
+                      {feedback.votes}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center gap-4">
+            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+              Filter by Priority
+            </button>
+            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+              Filter by Category
+            </button>
+            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+              Sort by Votes
+            </button>
+          </div>
+          <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+            Export Report
+          </button>
+        </div>
+      </div>
+
+      {/* AI Product Coach */}
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-lg border border-purple-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Product Coach</h2>
+        <p className="text-gray-600 mb-6">Suggests next build milestone, copy tips, or design refinements. (Powered by BiggDate AI.)</p>
+
+          <div className="space-y-4">
+          <div className="bg-white rounded-xl p-4">
+                <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 text-white" />
+          </div>
+          <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Recommendation</h4>
+                <p className="text-sm text-gray-700">Consider adding email verification before public launch to improve security.</p>
+                </div>
+                </div>
+              </div>
+          <div className="bg-white rounded-xl p-4">
+                <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 text-white" />
+            </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Design Tip</h4>
+                <p className="text-sm text-gray-700">Your onboarding flow could be simplified - reduce from 5 steps to 3.</p>
+          </div>
+            </div>
+                </div>
+          </div>
+        </div>
+
+      {/* Demo Kit */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Demo Kit</h2>
+        <p className="text-gray-600 mb-6">Store screenshots, explainer video, and demo link for sharing.</p>
+        
+          <div className="space-y-4">
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Demo Materials</h3>
+            <p className="text-gray-600 mb-4">Screenshots, videos, or demo links</p>
+              <button className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
+              Choose Files
+              </button>
+            </div>
+              </div>
+            </div>
+          </div>
+  );
+
+  const renderDataRoomTab = () => (
+    <div className="space-y-6">
+      {/* Incorporation Tracker */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Incorporation Tracker</h2>
+        <p className="text-gray-600 mb-6">Choose country → jurisdiction → document upload → Finanshels connects automatically.</p>
+
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Country</label>
+                <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent">
+                  <option>United States</option>
+                  <option>United Kingdom</option>
+                  <option>Singapore</option>
+                  <option>India</option>
+                  <option>UAE</option>
+                </select>
+          </div>
+          <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Jurisdiction</label>
+                <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent">
+                  <option>Delaware</option>
+                  <option>California</option>
+                  <option>New York</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Status</label>
+                <span className="inline-flex px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold">In Progress</span>
+          </div>
+        </div>
+
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="font-semibold text-gray-900 mb-4">Required Documents</h3>
+              <div className="space-y-3">
+                {[
+                  { name: 'Certificate of Incorporation', status: 'uploaded', date: '2024-02-15' },
+                  { name: 'Articles of Association', status: 'uploaded', date: '2024-02-15' },
+                  { name: 'EIN Letter', status: 'pending', date: null },
+                  { name: 'Registered Agent Agreement', status: 'pending', date: null }
+                ].map((doc, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-gray-600" />
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">{doc.name}</p>
+                        {doc.date && <p className="text-xs text-gray-500">Uploaded {doc.date}</p>}
+                </div>
+                </div>
+                    {doc.status === 'uploaded' ? (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">✓ Uploaded</span>
+                    ) : (
+                      <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-xs font-semibold">
+                        Upload
+              </button>
+                    )}
+                </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Link className="w-5 h-5 text-white" />
+            </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Finanshels Integration</h4>
+                    <p className="text-sm text-gray-600">Auto-sync incorporation documents</p>
+                  </div>
+                </div>
+                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold">
+                  Connect
+              </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Founder Pack */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Founder Pack</h2>
+        <p className="text-gray-600 mb-6">Auto-generate ESOP, equity split, IP transfer, NDAs with Smart Templates.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { name: 'ESOP Agreement', status: 'ready', description: 'Employee stock option plan template', icon: '📊' },
+            { name: 'Equity Split', status: 'ready', description: 'Founder equity distribution', icon: '🎯' },
+            { name: 'IP Transfer', status: 'pending', description: 'Intellectual property assignment', icon: '⚖️' },
+            { name: 'NDA Templates', status: 'ready', description: 'Non-disclosure agreements', icon: '🔒' }
+          ].map((doc, index) => (
+            <div key={index} className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">{doc.icon}</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{doc.name}</h3>
+                    <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
+                </div>
+                </div>
+                {doc.status === 'ready' && (
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Ready</span>
+                )}
+              </div>
+              <button className={`w-full mt-4 px-4 py-2 rounded-lg transition-colors text-sm font-semibold ${
+                doc.status === 'ready' 
+                  ? 'bg-black text-white hover:bg-gray-800' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}>
+                {doc.status === 'ready' ? 'Download Template' : 'Generate Document'}
+              </button>
+            </div>
+          ))}
+              </div>
+            </div>
+
+      {/* Contract Vault */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Contract Vault</h2>
+            <p className="text-gray-600 mt-2">Store, sign, and version every agreement (linked to ZeroHuman for AI audits).</p>
+          </div>
+          <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+            + Upload Contract
+              </button>
+        </div>
+
+              <div className="space-y-3">
+          {[
+            { name: 'Founder Agreement', date: '2024-01-15', status: 'signed', version: 'v2.0', signers: 3 },
+            { name: 'Service Agreement', date: '2024-02-10', status: 'pending', version: 'v1.0', signers: 2 },
+            { name: 'Privacy Policy', date: '2024-02-20', status: 'signed', version: 'v1.1', signers: 1 },
+            { name: 'Terms of Service', date: '2024-02-22', status: 'signed', version: 'v1.0', signers: 1 }
+          ].map((contract, index) => (
+            <div key={index} className="p-4 bg-gray-50 rounded-xl hover:shadow-md transition-all">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{contract.name}</h4>
+                    <div className="flex items-center gap-3 mt-1">
+                      <p className="text-xs text-gray-600">{contract.date}</p>
+                      <span className="text-xs text-gray-500">• {contract.version}</span>
+                      <span className="text-xs text-gray-500">• {contract.signers} signer{contract.signers > 1 ? 's' : ''}</span>
+                </div>
+                </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    contract.status === 'signed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {contract.status === 'signed' ? '✓ Signed' : '⏳ Pending'}
+                  </span>
+                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
+                    <Download className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        </div>
+          ))}
+      </div>
+
+        <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-white" />
+          </div>
+          <div>
+                <h4 className="font-semibold text-gray-900">ZeroHuman AI Audit</h4>
+                <p className="text-sm text-gray-600">Automated contract analysis and risk detection</p>
+            </div>
+                </div>
+            <button className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold">
+              Audit Contracts
+            </button>
+          </div>
+          </div>
+        </div>
+
+      {/* Brand & IP Hub */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Brand & IP Hub</h2>
+        <p className="text-gray-600 mb-6">Track trademark filings, domain ownership, and brand kit approval.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-900">Trademark</h3>
+              <span className="text-2xl">™</span>
+          </div>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Status:</span>
+                <span className="font-semibold text-blue-700">Filed</span>
+          </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Class:</span>
+                <span className="font-semibold text-gray-900">42 (Software)</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Filing Date:</span>
+                <span className="font-semibold text-gray-900">Feb 1, 2024</span>
+              </div>
+            </div>
+            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold">
+              View Details
+              </button>
+            </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-900">Domain</h3>
+              <span className="text-2xl">🌐</span>
+                </div>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Primary:</span>
+                <span className="font-semibold text-gray-900">techflow.ai</span>
+                </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Status:</span>
+                <span className="font-semibold text-green-700">Owned</span>
+                </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Expires:</span>
+                <span className="font-semibold text-gray-900">Dec 2025</span>
+              </div>
+            </div>
+            <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold">
+              Manage Domain
+            </button>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-900">Brand Kit</h3>
+              <span className="text-2xl">🎨</span>
+            </div>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Status:</span>
+                <span className="font-semibold text-green-700">Approved</span>
+            </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Assets:</span>
+                <span className="font-semibold text-gray-900">24 files</span>
+          </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Updated:</span>
+                <span className="font-semibold text-gray-900">Mar 1, 2024</span>
+              </div>
+            </div>
+            <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold">
+              Download Kit
+            </button>
+        </div>
+      </div>
+
+        <div className="bg-gray-50 rounded-xl p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Additional Domains</h3>
+          <div className="space-y-2">
+            {[
+              { domain: 'techflow.com', status: 'Owned', autoRenew: true },
+              { domain: 'techflow.io', status: 'Owned', autoRenew: true },
+              { domain: 'techflow.app', status: 'Available', autoRenew: false }
+            ].map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Globe className="w-4 h-4 text-gray-600" />
+                  <span className="font-medium text-gray-900 text-sm">{item.domain}</span>
+                  {item.autoRenew && <span className="text-xs text-green-600">Auto-renew ✓</span>}
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  item.status === 'Owned' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {item.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Finance Setup */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Finance Setup</h2>
+        <p className="text-gray-600 mb-6">Connect to Finanshels for bank account, bookkeeping, tax ID.</p>
+        
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-white" />
+          </div>
+          <div>
+                <h3 className="text-lg font-semibold text-gray-900">Finanshels Integration</h3>
+                <p className="text-sm text-gray-600">Streamline your financial setup</p>
+          </div>
+            </div>
+            <button className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold">
+              Connect Now
+            </button>
+        </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 text-center">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="text-sm font-semibold text-gray-900">Bank Account</div>
+              <div className="text-xs text-gray-600 mt-1">Connected</div>
+            </div>
+            <div className="bg-white rounded-lg p-4 text-center">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="text-sm font-semibold text-gray-900">Bookkeeping</div>
+              <div className="text-xs text-gray-600 mt-1">Active</div>
+            </div>
+            <div className="bg-white rounded-lg p-4 text-center">
+              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Clock className="w-6 h-6 text-gray-400" />
+              </div>
+              <div className="text-sm font-semibold text-gray-900">Tax ID</div>
+              <div className="text-xs text-gray-600 mt-1">Pending</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Financial Accounts</h3>
+              <div className="space-y-3">
+              {[
+                { name: 'Business Checking', bank: 'Mercury', balance: '$45,230', status: 'active' },
+                { name: 'Savings Account', bank: 'Mercury', balance: '$100,000', status: 'active' }
+              ].map((account, index) => (
+                <div key={index} className="p-3 bg-white rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-gray-900 text-sm">{account.name}</span>
+                    <span className="text-sm font-bold text-gray-900">{account.balance}</span>
+                </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">{account.bank}</span>
+                    <span className="text-xs text-green-600 font-semibold">● Active</span>
+                </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+            <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Tax Information</h3>
+              <div className="space-y-3">
+              <div className="p-3 bg-white rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-gray-600">EIN</span>
+                  <span className="text-sm font-semibold text-gray-900">XX-XXXXXXX</span>
+                </div>
+                </div>
+              <div className="p-3 bg-white rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-gray-600">Tax Year</span>
+                  <span className="text-sm font-semibold text-gray-900">2024</span>
+                </div>
+              </div>
+              <div className="p-3 bg-white rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-gray-600">Filing Status</span>
+                  <span className="text-sm font-semibold text-yellow-700">Setup Required</span>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {/* Regulatory Checklist */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Regulatory Checklist</h2>
+        <p className="text-gray-600 mb-6">Preloaded compliance path for India & UAE. More regions coming soon.</p>
+        
+        <div className="space-y-4">
+          {[
+            { region: 'India', items: ['GST Registration', 'PAN Card', 'MSME Registration'], progress: 67 },
+            { region: 'UAE', items: ['Trade License', 'VAT Registration', 'Labor Card'], progress: 33 }
+          ].map((region, index) => (
+            <div key={index} className="bg-gray-50 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900">{region.region}</h3>
+                <span className="text-sm font-semibold text-gray-600">{region.progress}% Complete</span>
+        </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div className="bg-black h-2 rounded-full" style={{ width: `${region.progress}%` }}></div>
+          </div>
+              <div className="space-y-2">
+                {region.items.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-gray-700">{item}</span>
+        </div>
+                ))}
+                </div>
+                </div>
+                  ))}
+                </div>
       </div>
     </div>
   );
 
   const renderGTMTab = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Go-to-Market Strategy</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {gtmChannels.map(channel => (
-          <div key={channel.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{channel.name}</h3>
-            <p className="text-gray-600 mb-4">{channel.description}</p>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Cost:</span>
-                <span className={`font-semibold ${
-                  channel.cost === 'Low' ? 'text-gray-600' :
-                  channel.cost === 'Medium' ? 'text-gray-700' : 'text-gray-800'
-                }`}>
-                  {channel.cost}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Reach:</span>
-                <span className={`font-semibold ${
-                  channel.reach === 'High' ? 'text-gray-600' :
-                  channel.reach === 'Medium' ? 'text-gray-700' : 'text-gray-800'
-                }`}>
-                  {channel.reach}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Conversion:</span>
-                <span className={`font-semibold ${
-                  channel.conversion === 'High' ? 'text-gray-600' :
-                  channel.conversion === 'Medium' ? 'text-gray-700' : 'text-gray-800'
-                }`}>
-                  {channel.conversion}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+      {/* Launch Narrative Builder */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Launch Narrative Builder</h2>
+        <p className="text-gray-600 mb-6">Craft your story: Problem → Promise → Proof → Personality. (Guided prompts.)</p>
 
-  const renderInvestorsTab = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Investor Readiness</h2>
-      
-      <div className="space-y-4">
-        {investorReadiness.map(item => (
-          <div key={item.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.name}</h3>
-                <p className="text-gray-600">{item.description}</p>
+      <div className="space-y-6">
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 border border-red-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center text-white font-bold">1</div>
+              <h3 className="text-lg font-bold text-gray-900">Problem</h3>
+            </div>
+            <textarea 
+              className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              rows="3"
+              placeholder="What problem are you solving? Make it relatable and urgent..."
+              defaultValue="Remote teams waste 30% of their time on manual workflows and context switching between tools."
+            />
+          </div>
+
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">2</div>
+              <h3 className="text-lg font-bold text-gray-900">Promise</h3>
+                </div>
+            <textarea 
+              className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows="3"
+              placeholder="What's your solution? What transformation do you promise..."
+              defaultValue="TechFlow AI automates repetitive tasks and unifies your workflow, saving teams 10+ hours per week."
+            />
               </div>
               
-              <div className="flex items-center gap-3">
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  item.priority === 'high' ? 'bg-gray-100 text-gray-800' :
-                  item.priority === 'medium' ? 'bg-gray-100 text-gray-700' :
-                  'bg-gray-100 text-gray-600'
-                }`}>
-                  {item.priority}
-                </span>
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  item.status === 'completed' ? 'bg-gray-100 text-gray-800' :
-                  item.status === 'in_progress' ? 'bg-gray-100 text-gray-700' :
-                  'bg-gray-100 text-gray-600'
-                }`}>
-                  {item.status}
-                </span>
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold">3</div>
+              <h3 className="text-lg font-bold text-gray-900">Proof</h3>
+            </div>
+            <textarea 
+              className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows="3"
+              placeholder="Show traction, testimonials, or data that validates your promise..."
+              defaultValue="1,250+ teams using TechFlow. Average 40% productivity increase. 4.8/5 rating from beta users."
+            />
+          </div>
+
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">4</div>
+              <h3 className="text-lg font-bold text-gray-900">Personality</h3>
+            </div>
+            <textarea 
+              className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows="3"
+              placeholder="What makes you unique? Your mission, values, or founder story..."
+              defaultValue="Built by ex-Google engineers who experienced remote work chaos firsthand. We're on a mission to make distributed work actually work."
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <button className="flex-1 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
+            Generate Full Story
+                </button>
+          <button className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+            AI Suggestions
+                </button>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-semibold">
-                View
-              </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-semibold">
-                Edit
-              </button>
-              <button className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                Share
-              </button>
+
+      {/* Distribution Planning */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Distribution Planning</h2>
+        <p className="text-gray-600 mb-6">Strategic distribution plan across channels with timeline and resource allocation.</p>
+        
+        <div className="space-y-6">
+          {/* Distribution Channels */}
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Distribution Channels</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                {
+                  channel: 'Product Hunt',
+                  priority: 'High',
+                  timeline: 'Week 1',
+                  effort: 'High',
+                  reach: '50K+',
+                  status: 'planned'
+                },
+                {
+                  channel: 'LinkedIn Organic',
+                  priority: 'High',
+                  timeline: 'Ongoing',
+                  effort: 'Medium',
+                  reach: '10K+',
+                  status: 'active'
+                },
+                {
+                  channel: 'Twitter/X',
+                  priority: 'Medium',
+                  timeline: 'Ongoing',
+                  effort: 'Medium',
+                  reach: '25K+',
+                  status: 'active'
+                },
+                {
+                  channel: 'Reddit Communities',
+                  priority: 'Medium',
+                  timeline: 'Week 2-3',
+                  effort: 'Low',
+                  reach: '15K+',
+                  status: 'planned'
+                },
+                {
+                  channel: 'Email Outreach',
+                  priority: 'High',
+                  timeline: 'Week 1-4',
+                  effort: 'High',
+                  reach: '5K+',
+                  status: 'active'
+                },
+                {
+                  channel: 'Content Marketing',
+                  priority: 'Medium',
+                  timeline: 'Ongoing',
+                  effort: 'High',
+                  reach: '20K+',
+                  status: 'planned'
+                }
+              ].map((item, index) => (
+                <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-gray-900">{item.channel}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      item.priority === 'High' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {item.priority}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                    <div>
+                      <span className="text-gray-500">Timeline:</span>
+                      <span className="ml-1 font-semibold text-gray-900">{item.timeline}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Effort:</span>
+                      <span className="ml-1 font-semibold text-gray-900">{item.effort}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Est. Reach:</span>
+                      <span className="ml-1 font-semibold text-gray-900">{item.reach}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Status:</span>
+                      <span className={`ml-1 font-semibold ${
+                        item.status === 'active' ? 'text-green-600' : 'text-blue-600'
+                      }`}>
+                        {item.status === 'active' ? '● Active' : '○ Planned'}
+                      </span>
+                    </div>
+                  </div>
+                  <button className="w-full px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-xs font-semibold">
+                    Edit Plan
+                  </button>
+                </div>
+              ))}
             </div>
+              </div>
+              
+          {/* Distribution Timeline */}
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribution Timeline</h3>
+            <div className="space-y-4">
+              {[
+                {
+                  phase: 'Pre-Launch (Week -2 to 0)',
+                  activities: ['Build waitlist', 'Teaser content', 'Influencer outreach', 'Community engagement'],
+                  goal: '500 waitlist signups'
+                },
+                {
+                  phase: 'Launch Week (Week 1)',
+                  activities: ['Product Hunt launch', 'Email blast', 'Social media blitz', 'Press outreach'],
+                  goal: '1,000 users, 100 signups'
+                },
+                {
+                  phase: 'Growth Phase (Week 2-4)',
+                  activities: ['Content marketing', 'Community building', 'Partnership outreach', 'Paid ads testing'],
+                  goal: '5,000 users, 500 signups'
+                },
+                {
+                  phase: 'Scale Phase (Month 2+)',
+                  activities: ['SEO optimization', 'Referral program', 'Paid acquisition', 'Strategic partnerships'],
+                  goal: '20,000 users, 2,000 signups'
+                }
+              ].map((phase, index) => (
+                <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{phase.phase}</h4>
+                      <p className="text-sm text-gray-600 mt-1">Goal: {phase.goal}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                      Phase {index + 1}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {phase.activities.map((activity, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                        {activity}
+                    </span>
+                    ))}
+                  </div>
+                </div>
+                  ))}
+                </div>
+              </div>
+              
+          {/* Resource Allocation */}
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Resource Allocation</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-white rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-3">Budget Distribution</h4>
+                <div className="space-y-2">
+                  {[
+                    { category: 'Paid Ads', percentage: 40, amount: '$4,000' },
+                    { category: 'Content', percentage: 30, amount: '$3,000' },
+                    { category: 'Tools', percentage: 20, amount: '$2,000' },
+                    { category: 'Events', percentage: 10, amount: '$1,000' }
+                  ].map((item, index) => (
+                    <div key={index}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-600">{item.category}</span>
+                        <span className="font-semibold text-gray-900">{item.amount}</span>
+                      </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                          className="bg-blue-600 h-2 rounded-full" 
+                          style={{ width: `${item.percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+                  ))}
+            </div>
+              </div>
+
+              <div className="p-4 bg-white rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-3">Team Allocation</h4>
+                <div className="space-y-3">
+                  {[
+                    { role: 'Marketing Lead', hours: '40h/week' },
+                    { role: 'Content Creator', hours: '30h/week' },
+                    { role: 'Community Manager', hours: '20h/week' },
+                    { role: 'Designer', hours: '15h/week' }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">{item.role}</span>
+                      <span className="text-xs font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                        {item.hours}
+                      </span>
           </div>
         ))}
       </div>
     </div>
-  );
 
-  const renderGrowthTab = () => (
-    <div className="space-y-8">
-      {/* StartupOS Integration */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
-            <Code className="w-6 h-6 text-white" />
+              <div className="p-4 bg-white rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-3">Key Metrics</h4>
+                <div className="space-y-3">
+                  {[
+                    { metric: 'Target Users', value: '10,000' },
+                    { metric: 'Conversion Rate', value: '5%' },
+                    { metric: 'CAC Target', value: '$25' },
+                    { metric: 'Viral Coefficient', value: '1.2x' }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">{item.metric}</span>
+                      <span className="text-sm font-bold text-gray-900">{item.value}</span>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">StartupOS Integration</h2>
-            <p className="text-gray-600">Export startup data into full-stack growth workspace</p>
+                  ))}
+                </div>
+              </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Export Data</h3>
+          {/* Distribution Playbook */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribution Playbook</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                {
+                  title: 'Product Hunt Strategy',
+                  steps: ['Schedule for Tuesday-Thursday', 'Prepare maker comment', 'Rally supporters', 'Respond to all comments'],
+                  icon: '🚀'
+                },
+                {
+                  title: 'LinkedIn Playbook',
+                  steps: ['Founder personal story', 'Behind-the-scenes content', 'Tag relevant people', 'Engage with comments'],
+                  icon: '💼'
+                },
+                {
+                  title: 'Community Strategy',
+                  steps: ['Identify target communities', 'Provide value first', 'Share learnings', 'Build relationships'],
+                  icon: '👥'
+                },
+                {
+                  title: 'Email Campaign',
+                  steps: ['Segment audience', 'Personalize messaging', 'A/B test subject lines', 'Track engagement'],
+                  icon: '📧'
+                }
+              ].map((playbook, index) => (
+                <div key={index} className="p-4 bg-white rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">{playbook.icon}</span>
+                    <h4 className="font-semibold text-gray-900">{playbook.title}</h4>
+                  </div>
+                  <ul className="space-y-2">
+                    {playbook.steps.map((step, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                        <CheckCircle className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Waitlist Metrics */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Waitlist Metrics</h2>
+        <p className="text-gray-600 mb-6">Track waitlist signups from your launch page form in real-time.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900">Total Signups</h3>
+              <Users className="w-5 h-5 text-blue-600" />
+          </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">1,523</div>
+            <div className="text-sm text-gray-600">+89 this week</div>
+            <div className="mt-3 text-xs text-green-600 font-semibold">↑ 18% growth</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900">Today</h3>
+              <TrendingUp className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">47</div>
+            <div className="text-sm text-gray-600">Last 24 hours</div>
+            <div className="mt-3 text-xs text-green-600 font-semibold">↑ 23% vs yesterday</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900">Conversion</h3>
+              <Target className="w-5 h-5 text-purple-600" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">12.4%</div>
+            <div className="text-sm text-gray-600">Visitor to signup</div>
+            <div className="mt-3 text-xs text-green-600 font-semibold">↑ 2.1% improvement</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900">Avg. Daily</h3>
+              <Calendar className="w-5 h-5 text-orange-600" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">52</div>
+            <div className="text-sm text-gray-600">Last 30 days</div>
+            <div className="mt-3 text-xs text-green-600 font-semibold">Steady growth</div>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 rounded-xl p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Recent Signups</h3>
+          <div className="space-y-3">
+            {[
+              { email: 'sarah@startup.com', source: 'Product Hunt', time: '2 min ago', verified: true },
+              { email: 'mike@company.io', source: 'Twitter', time: '15 min ago', verified: true },
+              { email: 'alex@tech.ai', source: 'Direct', time: '1 hour ago', verified: false },
+              { email: 'emma@venture.com', source: 'LinkedIn', time: '2 hours ago', verified: true }
+            ].map((signup, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${signup.verified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+          <div>
+                    <p className="text-sm font-medium text-gray-900">{signup.email}</p>
+                    <p className="text-xs text-gray-500">via {signup.source}</p>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-500">{signup.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-semibold text-gray-900">Auto-synced from Launch Page</h4>
+              <p className="text-sm text-gray-600">Waitlist form submissions are tracked automatically</p>
+            </div>
+            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold">
+              View All Signups
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Creative Vault */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Creative Vault</h2>
+        <p className="text-gray-600 mb-6">Centralize logos, brand colors, media assets — export brand kit instantly.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Brand Assets</h3>
             <div className="space-y-3">
               {[
-                { name: 'Vision & Mission', status: 'ready', description: 'Problem, solution, market analysis' },
-                { name: 'Team Structure', status: 'ready', description: 'Roles, equity, responsibilities' },
-                { name: 'Task Management', status: 'ready', description: 'Milestones, tasks, progress' },
-                { name: 'Financial Data', status: 'ready', description: 'Projections, metrics, funding' },
-                { name: 'Documentation', status: 'ready', description: 'Legal docs, agreements, NDAs' }
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div>
-                    <p className="font-medium text-gray-900">{item.name}</p>
-                    <p className="text-sm text-gray-600">{item.description}</p>
+                { name: 'Logo (PNG)', size: '2.4 MB', type: 'logo' },
+                { name: 'Logo (SVG)', size: '156 KB', type: 'logo' },
+                { name: 'Brand Guidelines', size: '5.1 MB', type: 'document' },
+                { name: 'Social Media Kit', size: '12.3 MB', type: 'images' }
+              ].map((asset, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">{asset.name}</p>
+                      <p className="text-xs text-gray-500">{asset.size}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-600 font-medium text-sm">{item.status}</span>
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  </div>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Download className="w-4 h-4 text-gray-600" />
+                    </button>
                 </div>
               ))}
             </div>
+            <button className="w-full mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+              Upload Assets
+            </button>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Integration Status</h3>
             <div className="bg-gray-50 rounded-xl p-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Connection Status:</span>
-                  <span className="text-green-600 font-medium">Connected</span>
+            <h3 className="font-semibold text-gray-900 mb-4">Brand Colors</h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Primary', color: '#000000', usage: 'Buttons, headers' },
+                { name: 'Secondary', color: '#6366F1', usage: 'Accents, links' },
+                { name: 'Background', color: '#F9FAFB', usage: 'Page background' },
+                { name: 'Text', color: '#111827', usage: 'Body text' }
+              ].map((color, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg border border-gray-200"
+                      style={{ backgroundColor: color.color }}
+                    ></div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">{color.name}</p>
+                      <p className="text-xs text-gray-500">{color.color} • {color.usage}</p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Last Sync:</span>
-                  <span className="font-medium">2 hours ago</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Data Points:</span>
-                  <span className="font-medium">1,247</span>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Copy className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+              ))}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                Export Now
+        <button className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
+          Export Complete Brand Kit
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-semibold">
-                Configure
-              </button>
+            </div>
+          </div>
+  );
+
+  const renderPitchingTab = () => (
+    <div className="space-y-6">
+      {/* Pitch Library */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Pitch Library</h2>
+        <p className="text-gray-600 mb-6">Store your Deck, One-Pager, Demo Video. Add notes per investor or event.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors cursor-pointer">
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-2">Pitch Deck</h3>
+            <p className="text-sm text-gray-600 mb-4">Upload your presentation</p>
+            <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+              Upload Deck
+            </button>
+          </div>
+          
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors cursor-pointer">
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-2">One-Pager</h3>
+            <p className="text-sm text-gray-600 mb-4">Executive summary</p>
+            <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+              Upload One-Pager
+            </button>
+          </div>
+          
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors cursor-pointer">
+            <Video className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-2">Demo Video</h3>
+            <p className="text-sm text-gray-600 mb-4">Product demonstration</p>
+            <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold">
+              Upload Video
+            </button>
+          </div>
+        </div>
+
+          <div className="bg-gray-50 rounded-xl p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Recent Materials</h3>
+            <div className="space-y-3">
+            {[
+              { name: 'TechFlow_Deck_v3.pdf', type: 'Deck', date: '2024-02-20', notes: 'Updated for Series A' },
+              { name: 'One_Pager_Final.pdf', type: 'One-Pager', date: '2024-02-18', notes: 'Investor version' },
+              { name: 'Demo_Video_2min.mp4', type: 'Video', date: '2024-02-15', notes: 'Product showcase' }
+            ].map((file, index) => (
+              <div key={index} className="flex items-center justify-between p-4 bg-white rounded-lg">
+                <div className="flex items-center gap-3 flex-1">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{file.name}</h4>
+                    <p className="text-xs text-gray-600">{file.type} • {file.date}</p>
+                    <p className="text-xs text-gray-500 mt-1">Notes: {file.notes}</p>
+              </div>
+              </div>
+                <div className="flex items-center gap-2">
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Download className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Share2 className="w-4 h-4 text-gray-600" />
+                  </button>
+              </div>
+              </div>
+            ))}
+              </div>
+            </div>
+          </div>
+
+      {/* Pitch Trainer */}
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-lg border border-purple-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Pitch Trainer</h2>
+        <p className="text-gray-600 mb-6">AI critique tool — feedback on tone, clarity, investor appeal.</p>
+        
+        <div className="bg-white rounded-xl p-6 mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">AI Analysis Ready</h3>
+              <p className="text-sm text-gray-600">Upload your pitch for instant feedback</p>
+            </div>
+          </div>
+          <button className="w-full px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-semibold">
+            Analyze My Pitch
+          </button>
+        </div>
+
+            <div className="space-y-4">
+          <div className="bg-white rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Tone</h4>
+                <p className="text-sm text-gray-700">Confident and professional. Good energy level.</p>
+                </div>
+                </div>
+              </div>
+          <div className="bg-white rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Clarity</h4>
+                <p className="text-sm text-gray-700">Consider simplifying technical jargon for broader appeal.</p>
+            </div>
+          </div>
+              </div>
+          <div className="bg-white rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Investor Appeal</h4>
+                <p className="text-sm text-gray-700">Strong market opportunity and traction metrics.</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Zerohuman Integration */}
+      {/* Events Calendar */}
       <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-600 rounded-2xl flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Zerohuman Integration</h2>
-            <p className="text-gray-600">Ops automation for finance, HR, and compliance</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Finance Automation</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Invoice generation</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Expense tracking</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Tax preparation</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">HR Automation</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Payroll processing</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Benefits management</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Compliance tracking</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Automation</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Contract management</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">IP protection</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600">Regulatory compliance</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Fractional CXOs */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-700 rounded-2xl flex items-center justify-center">
-            <Users className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Fractional CXOs (Strategix)</h2>
-            <p className="text-gray-600">Hire part-time leaders for growth</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Events Calendar</h2>
+        <p className="text-gray-600 mb-6">Discover and apply to accelerators, demo days, or hackathons. Sync with StartupOS.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { role: 'CTO', name: 'Sarah Chen', experience: '8 years', rate: '$200/hr', availability: '20h/week' },
-            { role: 'CMO', name: 'David Kim', experience: '6 years', rate: '$180/hr', availability: '15h/week' },
-            { role: 'CFO', name: 'Lisa Wang', experience: '10 years', rate: '$220/hr', availability: '10h/week' },
-            { role: 'COO', name: 'Mike Johnson', experience: '7 years', rate: '$190/hr', availability: '25h/week' }
-          ].map((exec, index) => (
-            <div key={index} className="bg-gray-50 rounded-xl p-6">
-              <div className="text-center mb-4">
-                <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center">
-                  <Users className="w-8 h-8 text-gray-600" />
+            {
+              name: 'TechCrunch Disrupt Demo Day',
+              type: 'Demo Day',
+              date: 'Mar 15, 2024',
+              location: 'San Francisco, CA',
+              deadline: '5 days left',
+              status: 'open'
+            },
+            {
+              name: 'Startup Grind Pitch Competition',
+              type: 'Pitch Event',
+              date: 'Apr 10, 2024',
+              location: 'Virtual',
+              deadline: '20 days left',
+              status: 'open'
+            },
+            {
+              name: 'AI Hackathon 2024',
+              type: 'Hackathon',
+              date: 'Apr 25, 2024',
+              location: 'New York, NY',
+              deadline: '35 days left',
+              status: 'open'
+            },
+            {
+              name: 'Y Combinator Demo Day',
+              type: 'Demo Day',
+              date: 'May 5, 2024',
+              location: 'Mountain View, CA',
+              deadline: 'Closed',
+              status: 'closed'
+            }
+          ].map((event, index) => (
+            <div key={index} className={`p-6 rounded-xl border-2 ${
+              event.status === 'open' ? 'bg-white border-gray-200 hover:border-black' : 'bg-gray-50 border-gray-200'
+            } transition-all`}>
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-bold text-gray-900">{event.name}</h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  event.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {event.status === 'open' ? 'Open' : 'Closed'}
+                </span>
+          </div>
+              <div className="space-y-2 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {event.date}
                 </div>
-                <h3 className="font-semibold text-gray-900">{exec.role}</h3>
-                <p className="text-sm text-gray-600">{exec.name}</p>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  {event.location}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {event.deadline}
+                </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Experience:</span>
-                  <span className="font-medium">{exec.experience}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Rate:</span>
-                  <span className="font-medium">{exec.rate}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Available:</span>
-                  <span className="font-medium">{exec.availability}</span>
-                </div>
-              </div>
-              <button className="w-full mt-4 px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                Contact
+              <button 
+                className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                  event.status === 'open' 
+                    ? 'bg-black text-white hover:bg-gray-800' 
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                }`}
+                disabled={event.status === 'closed'}
+              >
+                {event.status === 'open' ? 'Apply Now' : 'Applications Closed'}
               </button>
+            </div>
+          ))}
+          </div>
+        </div>
+
+      {/* Application Tracker */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Application Tracker</h2>
+        <p className="text-gray-600 mb-6">Keep tabs on YC, Sequoia Spark, Hub71, Plug & Play, etc.</p>
+        
+        <div className="space-y-4">
+          {[
+            {
+              program: 'Y Combinator',
+              batch: 'W24',
+              status: 'Interview Scheduled',
+              date: 'Mar 20, 2024',
+              stage: 'interview',
+              notes: 'Prepare 10-min pitch + Q&A'
+            },
+            {
+              program: 'Sequoia Spark',
+              batch: 'Spring 2024',
+              status: 'Application Submitted',
+              date: 'Feb 15, 2024',
+              stage: 'submitted',
+              notes: 'Waiting for response'
+            },
+            {
+              program: 'Hub71',
+              batch: 'Q2 2024',
+              status: 'Under Review',
+              date: 'Feb 28, 2024',
+              stage: 'review',
+              notes: 'Financial docs requested'
+            },
+            {
+              program: 'Plug and Play',
+              batch: 'Batch 15',
+              status: 'Accepted',
+              date: 'Jan 10, 2024',
+              stage: 'accepted',
+              notes: 'Onboarding starts Apr 1'
+            }
+          ].map((app, index) => (
+            <div key={index} className="p-6 bg-gray-50 rounded-xl hover:shadow-md transition-all">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{app.program}</h3>
+                  <p className="text-sm text-gray-600">{app.batch}</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  app.stage === 'accepted' ? 'bg-green-100 text-green-700' :
+                  app.stage === 'interview' ? 'bg-blue-100 text-blue-700' :
+                  app.stage === 'review' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {app.status}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500">Submitted</p>
+                  <p className="text-sm font-semibold text-gray-900">{app.date}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Notes</p>
+                  <p className="text-sm text-gray-700">{app.notes}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+                  View Details
+                </button>
+                <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+                  Add Note
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Perks & Credits Store */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center">
-            <Gift className="w-6 h-6 text-white" />
+      {/* Showcase Page */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Showcase Page</h2>
+        <p className="text-gray-600 mb-6">Public launch microsite (auto-built) for community + investor visibility.</p>
+        
+        <div className="bg-white rounded-xl p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">Your Public Launch Page</h3>
+              <p className="text-sm text-gray-600">biggdate.com/showcase/techflow-ai</p>
+            </div>
+            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">Live</span>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Perks & Credits Store</h2>
-            <p className="text-gray-600">Startup bundles and credits for growth tools</p>
+          
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">1,247</div>
+              <div className="text-xs text-gray-600">Page Views</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">89</div>
+              <div className="text-xs text-gray-600">Investor Clicks</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">23</div>
+              <div className="text-xs text-gray-600">Shares</div>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button className="flex-1 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold">
+              View Live Page
+            </button>
+            <button className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+              Edit Page
+            </button>
+            <button className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+              <Share2 className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { name: 'AWS Credits', value: '$5,000', description: 'Cloud infrastructure credits', status: 'Available' },
-            { name: 'Notion Pro', value: '1 Year', description: 'Team workspace and docs', status: 'Available' },
-            { name: 'HubSpot Starter', value: '6 Months', description: 'CRM and marketing tools', status: 'Available' },
-            { name: 'Stripe Processing', value: '0.5% off', description: 'Payment processing discount', status: 'Available' },
-            { name: 'Deel Credits', value: '$2,000', description: 'Global payroll and compliance', status: 'Available' },
-            { name: 'Figma Pro', value: '1 Year', description: 'Design and prototyping tools', status: 'Available' },
-            { name: 'Slack Pro', value: '1 Year', description: 'Team communication platform', status: 'Available' },
-            { name: 'GitHub Pro', value: '1 Year', description: 'Code repository and CI/CD', status: 'Available' }
-          ].map((perk, index) => (
-            <div key={index} className="bg-gray-50 rounded-xl p-6">
-              <div className="text-center mb-4">
-                <h3 className="font-semibold text-gray-900">{perk.name}</h3>
-                <p className="text-2xl font-bold text-gray-900">{perk.value}</p>
-                <p className="text-sm text-gray-600">{perk.description}</p>
+        <div className="bg-white rounded-xl p-6">
+          <h4 className="font-semibold text-gray-900 mb-4">What's Included</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              'Company Overview',
+              'Founder Bios',
+              'Product Demo',
+              'Traction Metrics',
+              'Team Photos',
+              'Contact Form',
+              'Social Links',
+              'Press Kit Download'
+            ].map((item, index) => (
+              <div key={index} className="flex items-center gap-2 text-sm text-gray-700">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                {item}
               </div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-500">{perk.status}</span>
-                <span className="text-green-600 font-medium text-sm">Free</span>
-              </div>
-              <button className="w-full px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-semibold">
-                Claim
-              </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 
-  const renderChecklistTab = () => (
+  const renderPerksTab = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Launch Checklist</h2>
-      
-      <div className="space-y-6">
-        {launches.map(launch => (
-          <div key={launch.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{launch.name}</h3>
-            <div className="space-y-3">
-              {launch.checklist.map(item => (
-                <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <button
-                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      item.completed ? 'bg-black text-white' : 'bg-gray-300 text-gray-600'
-                    }`}
-                  >
-                    {item.completed && <CheckCircle className="w-4 h-4" />}
-                  </button>
-                  
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">{item.task}</h4>
-                  </div>
-                  
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    item.completed ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {item.completed ? 'Completed' : 'Pending'}
-                  </span>
-                </div>
-              ))}
+      {/* Perks & Licenses */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Perks & Powerups</h2>
+        <p className="text-gray-600 mb-6">Angel Access, StartupOS, ZeroHuman, Credits Store, Startup Passport, Progress Meter, and Graduation Status.</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            {
+              name: 'Angel Access',
+              description: 'Connect with verified angel investors',
+              status: 'active',
+              icon: '👼'
+            },
+            {
+              name: 'StartupOS',
+              description: 'Graduate to full platform access',
+              status: 'locked',
+              icon: '🚀'
+            },
+            {
+              name: 'ZeroHuman',
+              description: 'AI-powered legal document analysis',
+              status: 'active',
+              icon: '🤖'
+            },
+            {
+              name: 'Credits Store',
+              description: '$10,000 in startup credits',
+              status: 'active',
+              icon: '💳'
+            }
+          ].map((perk, index) => (
+            <div key={index} className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-4xl">{perk.icon}</div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{perk.name}</h3>
+                    <p className="text-sm text-gray-600">{perk.description}</p>
+              </div>
+              </div>
+                {perk.status === 'active' ? (
+                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Active</span>
+                ) : (
+                  <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">Locked</span>
+                )}
+              </div>
+              <button className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                perk.status === 'active' 
+                  ? 'bg-black text-white hover:bg-gray-800' 
+                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              }`}>
+                {perk.status === 'active' ? 'Access Now' : 'Unlock'}
+              </button>
+              </div>
+          ))}
             </div>
+      </div>
+    </div>
+  );
+
+  const renderVisaTab = () => (
+    <div className="space-y-6">
+      {/* Visa to StartupOS */}
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8 shadow-lg border border-indigo-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Visa to StartupOS</h2>
+        <p className="text-gray-600 mb-6">Graduate from BiggDate to StartupOS platform with your Boarding Pass and Founder Visa.</p>
+
+        <div className="bg-white rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Graduation Requirements</h3>
+          <div className="space-y-3">
+            {[
+              { requirement: 'Complete MVP', status: 'done' },
+              { requirement: 'Launch publicly', status: 'done' },
+              { requirement: '100+ users', status: 'in-progress' },
+              { requirement: 'First revenue', status: 'pending' }
+            ].map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-900">{item.requirement}</span>
+                {item.status === 'done' ? (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                ) : item.status === 'in-progress' ? (
+                  <Clock className="w-5 h-5 text-blue-600" />
+                ) : (
+                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
+                )}
           </div>
         ))}
+          </div>
+        </div>
+
+        <button className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-bold text-lg">
+          Apply for StartupOS Visa
+        </button>
       </div>
     </div>
   );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto mb-4"></div>
-        <p className="text-gray-600 font-medium text-lg">Loading launch preparation...</p>
-      </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Launch Preparation</h1>
-            <p className="text-gray-600">Prepare for successful startup launch with go-to-market planning</p>
-          </div>
-
-          {/* Tabs */}
-          <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-100 mb-8">
-            <div className="flex space-x-2">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-100">
+            <div className="flex flex-wrap gap-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -1312,9 +2584,9 @@ const LaunchPreparation = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
                       isActive
-                        ? 'bg-black text-white shadow-lg'
+                        ? 'bg-gray-900 text-white shadow-lg'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
@@ -1325,15 +2597,16 @@ const LaunchPreparation = () => {
               })}
             </div>
           </div>
-
-          {/* Content */}
-          <div className="max-w-6xl mx-auto">
-            {activeTab === 'overview' && renderOverviewTab()}
-            {activeTab === 'pitch' && renderPitchTab()}
-            {activeTab === 'funding' && renderFundingTab()}
-            {activeTab === 'growth' && renderGrowthTab()}
-          </div>
         </div>
+
+        {/* Tab Content */}
+        {activeTab === 'overview' && renderOverviewTab()}
+        {activeTab === 'product' && renderProductTab()}
+        {activeTab === 'dataroom' && renderDataRoomTab()}
+        {activeTab === 'gtm' && renderGTMTab()}
+        {activeTab === 'pitching' && renderPitchingTab()}
+        {activeTab === 'perks' && renderPerksTab()}
+        {activeTab === 'visa' && renderVisaTab()}
       </div>
     </div>
   );
