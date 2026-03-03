@@ -1,4 +1,4 @@
-# Soulmap (BiggDate)
+# BiggDate
 
 Full-stack Vite + React app with a local Node API that supports Ollama (default) and OpenAI, plus lightweight per-session learning memory.
 
@@ -50,6 +50,20 @@ Full-stack Vite + React app with a local Node API that supports Ollama (default)
 - The API updates memory (summary, traits, needs, boundaries, attachment guess, readiness) as conversations progress.
 - This memory is injected into future prompts for continuity.
 
-## Optional key from UI
+## End-to-end platform APIs
 
-You can also paste an API key in the onboarding header (saved in browser `localStorage`). If present, it is sent as `x-ai-key` and overrides `.env` for your browser session.
+- `POST /api/profile/derive` → derive robust profile JSON from onboarding transcript.
+- `POST /api/matches/generate` → structured compatible matches with authenticity + intent signals.
+- `POST /api/matches/briefing` → agent briefing + date concierge + pre-date guide.
+- `POST /api/intros/request` → request introduction and persist concierge package.
+- `POST /api/intros/pass` → persist match pass feedback.
+- `POST /api/dates/debrief` → save post-date debrief and generate coaching insight.
+- `POST /api/waitlist/join` → waitlist capture for city launch.
+
+Persistent operations data is stored in `data/platform.json`.
+
+## Platform-owned AI credentials
+
+- End users do not provide API keys.
+- The backend exclusively uses server environment variables (`OPENAI_API_KEY` or `OLLAMA_API_KEY`) based on `AI_PROVIDER`.
+- If `api/health` reports no key loaded, fix deployment env vars on the server.

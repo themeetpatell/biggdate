@@ -223,7 +223,7 @@ const LandingScreen = ({ onStart }) => {
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 16, fontWeight: 700, animation: "glow 3s ease infinite",
             }}>✦</div>
-            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>Soulmap</span>
+            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>BiggDate</span>
           </div>
           <div style={{
             padding: "8px 18px",
@@ -461,11 +461,11 @@ FLOW — uncover in this order:
 After 7 exchanges, append on its own line:
 PROFILE_COMPLETE:{"name":"[name]","attachment":"[Secure/Anxious/Avoidant/Fearful-Avoidant]","attachmentScore":[60-95],"readinessScore":[40-90],"growthAreas":["area1","area2","area3"],"strengths":["strength1","strength2","strength3"],"coreValues":["value1","value2","value3"],"summary":"[2-sentence sharp summary of who they are as a partner]","coachingFocus":"[the single thing that would transform their love life]"}
 
-First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?" Nothing more.`;
+First message: Exactly this — "Hey, I'm your BiggDate guide. What's your name?" Nothing more.`;
   useEffect(() => {
     // Initial greeting
     // Hardcode the first message — instant, no API call, no duplicate
-    setMessages([{ role: "assistant", content: "Hey, I'm your Soulmap guide. What's your name?" }]);
+    setMessages([{ role: "assistant", content: "Hey, I'm your BiggDate guide. What's your name?" }]);
   }, []);
 
   useEffect(() => {
@@ -544,7 +544,7 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
               fontSize: 18,
             }}>✦</div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 500 }}>Soul Guide</div>
+              <div style={{ fontSize: 15, fontWeight: 500 }}>BiggDate Guide</div>
               <div style={{ fontSize: 12, color: colors.green, display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: colors.green, display: "inline-block", animation: "pulse 2s ease infinite" }} />
                 Mapping your soul
@@ -647,7 +647,7 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Share openly — your words shape your Soulmap…"
+              placeholder="Share openly — your words shape your BiggDate profile…"
               rows={1}
               style={{
                 flex: 1,
@@ -762,7 +762,7 @@ Keep it under 400 words. No markdown headers, just flowing text with clear phase
             letterSpacing: "0.05em",
             textTransform: "uppercase",
           }}>
-            <span>◆</span> Soul Profile Complete
+            <span>◆</span> BiggDate Profile Complete
           </div>
 
           <h1 style={{
@@ -985,7 +985,7 @@ Keep it under 400 words. No markdown headers, just flowing text with clear phase
                 Ready to meet your matches?
               </div>
               <p style={{ color: colors.textMuted, fontSize: 14, maxWidth: 360 }}>
-                Your soul profile is live. Let Soulmap's agent find 3 deeply compatible people for you this week.
+                Your relationship profile is live. Let BiggDate's agent find 3 deeply compatible people for you this week.
               </p>
             </div>
             <button onClick={onContinue} style={{
@@ -1130,7 +1130,7 @@ Include: why the agent selected this person, what to know before meeting, the pr
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 14, fontWeight: 700,
                   }}>✦</div>
-                  <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>Soulmap</span>
+                  <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>BiggDate</span>
                 </div>
                 <div style={{ fontSize: 13, color: colors.textMuted }}>Agent-curated for {profile.name}</div>
               </div>
@@ -1178,7 +1178,7 @@ Include: why the agent selected this person, what to know before meeting, the pr
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
                     }}>
-                      ◆ This Week's Soulmatches
+                      ◆ This Week's BiggDate Matches
                     </div>
                     <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 8 }}>
                       3 people worth knowing
@@ -1449,7 +1449,7 @@ const CoachView = ({ profile }) => {
       body: JSON.stringify({
         model: CLAUDE_MODEL,
         max_tokens: 1000,
-        system: `You are Soulmap's relationship intelligence coach for ${profile.name}. 
+        system: `You are BiggDate's relationship intelligence coach for ${profile.name}. 
 Profile: ${JSON.stringify(profile)}
 You know their attachment style, growth areas, strengths, and coaching focus intimately.
 Be warm, insightful, occasionally challenging when needed. Ask powerful questions. Reference their specific profile. 
@@ -1482,7 +1482,7 @@ Keep responses concise but profound — 2-4 paragraphs max.`,
           fontWeight: 500,
           textTransform: "uppercase",
           letterSpacing: "0.05em",
-        }}>◆ Soul Coach · Always On</div>
+        }}>◆ BiggDate Coach · Always On</div>
         <h2 style={{ letterSpacing: "-0.025em", fontSize: 28 }}>
           Your personal guide
         </h2>

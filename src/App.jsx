@@ -1,22 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const API_KEY_STORAGE = "soulmap_openai_key";
 const SESSION_ID_STORAGE = "soulmap_session_id";
-
-const getStoredApiKey = () => {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(API_KEY_STORAGE)?.trim() || "";
-};
-
-const setStoredApiKey = (value) => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(API_KEY_STORAGE, value.trim());
-};
-
-const clearStoredApiKey = () => {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(API_KEY_STORAGE);
-};
 
 const getPersistentSessionId = () => {
   if (typeof window === "undefined") return `onboarding-${Math.random().toString(36).slice(2, 10)}`;
@@ -53,13 +37,25 @@ const parseJsonArrayFromText = (text) => {
   }
 };
 
+const companionQuestionBank = {
+  2: ["When conflict hits, do you pursue or withdraw?", "When hurt, do you go quiet or talk it out?"],
+  3: ["What pattern keeps repeating in your love life?", "What loop do you keep seeing in relationships?"],
+  4: ["What do you truly need but often settle on?", "Where do your standards drop when feelings rise?"],
+  5: ["How emotionally available are you right now, honestly?", "What wall is still up for you today?"],
+  6: ["What is your non-negotiable dealbreaker?", "What behavior ends trust for you immediately?"],
+  7: ["What do people consistently misunderstand about you?", "What truth about you gets missed most often?"],
+};
+
+const pickCompanionQuestion = (step) => {
+  const options = companionQuestionBank[step] || ["What matters most to you in love right now?"];
+  return options[step % options.length];
+};
+
 async function callBackendChat({ systemPrompt, messages, userMessage, sessionId, maxTokens = 450, temperature = 0.7 }) {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({
       systemPrompt,
@@ -79,12 +75,10 @@ async function callBackendChat({ systemPrompt, messages, userMessage, sessionId,
 }
 
 async function callCoachPlan(profile) {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/coach-plan", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ profile }),
   });
@@ -97,12 +91,10 @@ async function callCoachPlan(profile) {
 }
 
 async function callProfileDerive(conversation, sessionId) {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/profile/derive", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ conversation, sessionId }),
   });
@@ -112,12 +104,10 @@ async function callProfileDerive(conversation, sessionId) {
 }
 
 async function callGenerateMatches(profile) {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/matches/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ profile }),
   });
@@ -127,12 +117,10 @@ async function callGenerateMatches(profile) {
 }
 
 async function callMatchBriefing(profile, match) {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/matches/briefing", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ profile, match }),
   });
@@ -142,12 +130,10 @@ async function callMatchBriefing(profile, match) {
 }
 
 async function callIntroRequest(profile, match, notes = "") {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/intros/request", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ profile, match, notes }),
   });
@@ -157,12 +143,10 @@ async function callIntroRequest(profile, match, notes = "") {
 }
 
 async function callPassMatch(profile, match, reason = "") {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/intros/pass", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ profile, match, reason }),
   });
@@ -172,12 +156,10 @@ async function callPassMatch(profile, match, reason = "") {
 }
 
 async function callDateDebrief(profile, match, payload) {
-  const apiKey = getStoredApiKey();
   const res = await fetch("/api/dates/debrief", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
     },
     body: JSON.stringify({ profile, match, ...payload }),
   });
@@ -406,7 +388,7 @@ const LandingScreen = ({ onStart }) => {
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 16, fontWeight: 700, animation: "glow 3s ease infinite",
             }}>✦</div>
-            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>Soulmap</span>
+            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>BiggDate</span>
           </div>
           <div style={{
             padding: "8px 18px",
@@ -592,8 +574,6 @@ const OnboardingScreen = ({ onComplete }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [apiKeyDraft, setApiKeyDraft] = useState("");
-  const [apiKeySaved, setApiKeySaved] = useState(false);
   const [apiStatus, setApiStatus] = useState({ checking: true, hasEnvKey: false, keyRequired: true, provider: "unknown" });
   const [conversationHistory, setConversationHistory] = useState([]);
   const [questionCount, setQuestionCount] = useState(0);
@@ -636,6 +616,12 @@ SHARP REACTIONS — examples of making them feel seen:
 "That's a lot of self-awareness."
 "That tracks — you prioritize depth."
 
+COMPANION MODE:
+- Sound like a trusted companion who remembers emotional nuance over time.
+- Reflect one specific emotional signal from their last message before asking.
+- Avoid canned fallback phrases like "Tell me more".
+- If they give a short answer, ask a clarifying follow-up tied to their exact words.
+
 FLOW — uncover in this order:
 1. Name
 2. Conflict style (reveals attachment fast)
@@ -652,17 +638,16 @@ ANTI-REPETITION:
 After 7 exchanges, append on its own line:
 PROFILE_COMPLETE:{"name":"[name]","attachment":"[Secure/Anxious/Avoidant/Fearful-Avoidant]","attachmentScore":[60-95],"readinessScore":[40-90],"growthAreas":["area1","area2","area3"],"strengths":["strength1","strength2","strength3"],"coreValues":["value1","value2","value3"],"summary":"[2-sentence sharp summary of who they are as a partner]","coachingFocus":"[the single thing that would transform their love life]"}
 
-First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?" Nothing more.`;
+First message: Exactly this — "Hey, I'm your BiggDate guide. What's your name?" Nothing more.`;
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
     // Initial greeting
     // Hardcode the first message — instant, no API call, no duplicate
-    const initialGreeting = { role: "assistant", content: "Hey, I'm your Soulmap guide. What's your name?" };
+    const initialGreeting = { role: "assistant", content: "Hey, I'm your BiggDate guide. What's your name?" };
     setMessages([initialGreeting]);
     setConversationHistory([initialGreeting]);
-    setApiKeyDraft(getStoredApiKey());
 
     fetch("/api/health")
       .then((res) => res.json())
@@ -717,12 +702,21 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
 
     let responseWithoutProfilePayload = response;
     let profileFromResponse = null;
+    let shouldForceDerive = false;
 
     // Check for profile completion payload
     if (response.includes("PROFILE_COMPLETE:")) {
       const parts = response.split("PROFILE_COMPLETE:");
       responseWithoutProfilePayload = (parts[0] || "").trim();
       profileFromResponse = parseJsonObjectFromText(parts.slice(1).join("PROFILE_COMPLETE:"));
+      shouldForceDerive = !profileFromResponse;
+    }
+
+    if (!responseWithoutProfilePayload.includes("?")) {
+      const prefix = responseWithoutProfilePayload && responseWithoutProfilePayload.length > 10
+        ? responseWithoutProfilePayload.replace(/\s+/g, " ").trim().slice(0, 120)
+        : "I hear you.";
+      responseWithoutProfilePayload = `${prefix} ${pickCompanionQuestion(Math.min(nextQuestionCount + 1, 7))}`;
     }
 
     const updatedHistory = [...newHistory, { role: "assistant", content: responseWithoutProfilePayload || response }];
@@ -736,7 +730,7 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
       return;
     }
 
-    if (nextQuestionCount >= 7) {
+    if (shouldForceDerive || nextQuestionCount >= 7) {
       try {
         const derivedProfile = await callProfileDerive(updatedHistory, sessionIdRef.current);
         setLoading(false);
@@ -779,7 +773,7 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
               fontSize: 18,
             }}>✦</div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 500 }}>Soul Guide</div>
+              <div style={{ fontSize: 15, fontWeight: 500 }}>BiggDate Guide</div>
               <div style={{ fontSize: 12, color: colors.green, display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: colors.green, display: "inline-block", animation: "pulse 2s ease infinite" }} />
                 Mapping your soul
@@ -802,65 +796,20 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 300, marginLeft: "auto" }}>
-            <input
-              type="password"
-              value={apiKeyDraft}
-              onChange={(e) => {
-                setApiKeyDraft(e.target.value);
-                setApiKeySaved(false);
-              }}
-              placeholder="Optional: paste API key"
-              style={{
-                flex: 1,
-                minWidth: 220,
-                height: 34,
-                borderRadius: 10,
-                border: `1px solid ${colors.border}`,
-                background: "rgba(255,255,255,0.04)",
-                color: colors.text,
-                padding: "0 10px",
-                fontSize: 12,
-              }}
-            />
-            <button
-              onClick={() => {
-                if (apiKeyDraft.trim()) {
-                  setStoredApiKey(apiKeyDraft);
-                  setApiKeySaved(true);
-                } else {
-                  clearStoredApiKey();
-                  setApiKeySaved(true);
-                }
-              }}
-              style={{
-                height: 34,
-                borderRadius: 10,
-                border: `1px solid ${colors.borderGlow}`,
-                background: "rgba(255,255,255,0.06)",
-                color: colors.text,
-                padding: "0 12px",
-                fontSize: 12,
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
-            >
-              Save Key
-            </button>
-            {apiKeySaved && <span style={{ fontSize: 11, color: colors.green }}>Saved</span>}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 220, marginLeft: "auto" }}>
             <span style={{
               fontSize: 11,
               color: apiStatus.checking
                 ? colors.textMuted
-                : (!apiStatus.keyRequired || apiStatus.hasEnvKey || Boolean(getStoredApiKey()))
+                : (!apiStatus.keyRequired || apiStatus.hasEnvKey)
                   ? colors.green
                   : colors.rose,
             }}>
               {apiStatus.checking
-                ? "Checking key…"
-                : (!apiStatus.keyRequired || apiStatus.hasEnvKey || Boolean(getStoredApiKey()))
-                  ? `API ready · ${String(apiStatus.provider).toUpperCase()}`
-                  : "No API key loaded"}
+                ? "Checking AI service…"
+                : (!apiStatus.keyRequired || apiStatus.hasEnvKey)
+                  ? `AI service ready · ${String(apiStatus.provider).toUpperCase()}`
+                  : "AI service temporarily unavailable"}
             </span>
           </div>
         </div>
@@ -955,7 +904,7 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Share openly — your words shape your Soulmap…"
+              placeholder="Share openly — your words shape your BiggDate profile…"
               rows={1}
               style={{
                 flex: 1,
@@ -1057,7 +1006,7 @@ const ReportScreen = ({ profile, onContinue }) => {
             letterSpacing: "0.05em",
             textTransform: "uppercase",
           }}>
-            <span>◆</span> Soul Profile Complete
+            <span>◆</span> BiggDate Profile Complete
           </div>
 
           <h1 style={{
@@ -1280,7 +1229,7 @@ const ReportScreen = ({ profile, onContinue }) => {
                 Ready to meet your matches?
               </div>
               <p style={{ color: colors.textMuted, fontSize: 14, maxWidth: 360 }}>
-                Your soul profile is live. Let Soulmap's agent find 3 deeply compatible people for you this week.
+                Your relationship profile is live. Let BiggDate's agent find 3 deeply compatible people for you this week.
               </p>
             </div>
             <button onClick={onContinue} style={{
@@ -1454,7 +1403,7 @@ const MatchesScreen = ({ profile }) => {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 14, fontWeight: 700,
                   }}>✦</div>
-                  <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>Soulmap</span>
+                  <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em" }}>BiggDate</span>
                 </div>
                 <div style={{ fontSize: 13, color: colors.textMuted }}>Agent-curated for {profile.name}</div>
               </div>
@@ -1502,7 +1451,7 @@ const MatchesScreen = ({ profile }) => {
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
                     }}>
-                      ◆ This Week's Soulmatches
+                      ◆ This Week's BiggDate Matches
                     </div>
                     <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 8 }}>
                       3 people worth knowing
@@ -1907,7 +1856,7 @@ const CoachView = ({ profile }) => {
 
     try {
       const reply = await callBackendChat({
-        systemPrompt: `You are Soulmap's relationship intelligence coach for ${profile.name}. 
+        systemPrompt: `You are BiggDate's relationship intelligence coach for ${profile.name}. 
 Profile: ${JSON.stringify(profile)}
 You know their attachment style, growth areas, strengths, and coaching focus intimately.
 Be warm, insightful, occasionally challenging when needed. Ask powerful questions. Reference their specific profile. 
@@ -1944,7 +1893,7 @@ Keep responses concise but profound — 2-4 paragraphs max.`,
           fontWeight: 500,
           textTransform: "uppercase",
           letterSpacing: "0.05em",
-        }}>◆ Soul Coach · Always On</div>
+        }}>◆ BiggDate Coach · Always On</div>
         <h2 style={{ letterSpacing: "-0.025em", fontSize: 28 }}>
           Your personal guide
         </h2>

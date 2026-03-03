@@ -40,21 +40,49 @@
       "lastUpdated": "2026-03-03T23:40:08.824Z"
     },
     "onboarding-v7do3jsq": {
-      "summary": "",
-      "traits": [],
-      "needs": [],
+      "summary": "Meet recognizes a pattern of relationship failures and a tendency to settle for comfort rather than depth. They identify a fight response and show self‑awareness about trading depth for safety, indicating an avoidant attachment style and low readiness for a deeper partnership.",
+      "traits": [
+        "Self‑awareness of recurring failures",
+        "Willingness to confront the fight response",
+        "Openness to exploring needs versus compromises"
+      ],
+      "needs": [
+        "Authenticity",
+        "Personal growth",
+        "Meaningful connection"
+      ],
       "boundaries": [],
-      "attachmentGuess": "",
-      "readiness": null,
+      "attachmentGuess": "Avoidant",
+      "readiness": 0,
       "previousQuestions": [
         "Hey, I'm your Soulmap guide. What's your name?",
         "Alright, I get that vibe. What name should I call you?",
         "Got it, Meet. Does that feel right?",
         "That’s solid, Meet. Fight or flight — which one shows up?",
         "That's someone who leans in. What pattern repeats in your love life?",
-        "That's a lot of self-awareness. What do you truly need versus settle for?"
+        "That's a lot of self-awareness. What do you truly need versus settle for?",
+        "You’re trading depth for comfort. How ready are you, truly?"
       ],
-      "lastUpdated": "2026-03-03T23:42:31.368Z"
+      "lastUpdated": "2026-03-03T23:42:45.393Z"
+    },
+    "companion-test": {
+      "summary": "Meet tends to withdraw first in conflict and then overthink, expressing a strong fear of abandonment after opening up. This pattern points to a fearful-avoidant attachment style.",
+      "traits": [
+        "Self-awareness of conflict response",
+        "Ability to articulate fear of abandonment",
+        "Willingness to share personal concerns"
+      ],
+      "needs": [],
+      "boundaries": [],
+      "emotionalPatterns": [],
+      "triggers": [],
+      "reassuranceStyle": "",
+      "communicationStyle": "",
+      "companionNotes": "",
+      "attachmentGuess": "Fearful-Avoidant",
+      "readiness": 0,
+      "previousQuestions": [],
+      "lastUpdated": "2026-03-03T23:46:32.419Z"
     }
   }
 }

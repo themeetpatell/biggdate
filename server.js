@@ -84,10 +84,8 @@ function createRecordId(prefix) {
 }
 
 function getClientFromRequest(req) {
-  const overrideKey = req.header("x-ai-key")?.trim() || req.header("x-openai-key")?.trim() || req.header("x-ollama-key")?.trim();
-
   if (provider === "openai") {
-    const apiKey = overrideKey || process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) return null;
     return {
       mode: "openai-compatible",
@@ -100,7 +98,7 @@ function getClientFromRequest(req) {
 
   if (provider === "ollama-cloud") {
     const host = process.env.OLLAMA_CLOUD_HOST || "https://ollama.com";
-    const apiKey = overrideKey || process.env.OLLAMA_API_KEY;
+    const apiKey = process.env.OLLAMA_API_KEY;
     if (!apiKey) return null;
     return {
       mode: "ollama-cloud",
@@ -113,7 +111,7 @@ function getClientFromRequest(req) {
   }
 
   const baseURL = process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1";
-  const apiKey = overrideKey || process.env.OLLAMA_API_KEY || "ollama-local";
+  const apiKey = process.env.OLLAMA_API_KEY || "ollama-local";
   return {
     mode: "openai-compatible",
     client: new OpenAI({ apiKey, baseURL }),
@@ -181,6 +179,11 @@ function updateSessionMemory(sessionId, patch) {
     traits: [],
     needs: [],
     boundaries: [],
+    emotionalPatterns: [],
+    triggers: [],
+    reassuranceStyle: "",
+    communicationStyle: "",
+    companionNotes: "",
     attachmentGuess: "",
     readiness: null,
     previousQuestions: [],
@@ -192,6 +195,8 @@ function updateSessionMemory(sessionId, patch) {
     traits: Array.from(new Set([...(current.traits || []), ...((patch && patch.traits) || [])])).slice(0, 8),
     needs: Array.from(new Set([...(current.needs || []), ...((patch && patch.needs) || [])])).slice(0, 8),
     boundaries: Array.from(new Set([...(current.boundaries || []), ...((patch && patch.boundaries) || [])])).slice(0, 8),
+    emotionalPatterns: Array.from(new Set([...(current.emotionalPatterns || []), ...((patch && patch.emotionalPatterns) || [])])).slice(0, 10),
+    triggers: Array.from(new Set([...(current.triggers || []), ...((patch && patch.triggers) || [])])).slice(0, 10),
     previousQuestions: Array.from(new Set([...(current.previousQuestions || []), ...((patch && patch.previousQuestions) || [])])).slice(-24),
     lastUpdated: new Date().toISOString(),
   };
@@ -258,7 +263,7 @@ async function learnSessionMemory({ clientConfig, model, sessionId, messages }) 
     .map((item) => `${item.role.toUpperCase()}: ${item.content}`)
     .join("\n");
 
-  const memoryPrompt = `Extract stable user relationship signals from this conversation. Return STRICT JSON only with keys: summary (string), traits (string[]), needs (string[]), boundaries (string[]), attachmentGuess (string), readiness (number 0-100 or null). Keep it concise and avoid invented facts.\n\nConversation:\n${transcript}`;
+  const memoryPrompt = `Extract stable user relationship signals from this conversation. Return STRICT JSON only with keys: summary (string), traits (string[]), needs (string[]), boundaries (string[]), emotionalPatterns (string[]), triggers (string[]), reassuranceStyle (string), communicationStyle (string), companionNotes (string), attachmentGuess (string), readiness (number 0-100 or null). Keep it concise and avoid invented facts.\n\nConversation:\n${transcript}`;
 
   try {
     const text = await createCompletion({
@@ -275,6 +280,11 @@ async function learnSessionMemory({ clientConfig, model, sessionId, messages }) 
       traits: Array.isArray(parsed.traits) ? parsed.traits.filter(Boolean) : [],
       needs: Array.isArray(parsed.needs) ? parsed.needs.filter(Boolean) : [],
       boundaries: Array.isArray(parsed.boundaries) ? parsed.boundaries.filter(Boolean) : [],
+      emotionalPatterns: Array.isArray(parsed.emotionalPatterns) ? parsed.emotionalPatterns.filter(Boolean) : [],
+      triggers: Array.isArray(parsed.triggers) ? parsed.triggers.filter(Boolean) : [],
+      reassuranceStyle: typeof parsed.reassuranceStyle === "string" ? parsed.reassuranceStyle : "",
+      communicationStyle: typeof parsed.communicationStyle === "string" ? parsed.communicationStyle : "",
+      companionNotes: typeof parsed.companionNotes === "string" ? parsed.companionNotes : "",
       attachmentGuess: typeof parsed.attachmentGuess === "string" ? parsed.attachmentGuess : "",
       readiness: typeof parsed.readiness === "number" ? Math.max(0, Math.min(100, parsed.readiness)) : null,
     });
@@ -316,7 +326,7 @@ app.post("/api/chat", async (req, res) => {
 
   const memory = getSessionMemory(sessionId);
   const memoryContext = memory
-    ? `Known user memory:\n- Summary: ${memory.summary || ""}\n- Traits: ${(memory.traits || []).join(", ")}\n- Needs: ${(memory.needs || []).join(", ")}\n- Boundaries: ${(memory.boundaries || []).join(", ")}\n- Attachment guess: ${memory.attachmentGuess || ""}\n- Readiness: ${memory.readiness ?? "unknown"}\n- Previously asked questions: ${(memory.previousQuestions || []).join(" | ") || "none"}`
+    ? `Known user memory:\n- Summary: ${memory.summary || ""}\n- Traits: ${(memory.traits || []).join(", ")}\n- Needs: ${(memory.needs || []).join(", ")}\n- Boundaries: ${(memory.boundaries || []).join(", ")}\n- Emotional patterns: ${(memory.emotionalPatterns || []).join(", ")}\n- Triggers: ${(memory.triggers || []).join(", ")}\n- Reassurance style: ${memory.reassuranceStyle || ""}\n- Communication style: ${memory.communicationStyle || ""}\n- Companion notes: ${memory.companionNotes || ""}\n- Attachment guess: ${memory.attachmentGuess || ""}\n- Readiness: ${memory.readiness ?? "unknown"}\n- Previously asked questions: ${(memory.previousQuestions || []).join(" | ") || "none"}`
     : "No prior user memory yet.";
 
   const clipped = clipMessages(messages);
