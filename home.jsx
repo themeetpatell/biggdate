@@ -1,190 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const API_KEY_STORAGE = "soulmap_openai_key";
-const SESSION_ID_STORAGE = "soulmap_session_id";
-
-const getStoredApiKey = () => {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(API_KEY_STORAGE)?.trim() || "";
-};
-
-const setStoredApiKey = (value) => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(API_KEY_STORAGE, value.trim());
-};
-
-const clearStoredApiKey = () => {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(API_KEY_STORAGE);
-};
-
-const getPersistentSessionId = () => {
-  if (typeof window === "undefined") return `onboarding-${Math.random().toString(36).slice(2, 10)}`;
-  const existing = localStorage.getItem(SESSION_ID_STORAGE);
-  if (existing) return existing;
-  const created = `onboarding-${Math.random().toString(36).slice(2, 10)}`;
-  localStorage.setItem(SESSION_ID_STORAGE, created);
-  return created;
-};
-
-const parseJsonObjectFromText = (text) => {
-  if (!text || typeof text !== "string") return null;
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  const candidate = text.slice(start, end + 1);
-  try {
-    return JSON.parse(candidate);
-  } catch {
-    return null;
-  }
-};
-
-const parseJsonArrayFromText = (text) => {
-  if (!text || typeof text !== "string") return null;
-  const start = text.indexOf("[");
-  const end = text.lastIndexOf("]");
-  if (start === -1 || end === -1 || end <= start) return null;
-  const candidate = text.slice(start, end + 1);
-  try {
-    return JSON.parse(candidate);
-  } catch {
-    return null;
-  }
-};
-
-async function callBackendChat({ systemPrompt, messages, userMessage, sessionId, maxTokens = 450, temperature = 0.7 }) {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({
-      systemPrompt,
-      messages,
-      userMessage,
-      sessionId,
-      maxTokens,
-      temperature,
-    }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || "AI request failed.");
-  }
-  return data.response || "I’m here with you. Tell me more.";
-}
-
-async function callCoachPlan(profile) {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/coach-plan", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ profile }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || "Failed to generate coaching plan.");
-  }
-  return data.plan || "";
-}
-
-async function callProfileDerive(conversation, sessionId) {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/profile/derive", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ conversation, sessionId }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Profile derivation failed.");
-  return data.profile;
-}
-
-async function callGenerateMatches(profile) {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/matches/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ profile }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed generating matches.");
-  return data.matches || [];
-}
-
-async function callMatchBriefing(profile, match) {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/matches/briefing", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ profile, match }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed briefing generation.");
-  return data.briefing || "";
-}
-
-async function callIntroRequest(profile, match, notes = "") {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/intros/request", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ profile, match, notes }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed to request introduction.");
-  return data.intro;
-}
-
-async function callPassMatch(profile, match, reason = "") {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/intros/pass", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ profile, match, reason }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed to pass match.");
-  return data.pass;
-}
-
-async function callDateDebrief(profile, match, payload) {
-  const apiKey = getStoredApiKey();
-  const res = await fetch("/api/dates/debrief", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "x-ai-key": apiKey } : {}),
-    },
-    body: JSON.stringify({ profile, match, ...payload }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed to save date debrief.");
-  return data.debrief;
-}
+const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const colors = {
@@ -210,12 +26,13 @@ const colors = {
 // ─── Global Styles ────────────────────────────────────────────────────────────
 const GlobalStyle = () => (
   <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background: ${colors.bg};
       color: ${colors.text};
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -448,7 +265,7 @@ const LandingScreen = ({ onStart }) => {
           </div>
 
           <h1 style={{
-            fontSize: "clamp(38px, 7vw, 68px)",
+            letterSpacing: "-0.025em", fontSize: "clamp(38px, 7vw, 68px)",
             fontWeight: 700,
             lineHeight: 1.05,
             letterSpacing: "-0.04em",
@@ -592,15 +409,11 @@ const OnboardingScreen = ({ onComplete }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [apiKeyDraft, setApiKeyDraft] = useState("");
-  const [apiKeySaved, setApiKeySaved] = useState(false);
-  const [apiStatus, setApiStatus] = useState({ checking: true, hasEnvKey: false, keyRequired: true, provider: "unknown" });
+  const [phase, setPhase] = useState(0);
+  const [userName, setUserName] = useState("");
   const [conversationHistory, setConversationHistory] = useState([]);
   const [questionCount, setQuestionCount] = useState(0);
   const bottomRef = useRef(null);
-  const sessionIdRef = useRef(getPersistentSessionId());
-  const initializedRef = useRef(false);
-  const inFlightRef = useRef(false);
   const cleanText = (text) => text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1').replace(/#+\s/g, '').trim();
 
   const SYSTEM_PROMPT = `You are a world-class relationship psychologist — the most perceptive person someone has ever talked to. You think like a Gottman therapist, speak like a trusted best friend texting.
@@ -645,109 +458,63 @@ FLOW — uncover in this order:
 6. Dealbreaker (reveals core values instantly)
 7. "What do people always get wrong about you?"
 
-ANTI-REPETITION:
-- Never repeat the same question wording in this session.
-- If prior memory contains "Previously asked questions", avoid those exact questions.
-
 After 7 exchanges, append on its own line:
 PROFILE_COMPLETE:{"name":"[name]","attachment":"[Secure/Anxious/Avoidant/Fearful-Avoidant]","attachmentScore":[60-95],"readinessScore":[40-90],"growthAreas":["area1","area2","area3"],"strengths":["strength1","strength2","strength3"],"coreValues":["value1","value2","value3"],"summary":"[2-sentence sharp summary of who they are as a partner]","coachingFocus":"[the single thing that would transform their love life]"}
 
 First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?" Nothing more.`;
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-
     // Initial greeting
     // Hardcode the first message — instant, no API call, no duplicate
-    const initialGreeting = { role: "assistant", content: "Hey, I'm your Soulmap guide. What's your name?" };
-    setMessages([initialGreeting]);
-    setConversationHistory([initialGreeting]);
-    setApiKeyDraft(getStoredApiKey());
-
-    fetch("/api/health")
-      .then((res) => res.json())
-      .then((data) => {
-        setApiStatus({
-          checking: false,
-          hasEnvKey: Boolean(data?.hasEnvKey),
-          keyRequired: Boolean(data?.keyRequired),
-          provider: data?.provider || "unknown",
-        });
-      })
-      .catch(() => {
-        setApiStatus({ checking: false, hasEnvKey: false, keyRequired: true, provider: "unknown" });
-      });
+    setMessages([{ role: "assistant", content: "Hey, I'm your Soulmap guide. What's your name?" }]);
   }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  async function callGuide(history, userMessage) {
-    return callBackendChat({
-      systemPrompt: SYSTEM_PROMPT,
-      messages: history,
-      userMessage,
-      sessionId: sessionIdRef.current,
-      maxTokens: 300,
-      temperature: 0.75,
+  async function callClaude(history, userMessage) {
+    const msgs = [...history, { role: "user", content: userMessage }];
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 300,
+        system: SYSTEM_PROMPT,
+        messages: msgs,
+      }),
     });
+    const data = await res.json();
+    return data.content?.[0]?.text || "I'm here with you. Tell me more.";
   }
 
   async function sendMessage() {
-    if (!input.trim() || loading || inFlightRef.current) return;
-    inFlightRef.current = true;
+    if (!input.trim() || loading) return;
     const userMsg = input.trim();
-    const nextQuestionCount = questionCount + 1;
     setInput("");
     const newHistory = [...conversationHistory, { role: "user", content: userMsg }];
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     setLoading(true);
-    setQuestionCount(nextQuestionCount);
+    setQuestionCount(q => q + 1);
 
-    let response;
-    try {
-      response = await callGuide(conversationHistory, userMsg);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: "assistant", content: `I hit a connection issue: ${error.message}` }]);
-      setLoading(false);
-      inFlightRef.current = false;
-      return;
-    }
+    const response = await callClaude(conversationHistory, userMsg);
 
-    let responseWithoutProfilePayload = response;
-    let profileFromResponse = null;
-
-    // Check for profile completion payload
+    // Check for profile completion
     if (response.includes("PROFILE_COMPLETE:")) {
       const parts = response.split("PROFILE_COMPLETE:");
-      responseWithoutProfilePayload = (parts[0] || "").trim();
-      profileFromResponse = parseJsonObjectFromText(parts.slice(1).join("PROFILE_COMPLETE:"));
-    }
-
-    const updatedHistory = [...newHistory, { role: "assistant", content: responseWithoutProfilePayload || response }];
-    setConversationHistory(updatedHistory);
-    setMessages(prev => [...prev, { role: "assistant", content: responseWithoutProfilePayload || response }]);
-
-    if (profileFromResponse) {
-      setLoading(false);
-      inFlightRef.current = false;
-      setTimeout(() => onComplete(profileFromResponse), 1200);
-      return;
-    }
-
-    if (nextQuestionCount >= 7) {
+      const cleanResponse = parts[0].trim();
       try {
-        const derivedProfile = await callProfileDerive(updatedHistory, sessionIdRef.current);
+        const profile = JSON.parse(parts[1].trim());
+        setMessages(prev => [...prev, { role: "assistant", content: cleanResponse }]);
         setLoading(false);
-        inFlightRef.current = false;
-        setTimeout(() => onComplete(derivedProfile), 1200);
+        setTimeout(() => onComplete(profile), 2000);
         return;
-      } catch {
-      }
+      } catch (e) {}
     }
+
+    setConversationHistory([...newHistory, { role: "assistant", content: response }]);
+    setMessages(prev => [...prev, { role: "assistant", content: response }]);
     setLoading(false);
-    inFlightRef.current = false;
   }
 
   const progress = Math.min(questionCount / 7, 1);
@@ -764,11 +531,9 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(10,10,15,0.72)",
-          backdropFilter: "blur(24px) saturate(140%)",
+          background: "rgba(10,10,15,0.8)",
+          backdropFilter: "blur(20px)",
           flexShrink: 0,
-          gap: 20,
-          flexWrap: "wrap",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{
@@ -786,7 +551,7 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
               </div>
             </div>
           </div>
-          <div style={{ textAlign: "right", marginLeft: "auto" }}>
+          <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 6 }}>
               Phase 1 — Deep Profiling
             </div>
@@ -800,68 +565,6 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
                 boxShadow: `0 0 8px ${colors.accent}66`,
               }} />
             </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 300, marginLeft: "auto" }}>
-            <input
-              type="password"
-              value={apiKeyDraft}
-              onChange={(e) => {
-                setApiKeyDraft(e.target.value);
-                setApiKeySaved(false);
-              }}
-              placeholder="Optional: paste API key"
-              style={{
-                flex: 1,
-                minWidth: 220,
-                height: 34,
-                borderRadius: 10,
-                border: `1px solid ${colors.border}`,
-                background: "rgba(255,255,255,0.04)",
-                color: colors.text,
-                padding: "0 10px",
-                fontSize: 12,
-              }}
-            />
-            <button
-              onClick={() => {
-                if (apiKeyDraft.trim()) {
-                  setStoredApiKey(apiKeyDraft);
-                  setApiKeySaved(true);
-                } else {
-                  clearStoredApiKey();
-                  setApiKeySaved(true);
-                }
-              }}
-              style={{
-                height: 34,
-                borderRadius: 10,
-                border: `1px solid ${colors.borderGlow}`,
-                background: "rgba(255,255,255,0.06)",
-                color: colors.text,
-                padding: "0 12px",
-                fontSize: 12,
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
-            >
-              Save Key
-            </button>
-            {apiKeySaved && <span style={{ fontSize: 11, color: colors.green }}>Saved</span>}
-            <span style={{
-              fontSize: 11,
-              color: apiStatus.checking
-                ? colors.textMuted
-                : (!apiStatus.keyRequired || apiStatus.hasEnvKey || Boolean(getStoredApiKey()))
-                  ? colors.green
-                  : colors.rose,
-            }}>
-              {apiStatus.checking
-                ? "Checking key…"
-                : (!apiStatus.keyRequired || apiStatus.hasEnvKey || Boolean(getStoredApiKey()))
-                  ? `API ready · ${String(apiStatus.provider).toUpperCase()}`
-                  : "No API key loaded"}
-            </span>
           </div>
         </div>
 
@@ -935,22 +638,11 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
         <div style={{
           padding: "16px 16px 24px",
           borderTop: `1px solid ${colors.border}`,
-          background: "rgba(10,10,15,0.72)",
-          backdropFilter: "blur(26px) saturate(150%)",
+          background: "rgba(10,10,15,0.9)",
+          backdropFilter: "blur(20px)",
           flexShrink: 0,
         }}>
-          <div style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            display: "flex",
-            gap: 10,
-            alignItems: "center",
-            padding: "8px",
-            borderRadius: 20,
-            border: `1px solid ${colors.border}`,
-            background: "rgba(255,255,255,0.04)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
-          }}>
+          <div style={{ maxWidth: 680, margin: "0 auto", display: "flex", gap: 12, alignItems: "flex-end" }}>
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -959,33 +651,35 @@ First message: Exactly this — "Hey, I'm your Soulmap guide. What's your name?"
               rows={1}
               style={{
                 flex: 1,
-                padding: "12px 14px",
-                borderRadius: 14,
-                background: "transparent",
-                border: "none",
+                padding: "14px 18px",
+                borderRadius: 16,
+                background: "rgba(255,255,255,0.05)",
+                border: `1px solid ${colors.border}`,
                 color: colors.text,
                 fontSize: 15,
                 fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif",
-                fontWeight: 400,
+                fontWeight: 300,
                 resize: "none",
                 lineHeight: 1.5,
-                transition: "all 0.2s ease",
-                minHeight: 44,
+                transition: "border-color 0.2s ease",
+                minHeight: 52,
                 maxHeight: 120,
                 overflowY: "auto",
               }}
+              onFocus={e => e.currentTarget.style.borderColor = colors.borderGlow}
+              onBlur={e => e.currentTarget.style.borderColor = colors.border}
             />
             <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
-              width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+              width: 52, height: 52, borderRadius: 14, flexShrink: 0,
               background: input.trim() && !loading
                 ? `linear-gradient(135deg, ${colors.accent}, ${colors.rose})`
                 : "rgba(255,255,255,0.06)",
-              border: `1px solid ${input.trim() && !loading ? colors.borderGlow : colors.border}`,
+              border: "none",
               cursor: input.trim() && !loading ? "pointer" : "default",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18,
+              fontSize: 20,
               transition: "all 0.2s ease",
-              boxShadow: input.trim() && !loading ? `0 10px 22px ${colors.accentGlow}` : "none",
+              boxShadow: input.trim() && !loading ? `0 4px 20px ${colors.accentGlow}` : "none",
             }}>
               {loading ? <Spinner size={18} /> : "↑"}
             </button>
@@ -1010,12 +704,23 @@ const ReportScreen = ({ profile, onContinue }) => {
 
   async function generateCoachingPlan() {
     setLoadingPlan(true);
-    try {
-      const plan = await callCoachPlan(profile);
-      setCoachPlan(plan);
-    } catch (error) {
-      setCoachPlan(`Could not generate your plan right now. ${error.message}`);
-    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `Based on this soul profile, create a warm, inspiring 30-day relationship readiness coaching plan. 
+Profile: ${JSON.stringify(profile)}
+Format as 3 phases of 10 days each. Be specific and actionable but poetic. Each phase: title + 2-3 practices.
+Keep it under 400 words. No markdown headers, just flowing text with clear phase labels like "Phase 1 (Days 1-10):" etc.`
+        }]
+      }),
+    });
+    const data = await res.json();
+    setCoachPlan(data.content?.[0]?.text || "");
     setLoadingPlan(false);
   }
 
@@ -1316,14 +1021,6 @@ const MatchesScreen = ({ profile }) => {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [agentThinking, setAgentThinking] = useState(false);
   const [agentMessage, setAgentMessage] = useState("");
-  const [agentInsights, setAgentInsights] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [actionMessage, setActionMessage] = useState("");
-  const [debriefNotes, setDebriefNotes] = useState("");
-  const [debriefRating, setDebriefRating] = useState(8);
-  const [secondDateIntent, setSecondDateIntent] = useState(false);
-  const [debriefResult, setDebriefResult] = useState(null);
-  const [debriefLoading, setDebriefLoading] = useState(false);
   const [activeView, setActiveView] = useState("matches");
 
   useEffect(() => {
@@ -1332,18 +1029,45 @@ const MatchesScreen = ({ profile }) => {
 
   async function generateMatches() {
     setLoading(true);
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `Create 3 deeply compatible match profiles for this person. Profile: ${JSON.stringify(profile)}
+
+Return ONLY a JSON array, no markdown:
+[
+  {
+    "name": "First name",
+    "age": 28,
+    "city": "city name",
+    "profession": "job title",
+    "attachment": "Secure/Anxious/Avoidant",
+    "compatibilityScore": 87,
+    "sharedValues": ["value1","value2"],
+    "whyTheyWork": "2 sentence explanation of why this match is powerful",
+    "conversationStarter": "A thoughtful, specific conversation starter based on both profiles",
+    "potentialFriction": "One honest potential challenge to navigate",
+    "emoji": "A single emoji that captures their energy"
+  }
+]`
+        }]
+      }),
+    });
+    const data = await res.json();
     try {
-      const generatedMatches = await callGenerateMatches(profile);
-      if (Array.isArray(generatedMatches) && generatedMatches.length) {
-        setMatches(generatedMatches);
-      } else {
-        throw new Error("No matches generated.");
-      }
+      const text = data.content?.[0]?.text || "[]";
+      const clean = text.replace(/```json|```/g, "").trim();
+      setMatches(JSON.parse(clean));
     } catch (e) {
       setMatches([
-        { name: "Aria", age: 29, city: "London", profession: "UX Designer", attachment: "Secure", compatibilityScore: 91, sharedValues: ["Authenticity", "Growth"], whyTheyWork: "You both prize depth over surface. Your emotional styles complement rather than clash.", conversationStarter: "I heard you're passionate about creativity — what's a project you've done that you're most proud of?", potentialFriction: "Both of you tend to need processing time after conflict.", emoji: "🌿", authenticityScore: 94, intentAlignment: "High" },
-        { name: "James", age: 32, city: "NYC", profession: "Writer", attachment: "Anxious", compatibilityScore: 84, sharedValues: ["Depth", "Honesty"], whyTheyWork: "His emotional expressiveness meets your need for real connection. Together you'd create remarkable depth.", conversationStarter: "What's a book that changed how you see yourself?", potentialFriction: "His need for reassurance may test your patience at first.", emoji: "✍️", authenticityScore: 82, intentAlignment: "Medium" },
-        { name: "Mia", age: 27, city: "Paris", profession: "Architect", attachment: "Secure", compatibilityScore: 88, sharedValues: ["Beauty", "Adventure"], whyTheyWork: "She brings structure to your creative energy. Your values align in the ways that matter most long-term.", conversationStarter: "If you could design your ideal Saturday from scratch, what would it look like?", potentialFriction: "Her independence may sometimes feel like distance.", emoji: "🏛️", authenticityScore: 89, intentAlignment: "High" }
+        { name: "Aria", age: 29, city: "London", profession: "UX Designer", attachment: "Secure", compatibilityScore: 91, sharedValues: ["Authenticity", "Growth"], whyTheyWork: "You both prize depth over surface. Your emotional styles complement rather than clash.", conversationStarter: "I heard you're passionate about creativity — what's a project you've done that you're most proud of?", potentialFriction: "Both of you tend to need processing time after conflict.", emoji: "🌿" },
+        { name: "James", age: 32, city: "NYC", profession: "Writer", attachment: "Anxious", compatibilityScore: 84, sharedValues: ["Depth", "Honesty"], whyTheyWork: "His emotional expressiveness meets your need for real connection. Together you'd create remarkable depth.", conversationStarter: "What's a book that changed how you see yourself?", potentialFriction: "His need for reassurance may test your patience at first.", emoji: "✍️" },
+        { name: "Mia", age: 27, city: "Paris", profession: "Architect", attachment: "Secure", compatibilityScore: 88, sharedValues: ["Beauty", "Adventure"], whyTheyWork: "She brings structure to your creative energy. Your values align in the ways that matter most long-term.", conversationStarter: "If you could design your ideal Saturday from scratch, what would it look like?", potentialFriction: "Her independence may sometimes feel like distance.", emoji: "🏛️" }
       ]);
     }
     setLoading(false);
@@ -1353,74 +1077,26 @@ const MatchesScreen = ({ profile }) => {
     setSelectedMatch(match);
     setAgentThinking(true);
     setActiveView("agent");
-    setAgentInsights(null);
-    try {
-      const briefing = await callMatchBriefing(profile, match);
-      const parsed = parseJsonObjectFromText(briefing);
-      if (parsed && parsed.briefing) {
-        setAgentMessage(parsed.briefing);
-        setAgentInsights(parsed);
-      } else {
-        setAgentMessage(briefing || "");
-      }
-    } catch (error) {
-      setAgentMessage(`Could not generate the agent briefing right now. ${error.message}`);
-    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `You are ${profile.name}'s AI dating agent. You've just "negotiated" compatibility with ${match.name}'s agent. Write a warm, insightful briefing to ${profile.name} about this match.
+
+${profile.name}'s profile: ${JSON.stringify(profile)}
+Match: ${JSON.stringify(match)}
+
+Include: why the agent selected this person, what to know before meeting, the pre-date conversation guide (3 questions to ask), and what to watch for. Be warm, specific, human. Under 350 words.`
+        }]
+      }),
+    });
+    const data = await res.json();
+    setAgentMessage(data.content?.[0]?.text || "");
     setAgentThinking(false);
-  }
-
-  async function requestIntroduction() {
-    if (!selectedMatch || actionLoading) return;
-    setActionLoading(true);
-    setActionMessage("");
-    try {
-      const intro = await callIntroRequest(profile, selectedMatch, "Requested from agent briefing screen");
-      setActionMessage(`Introduction requested for ${intro.matchName}. Concierge package is ready.`);
-    } catch (error) {
-      setActionMessage(`Could not request introduction: ${error.message}`);
-    }
-    setActionLoading(false);
-  }
-
-  async function passMatch() {
-    if (!selectedMatch || actionLoading) return;
-    setActionLoading(true);
-    setActionMessage("");
-    try {
-      await callPassMatch(profile, selectedMatch, "Passed from agent briefing screen");
-      setActionMessage(`${selectedMatch.name} passed. Your agent will learn from this preference.`);
-      setActiveView("matches");
-    } catch (error) {
-      setActionMessage(`Could not pass this match: ${error.message}`);
-    }
-    setActionLoading(false);
-  }
-
-  async function submitDateDebrief() {
-    if (!selectedMatch || !debriefNotes.trim() || debriefLoading) return;
-    setDebriefLoading(true);
-    setDebriefResult(null);
-    try {
-      const result = await callDateDebrief(profile, selectedMatch, {
-        notes: debriefNotes,
-        rating: Number(debriefRating),
-        secondDateIntent,
-      });
-      setDebriefResult(result.analysis || {
-        summary: "Debrief saved successfully.",
-        signals: [],
-        nextStep: "Your coach will use this in future matching.",
-        riskFlags: [],
-      });
-    } catch (error) {
-      setDebriefResult({
-        summary: `Could not save debrief: ${error.message}`,
-        signals: [],
-        nextStep: "Try again in a moment.",
-        riskFlags: [],
-      });
-    }
-    setDebriefLoading(false);
   }
 
   const getCompatColor = (score) => {
@@ -1563,26 +1239,10 @@ const MatchesScreen = ({ profile }) => {
                                   color: getCompatColor(match.compatibilityScore),
                                   fontWeight: 600,
                                 }}>{match.compatibilityScore}% match</span>
-                                {typeof match.authenticityScore === "number" && (
-                                  <span style={{
-                                    padding: "3px 10px",
-                                    borderRadius: 99,
-                                    background: "rgba(79,255,176,0.12)",
-                                    border: "1px solid rgba(79,255,176,0.28)",
-                                    fontSize: 12,
-                                    color: colors.green,
-                                    fontWeight: 600,
-                                  }}>Authenticity {match.authenticityScore}</span>
-                                )}
                               </div>
                               <div style={{ fontSize: 13, color: colors.textMuted, marginBottom: 12 }}>
                                 {match.profession} · {match.city} · {match.attachment} attachment
                               </div>
-                              {match.intentAlignment && (
-                                <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 12 }}>
-                                  Intent alignment: <span style={{ color: colors.text }}>{match.intentAlignment}</span>
-                                </div>
-                              )}
                               <p style={{ fontSize: 14, color: colors.textMuted, lineHeight: 1.7, marginBottom: 16 }}>
                                 {match.whyTheyWork}
                               </p>
@@ -1712,47 +1372,9 @@ const MatchesScreen = ({ profile }) => {
                     )}
                   </div>
 
-                  {!agentThinking && agentInsights?.dateIdeas?.length > 0 && (
-                    <div style={{
-                      padding: "20px",
-                      borderRadius: 18,
-                      background: "rgba(79,255,176,0.05)",
-                      border: "1px solid rgba(79,255,176,0.2)",
-                      marginBottom: 16,
-                    }}>
-                      <div style={{ fontSize: 12, color: colors.green, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
-                        Date Concierge Ideas
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {agentInsights.dateIdeas.map((idea, idx) => (
-                          <div key={idx} style={{ fontSize: 14, color: colors.textMuted }}>• {idea}</div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {!agentThinking && agentInsights?.preDateQuestions?.length > 0 && (
-                    <div style={{
-                      padding: "20px",
-                      borderRadius: 18,
-                      background: "rgba(180,140,255,0.06)",
-                      border: `1px solid ${colors.borderGlow}`,
-                      marginBottom: 24,
-                    }}>
-                      <div style={{ fontSize: 12, color: colors.accent, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
-                        Pre-date Conversation Guide
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {agentInsights.preDateQuestions.map((question, idx) => (
-                          <div key={idx} style={{ fontSize: 14, color: colors.textMuted }}>{idx + 1}. {question}</div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {!agentThinking && (
                     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                      <button onClick={requestIntroduction} disabled={actionLoading} style={{
+                      <button style={{
                         flex: 1, minWidth: 160,
                         padding: "14px 24px",
                         borderRadius: 14,
@@ -1768,7 +1390,7 @@ const MatchesScreen = ({ profile }) => {
                       }}>
                         Request Introduction
                       </button>
-                      <button onClick={passMatch} disabled={actionLoading} style={{
+                      <button style={{
                         flex: 1, minWidth: 160,
                         padding: "14px 24px",
                         borderRadius: 14,
@@ -1782,90 +1404,6 @@ const MatchesScreen = ({ profile }) => {
                       }}>
                         Pass
                       </button>
-                    </div>
-                  )}
-
-                  {!agentThinking && actionMessage && (
-                    <div style={{
-                      marginTop: 14,
-                      padding: "12px 14px",
-                      borderRadius: 12,
-                      background: "rgba(79,255,176,0.08)",
-                      border: "1px solid rgba(79,255,176,0.2)",
-                      color: colors.green,
-                      fontSize: 13,
-                    }}>{actionMessage}</div>
-                  )}
-
-                  {!agentThinking && (
-                    <div style={{
-                      marginTop: 24,
-                      padding: "20px",
-                      borderRadius: 18,
-                      background: "rgba(255,255,255,0.03)",
-                      border: `1px solid ${colors.border}`,
-                    }}>
-                      <div style={{ fontSize: 12, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
-                        Post-date Debrief
-                      </div>
-                      <textarea
-                        value={debriefNotes}
-                        onChange={(e) => setDebriefNotes(e.target.value)}
-                        placeholder="How did the date feel? What stood out?"
-                        rows={4}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          borderRadius: 12,
-                          border: `1px solid ${colors.border}`,
-                          background: "rgba(255,255,255,0.04)",
-                          color: colors.text,
-                          marginBottom: 10,
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif",
-                        }}
-                      />
-                      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
-                        <label style={{ fontSize: 13, color: colors.textMuted }}>Rating:</label>
-                        <input
-                          type="number"
-                          min={1}
-                          max={10}
-                          value={debriefRating}
-                          onChange={(e) => setDebriefRating(e.target.value)}
-                          style={{
-                            width: 72,
-                            height: 34,
-                            borderRadius: 10,
-                            border: `1px solid ${colors.border}`,
-                            background: "rgba(255,255,255,0.04)",
-                            color: colors.text,
-                            padding: "0 10px",
-                          }}
-                        />
-                        <label style={{ fontSize: 13, color: colors.textMuted, display: "flex", alignItems: "center", gap: 6 }}>
-                          <input type="checkbox" checked={secondDateIntent} onChange={(e) => setSecondDateIntent(e.target.checked)} />
-                          Want second date
-                        </label>
-                      </div>
-                      <button onClick={submitDateDebrief} disabled={debriefLoading || !debriefNotes.trim()} style={{
-                        padding: "10px 16px",
-                        borderRadius: 10,
-                        border: `1px solid ${colors.borderGlow}`,
-                        background: colors.accentSoft,
-                        color: colors.text,
-                        cursor: debriefLoading || !debriefNotes.trim() ? "default" : "pointer",
-                        fontSize: 13,
-                        fontWeight: 500,
-                      }}>
-                        {debriefLoading ? "Saving…" : "Save Debrief"}
-                      </button>
-
-                      {debriefResult?.summary && (
-                        <div style={{ marginTop: 14, fontSize: 13, color: colors.textMuted, lineHeight: 1.7 }}>
-                          <div style={{ color: colors.text, marginBottom: 6 }}>{debriefResult.summary}</div>
-                          {debriefResult.nextStep && <div>Next step: {debriefResult.nextStep}</div>}
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1905,25 +1443,25 @@ const CoachView = ({ profile }) => {
     setMessages(prev => [...prev, { role: "user", content: msg }]);
     setLoading(true);
 
-    try {
-      const reply = await callBackendChat({
-        systemPrompt: `You are Soulmap's relationship intelligence coach for ${profile.name}. 
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 1000,
+        system: `You are Soulmap's relationship intelligence coach for ${profile.name}. 
 Profile: ${JSON.stringify(profile)}
 You know their attachment style, growth areas, strengths, and coaching focus intimately.
 Be warm, insightful, occasionally challenging when needed. Ask powerful questions. Reference their specific profile. 
 You're like the world's best relationship therapist meets a brilliant, caring best friend.
 Keep responses concise but profound — 2-4 paragraphs max.`,
-        messages: history,
-        userMessage: msg,
-        sessionId: `coach-${profile.name || "user"}`,
-        maxTokens: 1000,
-        temperature: 0.8,
-      });
-      setHistory([...newHistory, { role: "assistant", content: reply }]);
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: "assistant", content: `I couldn't reach your coach right now: ${error.message}` }]);
-    }
+        messages: [...newHistory],
+      }),
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || "I'm here.";
+    setHistory([...newHistory, { role: "assistant", content: reply }]);
+    setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     setLoading(false);
   }
 

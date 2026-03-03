@@ -1,213 +1,55 @@
-# 🚀 Co-Builders - Cofounder Startup Building Platform
+# Soulmap (BiggDate)
 
-A comprehensive platform for finding cofounders, building startups, and launching successful ventures together.
+Full-stack Vite + React app with a local Node API that supports Ollama (default) and OpenAI, plus lightweight per-session learning memory.
 
-## ✨ Features
+## Quick Start
 
-- **Entrepreneur Profiles**: Detailed profiles with background, skills, and startup experience
-- **Pitch Creation**: Video/audio recording and detailed business concept presentation
-- **Pitch-Back System**: Express interest with specific role proposals and collaboration offers
-- **Cofounder Matching**: AI-powered matching based on complementary skills and vision alignment
-- **Idea Sprint Tools**: Idea furnishing, validation, market research, and MVP building
-- **Skills Marketplace**: Offer skills, showcase work, manage clients, and set availability
-- **Sprint Dashboard**: Guided startup development with milestone tracking
-- **Project Board**: Interactive execution board with tasks, deadlines, and progress tracking
-- **Team Workspace**: Document sharing, meeting scheduler, and decision logging
-- **MVP Tracker**: Feature planning and launch countdown with development milestones
-- **Equity Framework**: Templates and guidance for role and equity discussions
-- **Collaboration Tools**: Real-time wireframing, planning, and execution tools
-- **Launch Preparation**: Go-to-market planning and investor readiness preparation
+1. Copy env template:
+   ```bash
+   cp .env.example .env
+   ```
+2. Add your provider config in `.env`:
+   ```env
+   AI_PROVIDER=ollama-cloud
+   OLLAMA_CLOUD_HOST=https://ollama.com
+   OLLAMA_API_KEY=your_key
+   OLLAMA_CLOUD_MODEL=gpt-oss:120b
+   PORT=8787
+   ```
 
-## 🛠️ Tech Stack
+   For local Ollama instead:
+   ```env
+   AI_PROVIDER=ollama
+   OLLAMA_BASE_URL=http://localhost:11434/v1
+   OLLAMA_MODEL=llama3.1:8b
+   PORT=8787
+   ```
 
-- **Frontend**: React 18, Vite, Tailwind CSS
-- **State Management**: Redux Toolkit
-- **Routing**: React Router DOM
-- **UI Components**: Custom components with Framer Motion
-- **Build Tool**: Vite with production optimizations
-- **Deployment**: Docker, Nginx, Vercel-ready
+   For OpenAI instead:
+   ```env
+   AI_PROVIDER=openai
+   OPENAI_API_KEY=your_key_here
+   OPENAI_MODEL=gpt-4.1
+   PORT=8787
+   ```
+3. Install deps:
+   ```bash
+   npm install
+   ```
+4. Run app + API together:
+   ```bash
+   npm run dev
+   ```
 
-## 🚀 Quick Start
+- Web app: http://localhost:5173
+- API health: http://localhost:8787/api/health
 
-### Prerequisites
-- Node.js 18+ 
-- npm 8+
+## Self-learning memory
 
-### Installation
+- Session memory is saved in `data/memory.json`.
+- The API updates memory (summary, traits, needs, boundaries, attachment guess, readiness) as conversations progress.
+- This memory is injected into future prompts for continuity.
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/biggdate.git
-cd biggdate
+## Optional key from UI
 
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-### Production Build
-
-```bash
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-## 🐳 Docker Deployment
-
-### Quick Deploy
-```bash
-# Make deployment script executable
-chmod +x deploy.sh
-
-# Run deployment
-./deploy.sh
-```
-
-### Manual Docker
-```bash
-# Build and start containers
-docker-compose up --build -d
-
-# Stop containers
-docker-compose down
-```
-
-## 🌐 Deployment Options
-
-### Vercel (Recommended)
-1. Connect your GitHub repository to Vercel
-2. Set build command: `npm run build`
-3. Set output directory: `dist`
-4. Deploy automatically on push
-
-### Netlify
-1. Connect your GitHub repository to Netlify
-2. Set build command: `npm run build`
-3. Set publish directory: `dist`
-4. Deploy automatically on push
-
-### Static Hosting
-Upload the `dist/` folder to any static hosting provider:
-- AWS S3 + CloudFront
-- GitHub Pages
-- Firebase Hosting
-- Any CDN
-
-## 📁 Project Structure
-
-```
-biggdate/
-├── src/
-│   ├── components/          # React components
-│   │   ├── onboarding/      # Onboarding flow
-│   │   ├── sprint-tools/    # Sprint development tools
-│   │   ├── skills-tools/    # Skills marketplace tools
-│   │   ├── Auth.jsx         # Authentication
-│   │   ├── Home.jsx         # Dashboard
-│   │   └── ...
-│   ├── store/               # Redux store
-│   └── App.jsx              # Main application
-├── public/                  # Static assets
-├── dist/                    # Production build
-├── backend/                 # Backend API
-├── docker-compose.yml       # Docker configuration
-├── Dockerfile               # Frontend Docker image
-├── nginx.conf               # Nginx configuration
-└── deploy.sh                # Deployment script
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-Copy `production.env` to `.env` and update values:
-
-```bash
-cp production.env .env
-```
-
-Key variables:
-- `VITE_API_URL`: Backend API URL
-- `VITE_SOCKET_URL`: WebSocket URL
-- `VITE_APP_VERSION`: Application version
-
-### Build Configuration
-- **Vite Config**: `vite.config.prod.js` for production
-- **Code Splitting**: Automatic chunk splitting
-- **Minification**: Terser with console removal
-- **Tree Shaking**: Unused code elimination
-
-## 📊 Performance
-
-- **Bundle Size**: 788KB (gzipped: ~200KB)
-- **Build Time**: ~8 seconds
-- **First Load**: Optimized with code splitting
-- **Caching**: 1-year cache for static assets
-
-## 🔒 Security
-
-- **CSP Headers**: Content Security Policy configured
-- **XSS Protection**: Cross-site scripting protection
-- **HTTPS Ready**: SSL/TLS configuration
-- **CORS**: Cross-origin resource sharing configured
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run tests in UI mode
-npm run test:ui
-```
-
-## 📝 Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
-- `npm test` - Run tests
-- `npm run analyze` - Analyze bundle size
-
-## 🚀 Deployment Status
-
-✅ **Production Ready**
-- Build successful
-- All components working
-- Docker configuration ready
-- Security headers configured
-- Performance optimized
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📞 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation
-- Review the deployment guide
-
----
-
-**Ready to deploy! 🚀**
-
-Built with ❤️ using React, Vite, and modern web technologies.
+You can also paste an API key in the onboarding header (saved in browser `localStorage`). If present, it is sent as `x-ai-key` and overrides `.env` for your browser session.
