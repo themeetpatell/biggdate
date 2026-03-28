@@ -7,6 +7,6 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const { matchId, matchName } = await req.json();
-  const intro = createIntro(auth.userId, matchId, matchName);
+  const intro = await createIntro(auth.userId, matchId, matchName);
   return NextResponse.json(intro);
 }

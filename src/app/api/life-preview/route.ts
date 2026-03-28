@@ -11,13 +11,13 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const { match }: { match: Match } = await req.json();
-  const profile = getProfileByUserId(auth.userId);
+  const profile = await getProfileByUserId(auth.userId);
   if (!profile || !match) {
     return NextResponse.json({ error: "Missing profile or match" }, { status: 400 });
   }
 
   // Check cache
-  const cached = getLifePreview(auth.userId, match.id);
+  const cached = await getLifePreview(auth.userId, match.id);
   if (cached) return NextResponse.json(cached);
 
   const provider = getAIProvider();
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const preview = { matchId: match.id, match, ...previewData };
 
     // Cache in DB
-    saveLifePreview(auth.userId, match.id, preview);
+    await saveLifePreview(auth.userId, match.id, preview);
 
     return NextResponse.json(preview);
   } catch {

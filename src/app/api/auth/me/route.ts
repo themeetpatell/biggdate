@@ -8,7 +8,7 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const profile = getProfileByUserId(session.userId);
+  const profile = await getProfileByUserId(session.userId);
 
   return NextResponse.json({
     userId: session.userId,

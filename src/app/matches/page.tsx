@@ -17,25 +17,22 @@ function MatchCard({ match, profile, onPreview }: { match: Match; profile: Profi
   return (
     <Card className="bg-[var(--bd-surface)] border-[var(--bd-border)] hover:border-[var(--bd-accent)]/30 bd-card-hover overflow-hidden">
       <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{match.emoji || "✨"}</span>
-              <h3 className="text-lg font-bold">{match.name}</h3>
-              <span className="text-sm" style={{ color: "var(--bd-text-muted)" }}>
-                {match.age}
-              </span>
-            </div>
-            <p className="text-xs mt-0.5" style={{ color: "var(--bd-text-muted)" }}>
-              {match.profession} · {match.city}
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-lg">{match.emoji || "✨"}</span>
+            <h3 className="text-lg font-bold">{match.name}</h3>
+            <span className="text-sm" style={{ color: "var(--bd-text-muted)" }}>
+              {match.age}
+            </span>
+          </div>
+          <p className="text-xs mb-2" style={{ color: "var(--bd-text-muted)" }}>
+            {match.profession} · {match.city}
+          </p>
+          {match.narrativeIntro && (
+            <p className="text-sm italic leading-snug" style={{ color: "var(--bd-accent)" }}>
+              &ldquo;{match.narrativeIntro}&rdquo;
             </p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold" style={{ color: "var(--bd-accent)" }}>
-              {match.compatibilityScore}%
-            </div>
-            <div className="text-[10px] uppercase" style={{ color: "var(--bd-text-faint)" }}>Match</div>
-          </div>
+          )}
         </div>
 
         {/* Zodiac & Badges */}

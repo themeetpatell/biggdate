@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const { matchName, matchId, feedback } = await req.json();
-  const profile = getProfileByUserId(auth.userId);
+  const profile = await getProfileByUserId(auth.userId);
   if (!profile) {
     return NextResponse.json({ error: "No profile" }, { status: 400 });
   }
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 Provide: 1) A warm acknowledgment 2) What this reveals about their patterns 3) One specific growth insight 4) Whether to pursue or pass, with reasoning. Keep it concise (3-4 paragraphs).`,
   });
 
-  createDebrief(auth.userId, matchId, matchName, feedback, result.text || "");
+  await createDebrief(auth.userId, matchId, matchName, feedback, result.text || "");
 
   return NextResponse.json({ insight: result.text || "" });
 }

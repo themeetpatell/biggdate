@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     sessionId,
   }: { messages: UIMessage[]; sessionId: string } = await req.json();
 
-  const memory = getSessionMemoryDb(auth.userId, sessionId || "default");
+  const memory = await getSessionMemoryDb(auth.userId, sessionId || "default");
   const questionIndex = messages.filter((m) => m.role === "assistant").length;
 
   const bankQ =
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       const raw = memResult.text || "";
       const jsonStr = raw.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
       const parsed = JSON.parse(jsonStr);
-      upsertSessionMemory(auth.userId, sessionId || "default", parsed);
+      await upsertSessionMemory(auth.userId, sessionId || "default", parsed);
     } catch {
       // silent
     }

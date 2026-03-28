@@ -6,6 +6,6 @@ export async function GET() {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
-  const intros = getIntrosForUser(auth.userId);
+  const intros = await getIntrosForUser(auth.userId);
   return NextResponse.json(intros);
 }

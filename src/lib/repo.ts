@@ -1,6 +1,6 @@
-import { getDb } from "./db";
+import { sql } from "./db";
 import { randomUUID } from "node:crypto";
-import type { Profile, Match, LifePreview, SessionMemory } from "./types";
+import type { Profile, Match, LifePreview, SessionMemory, DebriefReflection } from "./types";
 
 function createId(prefix: string) {
   return `${prefix}_${randomUUID()}`;
@@ -8,70 +8,84 @@ function createId(prefix: string) {
 
 // ─── Profile ───
 
-export function getProfileByUserId(userId: string): Profile | null {
-  const db = getDb();
-  const row = db.prepare("SELECT * FROM profiles WHERE user_id = ?").get(userId) as Record<string, unknown> | undefined;
-  if (!row) return null;
-  return rowToProfile(row);
+export async function getProfileByUserId(userId: string): Promise<Profile | null> {
+  const rows = await sql`SELECT * FROM profiles WHERE user_id = ${userId}`;
+  if (!rows.length) return null;
+  return rowToProfile(rows[0] as Record<string, unknown>);
 }
 
-export function upsertProfile(userId: string, profile: Partial<Profile>) {
-  const db = getDb();
-  const existing = db.prepare("SELECT id FROM profiles WHERE user_id = ?").get(userId) as { id: string } | undefined;
+export async function upsertProfile(userId: string, profile: Partial<Profile>) {
+  const existing = await sql`SELECT id FROM profiles WHERE user_id = ${userId}`;
 
-  if (existing) {
-    db.prepare(`
+  const dealbreakers = JSON.stringify(profile.dealbreakers || []);
+  const growthAreas = JSON.stringify(profile.growthAreas || []);
+  const strengths = JSON.stringify(profile.strengths || []);
+  const coreValues = JSON.stringify(profile.coreValues || []);
+  const photos = JSON.stringify(profile.photos || []);
+
+  if (existing.length) {
+    await sql`
       UPDATE profiles SET
-        name = coalesce(?, name), age = coalesce(?, age), birthday = coalesce(?, birthday),
-        zodiac = coalesce(?, zodiac), city = coalesce(?, city), gender = coalesce(?, gender),
-        orientation = coalesce(?, orientation), partner_gender = coalesce(?, partner_gender),
-        intent = coalesce(?, intent), has_kids = ?, wants_kids = coalesce(?, wants_kids),
-        love_language = coalesce(?, love_language), drinking = coalesce(?, drinking),
-        smoking = coalesce(?, smoking), exercise = coalesce(?, exercise),
-        dealbreakers = ?, partner_age_min = coalesce(?, partner_age_min),
-        partner_age_max = coalesce(?, partner_age_max),
-        attachment = coalesce(?, attachment), attachment_score = coalesce(?, attachment_score),
-        readiness_score = coalesce(?, readiness_score),
-        growth_areas = ?, strengths = ?, core_values = ?,
-        summary = coalesce(?, summary), coaching_focus = coalesce(?, coaching_focus),
-        photos = ?, updated_at = datetime('now')
-      WHERE user_id = ?
-    `).run(
-      profile.name, profile.age, profile.birthday,
-      profile.zodiac, profile.city, profile.gender,
-      profile.orientation, profile.partnerGender,
-      profile.intent, profile.hasKids === null ? null : profile.hasKids ? 1 : 0, profile.wantsKids,
-      profile.loveLanguage, profile.drinking,
-      profile.smoking, profile.exercise,
-      JSON.stringify(profile.dealbreakers || []), profile.partnerAgeMin,
-      profile.partnerAgeMax,
-      profile.attachment, profile.attachmentScore,
-      profile.readinessScore,
-      JSON.stringify(profile.growthAreas || []), JSON.stringify(profile.strengths || []), JSON.stringify(profile.coreValues || []),
-      profile.summary, profile.coachingFocus,
-      JSON.stringify(profile.photos || []),
-      userId,
-    );
+        name = COALESCE(${profile.name ?? null}, name),
+        age = COALESCE(${profile.age ?? null}, age),
+        birthday = COALESCE(${profile.birthday ?? null}, birthday),
+        zodiac = COALESCE(${profile.zodiac ?? null}, zodiac),
+        city = COALESCE(${profile.city ?? null}, city),
+        gender = COALESCE(${profile.gender ?? null}, gender),
+        orientation = COALESCE(${profile.orientation ?? null}, orientation),
+        partner_gender = COALESCE(${profile.partnerGender ?? null}, partner_gender),
+        intent = COALESCE(${profile.intent ?? null}, intent),
+        has_kids = COALESCE(${profile.hasKids ?? null}, has_kids),
+        wants_kids = COALESCE(${profile.wantsKids ?? null}, wants_kids),
+        love_language = COALESCE(${profile.loveLanguage ?? null}, love_language),
+        drinking = COALESCE(${profile.drinking ?? null}, drinking),
+        smoking = COALESCE(${profile.smoking ?? null}, smoking),
+        exercise = COALESCE(${profile.exercise ?? null}, exercise),
+        dealbreakers = ${dealbreakers},
+        partner_age_min = COALESCE(${profile.partnerAgeMin ?? null}, partner_age_min),
+        partner_age_max = COALESCE(${profile.partnerAgeMax ?? null}, partner_age_max),
+        attachment = COALESCE(${profile.attachment ?? null}, attachment),
+        attachment_score = COALESCE(${profile.attachmentScore ?? null}, attachment_score),
+        readiness_score = COALESCE(${profile.readinessScore ?? null}, readiness_score),
+        growth_areas = ${growthAreas},
+        strengths = ${strengths},
+        core_values = ${coreValues},
+        summary = COALESCE(${profile.summary ?? null}, summary),
+        coaching_focus = COALESCE(${profile.coachingFocus ?? null}, coaching_focus),
+        photos = ${photos},
+        conflict_style = COALESCE(${profile.conflictStyle ?? null}, conflict_style),
+        family_expectations = COALESCE(${profile.familyExpectations ?? null}, family_expectations),
+        life_architecture = COALESCE(${profile.lifeArchitecture ?? null}, life_architecture),
+        updated_at = NOW()
+      WHERE user_id = ${userId}
+    `;
   } else {
     const id = createId("prof");
-    db.prepare(`
-      INSERT INTO profiles (id, user_id, name, age, birthday, zodiac, city, gender, orientation,
+    await sql`
+      INSERT INTO profiles (
+        id, user_id, name, age, birthday, zodiac, city, gender, orientation,
         partner_gender, intent, has_kids, wants_kids, love_language, drinking, smoking, exercise,
         dealbreakers, partner_age_min, partner_age_max, attachment, attachment_score, readiness_score,
-        growth_areas, strengths, core_values, summary, coaching_focus, photos)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id, userId, profile.name || "", profile.age, profile.birthday,
-      profile.zodiac, profile.city || "", profile.gender,
-      profile.orientation, profile.partnerGender,
-      profile.intent, profile.hasKids === null ? null : profile.hasKids ? 1 : 0, profile.wantsKids,
-      profile.loveLanguage, profile.drinking, profile.smoking, profile.exercise,
-      JSON.stringify(profile.dealbreakers || []), profile.partnerAgeMin, profile.partnerAgeMax,
-      profile.attachment || "Secure", profile.attachmentScore || 50, profile.readinessScore || 50,
-      JSON.stringify(profile.growthAreas || []), JSON.stringify(profile.strengths || []),
-      JSON.stringify(profile.coreValues || []), profile.summary || "", profile.coachingFocus || "",
-      JSON.stringify(profile.photos || []),
-    );
+        growth_areas, strengths, core_values, summary, coaching_focus, photos,
+        conflict_style, family_expectations, life_architecture
+      ) VALUES (
+        ${id}, ${userId}, ${profile.name || ""},
+        ${profile.age ?? null}, ${profile.birthday ?? null},
+        ${profile.zodiac ?? null}, ${profile.city || ""},
+        ${profile.gender ?? null}, ${profile.orientation ?? null},
+        ${profile.partnerGender ?? null}, ${profile.intent ?? null},
+        ${profile.hasKids ?? null}, ${profile.wantsKids ?? null},
+        ${profile.loveLanguage ?? null}, ${profile.drinking ?? null},
+        ${profile.smoking ?? null}, ${profile.exercise ?? null},
+        ${dealbreakers}, ${profile.partnerAgeMin ?? null}, ${profile.partnerAgeMax ?? null},
+        ${profile.attachment || "Secure"}, ${profile.attachmentScore ?? 50},
+        ${profile.readinessScore ?? 50},
+        ${growthAreas}, ${strengths}, ${coreValues},
+        ${profile.summary || ""}, ${profile.coachingFocus || ""}, ${photos},
+        ${profile.conflictStyle || ""}, ${profile.familyExpectations || ""},
+        ${profile.lifeArchitecture || ""}
+      )
+    `;
   }
 }
 
@@ -86,7 +100,7 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     orientation: row.orientation as string | null,
     partnerGender: row.partner_gender as string | null,
     intent: row.intent as Profile["intent"],
-    hasKids: row.has_kids === null ? null : Boolean(row.has_kids),
+    hasKids: row.has_kids as boolean | null,
     wantsKids: row.wants_kids as Profile["wantsKids"],
     loveLanguage: row.love_language as string | null,
     drinking: row.drinking as Profile["drinking"],
@@ -104,62 +118,90 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     summary: (row.summary as string) || "",
     coachingFocus: (row.coaching_focus as string) || "",
     photos: safeParseJson(row.photos as string, []),
+    conflictStyle: (row.conflict_style as string) || "",
+    familyExpectations: (row.family_expectations as string) || "",
+    lifeArchitecture: (row.life_architecture as string) || "",
   };
 }
 
 // ─── Matches ───
 
-export function saveMatchesForUser(userId: string, matches: Match[]) {
-  const db = getDb();
-  // Clear old matches
-  db.prepare("DELETE FROM matches WHERE user_id = ?").run(userId);
-  const stmt = db.prepare("INSERT INTO matches (id, user_id, match_data) VALUES (?, ?, ?)");
+export async function saveMatchesForUser(userId: string, matches: Match[]) {
+  await sql`DELETE FROM matches WHERE user_id = ${userId}`;
   for (const m of matches) {
-    stmt.run(m.id || createId("match"), userId, JSON.stringify(m));
+    await sql`
+      INSERT INTO matches (id, user_id, match_data)
+      VALUES (${m.id || createId("match")}, ${userId}, ${JSON.stringify(m)})
+    `;
   }
 }
 
-export function getMatchesForUser(userId: string): Match[] {
-  const db = getDb();
-  const rows = db.prepare("SELECT match_data FROM matches WHERE user_id = ? ORDER BY created_at DESC").all(userId) as { match_data: string }[];
-  return rows.map((r) => safeParseJson<Match>(r.match_data, null as unknown as Match)).filter(Boolean);
+export async function getMatchesForUser(userId: string): Promise<Match[]> {
+  const rows = await sql`
+    SELECT match_data FROM matches WHERE user_id = ${userId} ORDER BY created_at DESC
+  `;
+  return (rows as { match_data: string }[])
+    .map((r) => safeParseJson<Match>(r.match_data, null as unknown as Match))
+    .filter(Boolean);
 }
 
-export function getMatchForUser(userId: string, matchId: string): Match | null {
-  const db = getDb();
-  const row = db.prepare("SELECT match_data FROM matches WHERE user_id = ? AND id = ?").get(userId, matchId) as { match_data: string } | undefined;
-  if (!row) {
-    // Also check by match_data.id
-    const all = getMatchesForUser(userId);
-    return all.find((m) => m.id === matchId) || null;
+export async function getMatchForUser(userId: string, matchId: string): Promise<Match | null> {
+  const rows = await sql`
+    SELECT match_data FROM matches WHERE user_id = ${userId} AND id = ${matchId}
+  `;
+  if (rows.length) {
+    return safeParseJson<Match>((rows[0] as { match_data: string }).match_data, null as unknown as Match);
   }
-  return safeParseJson<Match>(row.match_data, null as unknown as Match);
+  const all = await getMatchesForUser(userId);
+  return all.find((m) => m.id === matchId) || null;
+}
+
+// ─── L1 Bandhan: Daily match cache ───
+
+export async function getCachedMatches(userId: string, date: string): Promise<Match[] | null> {
+  const rows = await sql`
+    SELECT matches_json FROM match_cache WHERE user_id = ${userId} AND cache_date = ${date}
+  `;
+  if (!rows.length) return null;
+  return safeParseJson<Match[]>((rows[0] as { matches_json: string }).matches_json, null as unknown as Match[]);
+}
+
+export async function setCachedMatches(userId: string, date: string, matches: Match[]) {
+  const id = createId("mc");
+  await sql`
+    INSERT INTO match_cache (id, user_id, cache_date, matches_json)
+    VALUES (${id}, ${userId}, ${date}, ${JSON.stringify(matches)})
+    ON CONFLICT (user_id, cache_date) DO UPDATE SET matches_json = EXCLUDED.matches_json
+  `;
 }
 
 // ─── Life Previews ───
 
-export function saveLifePreview(userId: string, matchId: string, preview: LifePreview) {
-  const db = getDb();
+export async function saveLifePreview(userId: string, matchId: string, preview: LifePreview) {
   const id = createId("lp");
-  db.prepare(`
-    INSERT OR REPLACE INTO life_previews (id, user_id, match_id, preview_data)
-    VALUES (?, ?, ?, ?)
-  `).run(id, userId, matchId, JSON.stringify(preview));
+  await sql`
+    INSERT INTO life_previews (id, user_id, match_id, preview_data)
+    VALUES (${id}, ${userId}, ${matchId}, ${JSON.stringify(preview)})
+    ON CONFLICT (user_id, match_id) DO UPDATE SET preview_data = EXCLUDED.preview_data
+  `;
 }
 
-export function getLifePreview(userId: string, matchId: string): LifePreview | null {
-  const db = getDb();
-  const row = db.prepare("SELECT preview_data FROM life_previews WHERE user_id = ? AND match_id = ?").get(userId, matchId) as { preview_data: string } | undefined;
-  if (!row) return null;
-  return safeParseJson<LifePreview>(row.preview_data, null as unknown as LifePreview);
+export async function getLifePreview(userId: string, matchId: string): Promise<LifePreview | null> {
+  const rows = await sql`
+    SELECT preview_data FROM life_previews WHERE user_id = ${userId} AND match_id = ${matchId}
+  `;
+  if (!rows.length) return null;
+  return safeParseJson<LifePreview>((rows[0] as { preview_data: string }).preview_data, null as unknown as LifePreview);
 }
 
 // ─── Session Memory ───
 
-export function getSessionMemoryDb(userId: string, sessionKey: string): SessionMemory | null {
-  const db = getDb();
-  const row = db.prepare("SELECT * FROM session_memory WHERE user_id = ? AND session_key = ?").get(userId, sessionKey) as Record<string, unknown> | undefined;
-  if (!row) return null;
+export async function getSessionMemoryDb(userId: string, sessionKey: string): Promise<SessionMemory | null> {
+  const rows = await sql`
+    SELECT * FROM session_memory WHERE user_id = ${userId} AND session_key = ${sessionKey}
+  `;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
   return {
     summary: (row.summary as string) || "",
     traits: safeParseJson(row.traits as string, []),
@@ -177,9 +219,8 @@ export function getSessionMemoryDb(userId: string, sessionKey: string): SessionM
   };
 }
 
-export function upsertSessionMemory(userId: string, sessionKey: string, patch: Partial<SessionMemory>) {
-  const db = getDb();
-  const existing = getSessionMemoryDb(userId, sessionKey);
+export async function upsertSessionMemory(userId: string, sessionKey: string, patch: Partial<SessionMemory>) {
+  const existing = await getSessionMemoryDb(userId, sessionKey);
 
   const mergeArr = (a: string[], b: string[], max: number) =>
     Array.from(new Set([...a, ...b])).slice(0, max);
@@ -201,69 +242,151 @@ export function upsertSessionMemory(userId: string, sessionKey: string, patch: P
   };
 
   if (existing) {
-    db.prepare(`
-      UPDATE session_memory SET summary=?, traits=?, needs=?, boundaries=?,
-        emotional_patterns=?, triggers=?, reassurance_style=?, communication_style=?,
-        companion_notes=?, attachment_guess=?, readiness=?, previous_questions=?, updated_at=datetime('now')
-      WHERE user_id=? AND session_key=?
-    `).run(
-      merged.summary, JSON.stringify(merged.traits), JSON.stringify(merged.needs),
-      JSON.stringify(merged.boundaries), JSON.stringify(merged.emotionalPatterns),
-      JSON.stringify(merged.triggers), merged.reassuranceStyle, merged.communicationStyle,
-      merged.companionNotes, merged.attachmentGuess, merged.readiness,
-      JSON.stringify(merged.previousQuestions), userId, sessionKey,
-    );
+    await sql`
+      UPDATE session_memory SET
+        summary = ${merged.summary},
+        traits = ${JSON.stringify(merged.traits)},
+        needs = ${JSON.stringify(merged.needs)},
+        boundaries = ${JSON.stringify(merged.boundaries)},
+        emotional_patterns = ${JSON.stringify(merged.emotionalPatterns)},
+        triggers = ${JSON.stringify(merged.triggers)},
+        reassurance_style = ${merged.reassuranceStyle},
+        communication_style = ${merged.communicationStyle},
+        companion_notes = ${merged.companionNotes},
+        attachment_guess = ${merged.attachmentGuess},
+        readiness = ${merged.readiness ?? null},
+        previous_questions = ${JSON.stringify(merged.previousQuestions)},
+        updated_at = NOW()
+      WHERE user_id = ${userId} AND session_key = ${sessionKey}
+    `;
   } else {
-    db.prepare(`
-      INSERT INTO session_memory (id, user_id, session_key, summary, traits, needs, boundaries,
+    await sql`
+      INSERT INTO session_memory (
+        id, user_id, session_key, summary, traits, needs, boundaries,
         emotional_patterns, triggers, reassurance_style, communication_style,
-        companion_notes, attachment_guess, readiness, previous_questions)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      createId("mem"), userId, sessionKey, merged.summary,
-      JSON.stringify(merged.traits), JSON.stringify(merged.needs),
-      JSON.stringify(merged.boundaries), JSON.stringify(merged.emotionalPatterns),
-      JSON.stringify(merged.triggers), merged.reassuranceStyle, merged.communicationStyle,
-      merged.companionNotes, merged.attachmentGuess, merged.readiness,
-      JSON.stringify(merged.previousQuestions),
-    );
+        companion_notes, attachment_guess, readiness, previous_questions
+      ) VALUES (
+        ${createId("mem")}, ${userId}, ${sessionKey},
+        ${merged.summary}, ${JSON.stringify(merged.traits)}, ${JSON.stringify(merged.needs)},
+        ${JSON.stringify(merged.boundaries)}, ${JSON.stringify(merged.emotionalPatterns)},
+        ${JSON.stringify(merged.triggers)}, ${merged.reassuranceStyle},
+        ${merged.communicationStyle}, ${merged.companionNotes}, ${merged.attachmentGuess},
+        ${merged.readiness ?? null}, ${JSON.stringify(merged.previousQuestions)}
+      )
+    `;
   }
 }
 
 // ─── Intros / Passes / Debriefs ───
 
-export function createIntro(userId: string, matchId: string, matchName: string) {
-  const db = getDb();
+export async function createIntro(userId: string, matchId: string, matchName: string, icebreakers: string[] = []) {
   const id = createId("intro");
-  db.prepare("INSERT INTO intros (id, user_id, match_id, match_name) VALUES (?, ?, ?, ?)").run(id, userId, matchId, matchName);
-  return { id, matchId, matchName, status: "requested", createdAt: new Date().toISOString() };
+  await sql`
+    INSERT INTO intros (id, user_id, match_id, match_name, icebreakers)
+    VALUES (${id}, ${userId}, ${matchId}, ${matchName}, ${JSON.stringify(icebreakers)})
+  `;
+  return { id, matchId, matchName, status: "requested", icebreakers, createdAt: new Date().toISOString() };
 }
 
-export function getIntrosForUser(userId: string) {
-  const db = getDb();
-  return db.prepare("SELECT * FROM intros WHERE user_id = ? ORDER BY created_at DESC").all(userId);
+export async function getIntrosForUser(userId: string) {
+  const rows = await sql`SELECT * FROM intros WHERE user_id = ${userId} ORDER BY created_at DESC`;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      ...row,
+      icebreakers: safeParseJson(row.icebreakers as string, []),
+    };
+  });
 }
 
-export function createPass(userId: string, matchId: string, matchName: string, reason: string) {
-  const db = getDb();
-  db.prepare("INSERT INTO passes (id, user_id, match_id, match_name, reason) VALUES (?, ?, ?, ?, ?)").run(createId("pass"), userId, matchId, matchName, reason);
+export async function updateIntroWithIcebreakers(introId: string, icebreakers: string[]) {
+  await sql`UPDATE intros SET icebreakers = ${JSON.stringify(icebreakers)} WHERE id = ${introId}`;
 }
 
-export function createDebrief(userId: string, matchId: string, matchName: string, feedback: string, insight: string) {
-  const db = getDb();
-  db.prepare("INSERT INTO debriefs (id, user_id, match_id, match_name, feedback, insight) VALUES (?, ?, ?, ?, ?, ?)").run(createId("debrief"), userId, matchId, matchName, feedback, insight);
+export async function updateIntroDateNudge(introId: string, venueSuggestion: string) {
+  await sql`
+    UPDATE intros SET date_nudge_sent_at = NOW(), venue_suggestion = ${venueSuggestion}
+    WHERE id = ${introId}
+  `;
+}
+
+export async function createPass(userId: string, matchId: string, matchName: string, reason: string) {
+  await sql`
+    INSERT INTO passes (id, user_id, match_id, match_name, reason)
+    VALUES (${createId("pass")}, ${userId}, ${matchId}, ${matchName}, ${reason})
+  `;
+}
+
+export async function createDebrief(userId: string, matchId: string, matchName: string, feedback: string, insight: string) {
+  await sql`
+    INSERT INTO debriefs (id, user_id, match_id, match_name, feedback, insight)
+    VALUES (${createId("debrief")}, ${userId}, ${matchId}, ${matchName}, ${feedback}, ${insight})
+  `;
+}
+
+// ─── L4 Bandhan: Structured debrief reflections ───
+
+export async function createDebriefReflection(
+  userId: string,
+  matchId: string,
+  matchName: string,
+  answers: { chemistry: string; surprise: string; decision: string },
+  chemistryScore: number | null,
+  wouldSeeAgain: boolean | null,
+  aiInsight: string,
+): Promise<DebriefReflection> {
+  const id = createId("dr");
+  await sql`
+    INSERT INTO debrief_reflections (
+      id, user_id, match_id, match_name,
+      chemistry_answer, surprise_answer, decision_answer,
+      chemistry_score, would_see_again, ai_insight
+    ) VALUES (
+      ${id}, ${userId}, ${matchId}, ${matchName},
+      ${answers.chemistry}, ${answers.surprise}, ${answers.decision},
+      ${chemistryScore ?? null}, ${wouldSeeAgain ?? null}, ${aiInsight}
+    )
+  `;
+  return {
+    id, matchId, matchName,
+    chemistryAnswer: answers.chemistry,
+    surpriseAnswer: answers.surprise,
+    decisionAnswer: answers.decision,
+    chemistryScore, wouldSeeAgain, aiInsight,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+export async function getDebriefReflectionsForUser(userId: string): Promise<DebriefReflection[]> {
+  const rows = await sql`
+    SELECT * FROM debrief_reflections WHERE user_id = ${userId} ORDER BY created_at DESC
+  `;
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    id: row.id as string,
+    matchId: row.match_id as string,
+    matchName: row.match_name as string,
+    chemistryAnswer: (row.chemistry_answer as string) || "",
+    surpriseAnswer: (row.surprise_answer as string) || "",
+    decisionAnswer: (row.decision_answer as string) || "",
+    chemistryScore: row.chemistry_score as number | null,
+    wouldSeeAgain: row.would_see_again as boolean | null,
+    aiInsight: (row.ai_insight as string) || "",
+    createdAt: (row.created_at as string) || "",
+  }));
 }
 
 // ─── Waitlist ───
 
-export function addToWaitlist(name: string, email: string, city: string, intent: string) {
-  const db = getDb();
+export async function addToWaitlist(name: string, email: string, city: string, intent: string) {
   const id = createId("wl");
   try {
-    db.prepare("INSERT INTO waitlist (id, name, email, city, intent) VALUES (?, ?, ?, ?, ?)").run(id, name, email.toLowerCase(), city, intent);
+    await sql`
+      INSERT INTO waitlist (id, name, email, city, intent)
+      VALUES (${id}, ${name}, ${email.toLowerCase()}, ${city}, ${intent})
+    `;
     return { id, email: email.toLowerCase() };
   } catch {
-    return null; // duplicate
+    return null; // duplicate email
   }
 }
 

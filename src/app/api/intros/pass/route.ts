@@ -7,6 +7,6 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const { matchId, matchName, reason } = await req.json();
-  createPass(auth.userId, matchId, matchName, reason || "");
+  await createPass(auth.userId, matchId, matchName, reason || "");
   return NextResponse.json({ ok: true });
 }

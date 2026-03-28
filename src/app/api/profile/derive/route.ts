@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     profile.coreValues = profile.coreValues || [];
 
     // Save to DB
-    upsertProfile(auth.userId, profile);
+    await upsertProfile(auth.userId, profile);
 
     return NextResponse.json(profile);
   } catch {

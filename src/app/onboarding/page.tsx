@@ -62,7 +62,7 @@ export default function OnboardingPage() {
       const profile = await res.json();
       if (profile && profile.name) {
         await refresh(); // reload auth context with new profile
-        router.push("/report");
+        router.push("/soul-snapshot");
       }
     } catch {
       setDeriving(false);

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const body = await req.json();
-  const profile = getProfileByUserId(auth.userId) || body.profile;
+  const profile = await getProfileByUserId(auth.userId) || body.profile;
   if (!profile) {
     return NextResponse.json({ error: "No profile" }, { status: 400 });
   }

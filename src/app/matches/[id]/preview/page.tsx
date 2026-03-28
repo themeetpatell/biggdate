@@ -49,12 +49,8 @@ export default function LifePreviewPage({ params }: { params: Promise<{ id: stri
     if (authLoading) return;
     if (!profile) { router.push("/onboarding"); return; }
 
-    // Fetch matches to find this one, then fetch life preview
-    fetch("/api/matches/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    })
+    // Load cached matches, then fetch life preview
+    fetch("/api/matches")
       .then((r) => r.json())
       .then((matches: Match[]) => {
         const m = Array.isArray(matches) ? matches.find((x) => x.id === id) : null;
@@ -182,7 +178,7 @@ export default function LifePreviewPage({ params }: { params: Promise<{ id: stri
             <span className="text-3xl">{match.emoji || "✨"}</span>
             <h1 className="text-3xl font-bold">Life with {match.name}</h1>
           </div>
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             {match.zodiac && (
               <Badge
                 className="text-xs border-none"
@@ -195,9 +191,14 @@ export default function LifePreviewPage({ params }: { params: Promise<{ id: stri
               </Badge>
             )}
             <Badge className="text-xs bg-[var(--bd-accent-soft)] text-[var(--bd-accent)] border-none">
-              {match.compatibilityScore}% Compatible
+              {match.intentAlignment} Intent Alignment
             </Badge>
           </div>
+          {match.narrativeIntro && (
+            <p className="text-sm italic mt-3 px-4" style={{ color: "var(--bd-text-muted)" }}>
+              &ldquo;{match.narrativeIntro}&rdquo;
+            </p>
+          )}
         </div>
 
         {/* Growth Score */}

@@ -11,12 +11,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
   }
 
-  const user = createUser(email, password);
+  const user = await createUser(email, password);
   if (!user) {
     return NextResponse.json({ error: "Email already registered" }, { status: 409 });
   }
 
-  const token = createSession(user.id);
+  const token = await createSession(user.id);
   await setSessionCookie(token);
 
   return NextResponse.json({ id: user.id, email: user.email });

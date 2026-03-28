@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const { match }: { match: Match } = await req.json();
-  const profile = getProfileByUserId(auth.userId);
+  const profile = await getProfileByUserId(auth.userId);
   if (!profile || !match) {
     return NextResponse.json({ error: "Missing data" }, { status: 400 });
   }

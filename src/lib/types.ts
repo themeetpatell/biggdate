@@ -26,8 +26,13 @@ export interface Profile {
   summary: string;
   coachingFocus: string;
   photos: string[];
+  // L3 Bandhan: onboarding depth
+  conflictStyle: string;
+  familyExpectations: string;
+  lifeArchitecture: string;
 }
 
+// L1 Bandhan: narrative-first match — no compatibility score
 export interface Match {
   id: string;
   name: string;
@@ -45,13 +50,15 @@ export interface Match {
   drinking: string;
   smoking: string;
   exercise: string;
-  compatibilityScore: number;
-  authenticityScore: number;
-  intentAlignment: "High" | "Medium" | "Low";
+  // Narrative fields — replaces compatibilityScore
+  narrativeIntro: string;     // "You both earn trust slowly — and that's exactly why this works"
+  connectionHook: string;     // The emotional core of why they'd click
+  tensionPoint: string;       // Honest friction (replaces potentialFriction)
   sharedValues: string[];
   whyTheyWork: string;
   conversationStarter: string;
-  potentialFriction: string;
+  authenticityScore: number;
+  intentAlignment: "High" | "Medium" | "Low";
   emoji: string;
 }
 
@@ -85,6 +92,20 @@ export interface SessionMemory {
   readiness: number | null;
   previousQuestions: string[];
   lastUpdated: string | null;
+}
+
+// L4 Bandhan: structured 3-Q post-date reflection
+export interface DebriefReflection {
+  id: string;
+  matchId: string;
+  matchName: string;
+  chemistryAnswer: string;
+  surpriseAnswer: string;
+  decisionAnswer: string;
+  chemistryScore: number | null;
+  wouldSeeAgain: boolean | null;
+  aiInsight: string;
+  createdAt: string;
 }
 
 export interface WaitlistEntry {

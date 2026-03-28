@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   const { messages }: { messages: UIMessage[] } = await req.json();
-  const profile = getProfileByUserId(auth.userId);
+  const profile = await getProfileByUserId(auth.userId);
   if (!profile) {
     return new Response("No profile found", { status: 400 });
   }

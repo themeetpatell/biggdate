@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email required" }, { status: 400 });
   }
 
-  const entry = addToWaitlist(name || "", email, city || "", intent || "");
+  const entry = await addToWaitlist(name || "", email, city || "", intent || "");
   if (!entry) {
     return NextResponse.json({ error: "Already on waitlist" }, { status: 409 });
   }
