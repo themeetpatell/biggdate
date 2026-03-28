@@ -34,23 +34,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
+  const loadAuthState = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
       if (res.ok) {
         const data = await res.json();
-        setUserId(data.userId);
-        setProfile(data.profile || null);
-      } else {
-        setUserId(null);
-        setProfile(null);
+        return {
+          userId: data.userId,
+          profile: data.profile || null,
+        };
       }
+      return { userId: null, profile: null };
     } catch {
-      setUserId(null);
-      setProfile(null);
+      return { userId: null, profile: null };
     }
-    setLoading(false);
   }, []);
+
+  const refresh = useCallback(async () => {
+    const nextState = await loadAuthState();
+    setUserId(nextState.userId);
+    setProfile(nextState.profile);
+    setLoading(false);
+  }, [loadAuthState]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -60,8 +65,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+
+    async function initializeAuth() {
+      const nextState = await loadAuthState();
+      if (cancelled) return;
+      setUserId(nextState.userId);
+      setProfile(nextState.profile);
+      setLoading(false);
+    }
+
+    void initializeAuth();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loadAuthState]);
 
   // Redirect unauthenticated users
   useEffect(() => {
