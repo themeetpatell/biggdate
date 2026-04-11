@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadAuthState = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/me");
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         return {
@@ -85,13 +85,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Redirect unauthenticated users
   useEffect(() => {
     if (loading) return;
-    const isPublic = PUBLIC_ROUTES.some(
-      (r) => pathname === r || pathname.startsWith(r + "/"),
-    );
-    if (!userId && !isPublic) {
-      router.push("/auth");
+    if (userId && pathname === "/auth") {
+      router.replace(profile ? "/dashboard" : "/onboarding");
+      return;
     }
-  }, [userId, loading, pathname, router]);
+
+    const isPublic = PUBLIC_ROUTES.some(
+      (r) => r === "/" ? pathname === "/" : pathname === r || pathname.startsWith(r + "/"),
+    );
+    if (!userId && !isPublic && !pathname.startsWith("/api/")) {
+      router.replace("/auth");
+    }
+  }, [userId, profile, loading, pathname, router]);
 
   return (
     <AuthContext.Provider value={{ userId, profile, loading, refresh, logout }}>

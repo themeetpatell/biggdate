@@ -27,6 +27,11 @@
 
 ## 1. What This Document Is
 
+Related document:
+
+- `docs/STRATEGY.md` is the forward-looking market and product strategy.
+- `docs/PRODUCT.md` remains the canonical description of what is actually built in this repository today.
+
 The previous `PRODUCT.md` described a March 2026 prototype:
 
 - Vite + React SPA

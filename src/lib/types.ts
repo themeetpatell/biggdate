@@ -106,11 +106,4 @@ export interface DebriefReflection {
   createdAt: string;
 }
 
-export interface WaitlistEntry {
-  id: string;
-  name: string;
-  email: string;
-  city: string;
-  intent: string;
-  createdAt: string;
-}
+

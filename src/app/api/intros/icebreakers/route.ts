@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { icebreakerPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, updateIntroWithIcebreakers } from "@/lib/repo";
@@ -14,9 +14,8 @@ export async function POST(req: Request) {
   const profile = await getProfileByUserId(auth.userId);
   if (!profile || !match) return NextResponse.json({ error: "Missing data" }, { status: 400 });
 
-  const provider = getAIProvider();
   const result = await generateText({
-    model: provider(getModel()),
+    model: getModel(),
     prompt: icebreakerPrompt(profile, match),
   });
 

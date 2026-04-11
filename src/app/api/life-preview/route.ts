@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { lifePreviewPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, getLifePreview, saveLifePreview } from "@/lib/repo";
@@ -20,9 +20,8 @@ export async function POST(req: Request) {
   const cached = await getLifePreview(auth.userId, match.id);
   if (cached) return NextResponse.json(cached);
 
-  const provider = getAIProvider();
   const result = await generateText({
-    model: provider(getModel()),
+    model: getModel(),
     prompt: lifePreviewPrompt(profile, match),
   });
 

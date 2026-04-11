@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { profileDerivePrompt } from "@/lib/prompts";
 import { getZodiacFromBirthday } from "@/lib/zodiac";
 import { requireAuth } from "@/lib/require-auth";
@@ -15,9 +15,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing transcript" }, { status: 400 });
   }
 
-  const provider = getAIProvider();
   const result = await generateText({
-    model: provider(getModel()),
+    model: getModel(),
     prompt: profileDerivePrompt(transcript),
   });
 

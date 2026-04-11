@@ -5,9 +5,9 @@ import { AuthProvider } from "@/components/auth-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BiggDate — See Your Future, Not Just a Profile",
+  title: "BiggDate — For People Who Build Things",
   description:
-    "AI-powered dating that shows you what life looks like with someone before you ever meet. Soul profiling, Life Previews, and relationship coaching.",
+    "A relationship product for founders, operators, PMs, engineers, designers, and investors. BiggDate helps builders date with context, schedule intelligence, and sharper compatibility.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

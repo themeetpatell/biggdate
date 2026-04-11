@@ -392,21 +392,6 @@ export async function getDebriefReflectionsForUser(userId: string): Promise<Debr
   }));
 }
 
-// ─── Waitlist ───
-
-export async function addToWaitlist(name: string, email: string, city: string, intent: string) {
-  const id = createId("wl");
-  try {
-    await sql`
-      INSERT INTO waitlist (id, name, email, city, intent)
-      VALUES (${id}, ${name}, ${email.toLowerCase()}, ${city}, ${intent})
-    `;
-    return { id, email: email.toLowerCase() };
-  } catch {
-    return null; // duplicate email
-  }
-}
-
 // ─── Helpers ───
 
 function safeParseJson<T>(str: string | null | undefined, fallback: T): T {

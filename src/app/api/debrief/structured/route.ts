@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { debriefReflectionInsightPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, createDebriefReflection } from "@/lib/repo";
@@ -17,9 +17,8 @@ export async function POST(req: Request) {
   const profile = await getProfileByUserId(auth.userId);
   if (!profile) return NextResponse.json({ error: "No profile" }, { status: 400 });
 
-  const provider = getAIProvider();
   const result = await generateText({
-    model: provider(getModel()),
+    model: getModel(),
     prompt: debriefReflectionInsightPrompt(profile, matchName, { chemistry, surprise, decision }),
   });
 

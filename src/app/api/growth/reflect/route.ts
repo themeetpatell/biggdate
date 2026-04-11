@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
 
@@ -14,9 +14,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing profile or reflection" }, { status: 400 });
   }
 
-  const provider = getAIProvider();
   const result = await generateText({
-    model: provider(getModel()),
+    model: getModel(),
     prompt: `You are a growth coach for ${profile.name} (${profile.attachment} attachment, readiness ${profile.readinessScore}/100).
 
 Their reflection: "${reflection}"

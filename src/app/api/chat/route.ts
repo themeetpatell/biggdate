@@ -1,5 +1,5 @@
 import { streamText, generateText, convertToModelMessages, UIMessage } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
 import { getSessionMemoryDb, upsertSessionMemory } from "@/lib/repo";
 import {
@@ -59,11 +59,10 @@ export async function POST(req: Request) {
     ? `\nMemory so far:\nPhase: ${phase}\nSummary: ${memory.summary}\nTraits: ${memory.traits.join(", ")}\nNeeds: ${memory.needs.join(", ")}\nCovered topics: ${coveredTopics.join(", ") || "none yet"}\nAttachment guess: ${memory.attachmentGuess}\n\nCurrent phase theme: ${phaseDescriptions[phase] || ""}\n${bankQ ? `Suggested question for this phase (only if topic not yet covered): ${bankQ}` : ""}`
     : `\nPhase: ${phase}\nCurrent phase theme: ${phaseDescriptions[phase] || ""}\n${bankQ ? `Suggested first question: ${bankQ}` : ""}`;
 
-  const provider = getAIProvider();
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
-    model: provider(getModel()),
+    model: getModel(),
     system: onboardingSystemPrompt(memoryContext, askedTopics),
     messages: modelMessages,
   });
@@ -82,7 +81,7 @@ export async function POST(req: Request) {
   if (messages.length >= 4 && messages.length % 2 === 0) {
     try {
       const memResult = await generateText({
-        model: provider(getModel()),
+        model: getModel(),
         prompt: memoryExtractionPrompt(transcript),
       });
       const raw = memResult.text || "";

@@ -86,18 +86,23 @@ export default function LifePreviewPage({ params }: { params: Promise<{ id: stri
       });
       setIntroSent(true);
     } catch {
-      // silent
+      setRequesting(false);
+      return;
     }
     setRequesting(false);
   };
 
   const passMatch = async () => {
     if (!match) return;
-    await fetch("/api/intros/pass", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ matchId: match.id, matchName: match.name }),
-    });
+    try {
+      await fetch("/api/intros/pass", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId: match.id, matchName: match.name }),
+      });
+    } catch {
+      // pass action is best-effort
+    }
     router.push("/matches");
   };
 
@@ -285,14 +290,22 @@ export default function LifePreviewPage({ params }: { params: Promise<{ id: stri
           </TabsList>
 
           <TabsContent value="story" className="mt-4">
-            <Card className="bg-[var(--bd-surface)] border-[var(--bd-border)]">
-              <CardContent className="p-6">
-                <h3 className="text-xs uppercase tracking-wider mb-4" style={{ color: "var(--bd-accent)" }}>
-                  Your First Year Together
-                </h3>
-                <MessageResponse>{preview?.storyArc || "Generating story..."}</MessageResponse>
-              </CardContent>
-            </Card>
+            {preview?.storyArc ? (
+              <Card className="bg-[var(--bd-surface)] border-[var(--bd-border)]">
+                <CardContent className="p-6">
+                  <h3 className="text-xs uppercase tracking-wider mb-4" style={{ color: "var(--bd-accent)" }}>
+                    Your Story Arc
+                  </h3>
+                  <MessageResponse>{preview.storyArc}</MessageResponse>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-[var(--bd-surface)] border-[var(--bd-border)]">
+                <CardContent className="p-6">
+                  <p style={{ color: "var(--bd-text-muted)" }}>Generating story...</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="day" className="mt-4">

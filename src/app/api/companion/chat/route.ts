@@ -1,5 +1,5 @@
 import { streamText, convertToModelMessages, UIMessage } from "ai";
-import { getAIProvider, getModel } from "@/lib/ai";
+import { getModel } from "@/lib/ai";
 import { companionSystemPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
@@ -16,11 +16,10 @@ export async function POST(req: Request) {
     return new Response("No profile found", { status: 400 });
   }
 
-  const provider = getAIProvider();
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
-    model: provider(getModel()),
+    model: getModel(),
     system: companionSystemPrompt(profile, context || {}),
     messages: modelMessages,
   });

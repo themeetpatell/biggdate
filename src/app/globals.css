@@ -134,20 +134,27 @@
   --bd-bg: #050914;
   --bd-surface: #0a1224;
   --bd-surface-hover: #10203d;
-  --bd-accent: #53b8ff;
-  --bd-accent-soft: rgba(83,184,255,0.16);
-  --bd-accent-glow: rgba(83,184,255,0.44);
-  --bd-rose: #3c7cff;
-  --bd-rose-glow: rgba(60,124,255,0.3);
-  --bd-gold: #61ddff;
-  --bd-gold-glow: rgba(97,221,255,0.28);
-  --bd-green: #7bfff1;
-  --bd-green-glow: rgba(123,255,241,0.28);
+  --bd-accent: #ff00ff;
+  --bd-accent-soft: rgba(255,0,255,0.16);
+  --bd-accent-glow: rgba(255,0,255,0.44);
+  --bd-blue: #0066ff;
+  --bd-blue-glow: rgba(0,102,255,0.3);
+  --bd-pink: #ff1493;
+  --bd-pink-glow: rgba(255,20,147,0.28);
+  --bd-cyan: #00ccff;
+  --bd-cyan-glow: rgba(0,204,255,0.28);
+  /* Semantic aliases */
+  --bd-rose: var(--bd-blue);
+  --bd-rose-glow: var(--bd-blue-glow);
+  --bd-gold: var(--bd-pink);
+  --bd-gold-glow: var(--bd-pink-glow);
+  --bd-green: var(--bd-cyan);
+  --bd-green-glow: var(--bd-cyan-glow);
   --bd-text: #edf5ff;
   --bd-text-muted: #8ea6c5;
   --bd-text-faint: #5f7695;
   --bd-border: rgba(255,255,255,0.07);
-  --bd-border-glow: rgba(83,184,255,0.28);
+  --bd-border-glow: rgba(255,0,255,0.28);
 }
 
 /* ─── BiggDate Animations ─── */
@@ -204,6 +211,22 @@
 @keyframes gridDrift {
   0% { background-position: 0 0, 0 0; }
   100% { background-position: 64px 64px, 64px 64px; }
+}
+@keyframes fillBar {
+  from { width: 0%; }
+  to { width: 84%; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+@keyframes beatPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.9; }
+}
+@keyframes slideUpStaggered {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── Page transition ─── */
