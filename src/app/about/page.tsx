@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
-  Code2,
   Clock3,
   Compass,
-  Gem,
   HeartHandshake,
-  Megaphone,
   Sparkles,
 } from "lucide-react";
 import { MarketingPageShell } from "@/components/marketing-page-shell";
+import { FounderAvatar } from "@/components/founder-avatar";
 
 export const metadata: Metadata = {
   title: "About BiggDate",
@@ -44,28 +42,34 @@ const AUDIENCE = [
 
 const FOUNDERS = [
   {
-    role: "CEO",
-    icon: Gem,
+    name: "Meet Patel",
+    initials: "MP",
+    image: "/founders/meet-patel.jpg",
     title: "Founder / CEO",
     focus:
       "Owns product vision, brand conviction, and the standard for a dating experience that feels premium without becoming performative.",
     accent: "rgba(255,20,147,0.18)",
+    avatarGradient: "from-[#ff1493] to-[#d4688a]",
   },
   {
-    role: "CTO",
-    icon: Code2,
+    name: "Dipen Patel",
+    initials: "DP",
+    image: "/founders/dipen-patel.jpg",
     title: "Founder / CTO",
     focus:
       "Builds the systems layer: matching logic, AI intelligence, and the infrastructure that keeps the experience sharp, fast, and trustworthy.",
     accent: "rgba(123,159,255,0.18)",
+    avatarGradient: "from-[#7b9fff] to-[#a855f7]",
   },
   {
-    role: "CGO",
-    icon: Megaphone,
+    name: "Drashty Soni",
+    initials: "DS",
+    image: "/founders/drashty-soni.jpg",
     title: "Founder / CGO",
     focus:
       "Drives growth, partnerships, and community loops so the product reaches the right people instead of chasing empty top-of-funnel volume.",
     accent: "rgba(255,106,199,0.18)",
+    avatarGradient: "from-[#ff6ac7] to-[#f04fb8]",
   },
 ];
 
@@ -187,49 +191,46 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-4">
-          {FOUNDERS.map((founder, index) => {
-            const Icon = founder.icon;
-
-            return (
+          {FOUNDERS.map((founder, index) => (
+            <div
+              key={founder.name}
+              className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(16,18,28,0.94),rgba(24,12,25,0.9))] p-7 sm:p-8"
+            >
               <div
-                key={founder.role}
-                className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(16,18,28,0.94),rgba(24,12,25,0.9))] p-7 sm:p-8"
-              >
-                <div
-                  className="absolute inset-y-0 left-0 w-1"
-                  style={{ background: founder.accent }}
-                />
-                <div className="grid gap-6 lg:grid-cols-[160px_1fr_72px] lg:items-center">
-                  <div className="flex items-center gap-4 lg:block">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-                      <Icon className="size-5 text-[#f8c6e8]" />
-                    </div>
-                    <div className="lg:mt-5">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8f92ab]">
-                        Founder seat
-                      </div>
-                      <div className="mt-1 font-display text-3xl font-bold tracking-[-0.04em]">
-                        {founder.role}
-                      </div>
-                    </div>
-                  </div>
+                className="absolute inset-y-0 left-0 w-1"
+                style={{ background: founder.accent }}
+              />
+              <div className="flex items-center gap-6">
+                {/* Avatar */}
+                <div className="shrink-0">
+                  <FounderAvatar
+                    src={founder.image}
+                    alt={founder.name}
+                    initials={founder.initials}
+                    avatarGradient={founder.avatarGradient}
+                  />
+                </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold tracking-[-0.02em]">
-                      {founder.title}
-                    </h3>
-                    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#a8aabe] sm:text-base">
-                      {founder.focus}
-                    </p>
+                {/* Info */}
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xl font-semibold tracking-[-0.02em]">
+                    {founder.name}
+                  </h3>
+                  <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8f92ab]">
+                    {founder.title}
                   </div>
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-[#a8aabe] sm:text-base">
+                    {founder.focus}
+                  </p>
+                </div>
 
-                  <div className="text-right text-5xl font-semibold tracking-[-0.06em] text-white/8">
-                    0{index + 1}
-                  </div>
+                {/* Index */}
+                <div className="hidden text-right text-5xl font-semibold tracking-[-0.06em] text-white/[0.06] sm:block">
+                  0{index + 1}
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </section>
 

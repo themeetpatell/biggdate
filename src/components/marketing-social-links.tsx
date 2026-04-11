@@ -77,26 +77,34 @@ export const MARKETING_SOCIAL_LINKS: readonly MarketingSocialLink[] = [
   },
   {
     label: "LinkedIn",
+    href: "https://www.linkedin.com/company/biggdate",
     Icon: Linkedin,
   },
   {
     label: "Instagram",
+    href: "https://www.instagram.com/biggdate",
     Icon: Instagram,
   },
   {
     label: "Facebook",
+    href: "https://www.facebook.com/biggdate",
     Icon: Facebook,
   },
   {
     label: "Twitter",
+    href: "https://twitter.com/biggdate",
     Icon: Twitter,
   },
   {
     label: "YouTube",
+    href: "https://www.youtube.com/channel/biggdate",
+
     Icon: Youtube,
   },
   {
     label: "Medium",
+    href: "https://medium.com/@biggdate",
+
     Icon: MediumIcon,
   },
 ] as const;

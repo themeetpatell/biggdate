@@ -25,7 +25,7 @@ export function useAuth() {
 }
 
 // Routes that don't require auth
-const PUBLIC_ROUTES = ["/", "/auth"];
+const PUBLIC_ROUTES = ["/", "/auth", "/about", "/contact"];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
