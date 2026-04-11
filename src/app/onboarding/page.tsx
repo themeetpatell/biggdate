@@ -268,7 +268,7 @@ export default function OnboardingPage() {
           ) : (
             <motion.div
               key="conversation"
-              className="mx-auto max-w-2xl space-y-8 px-6 py-8"
+              className="mx-auto max-w-2xl space-y-3 px-4 py-6 pb-32"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
