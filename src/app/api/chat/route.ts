@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     model: getModel(),
     system: onboardingSystemPrompt(memoryContext, askedTopics),
     messages: modelMessages,
-    maxOutputTokens: 200,
+    maxOutputTokens: 300,
     temperature: 0.5,
   });
 
