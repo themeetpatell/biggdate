@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BottomNav } from "@/components/bottom-nav";
 import { AuthProvider } from "@/components/auth-provider";
+import { MaahiChat } from "@/components/maahi-chat";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function RootLayout({
           <AuthProvider>
             {children}
             <BottomNav />
+            <MaahiChat />
           </AuthProvider>
         </TooltipProvider>
       </body>

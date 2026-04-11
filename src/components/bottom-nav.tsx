@@ -47,7 +47,15 @@ export function BottomNav() {
   const pathname = usePathname();
 
   // Don't show on landing, auth, or onboarding
-  if (pathname === "/" || pathname === "/auth" || pathname === "/onboarding") return null;
+  if (
+    pathname === "/" ||
+    pathname === "/about" ||
+    pathname === "/contact" ||
+    pathname === "/auth" ||
+    pathname === "/onboarding"
+  ) {
+    return null;
+  }
 
   return (
     <nav

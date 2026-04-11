@@ -477,7 +477,7 @@ export default function SoulSnapshotPage() {
                 textTransform: "uppercase",
               }}
             >
-              BiggDate · Bandhan
+              BiggDate · BiggDate
             </span>
             <span
               style={{

@@ -2,7 +2,21 @@
   "permissions": {
     "allow": [
       "Bash(git -C /Users/themeetpatel/Startups/biggdate commit -m 'chore: remove legacy Vite/Express files, gitignore dist/')",
-      "Bash(git -C /Users/themeetpatel/Startups/biggdate log --oneline -3)"
+      "Bash(git -C /Users/themeetpatel/Startups/biggdate log --oneline -3)",
+      "Bash(npx tsc:*)",
+      "Bash(git status:*)",
+      "Bash(ls /Users/themeetpatel/Startups/biggdate/src/components/landing*)",
+      "Bash(ls /Users/themeetpatel/Startups/biggdate/src/app/fonts*)",
+      "Bash(npx next:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(xxd)",
+      "Bash(node -e ':*)",
+      "Bash(kill %%)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/onboarding)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }

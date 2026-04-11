@@ -26,16 +26,16 @@ export interface Profile {
   summary: string;
   coachingFocus: string;
   photos: string[];
-  // L3 Bandhan: onboarding depth
+  // L3 BiggDate: onboarding depth
   conflictStyle: string;
   familyExpectations: string;
   lifeArchitecture: string;
-  // L4 Bandhan: Intelligence Card
+  // L4 BiggDate: Intelligence Card
   offers?: string[];  // What they bring to a relationship
   needs?: string[];   // What they need from a partner
 }
 
-// L2 Bandhan v2.0: narrative + compatibility signals, no zodiac/score
+// L2 BiggDate v2.0: narrative + compatibility signals, no zodiac/score
 export interface Match {
   id: string;
   name: string;
@@ -48,7 +48,7 @@ export interface Match {
   connectionHook: string;       // The emotional core of why they'd click
   tensionPoint: string;         // Honest friction (replaces potentialFriction)
   intentAlignment: "High" | "Medium" | "Low";
-  // Bandhan v2.0 compatibility signals
+  // BiggDate v2.0 compatibility signals
   compatibilitySignals: {
     values: string;             // one-sentence observation about shared/complementary values
     communication: string;      // one-sentence observation about communication fit
@@ -92,7 +92,7 @@ export interface SessionMemory {
   coveredTopics: string[];
 }
 
-// L4 Bandhan: structured 3-Q post-date reflection
+// L4 BiggDate: structured 3-Q post-date reflection
 export interface DebriefReflection {
   id: string;
   matchId: string;

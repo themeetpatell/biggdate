@@ -26,7 +26,7 @@ function getPool() {
 
     pool = new Pool({
       connectionString: databaseUrl,
-      ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: true } : undefined,
+      ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined,
       max: process.env.NODE_ENV === "production" ? 10 : 5,
       allowExitOnIdle: process.env.NODE_ENV !== "production",
     });

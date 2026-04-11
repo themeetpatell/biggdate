@@ -6,6 +6,47 @@ function createId(prefix: string) {
   return `${prefix}_${randomUUID()}`;
 }
 
+// ─── Account Handles ───
+
+export async function getAccountHandleByUsername(username: string) {
+  const rows = await sql`
+    SELECT user_id, email, username, full_name
+    FROM account_handles
+    WHERE username = ${username}
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    userId: row.user_id as string,
+    email: row.email as string,
+    username: row.username as string,
+    fullName: (row.full_name as string) || "",
+  };
+}
+
+export async function upsertAccountHandle({
+  userId,
+  email,
+  username,
+  fullName,
+}: {
+  userId: string;
+  email: string;
+  username: string;
+  fullName: string;
+}) {
+  await sql`
+    INSERT INTO account_handles (user_id, email, username, full_name)
+    VALUES (${userId}, ${email}, ${username}, ${fullName})
+    ON CONFLICT (user_id) DO UPDATE SET
+      email = EXCLUDED.email,
+      username = EXCLUDED.username,
+      full_name = EXCLUDED.full_name,
+      updated_at = NOW()
+  `;
+}
+
 // ─── Profile ───
 
 export async function getProfileByUserId(userId: string): Promise<Profile | null> {
@@ -165,7 +206,7 @@ export async function getMatchForUser(userId: string, matchId: string): Promise<
   return all.find((m) => m.id === matchId) || null;
 }
 
-// ─── L1 Bandhan: Daily match cache ───
+// ─── L1 BiggDate: Daily match cache ───
 
 export async function getCachedMatches(userId: string, date: string): Promise<Match[] | null> {
   const rows = await sql`
@@ -341,7 +382,7 @@ export async function createDebrief(userId: string, matchId: string, matchName: 
   `;
 }
 
-// ─── L4 Bandhan: Structured debrief reflections ───
+// ─── L4 BiggDate: Structured debrief reflections ───
 
 export async function createDebriefReflection(
   userId: string,
