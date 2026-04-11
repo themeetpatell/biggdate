@@ -1,0 +1,11 @@
+.git
+.next
+.claude
+.superpowers
+dist
+node_modules
+tsconfig.tsbuildinfo
+*.log
+.env
+.env.local
+.env.*.local

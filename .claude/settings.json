@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/themeetpatel/Startups/biggdate commit -m 'chore: remove legacy Vite/Express files, gitignore dist/')",
+      "Bash(git -C /Users/themeetpatel/Startups/biggdate log --oneline -3)"
+    ]
+  }
+}

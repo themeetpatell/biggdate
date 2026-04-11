@@ -1,0 +1,75 @@
+<h2>The 4 Gaps: What needs to change</h2>
+<p class="subtitle">Based on Bandhan's architecture — pick the order you want to tackle these</p>
+
+<div style="margin: 32px 0;">
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+    <div class="option" data-choice="match-experience" onclick="toggleSelect(this)" style="border-radius: 16px; padding: 24px; border: 1px solid #333; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div style="font-size: 28px;">💬</div>
+        <div style="display: flex; gap: 6px;">
+          <span style="background: rgba(255,107,138,0.15); color: #FF6B8A; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">HIGH IMPACT</span>
+        </div>
+      </div>
+      <h3 style="margin: 0 0 8px; font-size: 18px;">Guided Match Experience</h3>
+      <p style="font-size: 13px; color: #888; line-height: 1.6; margin: 0 0 16px;">Right now: match happens, nothing guides them to a date. Missing: AI icebreaker system, conversation stall detection, move-offline trigger ("you've been talking 9 days — want us to suggest a date?"), date concierge with venue + timing + safety check-in.</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(79,255,176,0.1); color: #4FFFB0; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Icebreaker</span>
+        <span style="background: rgba(79,255,176,0.1); color: #4FFFB0; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Move-offline trigger</span>
+        <span style="background: rgba(79,255,176,0.1); color: #4FFFB0; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Date concierge</span>
+      </div>
+    </div>
+
+    <div class="option" data-choice="match-quality" onclick="toggleSelect(this)" style="border-radius: 16px; padding: 24px; border: 1px solid #333; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div style="font-size: 28px;">🎯</div>
+        <div style="display: flex; gap: 6px;">
+          <span style="background: rgba(255,107,138,0.15); color: #FF6B8A; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">HIGH IMPACT</span>
+        </div>
+      </div>
+      <h3 style="margin: 0 0 8px; font-size: 18px;">Match Quality & Narratives</h3>
+      <p style="font-size: 13px; color: #888; line-height: 1.6; margin: 0 0 16px;">Right now: compatibilityScore numbers (Bandhan says this is the "lazy solution"). Missing: narrative match presentation ("you both described vulnerability as something you need to earn slowly"), simulation-based forecasts, daily fresh curation instead of one-time generation.</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(180,140,255,0.1); color: #B48CFF; padding: 3px 10px; border-radius: 99px; font-size: 11px;">No scores</span>
+        <span style="background: rgba(180,140,255,0.1); color: #B48CFF; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Narrative AI intro</span>
+        <span style="background: rgba(180,140,255,0.1); color: #B48CFF; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Daily curation</span>
+      </div>
+    </div>
+
+    <div class="option" data-choice="onboarding" onclick="toggleSelect(this)" style="border-radius: 16px; padding: 24px; border: 1px solid #333; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div style="font-size: 28px;">🧠</div>
+        <div style="display: flex; gap: 6px;">
+          <span style="background: rgba(245,200,66,0.15); color: #F5C842; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">MEDIUM IMPACT</span>
+        </div>
+      </div>
+      <h3 style="margin: 0 0 8px; font-size: 18px;">Onboarding Depth</h3>
+      <p style="font-size: 13px; color: #888; line-height: 1.6; margin: 0 0 16px;">Current onboarding is good but could go deeper. Missing: structured profile transparency screen (show user what AI learned about them), relationship simulation dimensions (life architecture, conflict style, family expectations), richer soul profile with actionable self-insights.</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(245,200,66,0.1); color: #F5C842; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Profile transparency</span>
+        <span style="background: rgba(245,200,66,0.1); color: #F5C842; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Deeper dimensions</span>
+        <span style="background: rgba(245,200,66,0.1); color: #F5C842; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Family compat layer</span>
+      </div>
+    </div>
+
+    <div class="option" data-choice="outcome-loop" onclick="toggleSelect(this)" style="border-radius: 16px; padding: 24px; border: 1px solid #333; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div style="font-size: 28px;">🔄</div>
+        <div style="display: flex; gap: 6px;">
+          <span style="background: rgba(245,200,66,0.15); color: #F5C842; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">HIGH LONG-TERM</span>
+        </div>
+      </div>
+      <h3 style="margin: 0 0 8px; font-size: 18px;">Outcome Loop (Flywheel)</h3>
+      <p style="font-size: 13px; color: #888; line-height: 1.6; margin: 0 0 16px;">Current debrief is basic (rating + notes). Missing: structured 3-question post-date reflection, chemistry calibration feeding future match accuracy, couple mode detection, success story engine, no-show reputation scoring.</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(79,255,176,0.1); color: #4FFFB0; padding: 3px 10px; border-radius: 99px; font-size: 11px;">3-Q reflection</span>
+        <span style="background: rgba(79,255,176,0.1); color: #4FFFB0; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Couple mode</span>
+        <span style="background: rgba(79,255,176,0.1); color: #4FFFB0; padding: 3px 10px; border-radius: 99px; font-size: 11px;">Success stories</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p style="font-size: 13px; color: #666; text-align: center; margin-top: 8px;">Select the ones you want to prioritize first (multi-select). We'll build a spec for each.</p>

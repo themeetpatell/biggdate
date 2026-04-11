@@ -1,69 +1,50 @@
-# BiggDate
+This is a Next.js app for BiggDate.
 
-Full-stack Vite + React app with a local Node API that supports Ollama (default) and OpenAI, plus lightweight per-session learning memory.
+## Getting Started
 
-## Quick Start
+1. Install dependencies:
 
-1. Copy env template:
-   ```bash
-   cp .env.example .env
-   ```
-2. Add your provider config in `.env`:
-   ```env
-   AI_PROVIDER=ollama-cloud
-   OLLAMA_CLOUD_HOST=https://ollama.com
-   OLLAMA_API_KEY=your_key
-   OLLAMA_CLOUD_MODEL=gpt-oss:120b
-   PORT=8787
-   ```
+```bash
+npm install
+```
 
-   For local Ollama instead:
-   ```env
-   AI_PROVIDER=ollama
-   OLLAMA_BASE_URL=http://localhost:11434/v1
-   OLLAMA_MODEL=llama3.1:8b
-   PORT=8787
-   ```
+2. Copy env template:
 
-   For OpenAI instead:
-   ```env
-   AI_PROVIDER=openai
-   OPENAI_API_KEY=your_key_here
-   OPENAI_MODEL=gpt-4.1
-   PORT=8787
-   ```
-3. Install deps:
-   ```bash
-   npm install
-   ```
-4. Run app + API together:
-   ```bash
-   npm run dev
-   ```
+```bash
+cp .env.example .env
+```
 
-- Web app: http://localhost:5173
-- API health: http://localhost:8787/api/health
+3. Configure AI provider in `.env`:
 
-## Self-learning memory
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-2.5-flash
+```
 
-- Session memory is saved in `data/memory.json`.
-- The API updates memory (summary, traits, needs, boundaries, attachment guess, readiness) as conversations progress.
-- This memory is injected into future prompts for continuity.
+4. Configure Supabase Postgres in `.env`:
 
-## End-to-end platform APIs
+```env
+SUPABASE_DB_URL=postgresql://postgres.<project_ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
+```
 
-- `POST /api/profile/derive` → derive robust profile JSON from onboarding transcript.
-- `POST /api/matches/generate` → structured compatible matches with authenticity + intent signals.
-- `POST /api/matches/briefing` → agent briefing + date concierge + pre-date guide.
-- `POST /api/intros/request` → request introduction and persist concierge package.
-- `POST /api/intros/pass` → persist match pass feedback.
-- `POST /api/dates/debrief` → save post-date debrief and generate coaching insight.
-- `POST /api/waitlist/join` → waitlist capture for city launch.
+`DATABASE_URL` is also supported as a fallback.
 
-Persistent operations data is stored in `data/platform.json`.
+5. Apply the database schema to your Supabase project:
 
-## Platform-owned AI credentials
+- Preferred: run the SQL in [supabase/migrations/202604110001_initial_schema.sql](/Users/themeetpatel/Startups/biggdate/supabase/migrations/202604110001_initial_schema.sql) with the Supabase CLI or SQL editor.
+- Convenience fallback: if `SUPABASE_DB_URL` or `DATABASE_URL` is set, the app will bootstrap any missing tables, columns, and indexes on startup.
 
-- End users do not provide API keys.
-- The backend exclusively uses server environment variables (`OPENAI_API_KEY` or `OLLAMA_API_KEY`) based on `AI_PROVIDER`.
-- If `api/health` reports no key loaded, fix deployment env vars on the server.
+6. Start the development server:
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000 in your browser.
+
+## Notes
+
+- The app now uses the standard `pg` driver, which works with Supabase Postgres directly.
+- The canonical schema lives in [supabase/migrations/202604110001_initial_schema.sql](/Users/themeetpatel/Startups/biggdate/supabase/migrations/202604110001_initial_schema.sql).
+- If no DB URL is set, the app boots and skips DB bootstrap.
