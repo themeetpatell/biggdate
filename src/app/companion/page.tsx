@@ -2,41 +2,93 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
-import { Conversation } from "@/components/ai-elements/conversation";
 import { ChatMessage } from "@/components/chat-message";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
-const QUICK_PROMPTS = [
-  { emoji: "💭", text: "I'm overthinking about someone" },
-  { emoji: "😰", text: "I'm anxious about a date tonight" },
-  { emoji: "🎉", text: "Something great happened!" },
-  { emoji: "💔", text: "I got ghosted again" },
-  { emoji: "🤔", text: "Am I repeating old patterns?" },
-  { emoji: "🌱", text: "What should I work on today?" },
+// ── Conversation starters — no emojis, just honest words ────────────────────
+const STARTERS = [
+  "I'm overthinking someone",
+  "I got ghosted",
+  "Something good happened",
+  "Am I repeating patterns?",
+  "I'm anxious about a date",
+  "What should I work on?",
+  "I feel disconnected lately",
+  "I need to vent",
 ];
 
-export default function CompanionPage() {
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function greeting(name: string): string {
+  const h = new Date().getHours();
+  if (h < 5) return `Still up, ${name}?`;
+  if (h < 12) return `Good morning, ${name}.`;
+  if (h < 17) return `Hey, ${name}.`;
+  if (h < 21) return `Good evening, ${name}.`;
+  return `Hey, ${name}.`;
+}
+
+function contextLine(attachment: string): string {
+  const map: Record<string, string> = {
+    Secure: "You're steady in love — that's rarer than people realize.",
+    Anxious: "Your heart feels deeply. That's not a flaw, it's a gift.",
+    Avoidant: "You protect what matters to you. That's not coldness.",
+    "Fearful-Avoidant": "You want closeness and safety both. They can coexist.",
+  };
+  return map[attachment] || "I'm here with you, no judgment.";
+}
+
+// ── Typing indicator ─────────────────────────────────────────────────────────
+function TypingDots() {
+  return (
+    <div style={{ display: "flex", gap: 4, padding: "4px 0" }}>
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: "rgba(212,104,138,0.6)",
+            animation: `maahiDot 1.3s ease-in-out ${i * 0.18}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+export default function MaahiPage() {
   const router = useRouter();
   const { profile, loading: authLoading } = useAuth();
   const [input, setInput] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/companion/chat",
-      body: { context: {} },
-    }),
-  });
+  // Stable transport — recreating on every render causes instability
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/companion/chat",
+        body: { context: {} },
+      }),
+    []
+  );
 
+  const { messages, sendMessage, status } = useChat({ transport });
   const isStreaming = status === "streaming" || status === "submitted";
+  const hasMessages = messages.length > 0;
 
   useEffect(() => {
     if (!authLoading && !profile) router.push("/onboarding");
   }, [profile, authLoading, router]);
+
+  // Auto-scroll when messages arrive
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isStreaming]);
 
   const handleSend = () => {
     const text = input.trim();
@@ -45,124 +97,387 @@ export default function CompanionPage() {
     setInput("");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   if (authLoading || !profile) return null;
 
   return (
-    <div className="relative min-h-screen flex flex-col">
-      {/* Background */}
+    <div
+      style={{
+        height: "100dvh",
+        background: "#0A0A0F",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* ── Ambient glows ── */}
       <div
-        className="pointer-events-none fixed top-[-15%] left-[-5%] w-[350px] h-[350px] rounded-full opacity-15 blur-[100px]"
-        style={{ background: "var(--bd-accent)", animation: "orb1 15s ease-in-out infinite" }}
+        aria-hidden
+        style={{
+          position: "fixed",
+          top: "-20%",
+          right: "-15%",
+          width: 420,
+          height: 420,
+          borderRadius: "50%",
+          background: "#d4688a",
+          opacity: 0.07,
+          filter: "blur(110px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
       />
       <div
-        className="pointer-events-none fixed bottom-[-15%] right-[-5%] w-[250px] h-[250px] rounded-full opacity-10 blur-[80px]"
-        style={{ background: "var(--bd-rose)", animation: "orb2 18s ease-in-out infinite" }}
+        aria-hidden
+        style={{
+          position: "fixed",
+          bottom: "-10%",
+          left: "-12%",
+          width: 300,
+          height: 300,
+          borderRadius: "50%",
+          background: "#B48CFF",
+          opacity: 0.05,
+          filter: "blur(90px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
       />
 
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b bd-glass" style={{ borderColor: "var(--bd-border)" }}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/dashboard")}
-          className="text-[var(--bd-text-muted)]"
+      {/* ── Scrollable body ── */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          position: "relative",
+          zIndex: 1,
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 480,
+            margin: "0 auto",
+            // 64px nav + 70px input bar + 20px breathing room = ~154px
+            padding: hasMessages
+              ? "32px 20px 160px"
+              : "56px 24px 160px",
+          }}
         >
-          ← Back
-        </Button>
-        <div className="text-center">
-          <div className="flex items-center gap-2 justify-center">
-            <span className="text-base">✨</span>
-            <span className="text-sm font-semibold">Aura</span>
-          </div>
-          <div className="text-[10px]" style={{ color: "var(--bd-accent)" }}>
-            Your AI Companion
-          </div>
-        </div>
-        <div className="w-16" />
-      </header>
+          {!hasMessages ? (
+            /* ── Empty state — Maahi is present ── */
+            <>
+              {/* Maahi presence element */}
+              <div style={{ marginBottom: 40 }}>
+                <div style={{ position: "relative", display: "inline-block", marginBottom: 24 }}>
+                  {/* Outer breathing ring */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: -10,
+                      borderRadius: "50%",
+                      border: "1px solid rgba(212,104,138,0.12)",
+                      animation: "breatheOuter 4s ease-in-out infinite",
+                    }}
+                  />
+                  {/* Inner breathing ring */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: -4,
+                      borderRadius: "50%",
+                      border: "1px solid rgba(212,104,138,0.2)",
+                      animation: "breatheInner 4s ease-in-out infinite 0.5s",
+                    }}
+                  />
+                  {/* Core */}
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: "50%",
+                      background:
+                        "linear-gradient(135deg, rgba(212,104,138,0.18), rgba(180,140,255,0.12))",
+                      border: "1px solid rgba(212,104,138,0.25)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 18,
+                      color: "rgba(212,104,138,0.8)",
+                    }}
+                  >
+                    ✦
+                  </div>
+                </div>
 
-      {/* Chat area */}
-      <div className="flex-1 max-w-2xl mx-auto w-full px-4">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16 page-enter">
-            {/* Companion avatar */}
-            <div className="relative mb-6">
+                <h1
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: "#fff",
+                    margin: "0 0 10px",
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {greeting(profile.name)}
+                </h1>
+                <p
+                  style={{
+                    fontSize: 16,
+                    color: "rgba(255,255,255,0.4)",
+                    margin: "0 0 6px",
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {contextLine(profile.attachment || "")}
+                </p>
+                <p
+                  style={{
+                    fontSize: 16,
+                    color: "rgba(255,255,255,0.28)",
+                    margin: 0,
+                    lineHeight: 1.65,
+                  }}
+                >
+                  What&apos;s alive for you today?
+                </p>
+              </div>
+
+              {/* Conversation starters — flowing chips */}
+              <div>
+                <p
+                  style={{
+                    fontSize: 10,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.15em",
+                    color: "rgba(255,255,255,0.18)",
+                    margin: "0 0 14px",
+                  }}
+                >
+                  Or start here
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
+                  {STARTERS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => sendMessage({ text: s })}
+                      style={{
+                        padding: "9px 16px",
+                        borderRadius: 999,
+                        fontSize: 13,
+                        fontWeight: 400,
+                        color: "rgba(255,255,255,0.5)",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        cursor: "pointer",
+                        lineHeight: 1.4,
+                        transition: "border-color 0.15s, color 0.15s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.target as HTMLButtonElement).style.borderColor =
+                          "rgba(212,104,138,0.3)";
+                        (e.target as HTMLButtonElement).style.color =
+                          "rgba(255,255,255,0.75)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.target as HTMLButtonElement).style.borderColor =
+                          "rgba(255,255,255,0.08)";
+                        (e.target as HTMLButtonElement).style.color =
+                          "rgba(255,255,255,0.5)";
+                      }}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            /* ── Active conversation ── */
+            <>
+              {/* Minimal Maahi label — replaces the big header */}
               <div
-                className="w-20 h-20 rounded-full flex items-center justify-center text-3xl"
                 style={{
-                  background: "linear-gradient(135deg, var(--bd-accent), var(--bd-rose))",
-                  animation: "float 3s ease-in-out infinite",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 28,
+                  paddingBottom: 16,
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
                 }}
               >
-                ✨
-              </div>
-              <div
-                className="absolute inset-0 rounded-full -m-2"
-                style={{ border: "2px solid var(--bd-accent)", animation: "pulseRing 2s ease-out infinite" }}
-              />
-            </div>
-
-            <h2 className="text-xl font-bold mb-2 page-enter page-enter-delay-1">
-              Hey {profile.name} 💜
-            </h2>
-            <p className="text-sm max-w-sm mb-8 page-enter page-enter-delay-2" style={{ color: "var(--bd-text-muted)" }}>
-              I&apos;m Aura, your personal relationship companion. I know your soul
-              profile deeply. Talk to me about anything — dates, feelings, patterns,
-              or just to process your day.
-            </p>
-
-            {/* Quick prompts */}
-            <div className="grid grid-cols-2 gap-2 max-w-sm w-full stagger-children">
-              {QUICK_PROMPTS.map((q) => (
-                <Button
-                  key={q.text}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => sendMessage({ text: q.text })}
-                  className="rounded-xl text-xs text-left h-auto py-3 px-3 border-[var(--bd-border)] text-[var(--bd-text-muted)] hover:border-[var(--bd-accent)]/30 hover:text-[var(--bd-text)] bd-card-hover"
+                <div
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg, rgba(212,104,138,0.2), rgba(180,140,255,0.15))",
+                    border: "1px solid rgba(212,104,138,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 11,
+                    color: "rgba(212,104,138,0.8)",
+                    flexShrink: 0,
+                  }}
                 >
-                  <span className="mr-1.5">{q.emoji}</span> {q.text}
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <Conversation className="py-6">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
-          </Conversation>
-        )}
-      </div>
+                  ✦
+                </div>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.4)",
+                  }}
+                >
+                  Maahi
+                </span>
+                {isStreaming && (
+                  <div style={{ marginLeft: 2 }}>
+                    <TypingDots />
+                  </div>
+                )}
+              </div>
 
-      {/* Input */}
-      <div className="sticky bottom-0 border-t px-4 py-4 bd-glass" style={{ borderColor: "var(--bd-border)" }}>
-        <div className="max-w-2xl mx-auto flex gap-2">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Talk to Aura..."
-            className="flex-1 min-h-[44px] max-h-32 resize-none bg-[var(--bd-surface)] border-[var(--bd-border)] text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] rounded-xl"
-            rows={1}
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isStreaming}
-            className="bg-[var(--bd-accent)] text-black font-semibold rounded-xl px-5 disabled:opacity-40"
-          >
-            {isStreaming ? "..." : "Send"}
-          </Button>
+              {/* Messages */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} />
+                ))}
+              </div>
+              <div ref={bottomRef} style={{ height: 1 }} />
+            </>
+          )}
         </div>
       </div>
+
+      {/* ── Input bar — sits above the bottom nav ── */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: "calc(64px + env(safe-area-inset-bottom, 0px))",
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          background: "rgba(10,10,15,0.92)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+          padding: "12px 16px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 480,
+            margin: "0 auto",
+            display: "flex",
+            gap: 10,
+            alignItems: "center",
+          }}
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Talk to Maahi…"
+            disabled={isStreaming}
+            style={{
+              flex: 1,
+              height: 46,
+              borderRadius: 23,
+              border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.05)",
+              color: "#fff",
+              fontSize: 14,
+              padding: "0 20px",
+              outline: "none",
+              transition: "border-color 0.15s",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "rgba(212,104,138,0.4)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "rgba(255,255,255,0.09)";
+            }}
+          />
+
+          {/* Send button */}
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || isStreaming}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              border: "none",
+              cursor: input.trim() && !isStreaming ? "pointer" : "default",
+              background:
+                input.trim() && !isStreaming
+                  ? "linear-gradient(135deg, #e8927c, #d4688a)"
+                  : "rgba(255,255,255,0.06)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              transition: "background 0.2s",
+            }}
+          >
+            {isStreaming ? (
+              <div
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "2px solid rgba(255,255,255,0.15)",
+                  borderTopColor: "rgba(255,255,255,0.6)",
+                  animation: "maahiSpin 0.8s linear infinite",
+                }}
+              />
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={input.trim() ? "#fff" : "rgba(255,255,255,0.25)"}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes breatheOuter {
+          0%, 100% { transform: scale(1); opacity: 0.4; }
+          50%       { transform: scale(1.18); opacity: 0.8; }
+        }
+        @keyframes breatheInner {
+          0%, 100% { transform: scale(1); opacity: 0.6; }
+          50%       { transform: scale(1.1); opacity: 1; }
+        }
+        @keyframes maahiDot {
+          0%, 80%, 100% { opacity: 0.2; transform: scale(0.75); }
+          40%           { opacity: 1;   transform: scale(1.25); }
+        }
+        @keyframes maahiSpin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

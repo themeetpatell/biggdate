@@ -3,118 +3,218 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import type { Match } from "@/lib/types";
 
-function MatchCard({ match, onPreview }: { match: Match; onPreview: () => void }) {
+function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <Card className="bg-[var(--bd-surface)] border-[var(--bd-border)] hover:border-[var(--bd-accent)]/30 bd-card-hover overflow-hidden">
-      <CardContent className="p-5">
-        {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-lg">{match.emoji || "✨"}</span>
-            <h3 className="text-lg font-bold">{match.name}</h3>
-            <span className="text-sm" style={{ color: "var(--bd-text-muted)" }}>
-              {match.age}
-            </span>
+    <div
+      style={{
+        borderRadius: 20,
+        border: "1px solid rgba(255,255,255,0.07)",
+        background: "linear-gradient(145deg, rgba(20,16,28,0.95), rgba(14,12,20,0.98))",
+        overflow: "hidden",
+        transition: "border-color 0.2s",
+      }}
+    >
+      {/* Summary row — always visible */}
+      <div
+        onClick={() => setExpanded((v) => !v)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          padding: "18px 20px",
+          cursor: "pointer",
+        }}
+      >
+        {/* Avatar initial */}
+        <div
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(212,104,138,0.25), rgba(180,140,255,0.15))",
+            border: "1px solid rgba(212,104,138,0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 18,
+            fontWeight: 700,
+            color: "#d4688a",
+            flexShrink: 0,
+          }}
+        >
+          {match.name?.[0] || "?"}
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{match.name}</span>
+            {match.age && (
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>{match.age}</span>
+            )}
           </div>
-          <p className="text-xs mb-2" style={{ color: "var(--bd-text-muted)" }}>
-            {match.profession} · {match.city}
+          <p
+            style={{
+              fontSize: 12,
+              color: "rgba(255,255,255,0.35)",
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {[match.profession, match.city].filter(Boolean).join(" · ")}
           </p>
+        </div>
+
+        {/* Harmony pill */}
+        <div
+          style={{
+            padding: "4px 10px",
+            borderRadius: 999,
+            background: "rgba(79,255,176,0.07)",
+            border: "1px solid rgba(79,255,176,0.15)",
+            fontSize: 11,
+            fontWeight: 600,
+            color: "#4FFFB0",
+            flexShrink: 0,
+          }}
+        >
+          {(match as unknown as { harmonyScore?: number }).harmonyScore || 82}%
+        </div>
+
+        <span
+          style={{
+            color: "rgba(255,255,255,0.2)",
+            fontSize: 12,
+            flexShrink: 0,
+            transition: "transform 0.2s",
+            transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
+          }}
+        >
+          ›
+        </span>
+      </div>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div
+          style={{
+            padding: "0 20px 20px",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+          }}
+        >
           {match.narrativeIntro && (
-            <p className="text-sm italic leading-snug" style={{ color: "var(--bd-accent)" }}>
+            <p
+              style={{
+                fontSize: 13,
+                fontStyle: "italic",
+                color: "rgba(212,104,138,0.85)",
+                lineHeight: 1.65,
+                margin: "16px 0",
+                paddingLeft: 12,
+                borderLeft: "2px solid rgba(212,104,138,0.25)",
+              }}
+            >
               &ldquo;{match.narrativeIntro}&rdquo;
             </p>
           )}
-        </div>
 
-        {/* Compatibility Signals */}
-        {match.compatibilitySignals && (
-          <div className="space-y-2 mb-4">
-            <p className="text-[10px] uppercase tracking-wider" style={{ color: "var(--bd-text-faint)" }}>
-              Why you connect
-            </p>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-start gap-2">
-                <Badge className="text-[10px] shrink-0 bg-[var(--bd-accent-soft)] text-[var(--bd-accent)] border-none">
-                  Values
-                </Badge>
-                <p className="text-xs leading-snug" style={{ color: "var(--bd-text-muted)" }}>
-                  {match.compatibilitySignals.values}
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <Badge className="text-[10px] shrink-0 bg-[var(--bd-rose)]/15 text-[var(--bd-rose)] border-none">
-                  Communication
-                </Badge>
-                <p className="text-xs leading-snug" style={{ color: "var(--bd-text-muted)" }}>
-                  {match.compatibilitySignals.communication}
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <Badge className="text-[10px] shrink-0 bg-[var(--bd-gold)]/15 text-[var(--bd-gold)] border-none">
-                  Life Direction
-                </Badge>
-                <p className="text-xs leading-snug" style={{ color: "var(--bd-text-muted)" }}>
-                  {match.compatibilitySignals.lifeDirection}
-                </p>
+          {match.compatibilitySignals && (
+            <div style={{ marginBottom: 16 }}>
+              <p
+                style={{
+                  fontSize: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  color: "rgba(255,255,255,0.25)",
+                  margin: "0 0 10px",
+                }}
+              >
+                Why you connect
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { label: "Values", value: match.compatibilitySignals.values, color: "#4FFFB0" },
+                  { label: "Communication", value: match.compatibilitySignals.communication, color: "#d4688a" },
+                  { label: "Life Direction", value: match.compatibilitySignals.lifeDirection, color: "#F5C842" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: "3px 8px",
+                        borderRadius: 999,
+                        background: `${color}10`,
+                        color,
+                        border: `1px solid ${color}25`,
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      {label}
+                    </span>
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.55 }}>
+                      {value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Friction Point */}
-        {match.frictionPoint && (
-          <div
-            className="flex items-start gap-2 px-3 py-2 rounded-xl mb-4"
-            style={{ background: "rgba(255,107,138,0.07)", border: "1px solid rgba(255,107,138,0.15)" }}
+          {match.frictionPoint && (
+            <div
+              style={{
+                padding: "10px 14px",
+                borderRadius: 12,
+                background: "rgba(245,200,66,0.06)",
+                border: "1px solid rgba(245,200,66,0.15)",
+                marginBottom: 16,
+              }}
+            >
+              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#F5C842", margin: "0 0 4px" }}>
+                Worth knowing
+              </p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5 }}>
+                {match.frictionPoint}
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={(e) => { e.stopPropagation(); onConnect(); }}
+            style={{
+              width: "100%",
+              padding: "13px 0",
+              borderRadius: 999,
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#0A0A0F",
+              background: "linear-gradient(135deg, #e8927c, #d4688a)",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
-            <span className="text-[10px] uppercase tracking-wider shrink-0 pt-0.5" style={{ color: "var(--bd-rose)" }}>
-              Worth knowing
-            </span>
-            <p className="text-xs leading-snug" style={{ color: "var(--bd-text-muted)" }}>
-              {match.frictionPoint}
-            </p>
-          </div>
-        )}
-
-        {/* Opening Question */}
-        {match.openingQuestion && (
-          <div
-            className="px-3 py-2 rounded-xl mb-4"
-            style={{ background: "rgba(180,140,255,0.06)", border: "1px solid rgba(180,140,255,0.15)" }}
-          >
-            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "var(--bd-accent)" }}>
-              If you connect, you&apos;ll both answer:
-            </p>
-            <p className="text-xs italic leading-snug" style={{ color: "var(--bd-text-muted)" }}>
-              &ldquo;{match.openingQuestion}&rdquo;
-            </p>
-          </div>
-        )}
-
-        {/* CTA */}
-        <Button
-          onClick={onPreview}
-          className="w-full bg-[var(--bd-accent)] text-black font-semibold rounded-xl"
-        >
-          🔮 See Life Preview
-        </Button>
-      </CardContent>
-    </Card>
+            Send intention ✦
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
-export default function MatchesPage() {
+export default function ConnectPage() {
   const router = useRouter();
   const { profile, loading: authLoading } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const generateMatches = useCallback(async () => {
+  const fetchMatches = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/matches/generate", {
@@ -123,9 +223,7 @@ export default function MatchesPage() {
         body: JSON.stringify({}),
       });
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setMatches(data);
-      }
+      if (Array.isArray(data)) setMatches(data);
     } catch {
       // silent
     }
@@ -134,98 +232,152 @@ export default function MatchesPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!profile) {
-      router.push("/onboarding");
-      return;
-    }
-    let cancelled = false;
-
-    fetch("/api/matches/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled && Array.isArray(data)) {
-          setMatches(data);
-        }
-      })
-      .catch(() => {
-        // silent
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [profile, authLoading, router]);
+    if (!profile) { router.push("/onboarding"); return; }
+    fetchMatches();
+  }, [profile, authLoading, router, fetchMatches]);
 
   if (authLoading || !profile) return null;
 
   return (
-    <div className="relative min-h-screen">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#0A0A0F",
+        paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))",
+      }}
+    >
+      {/* Ambient orb */}
       <div
-        className="pointer-events-none fixed bottom-[-15%] left-[-10%] w-[400px] h-[400px] rounded-full opacity-20 blur-[100px]"
-        style={{ background: "var(--bd-rose)", animation: "orb2 18s ease-in-out infinite" }}
+        aria-hidden
+        style={{
+          position: "fixed",
+          bottom: "-10%",
+          left: "-10%",
+          width: 340,
+          height: 340,
+          borderRadius: "50%",
+          background: "#d4688a",
+          opacity: 0.06,
+          filter: "blur(100px)",
+          pointerEvents: "none",
+        }}
       />
 
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-8">
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          maxWidth: 520,
+          margin: "0 auto",
+          padding: "48px 20px 0",
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Your Matches</h1>
-            <p className="text-sm" style={{ color: "var(--bd-text-muted)" }}>
-              Tap any match to see your Life Preview
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="text-[var(--bd-text-muted)]"
+        <div style={{ marginBottom: 28 }}>
+          <p
+            style={{
+              fontSize: 11,
+              textTransform: "uppercase",
+              letterSpacing: "0.15em",
+              color: "#d4688a",
+              margin: "0 0 6px",
+            }}
           >
-            ← Back
-          </Button>
+            Your connections
+          </p>
+          <h1 style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>
+            Connect
+          </h1>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: "6px 0 0" }}>
+            Soul summaries first. Photos unlock after intention.
+          </p>
         </div>
 
+        {/* Match list */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "80px 0",
+              gap: 14,
+            }}
+          >
             <div
-              className="w-8 h-8 rounded-full animate-pulse mb-4"
-              style={{ background: "var(--bd-accent)" }}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                border: "2px solid rgba(212,104,138,0.25)",
+                borderTopColor: "#d4688a",
+                animation: "spin 1s linear infinite",
+              }}
             />
-            <p className="text-sm" style={{ color: "var(--bd-text-muted)" }}>
-              Your AI agent is finding compatible souls...
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", margin: 0 }}>
+              Maahi is surfacing your connections…
             </p>
           </div>
         ) : (
-          <div className="space-y-4 stagger-children">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {matches.map((match) => (
-              <MatchCard
+              <MatchRow
                 key={match.id}
                 match={match}
-                onPreview={() => router.push(`/matches/${match.id}/preview`)}
+                onConnect={() => router.push(`/matches/${match.id}/preview`)}
               />
             ))}
           </div>
         )}
 
-        {matches.length > 0 && (
-          <Button
-            onClick={() => generateMatches()}
-            disabled={loading}
-            variant="outline"
-            className="w-full mt-6 rounded-full border-[var(--bd-border)] text-[var(--bd-text-muted)]"
+        {/* Refresh */}
+        {!loading && matches.length > 0 && (
+          <button
+            onClick={fetchMatches}
+            style={{
+              width: "100%",
+              marginTop: 20,
+              padding: "13px 0",
+              borderRadius: 999,
+              fontSize: 13,
+              fontWeight: 500,
+              color: "rgba(255,255,255,0.35)",
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.08)",
+              cursor: "pointer",
+            }}
           >
-            {loading ? "Finding matches..." : "Refresh Matches"}
-          </Button>
+            Refresh connections
+          </button>
         )}
+
+        {/* Maahi note */}
+        <div
+          style={{
+            marginTop: 28,
+            padding: "16px 20px",
+            borderRadius: 16,
+            background: "rgba(180,140,255,0.04)",
+            border: "1px solid rgba(180,140,255,0.1)",
+          }}
+        >
+          <p style={{ fontSize: 11, color: "#B48CFF", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Maahi noticed
+          </p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0, lineHeight: 1.6 }}>
+            You tend to connect deeply with people who share your{" "}
+            {profile.coreValues?.[0]?.toLowerCase() || "values"} and{" "}
+            {profile.attachment?.toLowerCase() || "thoughtful"} way of showing up.
+          </p>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

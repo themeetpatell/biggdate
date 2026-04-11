@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", icon: "home", label: "Home" },
-  { href: "/matches", icon: "heart", label: "Matches" },
-  { href: "/companion", icon: "sparkle", label: "Aura" },
-  { href: "/profile", icon: "user", label: "Profile" },
+  { href: "/dashboard", icon: "home", label: "Today" },
+  { href: "/matches", icon: "heart", label: "Connect" },
+  { href: "/companion", icon: "sparkle", label: "Maahi" },
+  { href: "/profile", icon: "user", label: "You" },
 ];
 
 function NavIcon({ name, active }: { name: string; active: boolean }) {
@@ -52,7 +52,8 @@ export function BottomNav() {
     pathname === "/about" ||
     pathname === "/contact" ||
     pathname === "/auth" ||
-    pathname === "/onboarding"
+    pathname === "/onboarding" ||
+    pathname === "/soul-snapshot"
   ) {
     return null;
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 
@@ -124,40 +124,23 @@ function Pill({
 export default function SoulSnapshotPage() {
   const router = useRouter();
   const { profile, loading } = useAuth();
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!loading && !profile) router.push("/onboarding");
   }, [profile, loading, router]);
+
+  // Auto-advance to dashboard after letting them absorb the card
+  useEffect(() => {
+    if (loading || !profile) return;
+    const t = setTimeout(() => router.push("/dashboard"), 3500);
+    return () => clearTimeout(t);
+  }, [loading, profile, router]);
 
   if (loading || !profile) return null;
 
   const attachmentDesc =
     ATTACHMENT_DESC[profile.attachment] ??
     "You have a unique way of connecting — trust what you know about yourself.";
-
-  async function handleShare() {
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    const text = `My Relationship Intelligence — ${profile!.attachment} | ${profile!.city} — `;
-
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({ title: "My Relationship Intelligence", text, url });
-      } catch {
-        // user dismissed — no-op
-      }
-      return;
-    }
-
-    // Fallback: copy URL
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // silent
-    }
-  }
 
   return (
     <div
@@ -491,28 +474,6 @@ export default function SoulSnapshotPage() {
           </div>
         </div>
 
-        {/* Share button */}
-        <div style={{ marginTop: 16, textAlign: "center" }}>
-          <button
-            onClick={handleShare}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "11px 24px",
-              borderRadius: 999,
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#0A0A0F",
-              background: "#4FFFB0",
-              border: "none",
-              cursor: "pointer",
-              transition: "opacity 0.15s",
-            }}
-          >
-            {copied ? "Link copied!" : "Share my card"}
-          </button>
-        </div>
       </div>
 
       {/* Sticky action bar */}
@@ -533,40 +494,29 @@ export default function SoulSnapshotPage() {
             maxWidth: 560,
             margin: "0 auto",
             display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             gap: 10,
           }}
         >
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: 0 }}>
+            Taking you home in a moment…
+          </p>
           <button
-            onClick={() => router.push("/onboarding")}
+            onClick={() => router.push("/dashboard")}
             style={{
-              flex: 1,
-              padding: "12px 0",
-              borderRadius: 999,
-              fontSize: 14,
-              fontWeight: 500,
-              color: "rgba(255,255,255,0.45)",
-              background: "transparent",
-              border: "1px solid rgba(255,255,255,0.12)",
-              cursor: "pointer",
-            }}
-          >
-            Something&apos;s off
-          </button>
-          <button
-            onClick={() => router.push("/report")}
-            style={{
-              flex: 2,
-              padding: "12px 0",
+              width: "100%",
+              padding: "14px 0",
               borderRadius: 999,
               fontSize: 14,
               fontWeight: 700,
               color: "#0A0A0F",
-              background: "#B48CFF",
+              background: "#4FFFB0",
               border: "none",
               cursor: "pointer",
             }}
           >
-            This is me →
+            Let&apos;s go →
           </button>
         </div>
       </div>
