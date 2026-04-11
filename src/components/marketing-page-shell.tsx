@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Nunito } from "next/font/google";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { MarketingHeader } from "@/components/marketing-header";
+import { MarketingSocialRail } from "@/components/marketing-social-rail";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -78,6 +79,7 @@ export function MarketingPageShell({
         <div className="relative z-10">{children}</div>
 
         <MarketingFooter />
+        <MarketingSocialRail />
       </main>
     </div>
   );

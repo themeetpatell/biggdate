@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { LifePreviewTimeline } from "@/components/life-preview-timeline";
 import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingSocialRail } from "@/components/marketing-social-rail";
 import {
   Sheet,
   SheetContent,
@@ -1193,6 +1194,7 @@ export function CinematicLanding() {
       </motion.section>
 
       <MarketingFooter />
+      <MarketingSocialRail />
     </main>
   );
 }

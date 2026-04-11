@@ -30,7 +30,7 @@ const PLACEHOLDERS: Record<Act, string> = {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { refresh } = useAuth();
+  const { refresh, loading: authLoading, userId, profile } = useAuth();
   const sessionId = useRef(
     `onboarding-${Math.random().toString(36).slice(2, 10)}`,
   );
@@ -44,6 +44,15 @@ export default function OnboardingPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Guard: redirect away if user already has a completed profile
+  useEffect(() => {
+    if (authLoading) return;
+    if (!userId) return; // AuthProvider handles unauthenticated redirect
+    if (profile?.name) {
+      router.replace("/soul-snapshot");
+    }
+  }, [authLoading, userId, profile, router]);
+
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -53,15 +62,16 @@ export default function OnboardingPage() {
 
   const isStreaming = status === "streaming" || status === "submitted";
 
-  // Auto-start: fire __BEGIN__ trigger 1.2s after mount
+  // Auto-start: fire __BEGIN__ only after auth is confirmed and user has no profile
   useEffect(() => {
+    if (authLoading || !userId || profile?.name) return;
     if (autoStarted.current) return;
     autoStarted.current = true;
     const timer = setTimeout(() => {
       sendMessage({ text: "__BEGIN__" });
     }, 1200);
     return () => clearTimeout(timer);
-  }, [sendMessage]);
+  }, [authLoading, userId, profile, sendMessage]);
 
   // Track the ID of the init trigger message (first user message)
   useEffect(() => {
@@ -186,6 +196,11 @@ export default function OnboardingPage() {
   };
 
   const isWelcome = visibleMessages.length === 0 && !isStreaming;
+
+  // Blank screen while auth loads or while redirecting a user with existing profile
+  if (authLoading || (!authLoading && userId && profile?.name)) {
+    return <div style={{ background: "var(--bd-bg)", height: "100vh" }} />;
+  }
 
   // Ritual reveal overlay
   if (revealing) {

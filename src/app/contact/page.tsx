@@ -1,16 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Facebook,
-  Instagram,
-  Linkedin,
-  Mail,
-  MessageCircleMore,
-  Twitter,
-  Users,
-  Youtube,
-} from "lucide-react";
+import { ArrowRight, Mail, MessageCircleMore, Users } from "lucide-react";
+import { MARKETING_SOCIAL_LINKS } from "@/components/marketing-social-links";
 import { MarketingPageShell } from "@/components/marketing-page-shell";
 
 export const metadata: Metadata = {
@@ -42,78 +33,6 @@ const CONTACT_LANES = [
     cta: "Start the conversation",
   },
 ];
-
-function WhatsAppIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-4">
-      <path
-        d="M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L4 20l.7-4A8.5 8.5 0 1 1 20.5 11.8Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.2 8.9c.2-.5.4-.5.7-.5h.6c.2 0 .5 0 .7.5l.3 1c.1.4.1.6-.1.8l-.4.5c-.1.1-.2.3 0 .6.3.5.9 1.1 1.4 1.4.3.2.5.1.6 0l.5-.4c.2-.2.4-.2.8-.1l1 .3c.5.2.5.5.5.7v.6c0 .3 0 .5-.5.7-.6.2-1.3.2-1.8 0-.9-.3-2-.9-3.1-2-.9-.9-1.5-1.9-1.8-2.7-.2-.6-.2-1.3 0-1.9Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MediumIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-4">
-      <path
-        d="M5 7.5c1.7 0 3 2 3 4.5s-1.3 4.5-3 4.5-3-2-3-4.5 1.3-4.5 3-4.5Zm8 0c2.3 0 4 2 4 4.5s-1.7 4.5-4 4.5-4-2-4-4.5 1.7-4.5 4-4.5Zm7 1.2c.8 0 1.5 1.5 1.5 3.3s-.7 3.3-1.5 3.3-1.5-1.5-1.5-3.3.7-3.3 1.5-3.3Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-const CONTACT_CHANNELS = [
-  {
-    label: "WhatsApp",
-    href: "https://api.whatsapp.com/send?text=Hello%20BiggDate",
-    Icon: WhatsAppIcon,
-  },
-  {
-    label: "Email",
-    href: "mailto:hello@biggdate.com",
-    Icon: Mail,
-  },
-  {
-    label: "LinkedIn",
-    Icon: Linkedin,
-  },
-  {
-    label: "Instagram",
-    Icon: Instagram,
-  },
-  {
-    label: "Facebook",
-    Icon: Facebook,
-  },
-  {
-    label: "Twitter",
-    Icon: Twitter,
-  },
-  {
-    label: "YouTube",
-    Icon: Youtube,
-  },
-  {
-    label: "Medium",
-    Icon: MediumIcon,
-  },
-] as const;
 
 export default function ContactPage() {
   return (
@@ -204,7 +123,7 @@ export default function ContactPage() {
               Channels
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {CONTACT_CHANNELS.map((channel) => {
+              {MARKETING_SOCIAL_LINKS.map((channel) => {
                 const tileClassName =
                   "group flex min-h-[84px] flex-col items-start justify-between rounded-[20px] border border-white/[0.08] bg-white/[0.04] px-4 py-4 text-left text-[#d8e2f6] transition-all hover:border-white/[0.14] hover:bg-white/[0.06]";
 
@@ -217,17 +136,23 @@ export default function ContactPage() {
                   </>
                 );
 
-                return "href" in channel ? (
-                  <a
-                    key={channel.label}
-                    href={channel.href}
-                    className={tileClassName}
-                    target={channel.href.startsWith("http") ? "_blank" : undefined}
-                    rel={channel.href.startsWith("http") ? "noreferrer" : undefined}
-                  >
-                    {content}
-                  </a>
-                ) : (
+                if (channel.href) {
+                  const href = channel.href;
+
+                  return (
+                    <a
+                      key={channel.label}
+                      href={href}
+                      className={tileClassName}
+                      target={href.startsWith("http") ? "_blank" : undefined}
+                      rel={href.startsWith("http") ? "noreferrer" : undefined}
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+
+                return (
                   <div key={channel.label} className={tileClassName}>
                     {content}
                   </div>
