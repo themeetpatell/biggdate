@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Heart, Menu } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -25,7 +26,7 @@ export function MarketingHeader({
 }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
-      <nav className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-3 overflow-hidden rounded-[28px] border border-white/[0.08] bg-[rgba(10,12,22,0.78)] px-4 py-3 shadow-[0_18px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl backdrop-saturate-150 sm:px-5">
+      <nav className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-2 overflow-hidden rounded-[28px] border border-white/[0.08] bg-[rgba(10,12,22,0.86)] px-3 py-3 shadow-[0_18px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl backdrop-saturate-150 sm:gap-3 sm:px-5">
         <div
           className="pointer-events-none absolute inset-0"
           aria-hidden
@@ -38,21 +39,18 @@ export function MarketingHeader({
 
         <Link
           href="/"
-          className="relative flex min-w-0 items-center gap-3 rounded-2xl transition-opacity hover:opacity-90"
+          className="relative flex min-w-0 items-center gap-2 rounded-2xl transition-opacity hover:opacity-90 sm:gap-3"
         >
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.12] bg-gradient-to-br from-[#d4688a]/32 via-white/[0.08] to-[#7b9fff]/28 shadow-[0_10px_24px_rgba(0,0,0,0.28)]">
-            <div className="absolute inset-[1px] rounded-[15px] bg-[#121522]/90" />
-            <Heart className="relative size-4 text-[#f19bc5]" />
-          </div>
-
-          <div className="min-w-0">
-            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.32em] text-[#8f92ab] sm:block">
-              BiggDate
-            </span>
-            <span className="block truncate text-sm font-medium text-[#f0ebe3]">
-              BiggDate
-            </span>
-          </div>
+          <Image
+            src="/Biggdate-logo.png"
+            alt="BiggDate"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-xl"
+          />
+          <span className="block truncate text-sm font-medium text-[#f0ebe3]">
+            BiggDate
+          </span>
         </Link>
 
         <div className="hidden items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.04] p-1 md:flex">
@@ -76,7 +74,7 @@ export function MarketingHeader({
           })}
         </div>
 
-        <div className="relative flex items-center gap-2">
+          <div className="relative flex shrink-0 items-center gap-2">
           <Link
             href="/auth"
             className="hidden h-11 items-center rounded-full border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02] px-5 text-sm font-medium text-[#d7d9e5] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-[#f0ebe3] sm:inline-flex"
@@ -85,13 +83,13 @@ export function MarketingHeader({
           </Link>
           <Link
             href="/auth"
-            className="group relative inline-flex h-11 items-center overflow-hidden rounded-full px-4 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(255,20,147,0.3),0_12px_32px_rgba(212,104,138,0.4)] transition-all hover:scale-[1.01] hover:shadow-[0_0_0_1px_rgba(255,20,147,0.4),0_16px_40px_rgba(212,104,138,0.5)] sm:px-6"
+            className="group relative inline-flex h-11 items-center overflow-hidden rounded-full px-3 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(255,20,147,0.3),0_12px_32px_rgba(212,104,138,0.4)] transition-all hover:scale-[1.01] hover:shadow-[0_0_0_1px_rgba(255,20,147,0.4),0_16px_40px_rgba(212,104,138,0.5)] sm:px-6"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-[#ff1493] via-[#d4688a] to-[#a855f7]" />
             <span className="absolute inset-0 bg-gradient-to-r from-[#ff6ac7] via-[#f04fb8] to-[#b86ef7] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <span className="relative z-10 inline-flex items-center gap-2">
-              <span className="hidden sm:inline">Join beta</span>
-              <span className="sm:hidden">Beta</span>
+              <span className="hidden sm:inline">Start Dating</span>
+              <span className="sm:hidden">Start Dating</span>
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </Link>

@@ -2,7 +2,7 @@
 
 import type { UIMessage } from "ai";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react"; // used by legacy ChatMessage
 import { ACT_COLORS, type Act } from "@/components/onboarding/ambient-layer";
 
 /** Extract plain text from a UIMessage's parts array. */
@@ -20,13 +20,17 @@ function stripChips(text: string): string {
   return text.replace(/\[CHIPS:[^\]]*\]/g, "").trim();
 }
 
-/** Detect and extract "[NOTICE]" prefix. */
-function parseNotice(text: string): { isNotice: boolean; text: string } {
-  const trimmed = text.trimStart();
-  if (trimmed.startsWith("[NOTICE]")) {
-    return { isNotice: true, text: trimmed.replace("[NOTICE]", "").trim() };
-  }
-  return { isNotice: false, text: trimmed };
+/**
+ * Extract an embedded "[NOTICE] ..." from anywhere in the text.
+ * Returns the notice string and the remaining message with the tag removed.
+ */
+function extractNotice(text: string): { notice: string | null; remaining: string } {
+  const match = text.match(/\[NOTICE\]\s*([^\n[]+)/);
+  if (!match) return { notice: null, remaining: text };
+  return {
+    notice: match[1].trim(),
+    remaining: text.replace(match[0], "").trim(),
+  };
 }
 
 interface OnboardingMessageProps {
@@ -37,24 +41,26 @@ interface OnboardingMessageProps {
 export function OnboardingMessage({ message, act }: OnboardingMessageProps) {
   const raw = getMessageText(message);
   const cleaned = stripChips(raw);
+  const color = ACT_COLORS[act];
 
   if (!cleaned) return null;
 
-  // User message — right-aligned gradient bubble
+  // User message — right-aligned gradient pill
   if (message.role === "user") {
     return (
       <motion.div
         className="flex justify-end"
-        initial={{ opacity: 0, x: 8, y: 4 }}
+        initial={{ opacity: 0, x: 10, y: 4 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
-        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       >
         <div
-          className="max-w-[72%] px-4 py-2.5 text-[15px] leading-relaxed text-white"
+          className="max-w-[68%] px-5 py-3 text-[15px] leading-relaxed text-white"
           style={{
             background: "linear-gradient(135deg, #e8927c, #d4688a)",
-            borderRadius: "18px 4px 18px 18px",
-            boxShadow: "0 2px 12px rgba(212,104,138,0.25)",
+            borderRadius: "22px 5px 22px 22px",
+            boxShadow:
+              "0 4px 20px rgba(212,104,138,0.28), 0 1px 3px rgba(0,0,0,0.15)",
           }}
         >
           {cleaned}
@@ -63,45 +69,46 @@ export function OnboardingMessage({ message, act }: OnboardingMessageProps) {
     );
   }
 
-  // Check for [NOTICE] variant
-  const { isNotice, text: noticeText } = parseNotice(cleaned);
+  // AI message — extract any embedded [NOTICE] then render notice + text
+  const { notice, remaining } = extractNotice(cleaned);
 
-  if (isNotice) {
-    const color = ACT_COLORS[act];
-    return (
-      <motion.div
-        className="py-1 text-center text-[13px] italic"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.75 }}
-        transition={{ duration: 0.6 }}
-        style={{ color, textShadow: `0 0 16px ${color}40` }}
-      >
-        {noticeText}
-      </motion.div>
-    );
-  }
-
-  // AI message — left-aligned dark glass bubble
   return (
-    <motion.div
-      className="flex items-end gap-2"
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <div
-        className="max-w-[78%] px-4 py-3 text-[15px] leading-relaxed"
-        style={{
-          background: "rgba(255,255,255,0.07)",
-          border: "1px solid rgba(255,255,255,0.09)",
-          borderRadius: "4px 18px 18px 18px",
-          color: "var(--bd-text)",
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        {cleaned}
-      </div>
-    </motion.div>
+    <>
+      {notice && (
+        <motion.div
+          className="py-1 text-center text-[13px] italic"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.75 }}
+          transition={{ duration: 0.6 }}
+          style={{ color, textShadow: `0 0 16px ${color}40` }}
+        >
+          {notice}
+        </motion.div>
+      )}
+      {remaining && (
+        <motion.div
+          className="flex items-start gap-3 pr-14"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="mt-[10px] flex-shrink-0">
+            <motion.div
+              className="size-[6px] rounded-full"
+              style={{ background: color, boxShadow: `0 0 8px ${color}80` }}
+              animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1.2, 0.85] }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+          <p
+            className="flex-1 text-[16px] leading-[1.8]"
+            style={{ color: "var(--bd-text)" }}
+          >
+            {remaining}
+          </p>
+        </motion.div>
+      )}
+    </>
   );
 }
 

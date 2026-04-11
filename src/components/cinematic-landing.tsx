@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   AnimatePresence,
   motion,
@@ -11,7 +12,6 @@ import {
 } from "framer-motion";
 import {
   ArrowRight,
-  Heart,
   Fingerprint,
   Eye,
   Compass,
@@ -215,7 +215,7 @@ function SectionTransition({
 
   return (
     <motion.div
-      className="relative z-10 mx-auto flex h-24 w-full max-w-5xl items-center justify-center px-6"
+      className="relative z-10 mx-auto flex h-10 w-full max-w-5xl items-center justify-center px-6"
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12% 0px -12% 0px" }}
@@ -375,19 +375,16 @@ export function CinematicLanding() {
             href="#top"
             className="relative flex min-w-0 items-center gap-3 rounded-2xl transition-opacity hover:opacity-90"
           >
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.12] bg-gradient-to-br from-[#d4688a]/32 via-white/[0.08] to-[#7b9fff]/28 shadow-[0_10px_24px_rgba(0,0,0,0.28)]">
-              <div className="absolute inset-[1px] rounded-[15px] bg-[#121522]/90" />
-              <Heart className="relative size-4 text-[#f19bc5]" />
-            </div>
-
-            <div className="min-w-0">
-              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.32em] text-[#8f92ab] sm:block">
-                BiggDate
-              </span>
-              <span className="block truncate text-sm font-medium text-[#f0ebe3]">
-                BiggDate
-              </span>
-            </div>
+            <Image
+              src="/Biggdate-logo.png"
+              alt="BiggDate"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-xl"
+            />
+            <span className="block truncate text-sm font-medium text-[#f0ebe3]">
+              BiggDate
+            </span>
           </a>
 
           <div className="hidden items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.04] p-1 md:flex">
@@ -517,7 +514,7 @@ export function CinematicLanding() {
       ══════════════════════════════════════════════ */}
       <section
         ref={heroRef}
-        className="relative z-10 flex min-h-[88vh] items-start justify-center px-6 pt-20 sm:min-h-[90vh] sm:pt-28"
+        className="relative z-10 flex min-h-[70vh] items-start justify-center px-6 pt-20 sm:min-h-[75vh] sm:pt-28"
       >
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}

@@ -2,7 +2,7 @@ import { after } from "next/server";
 import { streamText, generateText, convertToModelMessages, UIMessage } from "ai";
 import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
-import { getSessionMemoryDb, upsertSessionMemory } from "@/lib/repo";
+import { getSessionMemoryDb, upsertSessionMemory, getAccountHandleByUserId } from "@/lib/repo";
 import {
   onboardingSystemPrompt,
   memoryExtractionPrompt,
@@ -17,7 +17,15 @@ export async function POST(req: Request) {
     sessionId,
   }: { messages: UIMessage[]; sessionId: string } = await req.json();
 
-  const memory = await getSessionMemoryDb(auth.userId, sessionId || "default");
+  const [memory, accountHandle] = await Promise.all([
+    getSessionMemoryDb(auth.userId, sessionId || "default"),
+    getAccountHandleByUserId(auth.userId),
+  ]);
+
+  // Use just the first name so Maahi sounds natural, not formal
+  const firstName = accountHandle?.fullName
+    ? accountHandle.fullName.trim().split(/\s+/)[0]
+    : undefined;
 
   // Extract questions already asked from assistant messages (synchronous, no async lag)
   const assistantMessages = messages.filter((m) => m.role === "assistant");
@@ -44,9 +52,9 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: getModel(),
-    system: onboardingSystemPrompt(memoryContext, askedTopics),
+    system: onboardingSystemPrompt(memoryContext, askedTopics, firstName),
     messages: modelMessages,
-    maxOutputTokens: 300,
+    maxOutputTokens: 500,
     temperature: 0.5,
   });
 

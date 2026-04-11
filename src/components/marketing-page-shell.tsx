@@ -25,7 +25,7 @@ export function MarketingPageShell({
 }) {
   return (
     <div className={nunito.variable}>
-      <main className="relative min-h-screen overflow-x-hidden bg-[#06060e] pt-20 text-[#f0ebe3] sm:pt-24">
+      <main className="relative min-h-screen overflow-x-hidden bg-[#06060e] pt-24 text-[#f0ebe3] sm:pt-24">
         <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
           <div
             className="absolute -left-72 -top-48 h-[700px] w-[700px] rounded-full opacity-70 blur-[80px]"
@@ -62,7 +62,7 @@ export function MarketingPageShell({
 
         <MarketingHeader activePage={activePage} />
 
-        <section className="relative z-10 px-6 pb-10 pt-14 sm:pb-16 sm:pt-24">
+        <section className="relative z-10 px-6 pb-10 pt-4 sm:pb-16 sm:pt-24">
           <div className="mx-auto flex max-w-5xl flex-col items-center rounded-[32px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-8 text-center shadow-[0_36px_100px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:p-12">
             <span className="inline-flex rounded-full border border-[#ff1493]/20 bg-[#ff1493]/[0.08] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#ff6ac7]">
               {eyebrow}

@@ -53,21 +53,31 @@ export default function OnboardingPage() {
     }
   }, [authLoading, userId, profile, router]);
 
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      body: { sessionId: sessionId.current },
-    }),
-  });
+  // Stable transport — must not be recreated on every render or sendMessage
+  // identity changes, which cancels the auto-start timer mid-countdown.
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { sessionId: sessionId.current },
+      }),
+    [],
+  );
+
+  const { messages, sendMessage, status } = useChat({ transport });
 
   const isStreaming = status === "streaming" || status === "submitted";
 
-  // Auto-start: fire __BEGIN__ only after auth is confirmed and user has no profile
+  // Auto-start: fire __BEGIN__ only after auth is confirmed and user has no profile.
+  // autoStarted is set INSIDE the timeout so that if the effect re-runs (e.g. due
+  // to sendMessage identity change) we clear the stale timer and reschedule — the
+  // last scheduled invocation wins and sets the flag only when it actually fires.
   useEffect(() => {
     if (authLoading || !userId || profile?.name) return;
     if (autoStarted.current) return;
-    autoStarted.current = true;
     const timer = setTimeout(() => {
+      if (autoStarted.current) return;
+      autoStarted.current = true;
       sendMessage({ text: "__BEGIN__" });
     }, 1200);
     return () => clearTimeout(timer);
@@ -227,7 +237,7 @@ export default function OnboardingPage() {
 
   return (
     <div
-      className="relative flex h-screen flex-col overflow-hidden"
+      className="relative flex h-[100dvh] flex-col overflow-hidden"
       style={{ background: "var(--bd-bg)" }}
     >
       <AmbientLayer act={act} />
@@ -283,7 +293,7 @@ export default function OnboardingPage() {
           ) : (
             <motion.div
               key="conversation"
-              className="mx-auto max-w-2xl space-y-3 px-4 py-6 pb-32"
+              className="mx-auto max-w-2xl space-y-5 px-4 py-6 pb-36"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -330,9 +340,15 @@ export default function OnboardingPage() {
                   onSayMore={handleSayMore}
                 />
               )}
+              {/* Glass input card */}
               <div
-                className="flex items-end gap-3 border-b pb-2"
-                style={{ borderColor: "rgba(255,255,255,0.1)" }}
+                className="flex items-end gap-3 rounded-2xl px-4 py-3"
+                style={{
+                  background: "rgba(255,255,255,0.055)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  backdropFilter: "blur(20px)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+                }}
               >
                 <textarea
                   ref={textareaRef}
@@ -341,7 +357,7 @@ export default function OnboardingPage() {
                   onKeyDown={handleKeyDown}
                   placeholder={PLACEHOLDERS[act]}
                   rows={1}
-                  className="flex-1 resize-none border-0 bg-transparent text-sm focus:outline-none"
+                  className="flex-1 resize-none border-0 bg-transparent py-0.5 text-[15px] focus:outline-none"
                   style={{
                     color: "var(--bd-text)",
                     maxHeight: "160px",
@@ -352,21 +368,37 @@ export default function OnboardingPage() {
                   {input.trim() && !isStreaming && (
                     <motion.button
                       onClick={() => handleSend()}
-                      initial={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, scale: 0.6 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.15 }}
-                      className="mb-1 flex-shrink-0 text-xs font-medium transition-opacity hover:opacity-70"
-                      style={{ color: accentColor }}
+                      exit={{ opacity: 0, scale: 0.6 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      className="mb-0.5 flex size-8 flex-shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80"
+                      style={{ background: accentColor }}
+                      aria-label="Send"
                     >
-                      Send
+                      {/* Up-arrow icon */}
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        aria-hidden
+                      >
+                        <path
+                          d="M7 11.5V2.5M3 6.5l4-4 4 4"
+                          stroke="white"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </motion.button>
                   )}
                 </AnimatePresence>
               </div>
               <p
                 className="mt-2 text-center text-[10px]"
-                style={{ color: "var(--bd-text-faint)", opacity: 0.45 }}
+                style={{ color: "var(--bd-text-faint)", opacity: 0.4 }}
               >
                 Private and used only to build your profile
               </p>

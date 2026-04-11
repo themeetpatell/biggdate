@@ -8,6 +8,23 @@ function createId(prefix: string) {
 
 // ─── Account Handles ───
 
+export async function getAccountHandleByUserId(userId: string) {
+  const rows = await sql`
+    SELECT user_id, email, username, full_name
+    FROM account_handles
+    WHERE user_id = ${userId}
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    userId: row.user_id as string,
+    email: row.email as string,
+    username: row.username as string,
+    fullName: (row.full_name as string) || "",
+  };
+}
+
 export async function getAccountHandleByUsername(username: string) {
   const rows = await sql`
     SELECT user_id, email, username, full_name
