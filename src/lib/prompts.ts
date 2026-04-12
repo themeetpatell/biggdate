@@ -82,7 +82,7 @@ Return STRICT JSON only (no markdown, no explanation) with this exact shape:
 {
   "name": "string",
   "age": number_or_null,
-  "birthday": "MM-DD or null",
+  "birthday": "YYYY-MM-DD or null",
   "zodiac": "sign or null",
   "city": "string",
   "gender": "string or null",

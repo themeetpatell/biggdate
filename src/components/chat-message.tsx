@@ -18,7 +18,12 @@ export function getMessageText(message: UIMessage): string {
 /** Remove "[CHIPS: ...]" from text. Splits on the marker so text before it is always preserved,
  *  even when the AI incorrectly embeds [CHIPS:] mid-sentence. */
 function stripChips(text: string): string {
-  return text.split("[CHIPS:")[0].trim();
+  return text
+    .replace(/\[CHIPS:[^\]]*\]/g, "")
+    .replace(/\[MULTISELECT:[^\]]*\]/g, "")
+    .replace(/\[AGERANGE\]/g, "")
+    .replace(/\[DATEPICKER\]/g, "")
+    .trim();
 }
 
 /**

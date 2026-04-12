@@ -7,7 +7,13 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { AmbientLayer, ACT_COLORS, type Act } from "@/components/onboarding/ambient-layer";
 import { ThinkingPulse } from "@/components/onboarding/thinking-pulse";
-import { QuickReplies, parseChips } from "@/components/onboarding/quick-replies";
+import {
+  QuickReplies,
+  parseChips,
+  parseMultiSelect,
+  hasAgeRange,
+  hasDatePicker,
+} from "@/components/onboarding/quick-replies";
 import { SoulSignal } from "@/components/onboarding/soul-signal";
 import { OnboardingMessage, getMessageText } from "@/components/chat-message";
 import { useAuth } from "@/components/auth-provider";
@@ -164,12 +170,22 @@ export default function OnboardingPage() {
 
   // Extract chips from last AI message (only when streaming is done)
   const lastAIMessage = messages.filter((m) => m.role === "assistant").at(-1);
-  const currentChips = useMemo(() => {
-    if (isStreaming || !lastAIMessage) return [];
+  const lastAIText = useMemo(() => {
+    if (isStreaming || !lastAIMessage) return "";
     const text = getMessageText(lastAIMessage);
-    if (text.includes("PROFILE_COMPLETE")) return [];
-    return parseChips(text);
+    if (text.includes("PROFILE_COMPLETE")) return "";
+    return text;
   }, [lastAIMessage, isStreaming]);
+
+  const currentChips = useMemo(() => parseChips(lastAIText), [lastAIText]);
+  const currentMultiSelect = useMemo(() => parseMultiSelect(lastAIText), [lastAIText]);
+  const currentShowAgeRange = useMemo(() => hasAgeRange(lastAIText), [lastAIText]);
+  const currentShowDatePicker = useMemo(() => hasDatePicker(lastAIText), [lastAIText]);
+  const showAnyInlineUI =
+    currentChips.length > 0 ||
+    currentMultiSelect.length > 0 ||
+    currentShowAgeRange ||
+    currentShowDatePicker;
 
   const handleSend = useCallback(
     (text?: string) => {
@@ -366,11 +382,24 @@ export default function OnboardingPage() {
               }}
             />
             <div className="mx-auto max-w-2xl">
-              {currentChips.length > 0 && (
+              {showAnyInlineUI && (
                 <QuickReplies
+                  key={lastAIMessage?.id}
                   chips={currentChips}
+                  multiSelectOptions={currentMultiSelect}
+                  showAgeRange={currentShowAgeRange}
+                  showDatePicker={currentShowDatePicker}
                   act={act}
                   onSelect={handleChipSelect}
+                  onMultiSelect={(selected) => handleSend(selected.join(", "))}
+                  onAgeRange={(min, max) => handleSend(`${min} to ${max}`)}
+                  onDatePick={(birthday, age, zodiac) =>
+                    handleSend(
+                      birthday
+                        ? `My birthday is ${birthday}. I'm ${age} years old.${zodiac ? ` My zodiac sign is ${zodiac}.` : ""}`
+                        : "I'd rather not share my birthday",
+                    )
+                  }
                   onSayMore={handleSayMore}
                 />
               )}
