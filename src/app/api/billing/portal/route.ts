@@ -3,9 +3,8 @@ import Stripe from "stripe";
 import { getSessionFromCookies } from "@/lib/auth";
 import { getUserPlan } from "@/lib/repo";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 export async function POST(request: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const session = await getSessionFromCookies();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

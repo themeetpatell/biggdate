@@ -3,12 +3,15 @@ import Stripe from "stripe";
 import { getSessionFromCookies } from "@/lib/auth";
 import { getUserPlan, upsertUserPlan } from "@/lib/repo";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
 async function getOrCreateCustomer(userId: string, email: string | null): Promise<string> {
   const existing = await getUserPlan(userId);
   if (existing?.stripeCustomerId) return existing.stripeCustomerId;
 
+  const stripe = getStripe();
   const customer = await stripe.customers.create({
     email: email ?? undefined,
     metadata: { userId },
@@ -27,6 +30,7 @@ export async function POST(request: Request) {
   const { type, priceId } = await request.json() as { type: "subscription" | "payment"; priceId: string };
   const origin = request.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const customerId = await getOrCreateCustomer(session.userId, session.email);
+  const stripe = getStripe();
 
   if (type === "subscription") {
     const checkoutSession = await stripe.checkout.sessions.create({

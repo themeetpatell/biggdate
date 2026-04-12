@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUserPlanByStripeCustomer, upsertUserPlan } from "@/lib/repo";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
 // Stripe's newer API versions reorganized subscription period fields.
 // We access them safely via dynamic lookup to avoid SDK version drift.
 function getSubscriptionPeriodEnd(sub: Stripe.Subscription): string | null {
@@ -13,7 +10,7 @@ function getSubscriptionPeriodEnd(sub: Stripe.Subscription): string | null {
   return null;
 }
 
-async function handleSubscription(subscription: Stripe.Subscription) {
+async function handleSubscription(stripe: Stripe, subscription: Stripe.Subscription) {
   const customerId = typeof subscription.customer === "string"
     ? subscription.customer
     : subscription.customer.id;
@@ -41,6 +38,9 @@ async function handleSubscription(subscription: Stripe.Subscription) {
 }
 
 export async function POST(request: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     case "customer.subscription.created":
     case "customer.subscription.updated":
     case "customer.subscription.deleted":
-      await handleSubscription(event.data.object as Stripe.Subscription);
+      await handleSubscription(stripe, event.data.object as Stripe.Subscription);
       break;
     case "checkout.session.completed": {
       const session = event.data.object as unknown as Record<string, unknown>;
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
           ? session["subscription"]
           : (session["subscription"] as { id: string }).id;
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        await handleSubscription(subscription);
+        await handleSubscription(stripe, subscription);
       }
       break;
     }
