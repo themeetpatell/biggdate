@@ -1,19 +1,25 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { ArrowUp, Sparkles } from "lucide-react";
 import { DefaultChatTransport } from "ai";
+import Link from "next/link";
 
 export function LifePreviewTimeline() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/maahi",
-    }),
-  });
+
+  // Stable transport — recreating on every render causes instability
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: "/api/maahi" }),
+    []
+  );
+
+  const { messages, sendMessage, status } = useChat({ transport });
 
   const isLoading = status === "streaming" || status === "submitted";
+  const aiResponseCount = messages.filter((m) => m.role === "assistant").length;
+  const showSignupNudge = aiResponseCount >= 3;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -193,6 +199,31 @@ export function LifePreviewTimeline() {
           </div>
         )}
       </div>
+
+      {/* Sign-up nudge — appears after 3 AI responses */}
+      {showSignupNudge && (
+        <div
+          className="mx-4 mb-3 rounded-2xl px-4 py-3 text-center animate-in fade-in slide-in-from-bottom-2"
+          style={{
+            background: "linear-gradient(135deg, rgba(212,104,138,0.12), rgba(113,134,255,0.10))",
+            border: "1px solid rgba(212,104,138,0.2)",
+            animationDuration: "350ms",
+          }}
+        >
+          <p className="text-[12px] text-white/60 mb-2">
+            Maahi can go deeper when she knows your full story.
+          </p>
+          <Link
+            href="/auth"
+            className="inline-block rounded-full px-5 py-2 text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+            style={{
+              background: "linear-gradient(135deg, #d4688a, #7186ff)",
+            }}
+          >
+            Create your free profile →
+          </Link>
+        </div>
+      )}
 
       {/* Input */}
       <div className="px-4 pb-4 pt-2">
