@@ -36,7 +36,7 @@ const PLACEHOLDERS: Record<Act, string> = {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { refresh, loading: authLoading, userId, profile } = useAuth();
+  const { refresh, hydrateProfile, loading: authLoading, userId, profile } = useAuth();
   const sessionId = useRef(
     `onboarding-${Math.random().toString(36).slice(2, 10)}`,
   );
@@ -45,6 +45,8 @@ export default function OnboardingPage() {
   const [revealing, setRevealing] = useState(false);
   const [derivingStarted, setDerivingStarted] = useState(false);
   const [deriveError, setDeriveError] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState("100dvh");
 
   const autoStarted = useRef(false);
   const profileCompleteDetected = useRef(false);
@@ -121,18 +123,23 @@ export default function OnboardingPage() {
       .map((m) => `${m.role}: ${getMessageText(m)}`)
       .join("\n");
 
-    Promise.all([
-      fetch("/api/profile/derive", {
+    fetch("/api/profile/derive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript }),
-      }).then((r) => r.json()),
-      new Promise<void>((r) => setTimeout(r, 3500)),
-    ])
-      .then(async ([profile]) => {
+      })
+      .then(async (response) => {
+        const profile = await response.json();
+        if (!response.ok) {
+          throw new Error(profile?.error || "Failed to derive profile");
+        }
+        return profile;
+      })
+      .then((profile) => {
         if (profile?.name) {
-          await refresh();
-          router.push("/soul-snapshot");
+          hydrateProfile(profile);
+          router.replace("/soul-snapshot");
+          void refresh();
         } else {
           setDeriveError(true);
         }
@@ -147,6 +154,44 @@ export default function OnboardingPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isStreaming]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateViewportHeight = () => {
+      const nextHeight = window.visualViewport?.height ?? window.innerHeight;
+      const nextViewportHeight = `${Math.round(nextHeight)}px`;
+      setViewportHeight(nextViewportHeight);
+      document.documentElement.style.setProperty(
+        "--bd-viewport-height",
+        nextViewportHeight,
+      );
+    };
+
+    updateViewportHeight();
+
+    const visualViewport = window.visualViewport;
+    visualViewport?.addEventListener("resize", updateViewportHeight);
+    visualViewport?.addEventListener("scroll", updateViewportHeight);
+    window.addEventListener("orientationchange", updateViewportHeight);
+
+    return () => {
+      visualViewport?.removeEventListener("resize", updateViewportHeight);
+      visualViewport?.removeEventListener("scroll", updateViewportHeight);
+      window.removeEventListener("orientationchange", updateViewportHeight);
+      document.documentElement.style.removeProperty("--bd-viewport-height");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isInputFocused) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isInputFocused, viewportHeight]);
 
   // Derived state
   const aiMessageCount = messages.filter((m) => m.role === "assistant").length;
@@ -227,7 +272,14 @@ export default function OnboardingPage() {
 
   // Blank screen while auth loads or while redirecting a user with existing profile
   if (authLoading || (!authLoading && userId && profile?.name)) {
-    return <div style={{ background: "var(--bd-bg)", height: "100vh" }} />;
+    return (
+      <div
+        style={{
+          background: "var(--bd-bg)",
+          height: viewportHeight,
+        }}
+      />
+    );
   }
 
   // Ritual reveal overlay
@@ -287,8 +339,11 @@ export default function OnboardingPage() {
 
   return (
     <div
-      className="relative flex h-[100dvh] flex-col overflow-hidden"
-      style={{ background: "var(--bd-bg)" }}
+      className="relative flex min-h-0 flex-col overflow-hidden"
+      style={{
+        background: "var(--bd-bg)",
+        height: viewportHeight,
+      }}
     >
       <AmbientLayer act={act} />
 
@@ -306,7 +361,14 @@ export default function OnboardingPage() {
       </header>
 
       {/* Content area */}
-      <div className="relative flex-1 overflow-y-auto" style={{ zIndex: 10 }}>
+      <div
+        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        style={{
+          zIndex: 10,
+          WebkitOverflowScrolling: "touch",
+          scrollPaddingBottom: "calc(12rem + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <AnimatePresence mode="wait">
           {isWelcome ? (
             <motion.div
@@ -368,12 +430,15 @@ export default function OnboardingPage() {
       <AnimatePresence>
         {!isWelcome && (
           <motion.div
-            className="relative flex-shrink-0 px-6 pb-6 pt-2"
+            className="relative flex-shrink-0 px-6 pt-2"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            style={{ zIndex: 10 }}
+            style={{
+              zIndex: 10,
+              paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
+            }}
           >
             <div
               className="pointer-events-none absolute inset-x-0 -top-10 h-10"
@@ -418,6 +483,8 @@ export default function OnboardingPage() {
                   value={input}
                   onChange={handleTextareaChange}
                   onKeyDown={handleKeyDown}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
                   placeholder={PLACEHOLDERS[act]}
                   rows={1}
                   className="flex-1 resize-none border-0 bg-transparent py-0.5 text-[15px] focus:outline-none"

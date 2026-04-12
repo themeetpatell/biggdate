@@ -9,6 +9,7 @@ interface AuthState {
   profile: Profile | null;
   loading: boolean;
   refresh: () => Promise<void>;
+  hydrateProfile: (profile: Profile) => void;
   logout: () => Promise<void>;
 }
 
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthState>({
   profile: null,
   loading: true,
   refresh: async () => {},
+  hydrateProfile: () => {},
   logout: async () => {},
 });
 
@@ -56,6 +58,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(nextState.profile);
     setLoading(false);
   }, [loadAuthState]);
+
+  const hydrateProfile = useCallback((nextProfile: Profile) => {
+    setProfile(nextProfile);
+    setLoading(false);
+  }, []);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -99,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [userId, profile, loading, pathname, router]);
 
   return (
-    <AuthContext.Provider value={{ userId, profile, loading, refresh, logout }}>
+    <AuthContext.Provider value={{ userId, profile, loading, refresh, hydrateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );
