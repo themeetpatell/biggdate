@@ -2,6 +2,18 @@
 
 These emails are sent by Supabase Auth. If Resend is integrated directly in Supabase, the actual HTML/subject lines should live in the Supabase dashboard email settings.
 
+## Known-Good Setup
+
+Before blaming the HTML, verify the delivery path:
+
+- In Supabase, `Authentication -> Email Templates`, keep the confirmation and recovery templates on Supabase placeholders like `{{ .ConfirmationURL }}`.
+- In Supabase, `Authentication -> SMTP Settings` or the Resend integration, confirm the sender uses a Resend-verified domain such as `auth@biggdate.com`.
+- In Resend, confirm the domain is fully verified and the API key used by Supabase is current.
+- In Supabase Auth logs, inspect the exact provider response. `401` usually means a bad key, `403` usually means sender/domain mismatch, and `429` usually means a rate limit.
+- Use simple table-based HTML with inline styles. Avoid relying on `flex`, gradients, external fonts, scripts, or complex CSS.
+
+These local HTML files in [`docs/email-templates/`](/Users/themeetpatel/Startups/biggdate/docs/email-templates) are the safe versions to paste into Supabase.
+
 Tone target:
 - funny
 - loving
