@@ -50,3 +50,14 @@ export function getZodiacCompat(sign1: string, sign2: string): { level: string; 
   if (c.medium.includes(sign2)) return { level: "medium", label: "Compatible", color: "var(--bd-gold)" };
   return { level: "low", label: "Growth Pairing", color: "var(--bd-accent)" };
 }
+
+export function computeAgeFromBirthday(birthday: string | null): number | null {
+  if (!birthday) return null;
+  const birth = new Date(birthday);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
