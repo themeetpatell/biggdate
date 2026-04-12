@@ -49,6 +49,31 @@ import { ZODIAC_EMOJI } from "@/lib/zodiac";
 import type { Profile, ProfilePrompt } from "@/lib/types";
 import { SettingsDrawer } from "@/components/settings-drawer";
 import { UpgradeSheet } from "@/components/upgrade-sheet";
+import { DateOfBirth } from "@/components/ui/date-of-birth";
+import { MultiSelectChips } from "@/components/ui/multi-select-chips";
+import { AgeRangeSlider } from "@/components/ui/age-range-slider";
+import {
+  GENDER_OPTIONS,
+  PRONOUNS_OPTIONS,
+  ORIENTATION_OPTIONS,
+  ETHNICITY_OPTIONS,
+  RELIGION_OPTIONS,
+  POLITICS_OPTIONS,
+  PARTNER_GENDER_OPTIONS,
+  RELATIONSHIP_STYLE_OPTIONS,
+  LOVE_LANGUAGE_OPTIONS,
+  CONFLICT_STYLE_OPTIONS,
+  DIET_OPTIONS,
+  PETS_OPTIONS,
+  WEEKEND_STYLE_OPTIONS,
+  TRAVEL_STYLE_OPTIONS,
+  LANGUAGE_OPTIONS,
+  INTERESTS_GROUPS,
+  CORE_VALUES_OPTIONS,
+  DEALBREAKERS_OPTIONS,
+  STRENGTHS_OPTIONS,
+  GROWTH_AREAS_OPTIONS,
+} from "@/lib/profile-options";
 
 const MAX_PHOTOS = 6;
 const PROFILE_PHOTO_BUCKET = "profile-photos";
@@ -1030,36 +1055,107 @@ function ProfileEditor({
                           placeholder="Your first name"
                         />
                       </Field>
-                      <Field label="Age">
-                        <TextInput
-                          inputMode="numeric"
-                          value={draft.age ?? ""}
-                          onChange={(event) =>
-                            setField("age", event.target.value ? Number(event.target.value) : null)
-                          }
-                          placeholder="29"
+                      <Field label="Date of birth">
+                        <DateOfBirth
+                          value={draft.birthday ?? null}
+                          onChange={(birthday, age, zodiac) => {
+                            setDraft((prev) =>
+                              prev
+                                ? { ...prev, birthday: birthday ?? null, age: age ?? null, zodiac: zodiac ?? null }
+                                : prev,
+                            );
+                          }}
                         />
                       </Field>
                       <Field label="Pronouns">
-                        <TextInput
-                          value={draft.pronouns || ""}
-                          onChange={(event) => setField("pronouns", event.target.value)}
-                          placeholder="She/Her"
-                        />
+                        <SelectInput
+                          value={
+                            draft.pronouns && (PRONOUNS_OPTIONS as readonly string[]).includes(draft.pronouns)
+                              ? draft.pronouns
+                              : draft.pronouns
+                              ? "Other"
+                              : ""
+                          }
+                          onChange={(e) =>
+                            setField("pronouns", e.target.value === "Other" ? "" : e.target.value || null)
+                          }
+                        >
+                          <option value="">Select</option>
+                          {PRONOUNS_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                          <option value="Other">Other (specify)</option>
+                        </SelectInput>
+                        {draft.pronouns !== null &&
+                          draft.pronouns !== undefined &&
+                          !(PRONOUNS_OPTIONS as readonly string[]).includes(draft.pronouns) && (
+                            <TextInput
+                              value={draft.pronouns ?? ""}
+                              onChange={(e) => setField("pronouns", e.target.value || null)}
+                              placeholder="Your pronouns"
+                              className="mt-2"
+                            />
+                          )}
                       </Field>
                       <Field label="Gender">
-                        <TextInput
-                          value={draft.gender || ""}
-                          onChange={(event) => setField("gender", event.target.value)}
-                          placeholder="Woman"
-                        />
+                        <SelectInput
+                          value={
+                            draft.gender && (GENDER_OPTIONS as readonly string[]).includes(draft.gender)
+                              ? draft.gender
+                              : draft.gender
+                              ? "Other"
+                              : ""
+                          }
+                          onChange={(e) =>
+                            setField("gender", e.target.value === "Other" ? "" : e.target.value || null)
+                          }
+                        >
+                          <option value="">Select</option>
+                          {GENDER_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                          <option value="Other">Other (specify)</option>
+                        </SelectInput>
+                        {draft.gender !== null &&
+                          draft.gender !== undefined &&
+                          !(GENDER_OPTIONS as readonly string[]).includes(draft.gender) && (
+                            <TextInput
+                              value={draft.gender ?? ""}
+                              onChange={(e) => setField("gender", e.target.value || null)}
+                              placeholder="How would you describe your gender?"
+                              className="mt-2"
+                            />
+                          )}
                       </Field>
                       <Field label="Orientation">
-                        <TextInput
-                          value={draft.orientation || ""}
-                          onChange={(event) => setField("orientation", event.target.value)}
-                          placeholder="Straight"
-                        />
+                        <SelectInput
+                          value={
+                            draft.orientation && (ORIENTATION_OPTIONS as readonly string[]).includes(draft.orientation)
+                              ? draft.orientation
+                              : draft.orientation
+                              ? "Other"
+                              : ""
+                          }
+                          onChange={(e) =>
+                            setField("orientation", e.target.value === "Other" ? "" : e.target.value || null)
+                          }
+                        >
+                          <option value="">Select</option>
+                          {ORIENTATION_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                          <option value="Other">Other (specify)</option>
+                        </SelectInput>
+                        {draft.orientation !== null &&
+                          draft.orientation !== undefined &&
+                          !(ORIENTATION_OPTIONS as readonly string[]).includes(draft.orientation) && (
+                            <TextInput
+                              value={draft.orientation ?? ""}
+                              onChange={(e) => setField("orientation", e.target.value || null)}
+                              placeholder="How would you describe your orientation?"
+                              className="mt-2"
+                            />
+                          )}
                       </Field>
                       <Field label="Height">
                         <TextInput
@@ -1114,25 +1210,56 @@ function ProfileEditor({
                     <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
                       <p className="text-sm font-semibold text-white">Optional profile facts</p>
                       <Field label="Ethnicity">
-                        <TextInput
+                        <SelectInput
                           value={draft.ethnicity || ""}
-                          onChange={(event) => setField("ethnicity", event.target.value)}
-                          placeholder="Optional"
-                        />
+                          onChange={(e) => setField("ethnicity", e.target.value || null)}
+                        >
+                          <option value="">Prefer not to say</option>
+                          {ETHNICITY_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </SelectInput>
                       </Field>
                       <Field label="Religion">
-                        <TextInput
-                          value={draft.religion || ""}
-                          onChange={(event) => setField("religion", event.target.value)}
-                          placeholder="Optional"
-                        />
+                        <SelectInput
+                          value={
+                            draft.religion && (RELIGION_OPTIONS as readonly string[]).includes(draft.religion)
+                              ? draft.religion
+                              : draft.religion
+                              ? "Other"
+                              : ""
+                          }
+                          onChange={(e) =>
+                            setField("religion", e.target.value === "Other" ? "" : e.target.value || null)
+                          }
+                        >
+                          <option value="">Select</option>
+                          {RELIGION_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                          <option value="Other">Other</option>
+                        </SelectInput>
+                        {draft.religion !== null &&
+                          draft.religion !== undefined &&
+                          !(RELIGION_OPTIONS as readonly string[]).includes(draft.religion) && (
+                            <TextInput
+                              value={draft.religion ?? ""}
+                              onChange={(e) => setField("religion", e.target.value || null)}
+                              placeholder="Your religion or belief system"
+                              className="mt-2"
+                            />
+                          )}
                       </Field>
                       <Field label="Politics">
-                        <TextInput
+                        <SelectInput
                           value={draft.politics || ""}
-                          onChange={(event) => setField("politics", event.target.value)}
-                          placeholder="Optional"
-                        />
+                          onChange={(e) => setField("politics", e.target.value || null)}
+                        >
+                          <option value="">Select</option>
+                          {POLITICS_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </SelectInput>
                       </Field>
                     </div>
                   </div>
