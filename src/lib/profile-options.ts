@@ -22,7 +22,7 @@ export const ETHNICITY_OPTIONS = [
 
 export const RELIGION_OPTIONS = [
   "Agnostic", "Atheist", "Buddhist", "Catholic", "Christian",
-  "Hindu", "Jewish", "Muslim", "Sikh", "Spiritual",
+  "Hindu", "Jewish", "Muslim", "Sikh", "Spiritual", "Prefer not to say",
 ] as const;
 
 export const POLITICS_OPTIONS = [
@@ -75,7 +75,7 @@ export const LANGUAGE_OPTIONS = [
   "Tamil", "Bengali", "Italian", "Russian",
 ] as const;
 
-export const INTERESTS_GROUPS: Record<string, readonly string[]> = {
+export const INTERESTS_GROUPS = {
   "Arts & Culture": ["Photography", "Museums", "Theater", "Art galleries", "Design"],
   "Food & Drink": ["Cooking", "Fine dining", "Wine", "Coffee", "Baking", "Food markets"],
   "Fitness": ["Gym", "Running", "Yoga", "Pilates", "Cycling", "Hiking", "Climbing", "Swimming"],
@@ -86,7 +86,7 @@ export const INTERESTS_GROUPS: Record<string, readonly string[]> = {
   "Tech & Work": ["Startups", "AI", "Coding", "Product", "Finance", "Investing"],
   "Outdoors": ["Nature walks", "Camping", "Beach", "Skiing", "Surfing"],
   "Mindfulness": ["Meditation", "Journaling", "Spirituality", "Wellness", "Therapy"],
-};
+} as const;
 
 export const CORE_VALUES_OPTIONS = [
   "Family", "Honesty", "Ambition", "Creativity", "Kindness",

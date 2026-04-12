@@ -53,8 +53,9 @@ export function getZodiacCompat(sign1: string, sign2: string): { level: string; 
 
 export function computeAgeFromBirthday(birthday: string | null): number | null {
   if (!birthday) return null;
-  const birth = new Date(birthday);
-  if (isNaN(birth.getTime())) return null;
+  const parts = birthday.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return null;
+  const birth = new Date(parts[0], parts[1] - 1, parts[2]);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   const m = today.getMonth() - birth.getMonth();
