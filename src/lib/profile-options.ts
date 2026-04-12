@@ -45,8 +45,7 @@ export const LOVE_LANGUAGE_OPTIONS = [
 ] as const;
 
 export const CONFLICT_STYLE_OPTIONS = [
-  "Direct communicator", "Need time to process", "Collaborative",
-  "Tend to avoid conflict",
+  "Direct", "Needs space first", "Collaborative", "Avoids conflict",
 ] as const;
 
 export const DIET_OPTIONS = [
@@ -76,16 +75,16 @@ export const LANGUAGE_OPTIONS = [
 ] as const;
 
 export const INTERESTS_GROUPS = {
-  "Arts & Culture": ["Photography", "Museums", "Theater", "Art galleries", "Design"],
-  "Food & Drink": ["Cooking", "Fine dining", "Wine", "Coffee", "Baking", "Food markets"],
-  "Fitness": ["Gym", "Running", "Yoga", "Pilates", "Cycling", "Hiking", "Climbing", "Swimming"],
-  "Music": ["Live music", "Concerts", "Festivals", "Playing instruments", "DJing"],
-  "Entertainment": ["Films", "TV shows", "Gaming", "Podcasts", "Reading", "Comics"],
-  "Travel": ["Backpacking", "Luxury travel", "Road trips", "Solo travel", "Weekend getaways"],
-  "Social": ["Dinner parties", "Brunches", "Dancing", "Volunteering", "Community"],
-  "Tech & Work": ["Startups", "AI", "Coding", "Product", "Finance", "Investing"],
-  "Outdoors": ["Nature walks", "Camping", "Beach", "Skiing", "Surfing"],
-  "Mindfulness": ["Meditation", "Journaling", "Spirituality", "Wellness", "Therapy"],
+  "Travel style": ["Backpacking", "Luxury travel", "Cultural immersion", "Spontaneous trips", "Solo travel", "Road trips"],
+  "Fitness style": ["Discipline-driven", "Social fitness", "Aesthetic goals", "Health-focused", "Competitive sport", "Mindful movement"],
+  "Food culture": ["Home cooking", "Fine dining", "Street food", "Baking & pastry", "Wine & cocktails", "Coffee culture"],
+  "Arts & culture": ["Museums & galleries", "Theater & live arts", "Photography", "Design & aesthetics", "Film & cinema", "Street art"],
+  "Mind & growth": ["Reading", "Podcasts", "Philosophy", "Personal development", "Journaling", "Deep conversations"],
+  "Tech & building": ["Startups & founding", "Product & design", "AI & machine learning", "Side projects", "Investing", "VC & finance"],
+  "Music & nights": ["Live concerts", "Music festivals", "DJ culture", "Playing instruments", "Late nights out", "Intimate venues"],
+  "Nature & outdoors": ["Hiking & trails", "Camping", "Beach days", "Skiing & snowboard", "Surfing", "Nature photography"],
+  "Social life": ["Hosting dinners", "Brunches", "Volunteering", "Sports leagues", "Game nights", "Community building"],
+  "Wellbeing": ["Therapy & healing", "Spirituality", "Yoga & pilates", "Wellness rituals", "Meditation", "Sound baths"],
 } as const;
 
 export const CORE_VALUES_OPTIONS = [
@@ -110,4 +109,59 @@ export const GROWTH_AREAS_OPTIONS = [
   "Communication", "Setting boundaries", "Vulnerability", "Career clarity",
   "Work-life balance", "Confidence", "Emotional regulation",
   "Trust", "Patience", "Self-care",
+] as const;
+
+// ─── Enrichment v2 ────────────────────────────────────────────────────────────
+
+export const ATTRACTION_OPTIONS = [
+  "Intellectual stimulation", "Emotional depth", "Physical chemistry",
+  "Drive & ambition", "Humor", "Energy & vibe", "Confidence", "Kindness",
+] as const;
+
+export const TURN_ON_OPTIONS = [
+  "Deep conversations", "Being challenged", "Independence", "Spontaneity",
+  "Thoughtfulness", "Being direct", "Sense of style", "Physical presence",
+  "Intellectual curiosity", "Drive & ambition",
+] as const;
+
+export const TURN_OFF_OPTIONS = [
+  "Inconsistency", "Passive aggression", "Low ambition", "Emotional unavailability",
+  "Arrogance", "Poor communication", "Flakiness", "Closed-mindedness",
+  "Negativity", "Lack of curiosity",
+] as const;
+
+export const RELATIONSHIP_TIMELINE_OPTIONS = [
+  "Just exploring", "6–12 months, seeing where it goes",
+  "Ready for something serious", "Marriage-timeline serious",
+] as const;
+
+export const DATING_STAGE_OPTIONS = [
+  "Not dating anyone", "Casually dating", "Focused on one person", "Taking a break",
+] as const;
+
+export const LONG_DISTANCE_OPTIONS = ["Yes", "No", "Depends"] as const;
+
+export const EMOTIONAL_AVAILABILITY_OPTIONS = [
+  "Fully available", "Mostly available", "Working on it",
+] as const;
+
+export const RESIDENCY_STATUS_OPTIONS = [
+  "UAE resident", "UAE citizen", "Relocating to UAE",
+  "Just visiting", "Open to relocating", "Not in UAE",
+] as const;
+
+export const RELOCATION_OPTIONS = ["Yes", "No", "Depends on the person"] as const;
+
+export const WORK_INTENSITY_OPTIONS = [
+  "Chill", "Balanced", "High-growth", "Workaholic (proudly)",
+] as const;
+
+export const FAMILY_INVOLVEMENT_OPTIONS = ["Low", "Moderate", "High"] as const;
+
+export const CULTURAL_ALIGNMENT_OPTIONS = [
+  "Not important", "Somewhat important", "Very important",
+] as const;
+
+export const MARRIAGE_TYPE_OPTIONS = [
+  "Love marriage", "Arranged marriage", "Hybrid / semi-arranged",
 ] as const;

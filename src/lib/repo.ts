@@ -96,6 +96,11 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
   const interests = serializeArray(profile.interests);
   const pets = serializeArray(profile.pets);
   const prompts = profile.prompts === undefined ? null : JSON.stringify(profile.prompts);
+  const attractionPreferences = serializeArray(profile.attractionPreferences);
+  const turnOns = serializeArray(profile.turnOns);
+  const turnOffs = serializeArray(profile.turnOffs);
+  const loveLanguageGive = serializeArray(profile.loveLanguageGive);
+  const loveLanguageReceive = serializeArray(profile.loveLanguageReceive);
 
   if (existing.length) {
     await sql`
@@ -157,6 +162,23 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         life_architecture = COALESCE(${profile.lifeArchitecture ?? null}, life_architecture),
         offers = COALESCE(${offers}, offers),
         needs = COALESCE(${needs}, needs),
+        attraction_preferences = COALESCE(${attractionPreferences}, attraction_preferences),
+        turn_ons = COALESCE(${turnOns}, turn_ons),
+        turn_offs = COALESCE(${turnOffs}, turn_offs),
+        relationship_timeline = COALESCE(${profile.relationshipTimeline ?? null}, relationship_timeline),
+        dating_stage = COALESCE(${profile.datingStage ?? null}, dating_stage),
+        long_distance_open = COALESCE(${profile.longDistanceOpen ?? null}, long_distance_open),
+        emotional_availability = COALESCE(${profile.emotionalAvailability ?? null}, emotional_availability),
+        residency_status = COALESCE(${profile.residencyStatus ?? null}, residency_status),
+        relocation_open = COALESCE(${profile.relocationOpen ?? null}, relocation_open),
+        work_intensity = COALESCE(${profile.workIntensity ?? null}, work_intensity),
+        family_involvement = COALESCE(${profile.familyInvolvement ?? null}, family_involvement),
+        cultural_alignment = COALESCE(${profile.culturalAlignment ?? null}, cultural_alignment),
+        marriage_type = COALESCE(${profile.marriageType ?? null}, marriage_type),
+        love_language_give = COALESCE(${loveLanguageGive}, love_language_give),
+        love_language_receive = COALESCE(${loveLanguageReceive}, love_language_receive),
+        linkedin_url = COALESCE(${profile.linkedinUrl ?? null}, linkedin_url),
+        website_url = COALESCE(${profile.websiteUrl ?? null}, website_url),
         updated_at = NOW()
       WHERE user_id = ${userId}
     `;
@@ -172,7 +194,12 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         dealbreakers, partner_age_min, partner_age_max, attachment, attachment_score, readiness_score,
         growth_areas, strengths, core_values, summary, coaching_focus, photos, prompts,
         profile_visibility, show_age, show_city, show_work, show_education,
-        conflict_style, family_expectations, life_architecture, offers, needs
+        conflict_style, family_expectations, life_architecture, offers, needs,
+        attraction_preferences, turn_ons, turn_offs,
+        relationship_timeline, dating_stage, long_distance_open, emotional_availability,
+        residency_status, relocation_open, work_intensity,
+        family_involvement, cultural_alignment, marriage_type,
+        love_language_give, love_language_receive, linkedin_url, website_url
       ) VALUES (
         ${id}, ${userId}, ${profile.name || ""},
         ${profile.age ?? null}, ${profile.birthday ?? null},
@@ -196,7 +223,14 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         ${profile.profileVisibility ?? "visible"}, ${profile.showAge ?? true},
         ${profile.showCity ?? true}, ${profile.showWork ?? true}, ${profile.showEducation ?? true},
         ${profile.conflictStyle || ""}, ${profile.familyExpectations || ""},
-        ${profile.lifeArchitecture || ""}, ${offers ?? "[]"}, ${needs ?? "[]"}
+        ${profile.lifeArchitecture || ""}, ${offers ?? "[]"}, ${needs ?? "[]"},
+        ${attractionPreferences ?? "[]"}, ${turnOns ?? "[]"}, ${turnOffs ?? "[]"},
+        ${profile.relationshipTimeline ?? null}, ${profile.datingStage ?? null},
+        ${profile.longDistanceOpen ?? null}, ${profile.emotionalAvailability ?? null},
+        ${profile.residencyStatus ?? null}, ${profile.relocationOpen ?? null}, ${profile.workIntensity ?? null},
+        ${profile.familyInvolvement ?? null}, ${profile.culturalAlignment ?? null}, ${profile.marriageType ?? null},
+        ${loveLanguageGive ?? "[]"}, ${loveLanguageReceive ?? "[]"},
+        ${profile.linkedinUrl || ""}, ${profile.websiteUrl || ""}
       )
     `;
   }
@@ -261,6 +295,23 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     lifeArchitecture: (row.life_architecture as string) || "",
     offers: safeParseJson(row.offers as string, []),
     needs: safeParseJson(row.needs as string, []),
+    attractionPreferences: safeParseJson(row.attraction_preferences as string, []),
+    turnOns: safeParseJson(row.turn_ons as string, []),
+    turnOffs: safeParseJson(row.turn_offs as string, []),
+    relationshipTimeline: row.relationship_timeline as string | null,
+    datingStage: row.dating_stage as string | null,
+    longDistanceOpen: row.long_distance_open as string | null,
+    emotionalAvailability: row.emotional_availability as string | null,
+    residencyStatus: row.residency_status as string | null,
+    relocationOpen: row.relocation_open as string | null,
+    workIntensity: row.work_intensity as string | null,
+    familyInvolvement: row.family_involvement as string | null,
+    culturalAlignment: row.cultural_alignment as string | null,
+    marriageType: row.marriage_type as string | null,
+    loveLanguageGive: safeParseJson(row.love_language_give as string, []),
+    loveLanguageReceive: safeParseJson(row.love_language_receive as string, []),
+    linkedinUrl: (row.linkedin_url as string) || null,
+    websiteUrl: (row.website_url as string) || null,
   };
 }
 

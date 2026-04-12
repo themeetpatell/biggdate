@@ -107,6 +107,24 @@ function normalizePatch(body: Partial<Profile>): Partial<Profile> {
     showWork: parseBoolean(body.showWork, true),
     showEducation: parseBoolean(body.showEducation, true),
     hasKids: typeof body.hasKids === "boolean" ? body.hasKids : body.hasKids ?? null,
+    // Enrichment v2
+    attractionPreferences: compactStrings(body.attractionPreferences, 8),
+    turnOns: compactStrings(body.turnOns, 10),
+    turnOffs: compactStrings(body.turnOffs, 10),
+    relationshipTimeline: trimOptional(body.relationshipTimeline),
+    datingStage: trimOptional(body.datingStage),
+    longDistanceOpen: trimOptional(body.longDistanceOpen),
+    emotionalAvailability: trimOptional(body.emotionalAvailability),
+    residencyStatus: trimOptional(body.residencyStatus),
+    relocationOpen: trimOptional(body.relocationOpen),
+    workIntensity: trimOptional(body.workIntensity),
+    familyInvolvement: trimOptional(body.familyInvolvement),
+    culturalAlignment: trimOptional(body.culturalAlignment),
+    marriageType: trimOptional(body.marriageType),
+    loveLanguageGive: compactStrings(body.loveLanguageGive, 5),
+    loveLanguageReceive: compactStrings(body.loveLanguageReceive, 5),
+    linkedinUrl: trimOptional(body.linkedinUrl),
+    websiteUrl: trimOptional(body.websiteUrl),
   };
 }
 

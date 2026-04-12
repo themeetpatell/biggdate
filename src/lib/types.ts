@@ -63,6 +63,24 @@ export interface Profile {
   // L4 BiggDate: Intelligence Card
   offers?: string[];  // What they bring to a relationship
   needs?: string[];   // What they need from a partner
+  // L5 BiggDate: Enrichment v2
+  attractionPreferences?: string[];
+  turnOns?: string[];
+  turnOffs?: string[];
+  relationshipTimeline?: string | null;
+  datingStage?: string | null;
+  longDistanceOpen?: string | null;
+  emotionalAvailability?: string | null;
+  residencyStatus?: string | null;
+  relocationOpen?: string | null;
+  workIntensity?: string | null;
+  familyInvolvement?: string | null;
+  culturalAlignment?: string | null;
+  marriageType?: string | null;
+  loveLanguageGive?: string[];
+  loveLanguageReceive?: string[];
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
 }
 
 // L2 BiggDate v2.0: narrative + compatibility signals, no zodiac/score

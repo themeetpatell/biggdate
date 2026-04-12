@@ -73,6 +73,19 @@ import {
   DEALBREAKERS_OPTIONS,
   STRENGTHS_OPTIONS,
   GROWTH_AREAS_OPTIONS,
+  ATTRACTION_OPTIONS,
+  TURN_ON_OPTIONS,
+  TURN_OFF_OPTIONS,
+  RELATIONSHIP_TIMELINE_OPTIONS,
+  DATING_STAGE_OPTIONS,
+  LONG_DISTANCE_OPTIONS,
+  EMOTIONAL_AVAILABILITY_OPTIONS,
+  RESIDENCY_STATUS_OPTIONS,
+  RELOCATION_OPTIONS,
+  WORK_INTENSITY_OPTIONS,
+  FAMILY_INVOLVEMENT_OPTIONS,
+  CULTURAL_ALIGNMENT_OPTIONS,
+  MARRIAGE_TYPE_OPTIONS,
 } from "@/lib/profile-options";
 
 const MAX_PHOTOS = 6;
@@ -109,6 +122,11 @@ type HydratedProfile = Profile & {
   showCity: boolean;
   showWork: boolean;
   showEducation: boolean;
+  attractionPreferences: string[];
+  turnOns: string[];
+  turnOffs: string[];
+  loveLanguageGive: string[];
+  loveLanguageReceive: string[];
 };
 
 type EditorTab = "basics" | "about" | "dating" | "lifestyle" | "gallery" | "visibility";
@@ -222,6 +240,11 @@ function hydrateProfile(profile: Profile): HydratedProfile {
     showCity: profile.showCity ?? true,
     showWork: profile.showWork ?? true,
     showEducation: profile.showEducation ?? true,
+    attractionPreferences: compactStrings(profile.attractionPreferences),
+    turnOns: compactStrings(profile.turnOns),
+    turnOffs: compactStrings(profile.turnOffs),
+    loveLanguageGive: compactStrings(profile.loveLanguageGive),
+    loveLanguageReceive: compactStrings(profile.loveLanguageReceive),
   };
 }
 
@@ -279,6 +302,23 @@ function buildProfilePayload(profile: HydratedProfile): Partial<Profile> {
     needs: compactStrings(profile.needs),
     photos: compactStrings(profile.photos).slice(0, MAX_PHOTOS),
     prompts: sanitizePrompts(profile.prompts).slice(0, 3),
+    attractionPreferences: compactStrings(profile.attractionPreferences),
+    turnOns: compactStrings(profile.turnOns),
+    turnOffs: compactStrings(profile.turnOffs),
+    loveLanguageGive: compactStrings(profile.loveLanguageGive),
+    loveLanguageReceive: compactStrings(profile.loveLanguageReceive),
+    linkedinUrl: profile.linkedinUrl?.trim() || null,
+    websiteUrl: profile.websiteUrl?.trim() || null,
+    relationshipTimeline: profile.relationshipTimeline?.trim() || null,
+    datingStage: profile.datingStage?.trim() || null,
+    longDistanceOpen: profile.longDistanceOpen?.trim() || null,
+    emotionalAvailability: profile.emotionalAvailability?.trim() || null,
+    residencyStatus: profile.residencyStatus?.trim() || null,
+    relocationOpen: profile.relocationOpen?.trim() || null,
+    workIntensity: profile.workIntensity?.trim() || null,
+    familyInvolvement: profile.familyInvolvement?.trim() || null,
+    culturalAlignment: profile.culturalAlignment?.trim() || null,
+    marriageType: profile.marriageType?.trim() || null,
   };
 }
 
@@ -1207,6 +1247,20 @@ function ProfileEditor({
                           placeholder="NYU"
                         />
                       </Field>
+                      <Field label="LinkedIn">
+                        <TextInput
+                          value={draft.linkedinUrl || ""}
+                          onChange={(event) => setField("linkedinUrl", event.target.value || null)}
+                          placeholder="linkedin.com/in/yourname"
+                        />
+                      </Field>
+                      <Field label="Website / Portfolio">
+                        <TextInput
+                          value={draft.websiteUrl || ""}
+                          onChange={(event) => setField("websiteUrl", event.target.value || null)}
+                          placeholder="yoursite.com"
+                        />
+                      </Field>
                     </div>
 
                     <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
@@ -1420,20 +1474,56 @@ function ProfileEditor({
                             allowCustom={false}
                           />
                         </Field>
-                        <Field as="div" label="Love language" hint="Pick up to 2">
+                        <Field as="div" label="Love language — how I give">
                           <MultiSelectChips
                             options={LOVE_LANGUAGE_OPTIONS}
-                            value={
-                              draft.loveLanguage
-                                ? draft.loveLanguage.split(", ").filter(Boolean)
-                                : []
-                            }
-                            onChange={(next) =>
-                              setField("loveLanguage", next.join(", ") || null)
-                            }
+                            value={draft.loveLanguageGive}
+                            onChange={(next) => setField("loveLanguageGive", next)}
                             max={2}
                             allowCustom={false}
                           />
+                        </Field>
+                        <Field as="div" label="Love language — how I receive">
+                          <MultiSelectChips
+                            options={LOVE_LANGUAGE_OPTIONS}
+                            value={draft.loveLanguageReceive}
+                            onChange={(next) => setField("loveLanguageReceive", next)}
+                            max={2}
+                            allowCustom={false}
+                          />
+                        </Field>
+                        <Field label="Relationship timeline">
+                          <SelectInput
+                            value={draft.relationshipTimeline || ""}
+                            onChange={(e) => setField("relationshipTimeline", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {RELATIONSHIP_TIMELINE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Current dating stage">
+                          <SelectInput
+                            value={draft.datingStage || ""}
+                            onChange={(e) => setField("datingStage", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {DATING_STAGE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Open to long distance">
+                          <SelectInput
+                            value={draft.longDistanceOpen || ""}
+                            onChange={(e) => setField("longDistanceOpen", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {LONG_DISTANCE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
                         </Field>
                         <div className="col-span-2">
                           <Field
@@ -1510,6 +1600,81 @@ function ProfileEditor({
                           allowCustom
                           placeholder="Add a dealbreaker…"
                         />
+                      </Field>
+                    </div>
+                  </div>
+
+                  {/* Chemistry & attraction */}
+                  <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="mb-4 text-sm font-semibold text-white">Attraction & chemistry</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field as="div" label="Attracted to">
+                        <MultiSelectChips
+                          options={ATTRACTION_OPTIONS}
+                          value={draft.attractionPreferences}
+                          onChange={(next) => setField("attractionPreferences", next)}
+                          allowCustom={false}
+                        />
+                      </Field>
+                      <div className="space-y-4">
+                        <Field as="div" label="Turn-ons (lighter)">
+                          <MultiSelectChips
+                            options={TURN_ON_OPTIONS}
+                            value={draft.turnOns}
+                            onChange={(next) => setField("turnOns", next)}
+                            allowCustom
+                            placeholder="Add your own…"
+                          />
+                        </Field>
+                        <Field as="div" label="Turn-offs (lighter)">
+                          <MultiSelectChips
+                            options={TURN_OFF_OPTIONS}
+                            value={draft.turnOffs}
+                            onChange={(next) => setField("turnOffs", next)}
+                            allowCustom
+                            placeholder="Add your own…"
+                          />
+                        </Field>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cultural & family compatibility */}
+                  <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="mb-4 text-sm font-semibold text-white">Cultural & family fit</p>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <Field label="Family involvement">
+                        <SelectInput
+                          value={draft.familyInvolvement || ""}
+                          onChange={(e) => setField("familyInvolvement", e.target.value || null)}
+                        >
+                          <option value="">Select</option>
+                          {FAMILY_INVOLVEMENT_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </SelectInput>
+                      </Field>
+                      <Field label="Cultural alignment">
+                        <SelectInput
+                          value={draft.culturalAlignment || ""}
+                          onChange={(e) => setField("culturalAlignment", e.target.value || null)}
+                        >
+                          <option value="">Select</option>
+                          {CULTURAL_ALIGNMENT_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </SelectInput>
+                      </Field>
+                      <Field label="Marriage type preference">
+                        <SelectInput
+                          value={draft.marriageType || ""}
+                          onChange={(e) => setField("marriageType", e.target.value || null)}
+                        >
+                          <option value="">Select</option>
+                          {MARRIAGE_TYPE_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </SelectInput>
                       </Field>
                     </div>
                   </div>
@@ -1690,6 +1855,50 @@ function ProfileEditor({
                           >
                             <option value="">Select</option>
                             {TRAVEL_STYLE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Emotional availability">
+                          <SelectInput
+                            value={draft.emotionalAvailability || ""}
+                            onChange={(e) => setField("emotionalAvailability", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {EMOTIONAL_AVAILABILITY_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Work intensity">
+                          <SelectInput
+                            value={draft.workIntensity || ""}
+                            onChange={(e) => setField("workIntensity", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {WORK_INTENSITY_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Residency status">
+                          <SelectInput
+                            value={draft.residencyStatus || ""}
+                            onChange={(e) => setField("residencyStatus", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {RESIDENCY_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Open to relocation">
+                          <SelectInput
+                            value={draft.relocationOpen || ""}
+                            onChange={(e) => setField("relocationOpen", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {RELOCATION_OPTIONS.map((opt) => (
                               <option key={opt} value={opt}>{opt}</option>
                             ))}
                           </SelectInput>
