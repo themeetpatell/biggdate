@@ -421,7 +421,7 @@ export function CinematicLanding() {
           </div>
 
           <div className="relative flex items-center gap-2">
-            <Link href="/auth">
+            <Link href="/auth?mode=login">
               <Button
                 variant="ghost"
                 className="hidden h-11 rounded-full border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02] px-5 text-sm font-medium text-[#d7d9e5] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-[#f0ebe3] sm:inline-flex"
@@ -429,7 +429,7 @@ export function CinematicLanding() {
                 Enter BiggDate
               </Button>
             </Link>
-            <Link href="/auth">
+            <Link href="/auth?mode=signup">
               <Button className="group relative h-11 overflow-hidden rounded-full px-6 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(232,146,124,0.3),0_12px_32px_rgba(212,104,138,0.4)] transition-all hover:scale-[1.01] hover:shadow-[0_0_0_1px_rgba(232,146,124,0.4),0_16px_40px_rgba(212,104,138,0.5)]">
                 <span className="absolute inset-0 bg-gradient-to-r from-[#ff1493] via-[#d4688a] to-[#a855f7]" />
                 <span className="absolute inset-0 bg-gradient-to-r from-[#ff6ac7] via-[#f04fb8] to-[#b86ef7] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -490,7 +490,7 @@ export function CinematicLanding() {
                 <div className="mt-auto border-t border-white/[0.06] px-5 py-5">
                   <div className="grid gap-3">
                     <Link
-                      href="/auth"
+                      href="/auth?mode=login"
                       className="inline-flex items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] px-5 py-3 text-sm font-medium text-[#f0ebe3] transition-all hover:border-white/[0.14] hover:bg-white/[0.08]"
                     >
                       Enter BiggDate

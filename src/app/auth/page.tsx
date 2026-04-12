@@ -113,7 +113,7 @@ function AuthPageInner() {
 
   useEffect(() => {
     const modeParam = searchParams.get("mode");
-    if (modeParam === "reset" || modeParam === "forgot") {
+    if (modeParam === "login" || modeParam === "signup" || modeParam === "reset" || modeParam === "forgot") {
       setMode(modeParam);
     }
     const errorParam = searchParams.get("error");
