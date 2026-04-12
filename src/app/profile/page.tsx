@@ -1417,39 +1417,39 @@ function ProfileEditor({
                             allowCustom={false}
                           />
                         </Field>
-                        <Field label="Love language">
-                          <TextInput
-                            value={draft.loveLanguage || ""}
-                            onChange={(event) => setField("loveLanguage", event.target.value)}
-                            placeholder="Quality time"
-                          />
-                        </Field>
-                        <Field label="Preferred age min">
-                          <TextInput
-                            inputMode="numeric"
-                            value={draft.partnerAgeMin ?? ""}
-                            onChange={(event) =>
-                              setField(
-                                "partnerAgeMin",
-                                event.target.value ? Number(event.target.value) : null,
-                              )
+                        <Field label="Love language" hint="Pick up to 2">
+                          <MultiSelectChips
+                            options={LOVE_LANGUAGE_OPTIONS}
+                            value={
+                              draft.loveLanguage
+                                ? draft.loveLanguage.split(", ").filter(Boolean)
+                                : []
                             }
-                            placeholder="27"
-                          />
-                        </Field>
-                        <Field label="Preferred age max">
-                          <TextInput
-                            inputMode="numeric"
-                            value={draft.partnerAgeMax ?? ""}
-                            onChange={(event) =>
-                              setField(
-                                "partnerAgeMax",
-                                event.target.value ? Number(event.target.value) : null,
-                              )
+                            onChange={(next) =>
+                              setField("loveLanguage", next.join(", ") || null)
                             }
-                            placeholder="36"
+                            max={2}
+                            allowCustom={false}
                           />
                         </Field>
+                        <div className="col-span-2">
+                          <Field
+                            label="Partner age range"
+                            hint={`${draft.partnerAgeMin ?? 18} – ${draft.partnerAgeMax ?? 65} years old`}
+                          >
+                            <AgeRangeSlider
+                              min={draft.partnerAgeMin}
+                              max={draft.partnerAgeMax}
+                              onChange={(min, max) =>
+                                setDraft((prev) =>
+                                  prev
+                                    ? { ...prev, partnerAgeMin: min, partnerAgeMax: max }
+                                    : prev,
+                                )
+                              }
+                            />
+                          </Field>
+                        </div>
                         <Field label="Has kids">
                           <SelectInput
                             value={draft.hasKids === null ? "" : draft.hasKids ? "yes" : "no"}
@@ -1488,24 +1488,23 @@ function ProfileEditor({
 
                     <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
                       <p className="text-sm font-semibold text-white">Compatibility filters</p>
-                      <Field label="Core values" hint="Comma or new line separated">
-                        <TextArea
-                          value={listValue(draft.coreValues)}
-                          onChange={(event) =>
-                            updateArrayInput(event, (next) => setField("coreValues", next))
-                          }
-                          placeholder="Commitment, openness, stability"
-                          className="min-h-[110px]"
+                      <Field label="Core values" hint="Pick up to 5">
+                        <MultiSelectChips
+                          options={CORE_VALUES_OPTIONS}
+                          value={draft.coreValues}
+                          onChange={(next) => setField("coreValues", next)}
+                          max={5}
+                          allowCustom
+                          placeholder="Add a value…"
                         />
                       </Field>
-                      <Field label="Dealbreakers" hint="Comma or new line separated">
-                        <TextArea
-                          value={listValue(draft.dealbreakers)}
-                          onChange={(event) =>
-                            updateArrayInput(event, (next) => setField("dealbreakers", next))
-                          }
-                          placeholder="Dishonesty, emotional unavailability"
-                          className="min-h-[110px]"
+                      <Field label="Dealbreakers">
+                        <MultiSelectChips
+                          options={DEALBREAKERS_OPTIONS}
+                          value={draft.dealbreakers}
+                          onChange={(next) => setField("dealbreakers", next)}
+                          allowCustom
+                          placeholder="Add a dealbreaker…"
                         />
                       </Field>
                     </div>
