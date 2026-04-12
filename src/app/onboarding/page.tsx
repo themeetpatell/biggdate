@@ -384,6 +384,7 @@ export default function OnboardingPage() {
             <div className="mx-auto max-w-2xl">
               {showAnyInlineUI && (
                 <QuickReplies
+                  key={lastAIMessage?.id}
                   chips={currentChips}
                   multiSelectOptions={currentMultiSelect}
                   showAgeRange={currentShowAgeRange}
