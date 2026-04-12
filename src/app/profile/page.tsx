@@ -513,19 +513,21 @@ function Field({
   label,
   hint,
   children,
+  as: Tag = "label",
 }: {
   label: string;
   hint?: string;
   children: ReactNode;
+  as?: "label" | "div";
 }) {
   return (
-    <label className="space-y-2">
+    <Tag className="space-y-2">
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium text-white/78">{label}</span>
         {hint ? <span className="text-xs text-white/35">{hint}</span> : null}
       </div>
       {children}
-    </label>
+    </Tag>
   );
 }
 
@@ -1281,6 +1283,7 @@ function ProfileEditor({
 
                   <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
                     <Field
+                      as="div"
                       label="Interests"
                       hint={draft.interests.length > 0 ? `${draft.interests.length} selected` : undefined}
                     >
@@ -1403,7 +1406,7 @@ function ProfileEditor({
                               />
                             )}
                         </Field>
-                        <Field label="Looking for">
+                        <Field as="div" label="Looking for">
                           <MultiSelectChips
                             options={PARTNER_GENDER_OPTIONS}
                             value={
@@ -1417,7 +1420,7 @@ function ProfileEditor({
                             allowCustom={false}
                           />
                         </Field>
-                        <Field label="Love language" hint="Pick up to 2">
+                        <Field as="div" label="Love language" hint="Pick up to 2">
                           <MultiSelectChips
                             options={LOVE_LANGUAGE_OPTIONS}
                             value={
@@ -1434,6 +1437,7 @@ function ProfileEditor({
                         </Field>
                         <div className="col-span-2">
                           <Field
+                            as="div"
                             label="Partner age range"
                             hint={`${draft.partnerAgeMin ?? 18} – ${draft.partnerAgeMax ?? 65} years old`}
                           >
@@ -1488,7 +1492,7 @@ function ProfileEditor({
 
                     <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
                       <p className="text-sm font-semibold text-white">Compatibility filters</p>
-                      <Field label="Core values" hint="Pick up to 5">
+                      <Field as="div" label="Core values" hint="Pick up to 5">
                         <MultiSelectChips
                           options={CORE_VALUES_OPTIONS}
                           value={draft.coreValues}
@@ -1498,7 +1502,7 @@ function ProfileEditor({
                           placeholder="Add a value…"
                         />
                       </Field>
-                      <Field label="Dealbreakers">
+                      <Field as="div" label="Dealbreakers">
                         <MultiSelectChips
                           options={DEALBREAKERS_OPTIONS}
                           value={draft.dealbreakers}
@@ -1654,7 +1658,7 @@ function ProfileEditor({
                             <option value="Creative chaos">Creative chaos</option>
                           </SelectInput>
                         </Field>
-                        <Field label="Diet">
+                        <Field as="div" label="Diet">
                           <MultiSelectChips
                             options={DIET_OPTIONS}
                             value={draft.diet ? draft.diet.split(", ").filter(Boolean) : []}
@@ -1663,7 +1667,7 @@ function ProfileEditor({
                             placeholder="Add dietary preference…"
                           />
                         </Field>
-                        <Field label="Weekend style" hint="Pick up to 3">
+                        <Field as="div" label="Weekend style" hint="Pick up to 3">
                           <MultiSelectChips
                             options={WEEKEND_STYLE_OPTIONS}
                             value={
@@ -1692,7 +1696,7 @@ function ProfileEditor({
                         </Field>
                       </div>
 
-                      <Field label="Languages">
+                      <Field as="div" label="Languages">
                         <MultiSelectChips
                           options={LANGUAGE_OPTIONS}
                           value={draft.languages}
@@ -1702,7 +1706,7 @@ function ProfileEditor({
                         />
                       </Field>
 
-                      <Field label="Pets">
+                      <Field as="div" label="Pets">
                         <MultiSelectChips
                           options={PETS_OPTIONS}
                           value={draft.pets}
@@ -1714,7 +1718,7 @@ function ProfileEditor({
 
                     <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
                       <p className="text-sm font-semibold text-white">Inner signal layer</p>
-                      <Field label="Strengths">
+                      <Field as="div" label="Strengths">
                         <MultiSelectChips
                           options={STRENGTHS_OPTIONS}
                           value={draft.strengths}
@@ -1723,7 +1727,7 @@ function ProfileEditor({
                           placeholder="Add a strength…"
                         />
                       </Field>
-                      <Field label="Growing toward">
+                      <Field as="div" label="Growing toward">
                         <MultiSelectChips
                           options={GROWTH_AREAS_OPTIONS}
                           value={draft.growthAreas}
