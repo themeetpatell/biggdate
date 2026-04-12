@@ -528,7 +528,7 @@
 ::-webkit-scrollbar-thumb { background: var(--bd-text-faint); border-radius: 2px; }
 
 /* ─── Mobile nav safe area ─── */
-.pb-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+.pb-nav { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 
 /* ─── Tap highlight ─── */
 @media (max-width: 768px) {

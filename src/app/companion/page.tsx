@@ -357,7 +357,7 @@ export default function MaahiPage() {
       <div
         style={{
           position: "fixed",
-          bottom: "calc(64px + env(safe-area-inset-bottom, 0px))",
+          bottom: "calc(82px + env(safe-area-inset-bottom, 0px))",
           left: 0,
           right: 0,
           zIndex: 40,

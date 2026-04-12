@@ -59,7 +59,8 @@ export function MaahiChat() {
     pathname === "/about" ||
     pathname === "/contact" ||
     pathname === "/auth" ||
-    pathname === "/onboarding"
+    pathname === "/onboarding" ||
+    pathname === "/companion"
   ) {
     return null;
   }
@@ -69,7 +70,8 @@ export function MaahiChat() {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed bottom-20 right-4 z-50 flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl sm:bottom-6 sm:right-6 sm:w-[400px]"
+          className="fixed right-4 z-50 flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl sm:right-6 sm:w-[400px]"
+          style={{ bottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
           style={{
             height: "min(560px, calc(100vh - 7rem))",
             background: "var(--bd-bg)",
@@ -220,7 +222,8 @@ export function MaahiChat() {
       {/* Floating trigger button */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-4 right-4 z-50 flex size-12 items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 sm:bottom-6 sm:right-6 sm:size-14"
+        className="fixed right-4 z-50 flex size-14 items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 sm:right-6"
+        style={{ bottom: "calc(82px + env(safe-area-inset-bottom, 0px))" }}
         style={{
           background: open
             ? "var(--bd-surface)"

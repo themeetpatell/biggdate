@@ -82,7 +82,7 @@ export const MARKETING_SOCIAL_LINKS: readonly MarketingSocialLink[] = [
   },
   {
     label: "Instagram",
-    href: "https://www.instagram.com/biggdate",
+    href: "https://www.instagram.com/biggdates",
     Icon: Instagram,
   },
   {
