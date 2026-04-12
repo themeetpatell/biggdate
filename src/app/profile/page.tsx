@@ -237,7 +237,7 @@ function SoulTab({ profile }: { profile: Profile }) {
         <div>
           <SLabel>Core Values</SLabel>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {(profile.coreValues || []).map(v => <Pill key={v} color="#4FFFB0">{v}</Pill>)}
+            {(profile.coreValues || []).map((v, i) => <Pill key={`${v}-${i}`} color="#4FFFB0">{v}</Pill>)}
           </div>
         </div>
       )}
@@ -246,7 +246,7 @@ function SoulTab({ profile }: { profile: Profile }) {
         <div>
           <SLabel>Strengths</SLabel>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {(profile.strengths || []).map(s => <Pill key={s} color="#d4688a">{s}</Pill>)}
+            {(profile.strengths || []).map((s, i) => <Pill key={`${s}-${i}`} color="#d4688a">{s}</Pill>)}
           </div>
         </div>
       )}
