@@ -1,120 +1,406 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  Children,
+  type Dispatch,
+  isValidElement,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactElement,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type SetStateAction,
+} from "react";
 import { useRouter } from "next/navigation";
+import {
+  BriefcaseBusiness,
+  Camera,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Heart,
+  Lock,
+  LogOut,
+  MapPin,
+  MoreHorizontal,
+  Pencil,
+  Ruler,
+  Settings2,
+  Shield,
+  Sparkles,
+  Star,
+  UserRound,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/components/auth-provider";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { ZODIAC_EMOJI } from "@/lib/zodiac";
-import type { Profile } from "@/lib/types";
+import type { Profile, ProfilePrompt } from "@/lib/types";
+import { SettingsDrawer } from "@/components/settings-drawer";
+import { UpgradeSheet } from "@/components/upgrade-sheet";
 
-// ─── 10 Dimensions ────────────────────────────────────────────────────────────
-const DIMENSIONS = [
-  { id: "D1", label: "Emotional Intelligence", weight: 20, color: "#d4688a", desc: "How you attach, regulate, and hold space emotionally." },
-  { id: "D2", label: "Values & Beliefs",        weight: 18, color: "#4FFFB0", desc: "The principles that guide your choices and non-negotiables." },
-  { id: "D3", label: "Intellectual",             weight: 14, color: "#B48CFF", desc: "Curiosity, depth of thought, and how you explore ideas." },
-  { id: "D4", label: "Relational Patterns",      weight: 13, color: "#00ccff", desc: "How you give and receive love, and navigate closeness." },
-  { id: "D5", label: "Life Architecture",        weight: 12, color: "#F5C842", desc: "How you structure ambition, rest, and what success means." },
-  { id: "D6", label: "Family & Future",          weight: 11, color: "#ff8c61", desc: "Your relationship with family, tradition, and building forward." },
-  { id: "D7", label: "Financial Alignment",      weight: 8,  color: "#a8ff78", desc: "How you relate to money — security, abundance, and risk." },
-  { id: "D8", label: "Physical & Lifestyle",     weight: 7,  color: "#60a5fa", desc: "Health, energy, and how you inhabit your body and time." },
-  { id: "D9", label: "Spiritual & Meaning",      weight: 5,  color: "#f472b6", desc: "Your relationship to purpose, transcendence, and meaning." },
-  { id: "D10", label: "Astrological",            weight: 2,  color: "#fbbf24", desc: "Cosmic patterns and their resonance with your nature." },
+const MAX_PHOTOS = 6;
+const PROFILE_PHOTO_BUCKET = "profile-photos";
+
+const DEFAULT_PROMPT_QUESTIONS = [
+  "A green flag I never ignore",
+  "The life I'm building next",
+  "By date three, you should know",
 ];
 
-// ─── Derive scores from profile data ─────────────────────────────────────────
-function deriveDimensionScores(profile: Profile): number[] {
-  const d1 = profile.attachment === "Secure" ? 88 : profile.attachment === "Anxious" ? 65 : profile.attachment === "Avoidant" ? 58 : 50;
-  const d2 = Math.min(95, 55 + (profile.coreValues?.length || 0) * 9);
-  const summaryLen = (profile.summary || "").length;
-  const d3 = summaryLen > 200 ? 84 : summaryLen > 100 ? 72 : 60;
-  const d4 = profile.loveLanguage ? 78 : 62;
-  const d5 = profile.lifeArchitecture ? 80 : 65;
-  const d6 = profile.familyExpectations ? (profile.wantsKids ? 86 : 74) : (profile.wantsKids ? 68 : 58);
-  const d7 = profile.intent === "serious" || profile.intent === "marriage" ? 80 : 68;
-  const ex = profile.exercise === "often" ? 90 : profile.exercise === "sometimes" ? 70 : 45;
-  const dr = profile.drinking === "never" ? 95 : profile.drinking === "social" ? 78 : 55;
-  const d8 = Math.round((ex + dr) / 2);
-  const d9 = Math.min(90, Math.round(52 + (profile.readinessScore || 50) * 0.32));
-  const d10 = profile.zodiac ? 75 : 55;
+const DIMENSIONS = [
+  { id: "D1", label: "Emotional Intelligence", weight: 20, color: "#d4688a" },
+  { id: "D2", label: "Values & Beliefs", weight: 18, color: "#4FFFB0" },
+  { id: "D3", label: "Intellectual Depth", weight: 14, color: "#B48CFF" },
+  { id: "D4", label: "Relational Patterns", weight: 13, color: "#44c8ff" },
+  { id: "D5", label: "Life Architecture", weight: 12, color: "#f5c842" },
+  { id: "D6", label: "Family & Future", weight: 11, color: "#ff936d" },
+  { id: "D7", label: "Stability", weight: 8, color: "#9bff8c" },
+  { id: "D8", label: "Lifestyle", weight: 7, color: "#7fb4ff" },
+  { id: "D9", label: "Meaning", weight: 5, color: "#f58bc2" },
+  { id: "D10", label: "Astrology", weight: 2, color: "#ffcf5a" },
+];
+
+type HydratedProfile = Profile & {
+  languages: string[];
+  interests: string[];
+  pets: string[];
+  prompts: ProfilePrompt[];
+  offers: string[];
+  needs: string[];
+  profileVisibility: "visible" | "paused" | "hidden";
+  showAge: boolean;
+  showCity: boolean;
+  showWork: boolean;
+  showEducation: boolean;
+};
+
+type EditorTab = "basics" | "about" | "dating" | "lifestyle" | "gallery" | "visibility";
+type ProfileViewTab = "profile" | "dating" | "lifestyle" | "insights";
+
+const EDITOR_TABS: Array<{
+  key: EditorTab;
+  label: string;
+  title: string;
+  description: string;
+  icon: typeof UserRound;
+}> = [
+  {
+    key: "basics",
+    label: "Basics",
+    title: "Identity, work, and profile vitals",
+    description: "Enough signal to feel intentional, not witness protection.",
+    icon: UserRound,
+  },
+  {
+    key: "about",
+    label: "About",
+    title: "Story, interests, and prompt cards",
+    description: "Give them something better than 'just ask'.",
+    icon: Sparkles,
+  },
+  {
+    key: "dating",
+    label: "Dating",
+    title: "Intentions, values, and partner preferences",
+    description: "Clarity beats vibes-only chaos.",
+    icon: Heart,
+  },
+  {
+    key: "lifestyle",
+    label: "Lifestyle",
+    title: "Habits, growth, and day-to-day compatibility",
+    description: "Tuesday compatibility matters more than Friday chemistry.",
+    icon: Star,
+  },
+  {
+    key: "gallery",
+    label: "Gallery",
+    title: "Profile photo and gallery",
+    description: "Profile photo is your avatar. Gallery photos show on your profile.",
+    icon: Camera,
+  },
+  {
+    key: "visibility",
+    label: "Visibility",
+    title: "Discovery mode and field-level privacy",
+    description: "Private where it counts, visible where it helps.",
+    icon: Eye,
+  },
+];
+
+const PROFILE_VIEW_TABS: Array<{
+  key: ProfileViewTab;
+  label: string;
+}> = [
+  {
+    key: "profile",
+    label: "About me",
+  },
+  {
+    key: "dating",
+    label: "Looking For",
+  },
+  {
+    key: "lifestyle",
+    label: "Lifestyle",
+  },
+  {
+    key: "insights",
+    label: "Soulmap",
+  },
+];
+
+function compactStrings(values: string[] | undefined | null) {
+  return (values || []).map((value) => value.trim()).filter(Boolean);
+}
+
+function sanitizePrompts(prompts: ProfilePrompt[] | undefined | null) {
+  return (prompts || [])
+    .map((prompt) => ({
+      question: prompt.question.trim(),
+      answer: prompt.answer.trim(),
+    }))
+    .filter((prompt) => prompt.question || prompt.answer);
+}
+
+function hydrateProfile(profile: Profile): HydratedProfile {
+  return {
+    ...profile,
+    languages: compactStrings(profile.languages),
+    interests: compactStrings(profile.interests),
+    pets: compactStrings(profile.pets),
+    prompts: sanitizePrompts(profile.prompts),
+    offers: compactStrings(profile.offers),
+    needs: compactStrings(profile.needs),
+    photos: compactStrings(profile.photos),
+    dealbreakers: compactStrings(profile.dealbreakers),
+    strengths: compactStrings(profile.strengths),
+    growthAreas: compactStrings(profile.growthAreas),
+    coreValues: compactStrings(profile.coreValues),
+    profileVisibility:
+      profile.profileVisibility === "paused" || profile.profileVisibility === "hidden"
+        ? profile.profileVisibility
+        : "visible",
+    showAge: profile.showAge ?? true,
+    showCity: profile.showCity ?? true,
+    showWork: profile.showWork ?? true,
+    showEducation: profile.showEducation ?? true,
+  };
+}
+
+function createEditorDraft(profile: Profile): HydratedProfile {
+  const hydrated = hydrateProfile(profile);
+  const prompts = Array.from({ length: 3 }, (_, index) => ({
+    question:
+      hydrated.prompts[index]?.question ||
+      DEFAULT_PROMPT_QUESTIONS[index] ||
+      `Prompt ${index + 1}`,
+    answer: hydrated.prompts[index]?.answer || "",
+  }));
+  const photos = Array.from({ length: MAX_PHOTOS }, (_, index) => hydrated.photos[index] || "");
+  return { ...hydrated, prompts, photos };
+}
+
+function buildProfilePayload(profile: HydratedProfile): Partial<Profile> {
+  return {
+    ...profile,
+    name: profile.name.trim(),
+    city: profile.city.trim(),
+    pronouns: profile.pronouns?.trim() || null,
+    hometown: profile.hometown?.trim() || null,
+    gender: profile.gender?.trim() || null,
+    orientation: profile.orientation?.trim() || null,
+    jobTitle: profile.jobTitle?.trim() || null,
+    company: profile.company?.trim() || null,
+    education: profile.education?.trim() || null,
+    height: profile.height?.trim() || null,
+    religion: profile.religion?.trim() || null,
+    politics: profile.politics?.trim() || null,
+    ethnicity: profile.ethnicity?.trim() || null,
+    partnerGender: profile.partnerGender?.trim() || null,
+    relationshipStyle: profile.relationshipStyle?.trim() || null,
+    loveLanguage: profile.loveLanguage?.trim() || null,
+    sleepSchedule: profile.sleepSchedule?.trim() || null,
+    socialBattery: profile.socialBattery?.trim() || null,
+    diet: profile.diet?.trim() || null,
+    weekendStyle: profile.weekendStyle?.trim() || null,
+    travelStyle: profile.travelStyle?.trim() || null,
+    cleanliness: profile.cleanliness?.trim() || null,
+    summary: profile.summary.trim(),
+    coachingFocus: profile.coachingFocus.trim(),
+    conflictStyle: profile.conflictStyle.trim(),
+    familyExpectations: profile.familyExpectations.trim(),
+    lifeArchitecture: profile.lifeArchitecture.trim(),
+    languages: compactStrings(profile.languages),
+    interests: compactStrings(profile.interests),
+    pets: compactStrings(profile.pets),
+    dealbreakers: compactStrings(profile.dealbreakers),
+    strengths: compactStrings(profile.strengths),
+    growthAreas: compactStrings(profile.growthAreas),
+    coreValues: compactStrings(profile.coreValues),
+    offers: compactStrings(profile.offers),
+    needs: compactStrings(profile.needs),
+    photos: compactStrings(profile.photos).slice(0, MAX_PHOTOS),
+    prompts: sanitizePrompts(profile.prompts).slice(0, 3),
+  };
+}
+
+function parseListInput(value: string) {
+  return value
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function formatIntent(intent: Profile["intent"]) {
+  if (intent === "serious") return "Long-term relationship";
+  if (intent === "marriage") return "Marriage-minded";
+  if (intent === "casual") return "Something casual";
+  if (intent === "exploring") return "Still exploring";
+  return "Add relationship intention";
+}
+
+function formatWantsKids(value: Profile["wantsKids"]) {
+  if (value === "yes") return "Wants kids";
+  if (value === "no") return "Doesn't want kids";
+  if (value === "open") return "Open to kids";
+  return "Not set";
+}
+
+function formatHasKids(value: boolean | null) {
+  if (value === true) return "Has kids";
+  if (value === false) return "No kids";
+  return "Not set";
+}
+
+function formatVisibility(value: HydratedProfile["profileVisibility"]) {
+  if (value === "paused") return "Paused in discovery";
+  if (value === "hidden") return "Private profile";
+  return "Visible in discovery";
+}
+
+function joinLifestyle(values: Array<string | null | undefined>, fallback: string) {
+  const items = values.map((value) => (value || "").trim()).filter(Boolean);
+  return items.length > 0 ? items.join(" · ") : fallback;
+}
+
+function getCompletion(profile: HydratedProfile) {
+  const checks = [
+    { label: "3+ photos", complete: profile.photos.length >= 3 },
+    { label: "About section", complete: Boolean(profile.summary) },
+    { label: "Intentions", complete: Boolean(profile.intent || profile.relationshipStyle) },
+    { label: "Work or school", complete: Boolean(profile.jobTitle || profile.education) },
+    { label: "Lifestyle", complete: Boolean(profile.exercise || profile.drinking || profile.smoking) },
+    { label: "Interests", complete: profile.interests.length >= 3 },
+    { label: "Prompt cards", complete: profile.prompts.filter((prompt) => prompt.answer).length >= 2 },
+    { label: "Visibility set", complete: Boolean(profile.profileVisibility) },
+  ];
+  const completeCount = checks.filter((check) => check.complete).length;
+  return {
+    percent: Math.round((completeCount / checks.length) * 100),
+    missing: checks.filter((check) => !check.complete).map((check) => check.label),
+  };
+}
+
+function deriveDimensionScores(profile: HydratedProfile): number[] {
+  const d1 =
+    profile.attachment === "Secure"
+      ? 88
+      : profile.attachment === "Anxious"
+        ? 65
+        : profile.attachment === "Avoidant"
+          ? 58
+          : 52;
+  const d2 = Math.min(94, 52 + profile.coreValues.length * 11);
+  const d3 = profile.prompts.filter((prompt) => prompt.answer).length >= 2 ? 84 : profile.summary.length > 110 ? 73 : 60;
+  const d4 = profile.loveLanguage ? 80 : 62;
+  const d5 = profile.lifeArchitecture ? 82 : 64;
+  const d6 = profile.familyExpectations ? 82 : profile.wantsKids ? 72 : 58;
+  const d7 = profile.intent === "serious" || profile.intent === "marriage" ? 82 : 68;
+  const activity = profile.exercise === "often" ? 90 : profile.exercise === "sometimes" ? 72 : 48;
+  const habits = profile.drinking === "never" ? 88 : profile.drinking === "social" ? 74 : 56;
+  const d8 = Math.round((activity + habits) / 2);
+  const d9 = Math.min(92, Math.round(48 + profile.readinessScore * 0.42));
+  const d10 = profile.zodiac ? 76 : 54;
   return [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10];
 }
 
-function getDimensionInsight(dimId: string, score: number, profile: Profile): string {
-  switch (dimId) {
-    case "D1": return score >= 75
-      ? `Your ${profile.attachment} attachment style reflects genuine emotional availability. You can hold space for others without losing yourself — that's rare.`
-      : `Your attachment patterns (${profile.attachment}) show areas for growth. Awareness is the first step to transformation.`;
-    case "D2": return score >= 75
-      ? `You've articulated ${profile.coreValues?.length || 0} core values clearly. That clarity is rare and deeply attractive to the right person.`
-      : "Deepening your value vocabulary will sharpen who you look for and what you're building toward.";
-    case "D3": return score >= 75
-      ? "Your responses show nuanced thinking and genuine curiosity. You'd thrive with someone who can match your depth."
-      : "Intellectual connection grows through shared curiosity — you're actively building it.";
-    case "D4": return profile.loveLanguage
-      ? `Your love language (${profile.loveLanguage}) is clear, which means you can ask for what you need instead of waiting to be seen.`
-      : "Understanding how you give and receive love will transform your relationships from the inside out.";
-    case "D5": return profile.lifeArchitecture
-      ? "Your life architecture is intentional. You know what balance looks like for you — that's a gift to whoever shares your life."
-      : "Clarifying what success looks like across all domains will attract someone whose direction aligns with yours.";
-    case "D6": return profile.familyExpectations
-      ? "Your family expectations are clearly held. That groundedness is essential for long-term compatibility."
-      : "Your family vision is still forming — that openness can be a strength when held with intention.";
-    case "D7": return score >= 75
-      ? "Your relationship intent signals financial seriousness and stability. That's deeply reassuring to a partner building something real."
-      : "Financial alignment becomes more important as relationships deepen. Worth sitting with.";
-    case "D8": return score >= 75
-      ? "Your lifestyle habits show you value your body and energy. That vitality is contagious and deeply attractive."
-      : score >= 55 ? "Your lifestyle is balanced — room to grow in either direction. Small shifts compound."
-      : "Energy is the foundation of everything. Small improvements here create outsized returns.";
-    case "D9": return "Your relationship to meaning and purpose shapes who you'll build a life with — and what kind of life that becomes.";
-    case "D10": return profile.zodiac
-      ? `As a ${profile.zodiac}, your cosmic blueprint adds a layer of self-understanding that many overlook. Maahi uses it as one of 10 lenses.`
-      : "Add your birthday to unlock your astrological dimension — the final 2% that rounds out your soul profile.";
-    default: return "";
-  }
-}
-
-// ─── Radar Chart ──────────────────────────────────────────────────────────────
 function RadarChart({ scores }: { scores: number[] }) {
-  const cx = 110, cy = 110, maxR = 82;
-  const n = scores.length;
-  const step = (2 * Math.PI) / n;
+  const center = 110;
+  const radius = 82;
+  const count = scores.length;
+  const step = (Math.PI * 2) / count;
   const start = -Math.PI / 2;
+  const labels = ["Emo", "Val", "Int", "Rel", "Life", "Fam", "Stab", "Live", "Soul", "Ast"];
 
-  const getXY = (i: number, r: number) => ({
-    x: cx + r * Math.cos(start + i * step),
-    y: cy + r * Math.sin(start + i * step),
+  const pointFor = (index: number, scale: number) => ({
+    x: center + Math.cos(start + index * step) * scale,
+    y: center + Math.sin(start + index * step) * scale,
   });
 
-  const scorePts = scores.map((s, i) => getXY(i, (s / 100) * maxR));
-  const polyStr = scorePts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-  const gridLevels = [0.25, 0.5, 0.75, 1];
-  const shortLabels = ["Emo", "Val", "Int", "Rel", "Life", "Fam", "Fin", "Phy", "Spi", "Ast"];
+  const shape = scores
+    .map((score, index) => pointFor(index, (score / 100) * radius))
+    .map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`)
+    .join(" ");
 
   return (
-    <svg viewBox="0 0 220 220" style={{ width: "100%", maxWidth: 260, height: "auto" }}>
-      {gridLevels.map((lvl, gi) => (
-        <polygon key={gi}
-          points={Array.from({ length: n }, (_, i) => {
-            const p = getXY(i, lvl * maxR);
-            return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+    <svg viewBox="0 0 220 220" className="h-auto w-full max-w-[260px]">
+      {[0.25, 0.5, 0.75, 1].map((level) => (
+        <polygon
+          key={level}
+          points={Array.from({ length: count }, (_, index) => {
+            const point = pointFor(index, radius * level);
+            return `${point.x.toFixed(1)},${point.y.toFixed(1)}`;
           }).join(" ")}
-          fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8"
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="0.8"
         />
       ))}
-      {Array.from({ length: n }, (_, i) => {
-        const end = getXY(i, maxR);
-        return <line key={i} x1={cx} y1={cy} x2={end.x} y2={end.y} stroke="rgba(255,255,255,0.05)" strokeWidth="0.8" />;
-      })}
-      <polygon points={polyStr} fill="rgba(212,104,138,0.13)" stroke="#d4688a" strokeWidth="1.5" strokeLinejoin="round" />
-      {scorePts.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="3.5" fill={DIMENSIONS[i].color} opacity={0.9} />
-      ))}
-      {Array.from({ length: n }, (_, i) => {
-        const lp = getXY(i, maxR + 18);
+      {Array.from({ length: count }, (_, index) => {
+        const edge = pointFor(index, radius);
         return (
-          <text key={i} x={lp.x} y={lp.y} fontSize="7" fill="rgba(255,255,255,0.38)"
-            textAnchor="middle" dominantBaseline="middle">
-            {shortLabels[i]}
+          <line
+            key={index}
+            x1={center}
+            y1={center}
+            x2={edge.x}
+            y2={edge.y}
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="0.8"
+          />
+        );
+      })}
+      <polygon points={shape} fill="rgba(212,104,138,0.18)" stroke="#d4688a" strokeWidth="1.6" />
+      {scores.map((score, index) => {
+        const point = pointFor(index, (score / 100) * radius);
+        return <circle key={DIMENSIONS[index].id} cx={point.x} cy={point.y} r="3.5" fill={DIMENSIONS[index].color} />;
+      })}
+      {labels.map((label, index) => {
+        const point = pointFor(index, radius + 18);
+        return (
+          <text
+            key={label}
+            x={point.x}
+            y={point.y}
+            fontSize="7"
+            fill="rgba(255,255,255,0.4)"
+            textAnchor="middle"
+            dominantBaseline="middle"
+          >
+            {label}
           </text>
         );
       })}
@@ -122,437 +408,2067 @@ function RadarChart({ scores }: { scores: number[] }) {
   );
 }
 
-// ─── Photo Carousel ───────────────────────────────────────────────────────────
-function PhotoCarousel({ photos, name, zodiacEmoji, onEdit }: {
-  photos: string[];
-  name: string;
-  zodiacEmoji: string;
-  onEdit?: () => void;
+function SectionCard({
+  eyebrow,
+  title,
+  description,
+  action,
+  children,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  action?: ReactNode;
+  children: ReactNode;
 }) {
-  const [idx, setIdx] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const has = photos.length > 0;
-
-  const next = () => setIdx(i => (i + 1) % photos.length);
-  const prev = () => setIdx(i => (i - 1 + photos.length) % photos.length);
-
   return (
-    <div
-      style={{ position: "relative", width: "100%", height: "62svh", background: "#0d0d14", overflow: "hidden" }}
-      onTouchStart={e => setTouchStart(e.touches[0].clientX)}
-      onTouchEnd={e => {
-        if (touchStart === null) return;
-        const diff = touchStart - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
-        setTouchStart(null);
-      }}
-    >
-      {has ? (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photos[idx]} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          {photos.length > 1 && (
-            <>
-              <div onClick={prev} style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "40%", cursor: "pointer" }} />
-              <div onClick={next} style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "40%", cursor: "pointer" }} />
-              <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 5 }}>
-                {photos.map((_, i) => (
-                  <div key={i} style={{ width: i === idx ? 20 : 6, height: 3, borderRadius: 999, background: i === idx ? "#fff" : "rgba(255,255,255,0.38)", transition: "all 0.2s" }} />
-                ))}
-              </div>
-            </>
-          )}
-        </>
-      ) : (
-        <div style={{ width: "100%", height: "100%", background: "linear-gradient(145deg, rgba(212,104,138,0.10), rgba(180,140,255,0.07))", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
-          <div style={{ width: 100, height: 100, borderRadius: "50%", background: "linear-gradient(135deg, rgba(212,104,138,0.2), rgba(180,140,255,0.15))", border: "1.5px solid rgba(212,104,138,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 46 }}>
-            {zodiacEmoji || name?.[0]?.toUpperCase() || "?"}
-          </div>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.25)", margin: 0 }}>Add photos to your profile</p>
+    <section className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,27,0.96),rgba(9,10,16,0.9))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:p-6">
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          {eyebrow ? (
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/35">
+              {eyebrow}
+            </p>
+          ) : null}
+          <h2 className="text-[1.05rem] font-semibold tracking-[-0.02em] text-white">{title}</h2>
+          {description ? <p className="mt-1 text-[13px] leading-5 text-white/46">{description}</p> : null}
         </div>
-      )}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 130, background: "linear-gradient(to top, #0A0A0F, transparent)", pointerEvents: "none" }} />
-      {onEdit && (
-        <button onClick={onEdit} style={{ position: "absolute", top: 16, right: 16, width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", backdropFilter: "blur(8px)" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-        </button>
-      )}
-    </div>
+        {action}
+      </div>
+      {children}
+    </section>
   );
 }
 
-// ─── Shared primitives ────────────────────────────────────────────────────────
-function Pill({ children, color = "#4FFFB0" }: { children: React.ReactNode; color?: string }) {
+function Tag({
+  children,
+  tone = "default",
+}: {
+  children: ReactNode;
+  tone?: "default" | "emerald" | "rose" | "violet" | "amber";
+}) {
+  const tones = {
+    default: "border-white/10 bg-white/[0.04] text-white/72",
+    emerald: "border-[#4fffb0]/22 bg-[#4fffb0]/10 text-[#72ffc2]",
+    rose: "border-[#d4688a]/24 bg-[#d4688a]/10 text-[#ef8cab]",
+    violet: "border-[#b48cff]/24 bg-[#b48cff]/10 text-[#c7a8ff]",
+    amber: "border-[#f5c842]/24 bg-[#f5c842]/10 text-[#f4d26a]",
+  };
+
   return (
-    <span style={{ display: "inline-block", padding: "5px 13px", borderRadius: 999, fontSize: 12, fontWeight: 500, background: `${color}14`, color, border: `1px solid ${color}28` }}>
+    <span className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${tones[tone]}`}>
       {children}
     </span>
   );
 }
 
-function SLabel({ children }: { children: React.ReactNode }) {
+function DetailTile({
+  icon,
+  label,
+  value,
+  hidden,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  hidden?: boolean;
+}) {
   return (
-    <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.14em", color: "rgba(255,255,255,0.28)", margin: "0 0 10px" }}>
+    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+      <div className="mb-2 flex items-center gap-2 text-white/36">
+        {icon}
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">{label}</span>
+      </div>
+      <p className={`text-sm leading-6 ${hidden ? "text-white/38" : "text-white/78"}`}>{value}</p>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium text-white/78">{label}</span>
+        {hint ? <span className="text-xs text-white/35">{hint}</span> : null}
+      </div>
       {children}
-    </p>
+    </label>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
-  if (!value) return null;
+function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>{label}</span>
-      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
-    </div>
+    <input
+      {...props}
+      className={`h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none placeholder:text-white/22 focus:border-[#b48cff]/40 focus:bg-white/[0.06] ${
+        props.className || ""
+      }`}
+    />
   );
 }
 
-// ─── Tab: Soul ────────────────────────────────────────────────────────────────
-function SoulTab({ profile }: { profile: Profile }) {
+function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
-    <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", gap: 28 }}>
-      {(profile.offers || []).length > 0 ? (
-        <div>
-          <SLabel>What I bring</SLabel>
-          {(profile.offers || []).map((o, i) => (
-            <p key={i} style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, margin: "0 0 8px", fontStyle: "italic" }}>
-              &ldquo;{o}&rdquo;
-            </p>
-          ))}
-        </div>
-      ) : profile.summary ? (
-        <div>
-          <SLabel>About me</SLabel>
-          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, margin: 0, fontStyle: "italic" }}>
-            &ldquo;{profile.summary}&rdquo;
-          </p>
-        </div>
-      ) : null}
-
-      {(profile.coreValues || []).length > 0 && (
-        <div>
-          <SLabel>Core Values</SLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {(profile.coreValues || []).map((v, i) => <Pill key={`${v}-${i}`} color="#4FFFB0">{v}</Pill>)}
-          </div>
-        </div>
-      )}
-
-      {(profile.strengths || []).length > 0 && (
-        <div>
-          <SLabel>Strengths</SLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {(profile.strengths || []).map((s, i) => <Pill key={`${s}-${i}`} color="#d4688a">{s}</Pill>)}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <SLabel>Looking for</SLabel>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {profile.intent && <Pill color="#B48CFF">{profile.intent === "serious" ? "Serious relationship" : profile.intent === "marriage" ? "Marriage" : profile.intent === "casual" ? "Something casual" : "Still exploring"}</Pill>}
-          {profile.wantsKids && <Pill color="#B48CFF">{profile.wantsKids === "yes" ? "Wants kids" : profile.wantsKids === "no" ? "No kids" : "Open to kids"}</Pill>}
-          {profile.hasKids != null && <Pill color="#B48CFF">{profile.hasKids ? "Has kids" : "No kids yet"}</Pill>}
-        </div>
-      </div>
-
-      <div>
-        <SLabel>Lifestyle</SLabel>
-        <InfoRow label="Exercise" value={profile.exercise} />
-        <InfoRow label="Drinking" value={profile.drinking} />
-        <InfoRow label="Smoking" value={profile.smoking} />
-      </div>
-    </div>
+    <textarea
+      {...props}
+      className={`min-h-[112px] w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-white/22 focus:border-[#b48cff]/40 focus:bg-white/[0.06] ${
+        props.className || ""
+      }`}
+    />
   );
 }
 
-// ─── Tab: Dimensions ──────────────────────────────────────────────────────────
-function DimensionsTab({ profile }: { profile: Profile }) {
-  const scores = deriveDimensionScores(profile);
-  const [expanded, setExpanded] = useState<number | null>(null);
+function SelectInput({
+  children,
+  className,
+  onChange,
+  placeholder,
+  value,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement> & { placeholder?: string }) {
+  const EMPTY_OPTION_VALUE = "__empty__";
+  const options = Children.toArray(children)
+    .filter((child): child is ReactElement<{ value?: string; disabled?: boolean; children?: ReactNode }> =>
+      isValidElement(child),
+    )
+    .map((child) => ({
+      value: typeof child.props.value === "string" ? child.props.value : "",
+      label: child.props.children,
+      disabled: Boolean(child.props.disabled),
+    }));
+
+  const currentValue = typeof value === "string" ? value : value == null ? "" : String(value);
+  const placeholderLabel =
+    options.find((option) => option.value === "")?.label || placeholder || "Select";
+  const selectValue = currentValue === "" ? EMPTY_OPTION_VALUE : currentValue;
 
   return (
-    <div style={{ padding: "28px 20px" }}>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-        <RadarChart scores={scores} />
-      </div>
+    <Select
+      disabled={props.disabled}
+      value={selectValue}
+      onValueChange={(nextValue) => {
+        if (!onChange) return;
+        onChange({
+          target: { value: nextValue === EMPTY_OPTION_VALUE ? "" : nextValue },
+        } as ChangeEvent<HTMLSelectElement>);
+      }}
+    >
+      <SelectTrigger className={`h-12 w-full rounded-2xl border-white/10 bg-white/[0.04] px-4 text-sm text-white focus:border-[#b48cff]/40 focus:bg-white/[0.06] ${className || ""}`}>
+        <SelectValue>
+          {options.find((option) => option.value === currentValue)?.label || placeholderLabel}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent
+        className="z-[80] rounded-2xl border border-white/10 bg-[#121521] p-1 text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+        align="start"
+      >
+        {options.map((option) => (
+          <SelectItem
+            key={`${option.value}-${String(option.label)}`}
+            value={option.value === "" ? EMPTY_OPTION_VALUE : option.value}
+            disabled={option.disabled}
+            className="rounded-xl px-3 py-2 text-sm text-white data-disabled:text-white/30 focus:bg-white/[0.08] focus:text-white"
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
-      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "center", margin: "0 0 24px", letterSpacing: "0.06em" }}>
-        Tap any dimension to see Maahi&apos;s insight
-      </p>
+function listValue(values: string[]) {
+  return values.join(", ");
+}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {DIMENSIONS.map((dim, i) => {
-          const score = scores[i];
-          const open = expanded === i;
-          return (
-            <div key={dim.id} onClick={() => setExpanded(open ? null : i)}
-              style={{ borderRadius: 14, border: `1px solid ${open ? dim.color + "35" : "rgba(255,255,255,0.06)"}`, background: open ? `${dim.color}09` : "rgba(255,255,255,0.02)", padding: "13px 15px", cursor: "pointer", transition: "all 0.18s ease" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: dim.color, flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{dim.label}</span>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginLeft: 8 }}>{dim.weight}%</span>
+function updateArrayInput(
+  event: ChangeEvent<HTMLTextAreaElement>,
+  setValue: (next: string[]) => void,
+) {
+  setValue(parseListInput(event.target.value));
+}
+
+function PhotoHero({
+  profile,
+  onEditPhoto,
+  onLogout,
+  onSettings,
+  onUpgrade,
+}: {
+  profile: HydratedProfile;
+  onEditPhoto: () => void;
+  onLogout: () => void;
+  onSettings: () => void;
+  onUpgrade: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+
+  const openMenu = () => {
+    if (menuBtnRef.current) {
+      const rect = menuBtnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+    }
+    setMenuOpen(true);
+  };
+
+  // photos[0] = profile photo (avatar), photos[1..] = gallery (cover mosaic)
+  const avatarPhoto = profile.photos[0] || null;
+  const galleryPhotos = profile.photos.slice(1, MAX_PHOTOS);
+  const hasPhotos = galleryPhotos.length > 0;
+  const headline = [
+    profile.showWork && profile.jobTitle
+      ? profile.company
+        ? `${profile.jobTitle} at ${profile.company}`
+        : profile.jobTitle
+      : null,
+    profile.intent ? formatIntent(profile.intent) : null,
+    profile.relationshipStyle || null,
+  ]
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(" · ");
+  const summary =
+    profile.summary ||
+    "This profile still needs sharper edges. Right now it reads more draft than dangerous.";
+  const detailMeta = [
+    profile.showCity ? profile.city : null,
+    profile.showEducation && profile.education ? profile.education : null,
+    profile.pronouns || null,
+  ].filter(Boolean);
+
+  return (
+    <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[#0b0d16] shadow-[0_30px_90px_rgba(0,0,0,0.42)]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(212,104,138,0.2),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(180,140,255,0.16),transparent_44%)]" />
+      <div className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-white/6" />
+      <div className="relative overflow-hidden rounded-[inherit]">
+        <div className="relative h-[14rem] overflow-hidden sm:h-[16rem]">
+          {hasPhotos ? (
+            <div className="absolute inset-0 p-3">
+              {galleryPhotos.length === 1 ? (
+                <div className="relative h-full overflow-hidden rounded-[30px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={galleryPhotos[0]} alt={profile.name} className="h-full w-full object-cover" />
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: dim.color, marginRight: 10 }}>{score}</span>
-                <div style={{ width: 52, height: 3, borderRadius: 999, background: "rgba(255,255,255,0.07)", overflow: "hidden", flexShrink: 0 }}>
-                  <div style={{ height: "100%", width: `${score}%`, background: dim.color, borderRadius: 999, transition: "width 0.9s ease" }} />
-                </div>
-              </div>
-              {open && (
-                <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${dim.color}18` }}>
-                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", lineHeight: 1.6, margin: "0 0 12px" }}>{dim.desc}</p>
-                  <div style={{ padding: "10px 14px", borderRadius: 10, background: `${dim.color}0b`, border: `1px solid ${dim.color}1e` }}>
-                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: dim.color, margin: "0 0 6px" }}>Maahi sees</p>
-                    <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, margin: 0 }}>
-                      {getDimensionInsight(dim.id, score, profile)}
-                    </p>
+              ) : null}
+
+              {galleryPhotos.length === 2 ? (
+                <div className="grid h-full grid-cols-[1.35fr_0.65fr] gap-3">
+                  <div className="relative overflow-hidden rounded-[30px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={galleryPhotos[0]} alt={`${profile.name} photo 1`} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="relative overflow-hidden rounded-[26px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={galleryPhotos[1]} alt={`${profile.name} photo 2`} className="h-full w-full object-cover" />
                   </div>
                 </div>
-              )}
+              ) : null}
+
+              {galleryPhotos.length >= 3 ? (
+                <div className="grid h-full grid-cols-[1.4fr_0.6fr] gap-3">
+                  <div className="relative overflow-hidden rounded-[30px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={galleryPhotos[0]} alt={`${profile.name} photo 1`} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="grid gap-3">
+                    {galleryPhotos.slice(1, 3).map((photo, index) => (
+                      <div key={photo + index} className="relative overflow-hidden rounded-[26px]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photo}
+                          alt={`${profile.name} photo ${index + 2}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              <div className="pointer-events-none absolute inset-3 rounded-[30px] bg-[linear-gradient(180deg,rgba(7,9,16,0.04),rgba(7,9,16,0.14)_58%,rgba(7,9,16,0.32))]" />
             </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+          ) : (
+            <div className="absolute inset-0 p-3">
+              <div className="grid h-full grid-cols-[1.4fr_0.6fr] gap-3">
+                <button
+                  className="rounded-[30px] border border-white/10 bg-[linear-gradient(160deg,rgba(25,29,43,0.98),rgba(44,19,51,0.92))] p-6 text-left transition hover:border-white/20"
+                  onClick={onEditPhoto}
+                  type="button"
+                >
+                  <div className="flex h-full flex-col justify-between">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-white/68">
+                      <Camera className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-[1.55rem] font-semibold tracking-[-0.04em] text-white">
+                        Add your first photo
+                      </p>
+                      <p className="mt-2 max-w-sm text-sm leading-6 text-white/48">
+                        Start with one clear profile shot. Build the rest underneath.
+                      </p>
+                    </div>
+                  </div>
+                </button>
+                <div className="grid gap-3">
+                  <button
+                    className="rounded-[26px] border border-dashed border-white/10 bg-white/[0.03] transition hover:border-white/20"
+                    onClick={onEditPhoto}
+                    type="button"
+                  />
+                  <button
+                    className="rounded-[26px] border border-dashed border-white/10 bg-white/[0.03] transition hover:border-white/20"
+                    onClick={onEditPhoto}
+                    type="button"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
-// ─── Tab: Life ────────────────────────────────────────────────────────────────
-function LifeTab({ profile }: { profile: Profile }) {
-  const zodiacEmoji = profile.zodiac ? (ZODIAC_EMOJI[profile.zodiac] || "") : "";
-  return (
-    <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", gap: 24 }}>
-      {profile.familyExpectations && (
-        <div>
-          <SLabel>Family expectations</SLabel>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.7, margin: 0 }}>{profile.familyExpectations}</p>
-        </div>
-      )}
-      {profile.conflictStyle && (
-        <div>
-          <SLabel>How I handle conflict</SLabel>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.7, margin: 0 }}>{profile.conflictStyle}</p>
-        </div>
-      )}
-      {profile.lifeArchitecture && (
-        <div>
-          <SLabel>Life architecture</SLabel>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.7, margin: 0 }}>{profile.lifeArchitecture}</p>
-        </div>
-      )}
-      {(profile.dealbreakers || []).length > 0 && (
-        <div>
-          <SLabel>Dealbreakers</SLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {(profile.dealbreakers || []).map(d => (
-              <span key={d} style={{ display: "inline-block", padding: "5px 13px", borderRadius: 999, fontSize: 12, color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}>{d}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {(profile.partnerAgeMin || profile.partnerAgeMax) && (
-        <div>
-          <SLabel>Partner age range</SLabel>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.58)", margin: 0 }}>
-            {profile.partnerAgeMin && profile.partnerAgeMax ? `${profile.partnerAgeMin} – ${profile.partnerAgeMax} years` : profile.partnerAgeMin ? `${profile.partnerAgeMin}+` : `Up to ${profile.partnerAgeMax}`}
-          </p>
-        </div>
-      )}
-      {profile.zodiac && (
-        <div>
-          <SLabel>Astrological</SLabel>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.38)", margin: 0 }}>
-            {zodiacEmoji} {profile.zodiac} · D10 compatibility considered in matching
-          </p>
-        </div>
-      )}
-      <div>
-        <SLabel>Partner preferences</SLabel>
-        <InfoRow label="Gender seeking" value={profile.partnerGender} />
-        <InfoRow label="Orientation" value={profile.orientation} />
-      </div>
-    </div>
-  );
-}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(11,13,22,0.82))]" />
 
-// ─── Tab: You (private soul mirror) ──────────────────────────────────────────
-function YouTab({ profile, onLogout, onRedo }: { profile: Profile; onLogout: () => void; onRedo: () => void }) {
-  const score = profile.readinessScore || 50;
-  const arcColor = score >= 70 ? "#4FFFB0" : score >= 45 ? "#F5C842" : "#d4688a";
-  const r = 52, circ = 2 * Math.PI * r;
-  const arcLen = (240 / 360) * circ;
-  const filled = (score / 100) * arcLen;
+          {/* 3-dots menu button */}
+          <button
+            ref={menuBtnRef}
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-black/35 text-white shadow-[0_10px_24px_rgba(0,0,0,0.25)] backdrop-blur"
+            onClick={openMenu}
+            type="button"
+          >
+            <MoreHorizontal className="h-5 w-5" />
+          </button>
 
-  return (
-    <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", gap: 28 }}>
-      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 999, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", width: "fit-content" }}>
-        <span style={{ fontSize: 10 }}>🔒</span>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Only you see this</span>
-      </div>
+          {/* Backdrop to close menu */}
+          {menuOpen && (
+            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+          )}
 
-      {/* Readiness */}
-      <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "18px 20px", borderRadius: 18, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
-        <div style={{ position: "relative", width: 96, height: 76, flexShrink: 0 }}>
-          <svg viewBox="0 0 120 96" style={{ width: "100%", height: "100%" }}>
-            <circle cx="60" cy="68" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${arcLen} ${circ}`} transform="rotate(150 60 68)" />
-            <circle cx="60" cy="68" r={r} fill="none" stroke={arcColor} strokeWidth="7" strokeLinecap="round" strokeDasharray={`${filled} ${circ}`} transform="rotate(150 60 68)" style={{ transition: "stroke-dasharray 1.4s ease" }} />
-          </svg>
-          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
-            <span style={{ fontSize: 20, fontWeight: 800, color: arcColor, display: "block", lineHeight: 1 }}>{score}</span>
-            <span style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.28)" }}>Readiness</span>
-          </div>
-        </div>
-        <div>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "#fff", margin: "0 0 5px" }}>Love Readiness</p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", lineHeight: 1.6, margin: 0 }}>
-            {score >= 70 ? "You're emotionally available and actively choosing love."
-              : score >= 45 ? "Building toward readiness — some edges still to smooth."
-              : "Meaningful growth ahead before you fully invite love in."}
-          </p>
-        </div>
-      </div>
-
-      {/* Attachment */}
-      <div style={{ padding: "18px 20px", borderRadius: 18, border: "1px solid rgba(212,104,138,0.18)", background: "rgba(212,104,138,0.05)" }}>
-        <SLabel>Attachment Profile</SLabel>
-        <p style={{ fontSize: 20, fontWeight: 800, color: "#fff", margin: "0 0 8px" }}>{profile.attachment}</p>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", margin: 0, lineHeight: 1.65 }}>
-          {profile.attachment === "Secure" && "You can hold space for others without losing yourself. That's genuinely rare."}
-          {profile.attachment === "Anxious" && "You feel deeply and love hard. Your growth edge is trusting that love doesn't require chasing."}
-          {profile.attachment === "Avoidant" && "You protect what matters. Your growth edge is letting closeness feel safe, not threatening."}
-          {profile.attachment === "Fearful-Avoidant" && "You want closeness and safety both. They can coexist — that's your journey."}
-        </p>
-      </div>
-
-      {/* Love language + needs */}
-      {profile.loveLanguage && (
-        <div>
-          <SLabel>Love Language</SLabel>
-          <p style={{ fontSize: 17, fontWeight: 700, color: "#fff", margin: "0 0 10px" }}>{profile.loveLanguage}</p>
-          {(profile.needs || []).length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-              {(profile.needs || []).map(n => (
-                <span key={n} style={{ display: "inline-block", padding: "5px 13px", borderRadius: 999, fontSize: 12, color: "rgba(180,140,255,0.85)", border: "1px solid rgba(180,140,255,0.22)", background: "rgba(180,140,255,0.07)" }}>{n}</span>
-              ))}
+          {/* Dropdown menu — fixed so it clears overflow-hidden parents */}
+          {menuOpen && (
+            <div
+              className="fixed z-50 min-w-[180px] overflow-hidden rounded-2xl border border-white/10 bg-[#12141f] shadow-[0_20px_48px_rgba(0,0,0,0.5)]"
+              style={{ top: menuPos.top, right: menuPos.right }}
+            >
+              <button
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/[0.06]"
+                onClick={() => { onUpgrade(); setMenuOpen(false); }}
+                type="button"
+              >
+                <Sparkles className="h-4 w-4 text-[#f58bc2]" />
+                <span className="bg-[linear-gradient(90deg,#f58bc2,#b48cff)] bg-clip-text text-transparent">Upgrade</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white/80 transition hover:bg-white/[0.06] hover:text-white"
+                onClick={() => { onSettings(); setMenuOpen(false); }}
+                type="button"
+              >
+                <Settings2 className="h-4 w-4 text-white/45" />
+                Settings
+              </button>
+              <div className="mx-3 border-t border-white/8" />
+              <button
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#ef8cab] transition hover:bg-[#d4688a]/10"
+                onClick={() => { onLogout(); setMenuOpen(false); }}
+                type="button"
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </button>
             </div>
           )}
         </div>
-      )}
 
-      {/* Growth areas */}
-      {(profile.growthAreas || []).length > 0 && (
-        <div>
-          <SLabel>Growing toward</SLabel>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {(profile.growthAreas || []).map((g, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <span style={{ color: "#d4688a", fontSize: 13, flexShrink: 0, marginTop: 1 }}>✦</span>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.65, margin: 0 }}>{g}</p>
+        <div className="relative px-5 pb-6 pt-[4.5rem] sm:px-6 sm:pb-7 sm:pt-[5.5rem]">
+          <div className="absolute left-5 top-0 -translate-y-1/2 sm:left-6">
+            {/* Avatar — overflow-hidden wrapper for image rounding, camera button sits outside */}
+            <div className="relative h-24 w-24 shrink-0 rounded-[30px] border-[5px] border-[#0b0d16] shadow-[0_20px_40px_rgba(0,0,0,0.32)] sm:h-32 sm:w-32">
+              <div className="h-full w-full overflow-hidden rounded-[inherit] bg-[#10131d]">
+                {avatarPhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarPhoto} alt={`${profile.name} profile photo`} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-4xl font-semibold text-white/72">
+                    {profile.name?.[0]?.toUpperCase() || "?"}
+                  </div>
+                )}
               </div>
-            ))}
+              <button
+                className="absolute -bottom-1 -right-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/12 bg-[#12141f] text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition hover:bg-[#1e2030]"
+                onClick={onEditPhoto}
+                type="button"
+                aria-label="Change profile photo"
+              >
+                <Camera className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-[2rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.45rem]">
+                {profile.name}
+                {profile.showAge && profile.age ? `, ${profile.age}` : ""}
+              </h1>
+              {headline ? (
+                <p className="mt-2 max-w-[44rem] text-[1.05rem] leading-8 text-white/78">
+                  {headline}
+                </p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/48">
+                {detailMeta.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+                {profile.zodiac ? (
+                  <span>
+                    {ZODIAC_EMOJI[profile.zodiac] || "✦"} {profile.zodiac}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-4 max-w-[46rem] text-sm leading-7 text-white/60 line-clamp-2">
+                {summary}
+              </p>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Coaching focus */}
-      {profile.coachingFocus && (
-        <div style={{ padding: "16px 18px", borderRadius: 16, border: "1px solid rgba(180,140,255,0.18)", background: "rgba(180,140,255,0.06)" }}>
-          <SLabel>Maahi&apos;s focus for you</SLabel>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.7, margin: 0, fontStyle: "italic" }}>
-            &ldquo;{profile.coachingFocus}&rdquo;
-          </p>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <button onClick={onRedo} style={{ width: "100%", padding: "14px 0", borderRadius: 999, fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.48)", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer" }}>
-          Redo soul discovery
-        </button>
-        <button onClick={onLogout} style={{ width: "100%", padding: "14px 0", borderRadius: 999, fontSize: 14, fontWeight: 500, color: "rgba(212,104,138,0.7)", background: "transparent", border: "1px solid rgba(212,104,138,0.2)", cursor: "pointer" }}>
-          Sign out
-        </button>
       </div>
     </div>
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
-export default function YouPage() {
-  const router = useRouter();
-  const { profile, loading, logout } = useAuth();
-  const [tab, setTab] = useState<"soul" | "dimensions" | "life" | "you">("soul");
+function ProfileEditor({
+  userId,
+  draft,
+  setDraft,
+  activeTab,
+  setActiveTab,
+  focusedTab,
+  open,
+  onOpenChange,
+  onSave,
+  saving,
+  error,
+}: {
+  userId: string;
+  draft: HydratedProfile | null;
+  setDraft: Dispatch<SetStateAction<HydratedProfile | null>>;
+  activeTab: EditorTab;
+  setActiveTab: Dispatch<SetStateAction<EditorTab>>;
+  focusedTab: EditorTab | null;
+  open: boolean;
+  onOpenChange: (next: boolean) => void;
+  onSave: () => void;
+  saving: boolean;
+  error: string | null;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [uploadingPhotoIndex, setUploadingPhotoIndex] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && !profile) router.push("/onboarding");
-  }, [loading, profile, router]);
+    if (open && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = 0;
+        }
+      });
+    }
+  }, [open, activeTab, focusedTab]);
 
-  if (loading || !profile) return null;
+  if (!draft) return null;
 
-  const zodiacEmoji = profile.zodiac ? (ZODIAC_EMOJI[profile.zodiac] || "") : "";
-  const readiness = profile.readinessScore || 50;
-  const readyColor = readiness >= 70 ? "#4FFFB0" : readiness >= 45 ? "#F5C842" : "#d4688a";
+  const setField = <K extends keyof HydratedProfile>(key: K, value: HydratedProfile[K]) => {
+    setDraft((current) => (current ? { ...current, [key]: value } : current));
+  };
+  const setPhotoAtIndex = (index: number, value: string) => {
+    setDraft((current) =>
+      current
+        ? {
+            ...current,
+            photos: current.photos.map((entry, photoIndex) =>
+              photoIndex === index ? value : entry,
+            ),
+          }
+        : current,
+    );
+  };
 
-  const TABS = [
-    { key: "soul" as const, label: "Soul" },
-    { key: "dimensions" as const, label: "Dimensions" },
-    { key: "life" as const, label: "Life" },
-    { key: "you" as const, label: "You" },
-  ];
+  const handlePhotoUpload = async (index: number, file: File | null) => {
+    if (!file) return;
+    setUploadError(null);
+    setUploadingPhotoIndex(index);
+
+    try {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = extension.replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${userId}/${Date.now()}-${index}.${safeExtension}`;
+      const supabase = createSupabaseBrowserClient();
+      const { error: uploadError } = await supabase.storage
+        .from(PROFILE_PHOTO_BUCKET)
+        .upload(path, file, {
+          cacheControl: "3600",
+          contentType: file.type || "image/jpeg",
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from(PROFILE_PHOTO_BUCKET).getPublicUrl(path);
+      if (!data.publicUrl) {
+        throw new Error("Could not resolve the uploaded photo URL");
+      }
+
+      setPhotoAtIndex(index, data.publicUrl);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Photo upload failed");
+    } finally {
+      setUploadingPhotoIndex(null);
+    }
+  };
+
+  const currentTab =
+    EDITOR_TABS.find((tab) => tab.key === activeTab) || EDITOR_TABS[0];
+  const CurrentTabIcon = currentTab.icon;
+  const isFocused = focusedTab !== null;
+  const contentKey = `${isFocused ? "focused" : "full"}-${activeTab}-${open ? "open" : "closed"}`;
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#0A0A0F", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
-      {/* Ambient */}
-      <div aria-hidden style={{ position: "fixed", top: "-8%", left: "-12%", width: 320, height: 320, borderRadius: "50%", background: "#d4688a", opacity: 0.055, filter: "blur(90px)", pointerEvents: "none", zIndex: 0 }} />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        key={contentKey}
+        side="bottom"
+        showCloseButton={false}
+        className="inset-0 h-[100dvh] rounded-none border-0 bg-[#090b13] p-0 text-white sm:inset-x-3 sm:bottom-3 sm:top-3 sm:h-auto sm:max-h-[calc(100dvh-1.5rem)] sm:rounded-[32px] sm:border sm:border-white/10 sm:max-w-none"
+      >
+        <div className="flex h-full min-h-0 flex-col">
+          <div className="sticky top-0 z-20 border-b border-white/8 bg-[#090b13]/92 backdrop-blur-xl">
+            <div
+              style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top, 0px))" }}
+              className={`mx-auto w-full max-w-6xl px-4 sm:px-6 ${
+                isFocused ? "pb-3 pt-3" : "pb-3 pt-3"
+              }`}
+            >
+              <div className="mx-auto h-1.5 w-16 rounded-full bg-white/12 sm:block" />
+              {!isFocused ? (
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex flex-1 gap-2 overflow-x-auto pb-1">
+                    {EDITOR_TABS.map((tab) => {
+                      const TabIcon = tab.icon;
+                      const active = activeTab === tab.key;
+                      return (
+                        <button
+                          key={tab.key}
+                          className={`inline-flex min-w-fit items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition ${
+                            active
+                              ? "border-[#b48cff]/40 bg-[#b48cff]/14 text-white shadow-[0_10px_28px_rgba(180,140,255,0.12)]"
+                              : "border-white/8 bg-white/[0.03] text-white/54 hover:border-white/14 hover:text-white/78"
+                          }`}
+                          onClick={() => setActiveTab(tab.key)}
+                          type="button"
+                        >
+                          <TabIcon className="h-4 w-4" />
+                          <span>{tab.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/10 px-4 text-sm text-white/68"
+                    onClick={() => onOpenChange(false)}
+                    type="button"
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-white/35">
+                      Edit Profile
+                    </p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-[-0.04em] text-white">
+                      {currentTab.label}
+                    </h2>
+                  </div>
+                  <button
+                    className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/10 px-4 text-sm text-white/68"
+                    onClick={() => onOpenChange(false)}
+                    type="button"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
 
-      <PhotoCarousel photos={profile.photos || []} name={profile.name} zodiacEmoji={zodiacEmoji} onEdit={() => {}} />
-
-      {/* Identity strip */}
-      <div style={{ position: "relative", zIndex: 10, padding: "22px 20px 0", background: "#0A0A0F" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
-          <div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.025em" }}>
-              {profile.name}{profile.age ? `, ${profile.age}` : ""}
-            </h1>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.38)", margin: 0 }}>
-              {[profile.city, zodiacEmoji ? `${zodiacEmoji} ${profile.zodiac}` : profile.zodiac].filter(Boolean).join("  ·  ")}
-            </p>
+              {isFocused ? (
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#b48cff]/25 bg-[#b48cff]/10 px-3 py-1.5 text-sm font-medium text-white">
+                  <CurrentTabIcon className="h-4 w-4" />
+                  <span>Only this section is open</span>
+                </div>
+              ) : null}
+            </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 7 }}>
-            {profile.intent && (
-              <span style={{ fontSize: 11, padding: "4px 11px", borderRadius: 999, background: "rgba(180,140,255,0.12)", color: "#B48CFF", border: "1px solid rgba(180,140,255,0.22)", textTransform: "capitalize" }}>
-                {profile.intent}
-              </span>
-            )}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: readyColor, boxShadow: `0 0 8px ${readyColor}` }} />
-              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.32)" }}>{readiness}% ready</span>
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className={`mx-auto w-full max-w-6xl px-4 sm:px-6 ${isFocused ? "py-4" : "py-6"}`}>
+              {activeTab === "basics" ? (
+                <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+                  <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="text-sm font-semibold text-white">Identity</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Name">
+                        <TextInput
+                          value={draft.name}
+                          onChange={(event) => setField("name", event.target.value)}
+                          placeholder="Your first name"
+                        />
+                      </Field>
+                      <Field label="Age">
+                        <TextInput
+                          inputMode="numeric"
+                          value={draft.age ?? ""}
+                          onChange={(event) =>
+                            setField("age", event.target.value ? Number(event.target.value) : null)
+                          }
+                          placeholder="29"
+                        />
+                      </Field>
+                      <Field label="Pronouns">
+                        <TextInput
+                          value={draft.pronouns || ""}
+                          onChange={(event) => setField("pronouns", event.target.value)}
+                          placeholder="She/Her"
+                        />
+                      </Field>
+                      <Field label="Gender">
+                        <TextInput
+                          value={draft.gender || ""}
+                          onChange={(event) => setField("gender", event.target.value)}
+                          placeholder="Woman"
+                        />
+                      </Field>
+                      <Field label="Orientation">
+                        <TextInput
+                          value={draft.orientation || ""}
+                          onChange={(event) => setField("orientation", event.target.value)}
+                          placeholder="Straight"
+                        />
+                      </Field>
+                      <Field label="Height">
+                        <TextInput
+                          value={draft.height || ""}
+                          onChange={(event) => setField("height", event.target.value)}
+                          placeholder={`5'7"`}
+                        />
+                      </Field>
+                      <Field label="City">
+                        <TextInput
+                          value={draft.city}
+                          onChange={(event) => setField("city", event.target.value)}
+                          placeholder="Dubai"
+                        />
+                      </Field>
+                      <Field label="Hometown">
+                        <TextInput
+                          value={draft.hometown || ""}
+                          onChange={(event) => setField("hometown", event.target.value)}
+                          placeholder="Mumbai"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Work and education</p>
+                      <Field label="Job title">
+                        <TextInput
+                          value={draft.jobTitle || ""}
+                          onChange={(event) => setField("jobTitle", event.target.value)}
+                          placeholder="Product designer"
+                        />
+                      </Field>
+                      <Field label="Company">
+                        <TextInput
+                          value={draft.company || ""}
+                          onChange={(event) => setField("company", event.target.value)}
+                          placeholder="Bigg Labs"
+                        />
+                      </Field>
+                      <Field label="Education">
+                        <TextInput
+                          value={draft.education || ""}
+                          onChange={(event) => setField("education", event.target.value)}
+                          placeholder="NYU"
+                        />
+                      </Field>
+                    </div>
+
+                    <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Optional profile facts</p>
+                      <Field label="Ethnicity">
+                        <TextInput
+                          value={draft.ethnicity || ""}
+                          onChange={(event) => setField("ethnicity", event.target.value)}
+                          placeholder="Optional"
+                        />
+                      </Field>
+                      <Field label="Religion">
+                        <TextInput
+                          value={draft.religion || ""}
+                          onChange={(event) => setField("religion", event.target.value)}
+                          placeholder="Optional"
+                        />
+                      </Field>
+                      <Field label="Politics">
+                        <TextInput
+                          value={draft.politics || ""}
+                          onChange={(event) => setField("politics", event.target.value)}
+                          placeholder="Optional"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "about" ? (
+                <div className="space-y-5">
+                  <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <Field label="About me" hint="This shows under your hero">
+                      <TextArea
+                        value={draft.summary}
+                        onChange={(event) => setField("summary", event.target.value)}
+                        placeholder="What makes being with you feel different?"
+                        className="min-h-[140px]"
+                      />
+                    </Field>
+                  </div>
+
+                  <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <Field label="Interests" hint="Comma or new line separated">
+                      <TextArea
+                        value={listValue(draft.interests)}
+                        onChange={(event) =>
+                          updateArrayInput(event, (next) => setField("interests", next))
+                        }
+                        placeholder="Pilates, live music, Sunday dinner, startups"
+                        className="min-h-[110px]"
+                      />
+                    </Field>
+                  </div>
+
+                  <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Prompt cards</p>
+                      <p className="mt-1 text-[13px] leading-5 text-white/42">
+                        If a prompt cannot start a chat, it is just decorative wallpaper.
+                      </p>
+                    </div>
+                    <div className="grid gap-4 lg:grid-cols-3">
+                      {draft.prompts.map((prompt, index) => (
+                        <div
+                          key={index}
+                          className="space-y-3 rounded-[24px] border border-white/8 bg-[#0b0d16] p-4"
+                        >
+                          <Field label={`Prompt ${index + 1} question`}>
+                            <TextInput
+                              value={prompt.question}
+                              onChange={(event) =>
+                                setField(
+                                  "prompts",
+                                  draft.prompts.map((entry, promptIndex) =>
+                                    promptIndex === index
+                                      ? { ...entry, question: event.target.value }
+                                      : entry,
+                                  ),
+                                )
+                              }
+                            />
+                          </Field>
+                          <Field label="Answer">
+                            <TextArea
+                              value={prompt.answer}
+                              onChange={(event) =>
+                                setField(
+                                  "prompts",
+                                  draft.prompts.map((entry, promptIndex) =>
+                                    promptIndex === index
+                                      ? { ...entry, answer: event.target.value }
+                                      : entry,
+                                  ),
+                                )
+                              }
+                              className="min-h-[132px]"
+                              placeholder="Write something specific enough that a match can reply to it."
+                            />
+                          </Field>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "dating" ? (
+                <div className="space-y-5">
+                  <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+                    <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Relationship goals</p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <Field label="Relationship intention">
+                          <SelectInput
+                            value={draft.intent || ""}
+                            onChange={(event) =>
+                              setField(
+                                "intent",
+                                (event.target.value || null) as HydratedProfile["intent"],
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="serious">Long-term relationship</option>
+                            <option value="marriage">Marriage-minded</option>
+                            <option value="casual">Something casual</option>
+                            <option value="exploring">Still exploring</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Relationship style">
+                          <TextInput
+                            value={draft.relationshipStyle || ""}
+                            onChange={(event) => setField("relationshipStyle", event.target.value)}
+                            placeholder="Monogamy"
+                          />
+                        </Field>
+                        <Field label="Looking for">
+                          <TextInput
+                            value={draft.partnerGender || ""}
+                            onChange={(event) => setField("partnerGender", event.target.value)}
+                            placeholder="Men"
+                          />
+                        </Field>
+                        <Field label="Love language">
+                          <TextInput
+                            value={draft.loveLanguage || ""}
+                            onChange={(event) => setField("loveLanguage", event.target.value)}
+                            placeholder="Quality time"
+                          />
+                        </Field>
+                        <Field label="Preferred age min">
+                          <TextInput
+                            inputMode="numeric"
+                            value={draft.partnerAgeMin ?? ""}
+                            onChange={(event) =>
+                              setField(
+                                "partnerAgeMin",
+                                event.target.value ? Number(event.target.value) : null,
+                              )
+                            }
+                            placeholder="27"
+                          />
+                        </Field>
+                        <Field label="Preferred age max">
+                          <TextInput
+                            inputMode="numeric"
+                            value={draft.partnerAgeMax ?? ""}
+                            onChange={(event) =>
+                              setField(
+                                "partnerAgeMax",
+                                event.target.value ? Number(event.target.value) : null,
+                              )
+                            }
+                            placeholder="36"
+                          />
+                        </Field>
+                        <Field label="Has kids">
+                          <SelectInput
+                            value={draft.hasKids === null ? "" : draft.hasKids ? "yes" : "no"}
+                            onChange={(event) =>
+                              setField(
+                                "hasKids",
+                                event.target.value === ""
+                                  ? null
+                                  : event.target.value === "yes",
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Wants kids">
+                          <SelectInput
+                            value={draft.wantsKids || ""}
+                            onChange={(event) =>
+                              setField(
+                                "wantsKids",
+                                (event.target.value || null) as HydratedProfile["wantsKids"],
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="yes">Yes</option>
+                            <option value="open">Open</option>
+                            <option value="no">No</option>
+                          </SelectInput>
+                        </Field>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Compatibility filters</p>
+                      <Field label="Core values" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.coreValues)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("coreValues", next))
+                          }
+                          placeholder="Commitment, openness, stability"
+                          className="min-h-[110px]"
+                        />
+                      </Field>
+                      <Field label="Dealbreakers" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.dealbreakers)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("dealbreakers", next))
+                          }
+                          placeholder="Dishonesty, emotional unavailability"
+                          className="min-h-[110px]"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-5 lg:grid-cols-2">
+                    <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <Field label="Family expectations">
+                        <TextArea
+                          value={draft.familyExpectations}
+                          onChange={(event) =>
+                            setField("familyExpectations", event.target.value)
+                          }
+                          placeholder="How much does family approval matter to you?"
+                        />
+                      </Field>
+                    </div>
+                    <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <Field label="Life architecture">
+                        <TextArea
+                          value={draft.lifeArchitecture}
+                          onChange={(event) => setField("lifeArchitecture", event.target.value)}
+                          placeholder="Where and how do you want to live in the next 3 years?"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "lifestyle" ? (
+                <div className="space-y-5">
+                  <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+                    <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Habits and rhythm</p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <Field label="Exercise">
+                          <SelectInput
+                            value={draft.exercise || ""}
+                            onChange={(event) =>
+                              setField(
+                                "exercise",
+                                (event.target.value || null) as HydratedProfile["exercise"],
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="often">Often</option>
+                            <option value="sometimes">Sometimes</option>
+                            <option value="never">Rarely</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Drinking">
+                          <SelectInput
+                            value={draft.drinking || ""}
+                            onChange={(event) =>
+                              setField(
+                                "drinking",
+                                (event.target.value || null) as HydratedProfile["drinking"],
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="never">Never</option>
+                            <option value="social">Socially</option>
+                            <option value="regularly">Regularly</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Smoking">
+                          <SelectInput
+                            value={draft.smoking || ""}
+                            onChange={(event) =>
+                              setField(
+                                "smoking",
+                                (event.target.value || null) as HydratedProfile["smoking"],
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="never">Never</option>
+                            <option value="social">Socially</option>
+                            <option value="regularly">Regularly</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Conflict style">
+                          <TextInput
+                            value={draft.conflictStyle}
+                            onChange={(event) => setField("conflictStyle", event.target.value)}
+                            placeholder="Direct but calm"
+                          />
+                        </Field>
+                        <Field label="Sleep schedule">
+                          <SelectInput
+                            value={draft.sleepSchedule || ""}
+                            onChange={(event) => setField("sleepSchedule", event.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            <option value="Early bird">Early bird</option>
+                            <option value="Night owl">Night owl</option>
+                            <option value="Somewhere in between">Somewhere in between</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Social battery">
+                          <SelectInput
+                            value={draft.socialBattery || ""}
+                            onChange={(event) => setField("socialBattery", event.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            <option value="Needs alone time">Needs alone time</option>
+                            <option value="Balanced">Balanced</option>
+                            <option value="People-powered">People-powered</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Cleanliness">
+                          <SelectInput
+                            value={draft.cleanliness || ""}
+                            onChange={(event) => setField("cleanliness", event.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            <option value="Neat">Neat</option>
+                            <option value="Comfortably lived-in">Comfortably lived-in</option>
+                            <option value="Creative chaos">Creative chaos</option>
+                          </SelectInput>
+                        </Field>
+                        <Field label="Diet">
+                          <TextInput
+                            value={draft.diet || ""}
+                            onChange={(event) => setField("diet", event.target.value)}
+                            placeholder="Vegetarian-ish, halal, loves sushi"
+                          />
+                        </Field>
+                        <Field label="Weekend style">
+                          <TextInput
+                            value={draft.weekendStyle || ""}
+                            onChange={(event) => setField("weekendStyle", event.target.value)}
+                            placeholder="Slow mornings, dinner plans, one good walk"
+                          />
+                        </Field>
+                        <Field label="Travel style">
+                          <TextInput
+                            value={draft.travelStyle || ""}
+                            onChange={(event) => setField("travelStyle", event.target.value)}
+                            placeholder="Planner, spontaneous, one big trip person"
+                          />
+                        </Field>
+                      </div>
+
+                      <Field label="Languages" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.languages)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("languages", next))
+                          }
+                          placeholder="English, Hindi"
+                          className="min-h-[96px]"
+                        />
+                      </Field>
+
+                      <Field label="Pets" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.pets)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("pets", next))
+                          }
+                          placeholder="Dog person, has a cat"
+                          className="min-h-[96px]"
+                        />
+                      </Field>
+                    </div>
+
+                    <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Inner signal layer</p>
+                      <Field label="Strengths" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.strengths)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("strengths", next))
+                          }
+                          placeholder="Emotionally steady, funny, loyal"
+                          className="min-h-[96px]"
+                        />
+                      </Field>
+                      <Field label="Growing toward" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.growthAreas)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("growthAreas", next))
+                          }
+                          placeholder="Clearer communication, stronger boundaries"
+                          className="min-h-[96px]"
+                        />
+                      </Field>
+                      <Field label="What I bring" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.offers)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("offers", next))
+                          }
+                          placeholder="Calm under pressure, shows up consistently"
+                          className="min-h-[96px]"
+                        />
+                      </Field>
+                      <Field label="What I need" hint="Comma or new line separated">
+                        <TextArea
+                          value={listValue(draft.needs)}
+                          onChange={(event) =>
+                            updateArrayInput(event, (next) => setField("needs", next))
+                          }
+                          placeholder="Direct communication, emotional consistency"
+                          className="min-h-[96px]"
+                        />
+                      </Field>
+                      <Field label="Maahi focus">
+                        <TextArea
+                          value={draft.coachingFocus}
+                          onChange={(event) => setField("coachingFocus", event.target.value)}
+                          placeholder="What should your private growth lens be right now?"
+                          className="min-h-[120px]"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "gallery" ? (
+                <div className="space-y-5">
+                  {uploadError ? (
+                    <p className="rounded-2xl border border-[#ff9fb7]/18 bg-[#ff9fb7]/8 px-4 py-3 text-sm text-[#ffb4c7]">
+                      {uploadError}
+                    </p>
+                  ) : null}
+
+                  {/* ── Profile photo (index 0) ── */}
+                  <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="mb-1 text-sm font-semibold text-white">Profile photo</p>
+                    <p className="mb-4 text-[13px] leading-5 text-white/42">
+                      Shown as your avatar everywhere on the app.
+                    </p>
+                    <div className="flex items-center gap-4">
+                      {/* Avatar preview */}
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[22px] border border-white/10 bg-[#10131d]">
+                        {draft.photos[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={draft.photos[0]} alt="Profile photo preview" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white/40">
+                            {draft.name?.[0]?.toUpperCase() || "?"}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <label
+                          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/10 px-3 py-2 text-xs font-medium text-white/78 transition hover:bg-white/[0.05] ${
+                            uploadingPhotoIndex === 0 ? "pointer-events-none opacity-60" : ""
+                          }`}
+                          htmlFor="photo-upload-0"
+                        >
+                          <Camera className="h-3 w-3" />
+                          {uploadingPhotoIndex === 0 ? "Uploading..." : "Upload from gallery"}
+                        </label>
+                        <input
+                          id="photo-upload-0"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0] || null;
+                            void handlePhotoUpload(0, file);
+                            event.target.value = "";
+                          }}
+                        />
+                        {draft.photos[0] ? (
+                          <button
+                            className="inline-flex items-center rounded-full border border-white/10 px-3 py-2 text-xs font-medium text-white/58 transition hover:bg-white/[0.05] hover:text-white/78"
+                            onClick={() => setPhotoAtIndex(0, "")}
+                            type="button"
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Gallery photos (indices 1–5) ── */}
+                  <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="mb-1 text-sm font-semibold text-white">Gallery photos</p>
+                    <p className="mb-4 text-[13px] leading-5 text-white/42">
+                      Shown on your profile. Add up to 5 photos.
+                    </p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {draft.photos.slice(1).map((photo, i) => {
+                        const index = i + 1;
+                        return (
+                          <div key={index} className="relative">
+                            <label
+                              htmlFor={`photo-upload-${index}`}
+                              className={`relative block aspect-square cursor-pointer overflow-hidden rounded-[20px] border bg-[#0b0d16] transition ${
+                                photo
+                                  ? "border-white/10"
+                                  : "border-dashed border-white/12 hover:border-white/25"
+                              } ${uploadingPhotoIndex === index ? "pointer-events-none opacity-60" : ""}`}
+                            >
+                              {photo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={photo} alt={`Gallery ${i + 1}`} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-white/28">
+                                  <Camera className="h-5 w-5" />
+                                  <span className="text-[10px]">
+                                    {uploadingPhotoIndex === index ? "Uploading…" : "Add photo"}
+                                  </span>
+                                </div>
+                              )}
+                            </label>
+                            <input
+                              id={`photo-upload-${index}`}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] || null;
+                                void handlePhotoUpload(index, file);
+                                event.target.value = "";
+                              }}
+                            />
+                            {photo ? (
+                              <button
+                                className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white/70 backdrop-blur transition hover:text-white"
+                                onClick={() => setPhotoAtIndex(index, "")}
+                                type="button"
+                                aria-label="Remove photo"
+                              >
+                                ×
+                              </button>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "visibility" ? (
+                <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+                  <div className="space-y-3 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="text-sm font-semibold text-white">Discovery visibility</p>
+                    <div className="grid gap-3">
+                      {[
+                        {
+                          key: "visible" as const,
+                          label: "Visible in discovery",
+                          copy: "You are out there, charming strangers on purpose.",
+                        },
+                        {
+                          key: "paused" as const,
+                          label: "Pause discovery",
+                          copy: "Take a breath without ghosting the people already here.",
+                        },
+                        {
+                          key: "hidden" as const,
+                          label: "Private profile",
+                          copy: "Keep it backstage until the profile stops feeling half-dressed.",
+                        },
+                      ].map((option) => (
+                        <button
+                          key={option.key}
+                          className={`rounded-2xl border px-4 py-4 text-left transition ${
+                            draft.profileVisibility === option.key
+                              ? "border-[#b48cff]/45 bg-[#b48cff]/10"
+                              : "border-white/8 bg-[#0b0d16]"
+                          }`}
+                          onClick={() => setField("profileVisibility", option.key)}
+                          type="button"
+                        >
+                          <p className="text-sm font-medium text-white">{option.label}</p>
+                          <p className="mt-1 text-[13px] leading-5 text-white/42">{option.copy}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                    <p className="text-sm font-semibold text-white">What is shown publicly</p>
+                    {[
+                      {
+                        key: "showAge" as const,
+                        label: "Show age",
+                        copy: "Useful context, unless you prefer a little strategic mystery.",
+                      },
+                      {
+                        key: "showCity" as const,
+                        label: "Show city",
+                        copy: "Let people know the neighborhood, not your exact coordinates.",
+                      },
+                      {
+                        key: "showWork" as const,
+                        label: "Show work",
+                        copy: "Career can be attractive. Corporate oversharing, less so.",
+                      },
+                      {
+                        key: "showEducation" as const,
+                        label: "Show education",
+                        copy: "Show the school if it helps. Hide it if it turns into a personality.",
+                      },
+                    ].map((option) => (
+                      <button
+                        key={option.key}
+                        className={`flex w-full items-start justify-between rounded-2xl border px-4 py-4 text-left transition ${
+                          draft[option.key]
+                            ? "border-white/12 bg-[#0b0d16]"
+                            : "border-[#d4688a]/22 bg-[#d4688a]/08"
+                        }`}
+                        onClick={() => setField(option.key, !draft[option.key])}
+                        type="button"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-white">{option.label}</p>
+                          <p className="mt-1 text-[13px] leading-5 text-white/42">{option.copy}</p>
+                        </div>
+                        <div
+                          className={`mt-1 inline-flex h-7 min-w-14 items-center rounded-full p-1 ${
+                            draft[option.key] ? "bg-[#4fffb0]/22" : "bg-white/10"
+                          }`}
+                        >
+                          <span
+                            className={`h-5 w-5 rounded-full bg-white transition ${
+                              draft[option.key] ? "translate-x-7" : "translate-x-0"
+                            }`}
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="border-t border-white/8 bg-[#090b13]/95 backdrop-blur-xl">
+            <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
+              {error ? <p className="mb-3 text-sm text-[#ff9fb7]">{error}</p> : null}
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 rounded-full border border-white/10 px-4 py-3 text-sm font-medium text-white/72"
+                  onClick={() => onOpenChange(false)}
+                  type="button"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 rounded-full bg-[linear-gradient(135deg,#ff6a95,#b48cff)] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(180,140,255,0.24)] disabled:opacity-50"
+                  disabled={saving}
+                  onClick={onSave}
+                  type="button"
+                >
+                  {saving ? "Saving..." : "Save changes"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
 
-        {/* Tab bar */}
-        <div style={{ display: "flex", background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: 3, gap: 2 }}>
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ flex: 1, padding: "9px 0", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.15s ease", background: tab === t.key ? "#fff" : "transparent", color: tab === t.key ? "#0A0A0F" : "rgba(255,255,255,0.32)" }}>
-              {t.label}
+export default function ProfilePage() {
+  const router = useRouter();
+  const { userId, profile, loading, logout, refresh } = useAuth();
+  const [profileViewTab, setProfileViewTab] = useState<ProfileViewTab>("profile");
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorTab, setEditorTab] = useState<EditorTab>("basics");
+  const [focusedEditorTab, setFocusedEditorTab] = useState<EditorTab | null>(null);
+  const [draft, setDraft] = useState<HydratedProfile | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !profile) {
+      router.push("/onboarding");
+    }
+  }, [loading, profile, router]);
+
+  useEffect(() => {
+    if (profile) {
+      setDraft(createEditorDraft(profile));
+    }
+  }, [profile]);
+
+  const hydrated = useMemo(() => (profile ? hydrateProfile(profile) : null), [profile]);
+  const completion = useMemo(() => (hydrated ? getCompletion(hydrated) : null), [hydrated]);
+  const scores = useMemo(() => (hydrated ? deriveDimensionScores(hydrated) : []), [hydrated]);
+
+  if (loading || !profile || !hydrated || !completion) {
+    return null;
+  }
+
+  const topDimensions = DIMENSIONS.map((dimension, index) => ({
+    ...dimension,
+    score: scores[index],
+  }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  const hiddenCount = [
+    hydrated.showAge,
+    hydrated.showCity,
+    hydrated.showWork,
+    hydrated.showEducation,
+  ].filter((value) => !value).length;
+
+  const openEditor = (tab: EditorTab, mode: "full" | "focused" = "focused") => {
+    setSaveError(null);
+    setDraft(createEditorDraft(profile));
+    setEditorTab(tab);
+    setFocusedEditorTab(mode === "focused" ? tab : null);
+    setEditorOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!draft) return;
+    setSaveError(null);
+    setIsSaving(true);
+
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildProfilePayload(draft)),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not save profile changes");
+      }
+
+      await refresh();
+      setFocusedEditorTab(null);
+      setEditorOpen(false);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save profile changes");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="min-h-[100dvh] bg-[#06070d] pb-[calc(120px+env(safe-area-inset-bottom,0px))] text-white">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className="absolute left-[-6rem] top-[-5rem] h-72 w-72 rounded-full bg-[#d4688a]/18 blur-[110px]" />
+          <div className="absolute bottom-[-7rem] right-[-3rem] h-80 w-80 rounded-full bg-[#7e63ff]/14 blur-[120px]" />
+        </div>
+
+        <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pb-10 pt-4 sm:px-5">
+          <PhotoHero
+            profile={hydrated}
+            onEditPhoto={() => openEditor("gallery", "focused")}
+            onSettings={() => setSettingsOpen(true)}
+            onUpgrade={() => setUpgradeOpen(true)}
+            onLogout={() => void logout()}
+          />
+
+          {hydrated.profileVisibility !== "visible" ? (
+            <div className="rounded-[26px] border border-[#f5c842]/18 bg-[#f5c842]/8 px-5 py-4">
+              <div className="flex items-start gap-3">
+                <Shield className="mt-0.5 h-5 w-5 text-[#f5c842]" />
+                <div>
+                  <p className="text-sm font-semibold text-white">{formatVisibility(hydrated.profileVisibility)}</p>
+                  <p className="mt-1 text-[13px] leading-5 text-white/48">
+                    Your profile is not fully discoverable right now. Existing connections stay intact,
+                    but new people will not see the profile until you switch visibility back on.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <SectionCard
+            eyebrow="Profile Health"
+            title={`Profile completeness: ${completion.percent}%`}
+            description="The bones are here. Now we are making sure it reads like a person, not a beta feature."
+            action={
+              <button
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                onClick={() => openEditor("basics", "full")}
+                type="button"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </button>
+            }
+          >
+            <div className="grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
+              <div>
+                <div className="h-3 overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#ff6a95,#b48cff,#4fffb0)]"
+                    style={{ width: `${completion.percent}%` }}
+                  />
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {completion.missing.length > 0 ? (
+                    completion.missing.map((item) => <Tag key={item}>{item}</Tag>)
+                  ) : (
+                    <Tag tone="emerald">No obvious gaps left</Tag>
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Tag
+                    tone={
+                      hydrated.profileVisibility === "visible"
+                        ? "emerald"
+                        : hydrated.profileVisibility === "paused"
+                          ? "amber"
+                          : "rose"
+                    }
+                  >
+                    {formatVisibility(hydrated.profileVisibility)}
+                  </Tag>
+                  <Tag>
+                    {hydrated.photos.length}/{MAX_PHOTOS} photos
+                  </Tag>
+                </div>
+              </div>
+              <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/34">
+                  Profile state
+                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/48">Ready to date</span>
+                    <span className="text-white/78">{hydrated.readinessScore}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/48">Discovery</span>
+                    <span className="text-white/78">{formatVisibility(hydrated.profileVisibility)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/48">Hidden fields</span>
+                    <span className="text-white/78">{hiddenCount}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/48">Prompts answered</span>
+                    <span className="text-white/78">
+                      {hydrated.prompts.filter((prompt) => prompt.answer).length}/3
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+
+          <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,27,0.96),rgba(9,10,16,0.9))] p-2 shadow-[0_24px_80px_rgba(0,0,0,0.2)]">
+            <div className="flex gap-2 overflow-x-auto">
+              {PROFILE_VIEW_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  className={`min-w-[132px] flex-1 rounded-[20px] px-4 py-3 text-left transition ${
+                    profileViewTab === tab.key
+                      ? "bg-white text-[#090b13]"
+                      : "bg-transparent text-white/48 hover:bg-white/[0.04] hover:text-white/78"
+                  }`}
+                  onClick={() => setProfileViewTab(tab.key)}
+                  type="button"
+                >
+                  <p className="text-sm font-semibold">{tab.label}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {profileViewTab === "profile" ? (
+            <>
+              <SectionCard
+                eyebrow="Essentials"
+                title="What people see first"
+                description="The first thirty seconds: enough signal to intrigue, not enough mystery to feel suspicious."
+                action={
+                  <button
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                    onClick={() => openEditor("basics")}
+                    type="button"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </button>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DetailTile
+                    icon={<UserRound className="h-4 w-4" />}
+                    label="Identity"
+                    value={[hydrated.pronouns, hydrated.gender, hydrated.orientation].filter(Boolean).join(" · ") || "Add pronouns, gender, and orientation"}
+                  />
+                  <DetailTile
+                    icon={<MapPin className="h-4 w-4" />}
+                    label="Location"
+                    value={
+                      hydrated.showCity
+                        ? [hydrated.city, hydrated.hometown].filter(Boolean).join(" · ") || "Add city"
+                        : "Hidden on your public profile"
+                    }
+                    hidden={!hydrated.showCity}
+                  />
+                  <DetailTile
+                    icon={<BriefcaseBusiness className="h-4 w-4" />}
+                    label="Work"
+                    value={
+                      hydrated.showWork
+                        ? [hydrated.jobTitle, hydrated.company].filter(Boolean).join(" at ") || "Add role and company"
+                        : "Hidden on your public profile"
+                    }
+                    hidden={!hydrated.showWork}
+                  />
+                  <DetailTile
+                    icon={<GraduationCap className="h-4 w-4" />}
+                    label="Education"
+                    value={
+                      hydrated.showEducation
+                        ? hydrated.education || "Add school or education"
+                        : "Hidden on your public profile"
+                    }
+                    hidden={!hydrated.showEducation}
+                  />
+                  <DetailTile
+                    icon={<Ruler className="h-4 w-4" />}
+                    label="Vitals"
+                    value={[hydrated.height, hydrated.religion, hydrated.politics].filter(Boolean).join(" · ") || "Add height, religion, or politics"}
+                  />
+                  <DetailTile
+                    icon={<Star className="h-4 w-4" />}
+                    label="Interests"
+                    value={
+                      hydrated.interests.length > 0
+                        ? hydrated.interests.slice(0, 4).join(" · ")
+                        : "Add interests people can actually message you about"
+                    }
+                  />
+                </div>
+              </SectionCard>
+
+              <SectionCard
+                eyebrow="Gallery"
+                title="Photo gallery"
+                description="Photos do half the talking. Make sure they are saying something useful."
+                action={
+                  <button
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                    onClick={() => openEditor("gallery")}
+                    type="button"
+                  >
+                    <Camera className="h-4 w-4" />
+                    Edit
+                  </button>
+                }
+              >
+                {hydrated.photos.slice(1).filter(Boolean).length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {hydrated.photos.slice(1).filter(Boolean).map((photo, index) => (
+                      <div
+                        key={photo + index}
+                        className="relative overflow-hidden rounded-[24px] border border-white/8 bg-white/[0.03]"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photo}
+                          alt={`${hydrated.name} photo ${index + 1}`}
+                          className="aspect-[0.9] h-full w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[24px] border border-dashed border-white/12 bg-white/[0.02] px-5 py-8 text-center">
+                    <Camera className="mx-auto h-8 w-8 text-white/32" />
+                    <p className="mt-3 text-sm font-medium text-white">No gallery photos yet</p>
+                    <p className="mt-2 text-[13px] leading-5 text-white/42">
+                      Add photos in the editor to build your gallery.
+                    </p>
+                  </div>
+                )}
+              </SectionCard>
+            </>
+          ) : null}
+
+          {profileViewTab === "dating" ? (
+            <>
+              <SectionCard
+                eyebrow="Dating Intentions"
+                title="What you're looking for"
+                description="Clarity is attractive. Mixed signals are for bad Wi-Fi and people who text 'haha sure'."
+                action={
+                  <button
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                    onClick={() => openEditor("dating")}
+                    type="button"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </button>
+                }
+              >
+                <div className="flex flex-wrap gap-2">
+                  <Tag tone="violet">{formatIntent(hydrated.intent)}</Tag>
+                  {hydrated.relationshipStyle ? <Tag tone="violet">{hydrated.relationshipStyle}</Tag> : null}
+                  {hydrated.partnerGender ? <Tag tone="violet">Looking for {hydrated.partnerGender}</Tag> : null}
+                  {hydrated.partnerAgeMin || hydrated.partnerAgeMax ? (
+                    <Tag tone="violet">
+                      Prefers {hydrated.partnerAgeMin || 18} - {hydrated.partnerAgeMax || 99}
+                    </Tag>
+                  ) : null}
+                  <Tag tone="violet">{formatHasKids(hydrated.hasKids)}</Tag>
+                  <Tag tone="violet">{formatWantsKids(hydrated.wantsKids)}</Tag>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <DetailTile
+                    icon={<Heart className="h-4 w-4" />}
+                    label="Love language"
+                    value={hydrated.loveLanguage || "Add how care is best received"}
+                  />
+                  <DetailTile
+                    icon={<Shield className="h-4 w-4" />}
+                    label="Dealbreakers"
+                    value={
+                      hydrated.dealbreakers.length > 0
+                        ? hydrated.dealbreakers.join(" · ")
+                        : "Add what quietly ends attraction for you"
+                    }
+                  />
+                </div>
+
+                {hydrated.familyExpectations || hydrated.lifeArchitecture ? (
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <DetailTile
+                      icon={<Sparkles className="h-4 w-4" />}
+                      label="Family expectations"
+                      value={hydrated.familyExpectations || "Add how family fits into partner choice"}
+                    />
+                    <DetailTile
+                      icon={<MapPin className="h-4 w-4" />}
+                      label="Life architecture"
+                      value={hydrated.lifeArchitecture || "Add the life you're trying to build"}
+                    />
+                  </div>
+                ) : null}
+              </SectionCard>
+
+              <SectionCard
+                eyebrow="Conversation"
+                title="Prompt answers"
+                description="These are your reply magnets. A good prompt should invite a message, not polite silence."
+                action={
+                  <button
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                    onClick={() => openEditor("about")}
+                    type="button"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </button>
+                }
+              >
+                {hydrated.prompts.filter((prompt) => prompt.answer).length > 0 ? (
+                  <div className="grid gap-3">
+                    {hydrated.prompts
+                      .filter((prompt) => prompt.answer)
+                      .map((prompt) => (
+                        <div
+                          key={prompt.question}
+                          className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(180,140,255,0.08),rgba(180,140,255,0.03))] p-5"
+                        >
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#c9b5ff]">
+                            {prompt.question}
+                          </p>
+                          <p className="mt-3 text-sm leading-7 text-white/78">{prompt.answer}</p>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[24px] border border-dashed border-white/12 bg-white/[0.02] px-5 py-8 text-center">
+                    <p className="text-sm font-medium text-white">No prompt cards yet</p>
+                    <p className="mt-2 text-[13px] leading-5 text-white/42">
+                      Add two or three prompts so people can message the real you, not your résumé.
+                    </p>
+                  </div>
+                )}
+              </SectionCard>
+            </>
+          ) : null}
+
+          {profileViewTab === "lifestyle" ? (
+            <>
+              <SectionCard
+                eyebrow="Lifestyle"
+                title="Vibes, habits, and compatibility clues"
+                description="Chemistry is cute. Daily habits decide whether the Tuesday version of you works."
+                action={
+                  <button
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                    onClick={() => openEditor("lifestyle")}
+                    type="button"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </button>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DetailTile
+                    icon={<Sparkles className="h-4 w-4" />}
+                    label="Lifestyle"
+                    value={[hydrated.exercise, hydrated.drinking, hydrated.smoking].filter(Boolean).join(" · ") || "Add exercise, drinking, and smoking"}
+                  />
+                  <DetailTile
+                    icon={<Star className="h-4 w-4" />}
+                    label="Languages & pets"
+                    value={[...hydrated.languages, ...hydrated.pets].join(" · ") || "Add languages or pets"}
+                  />
+                  <DetailTile
+                    icon={<Heart className="h-4 w-4" />}
+                    label="Daily flow"
+                    value={joinLifestyle(
+                      [hydrated.sleepSchedule, hydrated.socialBattery, hydrated.cleanliness],
+                      "Add sleep schedule, social battery, and cleanliness style",
+                    )}
+                  />
+                  <DetailTile
+                    icon={<MapPin className="h-4 w-4" />}
+                    label="Weekends & travel"
+                    value={joinLifestyle(
+                      [hydrated.weekendStyle, hydrated.travelStyle, hydrated.diet],
+                      "Add weekend style, travel style, and diet",
+                    )}
+                  />
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {hydrated.coreValues.length > 0 ? hydrated.coreValues.map((value) => <Tag key={value} tone="emerald">{value}</Tag>) : <Tag>Core values missing</Tag>}
+                  {hydrated.strengths.length > 0 ? hydrated.strengths.map((value) => <Tag key={value} tone="rose">{value}</Tag>) : null}
+                </div>
+              </SectionCard>
+
+              <SectionCard
+                eyebrow="Visibility"
+                title="What stays public vs private"
+                description="Privacy is healthy. Accidental invisibility is less sexy."
+                action={
+                  <button
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/72"
+                    onClick={() => openEditor("visibility")}
+                    type="button"
+                  >
+                    {hiddenCount > 0 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Edit
+                  </button>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DetailTile
+                    icon={<Eye className="h-4 w-4" />}
+                    label="Discovery"
+                    value={formatVisibility(hydrated.profileVisibility)}
+                  />
+                  <DetailTile
+                    icon={<Lock className="h-4 w-4" />}
+                    label="Field privacy"
+                    value={
+                      hiddenCount > 0
+                        ? `${hiddenCount} field${hiddenCount === 1 ? "" : "s"} hidden from the public profile`
+                        : "All core fields visible"
+                    }
+                  />
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Tag tone={hydrated.showAge ? "emerald" : "rose"}>
+                    Age: {hydrated.showAge ? "Visible" : "Hidden"}
+                  </Tag>
+                  <Tag tone={hydrated.showCity ? "emerald" : "rose"}>
+                    City: {hydrated.showCity ? "Visible" : "Hidden"}
+                  </Tag>
+                  <Tag tone={hydrated.showWork ? "emerald" : "rose"}>
+                    Work: {hydrated.showWork ? "Visible" : "Hidden"}
+                  </Tag>
+                  <Tag tone={hydrated.showEducation ? "emerald" : "rose"}>
+                    Education: {hydrated.showEducation ? "Visible" : "Hidden"}
+                  </Tag>
+                </div>
+              </SectionCard>
+            </>
+          ) : null}
+
+          {profileViewTab === "insights" ? (
+            <SectionCard
+              eyebrow="Maahi Read"
+              title="Your deeper signal layer"
+                description="The deeper pattern read. Not destiny, just the stuff that keeps repeating until you notice."
+            >
+              <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
+                <div className="flex items-center justify-center rounded-[28px] border border-white/8 bg-white/[0.03] p-4">
+                  <RadarChart scores={scores} />
+                </div>
+                <div className="space-y-4">
+                  <div className="rounded-[24px] border border-[#d4688a]/16 bg-[#d4688a]/6 p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#f09cb6]">
+                      Attachment profile
+                    </p>
+                    <p className="mt-3 text-xl font-semibold text-white">{hydrated.attachment}</p>
+                  <p className="mt-2 text-[13px] leading-5 text-white/48">
+                    {hydrated.attachment === "Secure" &&
+                      "Emotionally available, grounded, and able to stay open without losing yourself."}
+                      {hydrated.attachment === "Anxious" &&
+                        "You care deeply. The work is trusting consistency without chasing it."}
+                      {hydrated.attachment === "Avoidant" &&
+                        "You protect yourself fast. The growth edge is making closeness feel safe."}
+                      {hydrated.attachment === "Fearful-Avoidant" &&
+                        "You want connection and safety at the same time. Both need attention."}
+                    </p>
+                  </div>
+
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/35">
+                        Strongest dimensions
+                      </p>
+                      <p className="text-sm font-medium text-white/65">{hydrated.readinessScore}% ready</p>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      {topDimensions.map((dimension) => (
+                        <div key={dimension.id}>
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="text-sm text-white/72">{dimension.label}</span>
+                            <span className="text-sm font-semibold" style={{ color: dimension.color }}>
+                              {dimension.score}
+                            </span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                            <div
+                              className="h-full rounded-full"
+                              style={{ width: `${dimension.score}%`, background: dimension.color }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {(hydrated.offers.length > 0 || hydrated.needs.length > 0 || hydrated.growthAreas.length > 0) ? (
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <DetailTile
+                    icon={<Heart className="h-4 w-4" />}
+                    label="What I bring"
+                    value={hydrated.offers.join(" · ") || "Add what makes being with you valuable"}
+                  />
+                  <DetailTile
+                    icon={<Shield className="h-4 w-4" />}
+                    label="What I need"
+                    value={hydrated.needs.join(" · ") || "Add what your partner needs to understand"}
+                  />
+                  <DetailTile
+                    icon={<Sparkles className="h-4 w-4" />}
+                    label="Growing toward"
+                    value={hydrated.growthAreas.join(" · ") || "Add current growth edges"}
+                  />
+                </div>
+              ) : null}
+
+              {hydrated.coachingFocus ? (
+                <div className="mt-5 rounded-[24px] border border-[#b48cff]/20 bg-[#b48cff]/8 p-5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#d8c8ff]">
+                    Maahi&apos;s focus for you
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-white/74">&ldquo;{hydrated.coachingFocus}&rdquo;</p>
+                </div>
+              ) : null}
+            </SectionCard>
+          ) : null}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              className="rounded-full border border-white/10 px-5 py-4 text-sm font-medium text-white/72"
+              onClick={() => router.push("/onboarding")}
+              type="button"
+            >
+              Redo soul discovery
             </button>
-          ))}
+            <Button
+              variant="ghost"
+              className="h-auto rounded-full border border-[#d4688a]/20 bg-[#d4688a]/8 px-5 py-4 text-sm font-medium text-[#ef8cab] hover:bg-[#d4688a]/14 hover:text-[#f6a3bc]"
+              onClick={() => void logout()}
+            >
+              Sign out
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div style={{ position: "relative", zIndex: 10 }}>
-        {tab === "soul" && <SoulTab profile={profile} />}
-        {tab === "dimensions" && <DimensionsTab profile={profile} />}
-        {tab === "life" && <LifeTab profile={profile} />}
-        {tab === "you" && <YouTab profile={profile} onLogout={logout} onRedo={() => router.push("/onboarding")} />}
-      </div>
-    </div>
+      {editorOpen ? (
+        <ProfileEditor
+          userId={userId!}
+          draft={draft}
+          setDraft={setDraft}
+          activeTab={editorTab}
+          setActiveTab={setEditorTab}
+          focusedTab={focusedEditorTab}
+          open={editorOpen}
+          onOpenChange={(next) => {
+            setEditorOpen(next);
+            if (!next) {
+              setFocusedEditorTab(null);
+            }
+          }}
+          onSave={handleSave}
+          saving={isSaving}
+          error={saveError}
+        />
+      ) : null}
+      <SettingsDrawer open={settingsOpen} onOpenChange={setSettingsOpen} onUpgrade={() => { setSettingsOpen(false); setUpgradeOpen(true); }} />
+      <UpgradeSheet open={upgradeOpen} onOpenChange={setUpgradeOpen} />
+    </>
   );
 }

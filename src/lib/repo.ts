@@ -1,6 +1,13 @@
 import { sql } from "./db";
 import { randomUUID } from "node:crypto";
-import type { Profile, Match, LifePreview, SessionMemory, DebriefReflection } from "./types";
+import type {
+  Profile,
+  ProfilePrompt,
+  Match,
+  LifePreview,
+  SessionMemory,
+  DebriefReflection,
+} from "./types";
 
 function createId(prefix: string) {
   return `${prefix}_${randomUUID()}`;
@@ -85,6 +92,10 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
   const photos = serializeArray(profile.photos);
   const offers = serializeArray(profile.offers);
   const needs = serializeArray(profile.needs);
+  const languages = serializeArray(profile.languages);
+  const interests = serializeArray(profile.interests);
+  const pets = serializeArray(profile.pets);
+  const prompts = profile.prompts === undefined ? null : JSON.stringify(profile.prompts);
 
   if (existing.length) {
     await sql`
@@ -96,14 +107,33 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         city = COALESCE(${profile.city ?? null}, city),
         gender = COALESCE(${profile.gender ?? null}, gender),
         orientation = COALESCE(${profile.orientation ?? null}, orientation),
+        pronouns = COALESCE(${profile.pronouns ?? null}, pronouns),
+        hometown = COALESCE(${profile.hometown ?? null}, hometown),
+        job_title = COALESCE(${profile.jobTitle ?? null}, job_title),
+        company = COALESCE(${profile.company ?? null}, company),
+        education = COALESCE(${profile.education ?? null}, education),
+        height = COALESCE(${profile.height ?? null}, height),
+        religion = COALESCE(${profile.religion ?? null}, religion),
+        politics = COALESCE(${profile.politics ?? null}, politics),
+        ethnicity = COALESCE(${profile.ethnicity ?? null}, ethnicity),
         partner_gender = COALESCE(${profile.partnerGender ?? null}, partner_gender),
         intent = COALESCE(${profile.intent ?? null}, intent),
+        relationship_style = COALESCE(${profile.relationshipStyle ?? null}, relationship_style),
         has_kids = COALESCE(${profile.hasKids ?? null}, has_kids),
         wants_kids = COALESCE(${profile.wantsKids ?? null}, wants_kids),
         love_language = COALESCE(${profile.loveLanguage ?? null}, love_language),
         drinking = COALESCE(${profile.drinking ?? null}, drinking),
         smoking = COALESCE(${profile.smoking ?? null}, smoking),
         exercise = COALESCE(${profile.exercise ?? null}, exercise),
+        sleep_schedule = COALESCE(${profile.sleepSchedule ?? null}, sleep_schedule),
+        social_battery = COALESCE(${profile.socialBattery ?? null}, social_battery),
+        diet = COALESCE(${profile.diet ?? null}, diet),
+        weekend_style = COALESCE(${profile.weekendStyle ?? null}, weekend_style),
+        travel_style = COALESCE(${profile.travelStyle ?? null}, travel_style),
+        cleanliness = COALESCE(${profile.cleanliness ?? null}, cleanliness),
+        languages = COALESCE(${languages}, languages),
+        interests = COALESCE(${interests}, interests),
+        pets = COALESCE(${pets}, pets),
         dealbreakers = COALESCE(${dealbreakers}, dealbreakers),
         partner_age_min = COALESCE(${profile.partnerAgeMin ?? null}, partner_age_min),
         partner_age_max = COALESCE(${profile.partnerAgeMax ?? null}, partner_age_max),
@@ -116,6 +146,12 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         summary = COALESCE(${profile.summary ?? null}, summary),
         coaching_focus = COALESCE(${profile.coachingFocus ?? null}, coaching_focus),
         photos = COALESCE(${photos}, photos),
+        prompts = COALESCE(${prompts}, prompts),
+        profile_visibility = COALESCE(${profile.profileVisibility ?? null}, profile_visibility),
+        show_age = COALESCE(${profile.showAge ?? null}, show_age),
+        show_city = COALESCE(${profile.showCity ?? null}, show_city),
+        show_work = COALESCE(${profile.showWork ?? null}, show_work),
+        show_education = COALESCE(${profile.showEducation ?? null}, show_education),
         conflict_style = COALESCE(${profile.conflictStyle ?? null}, conflict_style),
         family_expectations = COALESCE(${profile.familyExpectations ?? null}, family_expectations),
         life_architecture = COALESCE(${profile.lifeArchitecture ?? null}, life_architecture),
@@ -129,24 +165,36 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
     await sql`
       INSERT INTO profiles (
         id, user_id, name, age, birthday, zodiac, city, gender, orientation,
-        partner_gender, intent, has_kids, wants_kids, love_language, drinking, smoking, exercise,
+        pronouns, hometown, job_title, company, education, height, religion, politics, ethnicity,
+        partner_gender, intent, relationship_style, has_kids, wants_kids, love_language, drinking, smoking, exercise,
+        sleep_schedule, social_battery, diet, weekend_style, travel_style, cleanliness,
+        languages, interests, pets,
         dealbreakers, partner_age_min, partner_age_max, attachment, attachment_score, readiness_score,
-        growth_areas, strengths, core_values, summary, coaching_focus, photos,
+        growth_areas, strengths, core_values, summary, coaching_focus, photos, prompts,
+        profile_visibility, show_age, show_city, show_work, show_education,
         conflict_style, family_expectations, life_architecture, offers, needs
       ) VALUES (
         ${id}, ${userId}, ${profile.name || ""},
         ${profile.age ?? null}, ${profile.birthday ?? null},
         ${profile.zodiac ?? null}, ${profile.city || ""},
         ${profile.gender ?? null}, ${profile.orientation ?? null},
-        ${profile.partnerGender ?? null}, ${profile.intent ?? null},
+        ${profile.pronouns ?? null}, ${profile.hometown ?? null}, ${profile.jobTitle ?? null},
+        ${profile.company ?? null}, ${profile.education ?? null}, ${profile.height ?? null},
+        ${profile.religion ?? null}, ${profile.politics ?? null}, ${profile.ethnicity ?? null},
+        ${profile.partnerGender ?? null}, ${profile.intent ?? null}, ${profile.relationshipStyle ?? null},
         ${profile.hasKids ?? null}, ${profile.wantsKids ?? null},
         ${profile.loveLanguage ?? null}, ${profile.drinking ?? null},
         ${profile.smoking ?? null}, ${profile.exercise ?? null},
+        ${profile.sleepSchedule ?? null}, ${profile.socialBattery ?? null}, ${profile.diet ?? null},
+        ${profile.weekendStyle ?? null}, ${profile.travelStyle ?? null}, ${profile.cleanliness ?? null},
+        ${languages ?? "[]"}, ${interests ?? "[]"}, ${pets ?? "[]"},
         ${dealbreakers ?? "[]"}, ${profile.partnerAgeMin ?? null}, ${profile.partnerAgeMax ?? null},
         ${profile.attachment || "Secure"}, ${profile.attachmentScore ?? 50},
         ${profile.readinessScore ?? 50},
         ${growthAreas ?? "[]"}, ${strengths ?? "[]"}, ${coreValues ?? "[]"},
-        ${profile.summary || ""}, ${profile.coachingFocus || ""}, ${photos ?? "[]"},
+        ${profile.summary || ""}, ${profile.coachingFocus || ""}, ${photos ?? "[]"}, ${prompts ?? "[]"},
+        ${profile.profileVisibility ?? "visible"}, ${profile.showAge ?? true},
+        ${profile.showCity ?? true}, ${profile.showWork ?? true}, ${profile.showEducation ?? true},
         ${profile.conflictStyle || ""}, ${profile.familyExpectations || ""},
         ${profile.lifeArchitecture || ""}, ${offers ?? "[]"}, ${needs ?? "[]"}
       )
@@ -163,14 +211,33 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     city: row.city as string,
     gender: row.gender as string | null,
     orientation: row.orientation as string | null,
+    pronouns: row.pronouns as string | null,
+    hometown: row.hometown as string | null,
+    jobTitle: row.job_title as string | null,
+    company: row.company as string | null,
+    education: row.education as string | null,
+    height: row.height as string | null,
+    religion: row.religion as string | null,
+    politics: row.politics as string | null,
+    ethnicity: row.ethnicity as string | null,
     partnerGender: row.partner_gender as string | null,
     intent: row.intent as Profile["intent"],
+    relationshipStyle: row.relationship_style as string | null,
     hasKids: row.has_kids as boolean | null,
     wantsKids: row.wants_kids as Profile["wantsKids"],
     loveLanguage: row.love_language as string | null,
     drinking: row.drinking as Profile["drinking"],
     smoking: row.smoking as Profile["smoking"],
     exercise: row.exercise as Profile["exercise"],
+    sleepSchedule: row.sleep_schedule as string | null,
+    socialBattery: row.social_battery as string | null,
+    diet: row.diet as string | null,
+    weekendStyle: row.weekend_style as string | null,
+    travelStyle: row.travel_style as string | null,
+    cleanliness: row.cleanliness as string | null,
+    languages: safeParseJson(row.languages as string, []),
+    interests: safeParseJson(row.interests as string, []),
+    pets: safeParseJson(row.pets as string, []),
     dealbreakers: safeParseJson(row.dealbreakers as string, []),
     partnerAgeMin: row.partner_age_min as number | null,
     partnerAgeMax: row.partner_age_max as number | null,
@@ -183,6 +250,12 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     summary: (row.summary as string) || "",
     coachingFocus: (row.coaching_focus as string) || "",
     photos: safeParseJson(row.photos as string, []),
+    prompts: safeParseJson<ProfilePrompt[]>(row.prompts as string, []),
+    profileVisibility: ((row.profile_visibility as string) || "visible") as Profile["profileVisibility"],
+    showAge: row.show_age == null ? true : Boolean(row.show_age),
+    showCity: row.show_city == null ? true : Boolean(row.show_city),
+    showWork: row.show_work == null ? true : Boolean(row.show_work),
+    showEducation: row.show_education == null ? true : Boolean(row.show_education),
     conflictStyle: (row.conflict_style as string) || "",
     familyExpectations: (row.family_expectations as string) || "",
     lifeArchitecture: (row.life_architecture as string) || "",
@@ -285,6 +358,12 @@ export async function getSessionMemoryDb(userId: string, sessionKey: string): Pr
     lastUpdated: (row.updated_at as string) || null,
     conversationPhase: ((row.conversation_phase as string) || "opening") as SessionMemory["conversationPhase"],
     coveredTopics: safeParseJson(row.covered_topics as string, []),
+    // Maahi v3
+    stableTraits: safeParseJson(row.stable_traits as string, []),
+    growthEdges: safeParseJson(row.growth_edges as string, []),
+    currentSituation: (row.current_situation as string) || "",
+    recurringThemes: safeParseJson(row.recurring_themes as string, []),
+    lastEmotionalState: (row.last_emotional_state as string) || "",
   };
 }
 
@@ -310,6 +389,12 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
     lastUpdated: new Date().toISOString(),
     conversationPhase: patch.conversationPhase || existing?.conversationPhase || "opening",
     coveredTopics: mergeArr(existing?.coveredTopics || [], patch.coveredTopics || [], 30),
+    // Maahi v3
+    stableTraits: mergeArr(existing?.stableTraits || [], patch.stableTraits || [], 8),
+    growthEdges: mergeArr(existing?.growthEdges || [], patch.growthEdges || [], 8),
+    currentSituation: patch.currentSituation || existing?.currentSituation || "",
+    recurringThemes: mergeArr(existing?.recurringThemes || [], patch.recurringThemes || [], 8),
+    lastEmotionalState: patch.lastEmotionalState || existing?.lastEmotionalState || "",
   };
 
   if (existing) {
@@ -329,6 +414,11 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         previous_questions = ${JSON.stringify(merged.previousQuestions)},
         conversation_phase = ${merged.conversationPhase},
         covered_topics = ${JSON.stringify(merged.coveredTopics)},
+        stable_traits = ${JSON.stringify(merged.stableTraits)},
+        growth_edges = ${JSON.stringify(merged.growthEdges)},
+        current_situation = ${merged.currentSituation},
+        recurring_themes = ${JSON.stringify(merged.recurringThemes)},
+        last_emotional_state = ${merged.lastEmotionalState},
         updated_at = NOW()
       WHERE user_id = ${userId} AND session_key = ${sessionKey}
     `;
@@ -338,7 +428,8 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         id, user_id, session_key, summary, traits, needs, boundaries,
         emotional_patterns, triggers, reassurance_style, communication_style,
         companion_notes, attachment_guess, readiness, previous_questions,
-        conversation_phase, covered_topics
+        conversation_phase, covered_topics,
+        stable_traits, growth_edges, current_situation, recurring_themes, last_emotional_state
       ) VALUES (
         ${createId("mem")}, ${userId}, ${sessionKey},
         ${merged.summary}, ${JSON.stringify(merged.traits)}, ${JSON.stringify(merged.needs)},
@@ -346,7 +437,10 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         ${JSON.stringify(merged.triggers)}, ${merged.reassuranceStyle},
         ${merged.communicationStyle}, ${merged.companionNotes}, ${merged.attachmentGuess},
         ${merged.readiness ?? null}, ${JSON.stringify(merged.previousQuestions)},
-        ${merged.conversationPhase}, ${JSON.stringify(merged.coveredTopics)}
+        ${merged.conversationPhase}, ${JSON.stringify(merged.coveredTopics)},
+        ${JSON.stringify(merged.stableTraits)}, ${JSON.stringify(merged.growthEdges)},
+        ${merged.currentSituation}, ${JSON.stringify(merged.recurringThemes)},
+        ${merged.lastEmotionalState}
       )
     `;
   }
@@ -448,6 +542,78 @@ export async function getDebriefReflectionsForUser(userId: string): Promise<Debr
     aiInsight: (row.ai_insight as string) || "",
     createdAt: (row.created_at as string) || "",
   }));
+}
+
+// ─── User Plans ───
+
+export interface UserPlan {
+  id: string;
+  userId: string;
+  plan: "free" | "premium";
+  status: "active" | "trialing" | "inactive" | "canceled";
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+}
+
+export async function getUserPlan(userId: string): Promise<UserPlan | null> {
+  const rows = await sql`SELECT * FROM user_plans WHERE user_id = ${userId} LIMIT 1`;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    plan: (row.plan as "free" | "premium") ?? "free",
+    status: (row.status as UserPlan["status"]) ?? "inactive",
+    stripeCustomerId: (row.stripe_customer_id as string) ?? null,
+    stripeSubscriptionId: (row.stripe_subscription_id as string) ?? null,
+    trialEndsAt: (row.trial_ends_at as string) ?? null,
+    currentPeriodEnd: (row.current_period_end as string) ?? null,
+  };
+}
+
+export async function upsertUserPlan(userId: string, data: Partial<Omit<UserPlan, "id" | "userId">>) {
+  const existing = await getUserPlan(userId);
+  if (existing) {
+    await sql`
+      UPDATE user_plans SET
+        plan = COALESCE(${data.plan ?? null}, plan),
+        status = COALESCE(${data.status ?? null}, status),
+        stripe_customer_id = COALESCE(${data.stripeCustomerId ?? null}, stripe_customer_id),
+        stripe_subscription_id = COALESCE(${data.stripeSubscriptionId ?? null}, stripe_subscription_id),
+        trial_ends_at = COALESCE(${data.trialEndsAt ?? null}, trial_ends_at),
+        current_period_end = COALESCE(${data.currentPeriodEnd ?? null}, current_period_end),
+        updated_at = NOW()
+      WHERE user_id = ${userId}
+    `;
+  } else {
+    await sql`
+      INSERT INTO user_plans (id, user_id, plan, status, stripe_customer_id, stripe_subscription_id, trial_ends_at, current_period_end)
+      VALUES (
+        ${createId("plan")}, ${userId},
+        ${data.plan ?? "free"}, ${data.status ?? "inactive"},
+        ${data.stripeCustomerId ?? null}, ${data.stripeSubscriptionId ?? null},
+        ${data.trialEndsAt ?? null}, ${data.currentPeriodEnd ?? null}
+      )
+    `;
+  }
+}
+
+export async function getUserPlanByStripeCustomer(stripeCustomerId: string): Promise<UserPlan | null> {
+  const rows = await sql`SELECT * FROM user_plans WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1`;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    plan: (row.plan as "free" | "premium") ?? "free",
+    status: (row.status as UserPlan["status"]) ?? "inactive",
+    stripeCustomerId: (row.stripe_customer_id as string) ?? null,
+    stripeSubscriptionId: (row.stripe_subscription_id as string) ?? null,
+    trialEndsAt: (row.trial_ends_at as string) ?? null,
+    currentPeriodEnd: (row.current_period_end as string) ?? null,
+  };
 }
 
 // ─── Helpers ───

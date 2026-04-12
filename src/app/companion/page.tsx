@@ -80,6 +80,7 @@ export default function MaahiPage() {
   const { messages, sendMessage, status } = useChat({ transport });
   const isStreaming = status === "streaming" || status === "submitted";
   const hasMessages = messages.length > 0;
+  const lastMemoryUpdateRef = useRef(0);
 
   useEffect(() => {
     if (!authLoading && !profile) router.push("/onboarding");
@@ -89,6 +90,20 @@ export default function MaahiPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isStreaming]);
+
+  // Background memory update — fires every 3 AI responses, non-blocking
+  useEffect(() => {
+    if (status !== "ready") return;
+    const aiCount = messages.filter((m) => m.role === "assistant").length;
+    if (aiCount > 0 && aiCount % 3 === 0 && aiCount !== lastMemoryUpdateRef.current) {
+      lastMemoryUpdateRef.current = aiCount;
+      fetch("/api/companion/memory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      }).catch(() => {});
+    }
+  }, [status, messages]);
 
   const handleSend = () => {
     const text = input.trim();
@@ -144,6 +159,64 @@ export default function MaahiPage() {
         }}
       />
 
+      {/* ── Sticky Maahi header — only when conversation is active ── */}
+      {hasMessages && (
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            background: "rgba(10,10,15,0.92)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            padding: "12px 20px",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 480,
+              margin: "0 auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: "50%",
+                background:
+                  "linear-gradient(135deg, rgba(212,104,138,0.2), rgba(180,140,255,0.15))",
+                border: "1px solid rgba(212,104,138,0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 11,
+                color: "rgba(212,104,138,0.8)",
+                flexShrink: 0,
+              }}
+            >
+              ✦
+            </div>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.4)",
+              }}
+            >
+              Maahi
+            </span>
+            {isStreaming && (
+              <div style={{ marginLeft: 2 }}>
+                <TypingDots />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Scrollable body ── */}
       <div
         style={{
@@ -158,9 +231,8 @@ export default function MaahiPage() {
           style={{
             maxWidth: 480,
             margin: "0 auto",
-            // 64px nav + 70px input bar + 20px breathing room = ~154px
             padding: hasMessages
-              ? "32px 20px 160px"
+              ? "24px 20px 160px"
               : "56px 24px 160px",
           }}
         >
@@ -296,51 +368,6 @@ export default function MaahiPage() {
           ) : (
             /* ── Active conversation ── */
             <>
-              {/* Minimal Maahi label — replaces the big header */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 28,
-                  paddingBottom: 16,
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                }}
-              >
-                <div
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: "50%",
-                    background:
-                      "linear-gradient(135deg, rgba(212,104,138,0.2), rgba(180,140,255,0.15))",
-                    border: "1px solid rgba(212,104,138,0.2)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 11,
-                    color: "rgba(212,104,138,0.8)",
-                    flexShrink: 0,
-                  }}
-                >
-                  ✦
-                </div>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "rgba(255,255,255,0.4)",
-                  }}
-                >
-                  Maahi
-                </span>
-                {isStreaming && (
-                  <div style={{ marginLeft: 2 }}>
-                    <TypingDots />
-                  </div>
-                )}
-              </div>
-
               {/* Messages */}
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {messages.map((message) => (

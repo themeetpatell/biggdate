@@ -38,8 +38,10 @@ export default function OnboardingPage() {
   const [input, setInput] = useState("");
   const [revealing, setRevealing] = useState(false);
   const [derivingStarted, setDerivingStarted] = useState(false);
+  const [deriveError, setDeriveError] = useState(false);
 
   const autoStarted = useRef(false);
+  const profileCompleteDetected = useRef(false);
   const initMessageId = useRef<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -91,16 +93,18 @@ export default function OnboardingPage() {
     }
   }, [messages]);
 
-  // Detect PROFILE_COMPLETE in latest AI message
+  // Detect PROFILE_COMPLETE in latest AI message — fires only once
   useEffect(() => {
-    if (revealing) return;
+    if (profileCompleteDetected.current) return;
+    if (isStreaming) return;
     const lastAI = messages.filter((m) => m.role === "assistant").at(-1);
-    if (!lastAI || isStreaming) return;
+    if (!lastAI) return;
     const text = getMessageText(lastAI);
     if (text.includes("PROFILE_COMPLETE")) {
+      profileCompleteDetected.current = true;
       setRevealing(true);
     }
-  }, [messages, isStreaming, revealing]);
+  }, [messages, isStreaming]);
 
   // Derive profile — runs once when revealing becomes true
   useEffect(() => {
@@ -124,13 +128,11 @@ export default function OnboardingPage() {
           await refresh();
           router.push("/soul-snapshot");
         } else {
-          setRevealing(false);
-          setDerivingStarted(false);
+          setDeriveError(true);
         }
       })
       .catch(() => {
-        setRevealing(false);
-        setDerivingStarted(false);
+        setDeriveError(true);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealing]);
@@ -213,23 +215,55 @@ export default function OnboardingPage() {
   }
 
   // Ritual reveal overlay
-  if (revealing) {
+  if (revealing || deriveError) {
     return (
       <>
         <AmbientLayer act={5} />
         <div
-          className="fixed inset-0 flex items-center justify-center"
+          className="fixed inset-0 flex flex-col items-center justify-center gap-6"
           style={{ zIndex: 10 }}
         >
-          <motion.p
-            className="text-2xl font-light tracking-wide"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            style={{ color: "var(--bd-text)" }}
-          >
-            We see you.
-          </motion.p>
+          {deriveError ? (
+            <>
+              <motion.p
+                className="text-xl font-light tracking-wide"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                style={{ color: "var(--bd-text)", opacity: 0.7 }}
+              >
+                Something went wrong building your profile.
+              </motion.p>
+              <motion.button
+                onClick={() => {
+                  setDeriveError(false);
+                  setDerivingStarted(false);
+                  setRevealing(true);
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="rounded-full px-6 py-2 text-sm font-medium"
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  color: "var(--bd-text)",
+                }}
+              >
+                Try again
+              </motion.button>
+            </>
+          ) : (
+            <motion.p
+              className="text-2xl font-light tracking-wide"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              style={{ color: "var(--bd-text)" }}
+            >
+              We see you.
+            </motion.p>
+          )}
         </div>
       </>
     );

@@ -71,8 +71,8 @@ export function MaahiChat() {
       {open && (
         <div
           className="fixed right-4 z-50 flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl sm:right-6 sm:w-[400px]"
-          style={{ bottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
           style={{
+            bottom: "calc(100px + env(safe-area-inset-bottom, 0px))",
             height: "min(560px, calc(100vh - 7rem))",
             background: "var(--bd-bg)",
             border: "1px solid var(--bd-border)",
@@ -223,8 +223,8 @@ export function MaahiChat() {
       <button
         onClick={() => setOpen((v) => !v)}
         className="fixed right-4 z-50 flex size-14 items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 sm:right-6"
-        style={{ bottom: "calc(82px + env(safe-area-inset-bottom, 0px))" }}
         style={{
+          bottom: "calc(82px + env(safe-area-inset-bottom, 0px))",
           background: open
             ? "var(--bd-surface)"
             : "linear-gradient(135deg, var(--bd-accent), var(--bd-pink))",

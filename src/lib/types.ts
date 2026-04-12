@@ -1,3 +1,8 @@
+export interface ProfilePrompt {
+  question: string;
+  answer: string;
+}
+
 export interface Profile {
   name: string;
   age: number | null;
@@ -6,14 +11,33 @@ export interface Profile {
   city: string;
   gender: string | null;
   orientation: string | null;
+  pronouns?: string | null;
+  hometown?: string | null;
+  jobTitle?: string | null;
+  company?: string | null;
+  education?: string | null;
+  height?: string | null;
+  religion?: string | null;
+  politics?: string | null;
+  ethnicity?: string | null;
   partnerGender: string | null;
   intent: "serious" | "casual" | "marriage" | "exploring" | null;
+  relationshipStyle?: string | null;
   hasKids: boolean | null;
   wantsKids: "yes" | "no" | "open" | null;
   loveLanguage: string | null;
   drinking: "never" | "social" | "regularly" | null;
   smoking: "never" | "social" | "regularly" | null;
   exercise: "never" | "sometimes" | "often" | null;
+  sleepSchedule?: string | null;
+  socialBattery?: string | null;
+  diet?: string | null;
+  weekendStyle?: string | null;
+  travelStyle?: string | null;
+  cleanliness?: string | null;
+  languages?: string[];
+  interests?: string[];
+  pets?: string[];
   dealbreakers: string[];
   partnerAgeMin: number | null;
   partnerAgeMax: number | null;
@@ -26,6 +50,12 @@ export interface Profile {
   summary: string;
   coachingFocus: string;
   photos: string[];
+  prompts?: ProfilePrompt[];
+  profileVisibility?: "visible" | "paused" | "hidden";
+  showAge?: boolean;
+  showCity?: boolean;
+  showWork?: boolean;
+  showEducation?: boolean;
   // L3 BiggDate: onboarding depth
   conflictStyle: string;
   familyExpectations: string;
@@ -90,6 +120,12 @@ export interface SessionMemory {
   lastUpdated: string | null;
   conversationPhase: "opening" | "history" | "values" | "life-architecture" | "complete";
   coveredTopics: string[];
+  // Maahi v3 fields
+  stableTraits: string[];
+  growthEdges: string[];
+  currentSituation: string;
+  recurringThemes: string[];
+  lastEmotionalState: string;
 }
 
 // L4 BiggDate: structured 3-Q post-date reflection
@@ -105,5 +141,3 @@ export interface DebriefReflection {
   aiInsight: string;
   createdAt: string;
 }
-
-

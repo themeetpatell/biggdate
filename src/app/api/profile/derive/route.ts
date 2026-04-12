@@ -20,7 +20,10 @@ export async function POST(req: Request) {
     prompt: profileDerivePrompt(transcript),
   });
 
-  const raw = (result.text || "").replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+  // Extract the first {...} block — handles preamble text and markdown fences
+  const responseText = result.text || "";
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  const raw = jsonMatch ? jsonMatch[0] : responseText;
 
   try {
     const profile = JSON.parse(raw);
@@ -28,10 +31,19 @@ export async function POST(req: Request) {
       profile.zodiac = getZodiacFromBirthday(profile.birthday);
     }
     profile.photos = profile.photos || [];
+    profile.prompts = profile.prompts || [];
     profile.dealbreakers = profile.dealbreakers || [];
     profile.growthAreas = profile.growthAreas || [];
     profile.strengths = profile.strengths || [];
     profile.coreValues = profile.coreValues || [];
+    profile.languages = profile.languages || [];
+    profile.interests = profile.interests || [];
+    profile.pets = profile.pets || [];
+    profile.profileVisibility = profile.profileVisibility || "visible";
+    profile.showAge = profile.showAge ?? true;
+    profile.showCity = profile.showCity ?? true;
+    profile.showWork = profile.showWork ?? true;
+    profile.showEducation = profile.showEducation ?? true;
 
     // Save to DB
     await upsertProfile(auth.userId, profile);
