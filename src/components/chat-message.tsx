@@ -17,7 +17,12 @@ export function getMessageText(message: UIMessage): string {
 
 /** Remove "[CHIPS: ...]" suffix from text. */
 function stripChips(text: string): string {
-  return text.replace(/\[CHIPS:[^\]]*\]/g, "").trim();
+  return text
+    .replace(/\[CHIPS:[^\]]*\]/g, "")
+    .replace(/\[MULTISELECT:[^\]]*\]/g, "")
+    .replace(/\[AGERANGE\]/g, "")
+    .replace(/\[DATEPICKER\]/g, "")
+    .trim();
 }
 
 /**
