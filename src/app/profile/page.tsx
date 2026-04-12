@@ -365,11 +365,14 @@ function getCompletion(profile: HydratedProfile) {
   const checks = [
     { label: "3+ photos", complete: profile.photos.length >= 3 },
     { label: "About section", complete: Boolean(profile.summary) },
-    { label: "Intentions", complete: Boolean(profile.intent || profile.relationshipStyle) },
+    { label: "Intentions", complete: Boolean(profile.intent || profile.relationshipTimeline) },
     { label: "Work or school", complete: Boolean(profile.jobTitle || profile.education) },
-    { label: "Lifestyle", complete: Boolean(profile.exercise || profile.drinking || profile.smoking) },
+    { label: "Lifestyle habits", complete: Boolean(profile.exercise || profile.drinking || profile.smoking) },
     { label: "Interests", complete: profile.interests.length >= 3 },
-    { label: "Prompt cards", complete: profile.prompts.filter((prompt) => prompt.answer).length >= 2 },
+    { label: "Prompt cards", complete: profile.prompts.filter((p) => p.answer).length >= 2 },
+    { label: "Love language", complete: profile.loveLanguageGive.length > 0 || profile.loveLanguageReceive.length > 0 },
+    { label: "Chemistry layer", complete: profile.attractionPreferences.length > 0 },
+    { label: "Emotional availability", complete: Boolean(profile.emotionalAvailability) },
     { label: "Visibility set", complete: Boolean(profile.profileVisibility) },
   ];
   const completeCount = checks.filter((check) => check.complete).length;
@@ -380,25 +383,43 @@ function getCompletion(profile: HydratedProfile) {
 }
 
 function deriveDimensionScores(profile: HydratedProfile): number[] {
-  const d1 =
-    profile.attachment === "Secure"
-      ? 88
-      : profile.attachment === "Anxious"
-        ? 65
-        : profile.attachment === "Avoidant"
-          ? 58
-          : 52;
-  const d2 = Math.min(94, 52 + profile.coreValues.length * 11);
-  const d3 = profile.prompts.filter((prompt) => prompt.answer).length >= 2 ? 84 : profile.summary.length > 110 ? 73 : 60;
-  const d4 = profile.loveLanguage ? 80 : 62;
-  const d5 = profile.lifeArchitecture ? 82 : 64;
-  const d6 = profile.familyExpectations ? 82 : profile.wantsKids ? 72 : 58;
-  const d7 = profile.intent === "serious" || profile.intent === "marriage" ? 82 : 68;
+  // D1: Emotional Intelligence — attachment style + emotional availability
+  const baseAttach = profile.attachment === "Secure" ? 88 : profile.attachment === "Anxious" ? 65 : profile.attachment === "Avoidant" ? 58 : 52;
+  const availBonus = profile.emotionalAvailability === "Fully available" ? 6 : profile.emotionalAvailability === "Mostly available" ? 3 : 0;
+  const d1 = Math.min(96, baseAttach + availBonus);
+
+  // D2: Values & Beliefs — core values + cultural alignment
+  const d2 = Math.min(96, 52 + profile.coreValues.length * 9 + (profile.culturalAlignment ? 4 : 0));
+
+  // D3: Intellectual Depth — prompts + summary + attraction signals
+  const intellectualAttr = profile.attractionPreferences.includes("Intellectual stimulation") ? 6 : 0;
+  const d3 = Math.min(96, (profile.prompts.filter((p) => p.answer).length >= 2 ? 84 : profile.summary.length > 110 ? 73 : 60) + intellectualAttr);
+
+  // D4: Relational Patterns — love language (give + receive) + conflict style
+  const hasLL = profile.loveLanguageGive.length > 0 || profile.loveLanguageReceive.length > 0 || Boolean(profile.loveLanguage);
+  const d4 = Math.min(92, (hasLL ? 80 : 62) + (profile.conflictStyle ? 6 : 0));
+
+  // D5: Life Architecture — life arch text + relationship timeline + dating stage
+  const d5 = Math.min(96, (profile.lifeArchitecture ? 82 : 64) + (profile.relationshipTimeline ? 8 : 0) + (profile.datingStage ? 4 : 0));
+
+  // D6: Family & Future — family expectations + wants kids + family involvement + marriage type
+  const d6 = Math.min(96, (profile.familyExpectations ? 82 : profile.wantsKids ? 72 : 58) + (profile.familyInvolvement ? 5 : 0) + (profile.marriageType ? 5 : 0));
+
+  // D7: Stability — intent + work intensity + residency status
+  const d7 = Math.min(96, (profile.intent === "serious" || profile.intent === "marriage" ? 82 : 68) + (profile.workIntensity ? 5 : 0) + (profile.residencyStatus ? 4 : 0));
+
+  // D8: Lifestyle — exercise + drinking
   const activity = profile.exercise === "often" ? 90 : profile.exercise === "sometimes" ? 72 : 48;
   const habits = profile.drinking === "never" ? 88 : profile.drinking === "social" ? 74 : 56;
   const d8 = Math.round((activity + habits) / 2);
-  const d9 = Math.min(92, Math.round(48 + profile.readinessScore * 0.42));
+
+  // D9: Meaning — readiness score + depth fields filled
+  const depthFilled = [profile.summary, profile.conflictStyle, profile.lifeArchitecture, profile.familyExpectations, profile.emotionalAvailability, profile.relationshipTimeline].filter(Boolean).length;
+  const d9 = Math.min(96, Math.round(48 + profile.readinessScore * 0.38 + depthFilled * 1.5));
+
+  // D10: Astrology
   const d10 = profile.zodiac ? 76 : 54;
+
   return [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10];
 }
 
@@ -1247,6 +1268,10 @@ function ProfileEditor({
                           placeholder="NYU"
                         />
                       </Field>
+                    </div>
+
+                    <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Online presence</p>
                       <Field label="LinkedIn">
                         <TextInput
                           value={draft.linkedinUrl || ""}
@@ -1859,50 +1884,56 @@ function ProfileEditor({
                             ))}
                           </SelectInput>
                         </Field>
-                        <Field label="Emotional availability">
-                          <SelectInput
-                            value={draft.emotionalAvailability || ""}
-                            onChange={(e) => setField("emotionalAvailability", e.target.value || null)}
-                          >
-                            <option value="">Select</option>
-                            {EMOTIONAL_AVAILABILITY_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </SelectInput>
-                        </Field>
-                        <Field label="Work intensity">
-                          <SelectInput
-                            value={draft.workIntensity || ""}
-                            onChange={(e) => setField("workIntensity", e.target.value || null)}
-                          >
-                            <option value="">Select</option>
-                            {WORK_INTENSITY_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </SelectInput>
-                        </Field>
-                        <Field label="Residency status">
-                          <SelectInput
-                            value={draft.residencyStatus || ""}
-                            onChange={(e) => setField("residencyStatus", e.target.value || null)}
-                          >
-                            <option value="">Select</option>
-                            {RESIDENCY_STATUS_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </SelectInput>
-                        </Field>
-                        <Field label="Open to relocation">
-                          <SelectInput
-                            value={draft.relocationOpen || ""}
-                            onChange={(e) => setField("relocationOpen", e.target.value || null)}
-                          >
-                            <option value="">Select</option>
-                            {RELOCATION_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </SelectInput>
-                        </Field>
+                      </div>
+
+                      <div className="border-t border-white/6 pt-4">
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/35">Availability &amp; logistics</p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <Field label="Emotional availability">
+                            <SelectInput
+                              value={draft.emotionalAvailability || ""}
+                              onChange={(e) => setField("emotionalAvailability", e.target.value || null)}
+                            >
+                              <option value="">Select</option>
+                              {EMOTIONAL_AVAILABILITY_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </SelectInput>
+                          </Field>
+                          <Field label="Work intensity">
+                            <SelectInput
+                              value={draft.workIntensity || ""}
+                              onChange={(e) => setField("workIntensity", e.target.value || null)}
+                            >
+                              <option value="">Select</option>
+                              {WORK_INTENSITY_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </SelectInput>
+                          </Field>
+                          <Field label="Residency status">
+                            <SelectInput
+                              value={draft.residencyStatus || ""}
+                              onChange={(e) => setField("residencyStatus", e.target.value || null)}
+                            >
+                              <option value="">Select</option>
+                              {RESIDENCY_STATUS_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </SelectInput>
+                          </Field>
+                          <Field label="Open to relocation">
+                            <SelectInput
+                              value={draft.relocationOpen || ""}
+                              onChange={(e) => setField("relocationOpen", e.target.value || null)}
+                            >
+                              <option value="">Select</option>
+                              {RELOCATION_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </SelectInput>
+                          </Field>
+                        </div>
                       </div>
 
                       <Field as="div" label="Languages">
