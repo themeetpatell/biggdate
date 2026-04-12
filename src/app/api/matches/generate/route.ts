@@ -31,8 +31,10 @@ export async function POST(req: Request) {
   const raw = (result.text || "").replace(/```json?\n?/g, "").replace(/```/g, "").trim();
 
   try {
-    const matches = JSON.parse(raw);
-    const withIds = (Array.isArray(matches) ? matches : []).map(
+    const parsed = JSON.parse(raw);
+    // Prompt returns { matches: [...] } but guard against raw array too
+    const matches = Array.isArray(parsed) ? parsed : (parsed.matches ?? []);
+    const withIds = matches.map(
       (m: Record<string, unknown>, i: number) => ({
         ...m,
         id: `match_${Date.now()}_${i}`,

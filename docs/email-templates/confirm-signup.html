@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm your BiggDate account</title>
+</head>
+<body style="margin:0;padding:0;background-color:#07080f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#07080f;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:28px;">
+              <span style="font-size:20px;font-weight:800;letter-spacing:-0.04em;background:linear-gradient(90deg,#f58bc2,#b48cff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">BiggDate</span>
+            </td>
+          </tr>
+
+          <!-- Hero glow card -->
+          <tr>
+            <td style="background:linear-gradient(160deg,#111320 0%,#0d0f1e 100%);border:1px solid rgba(255,255,255,0.07);border-radius:24px;overflow:hidden;">
+
+              <!-- Pink/purple ambient top strip -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="height:6px;background:linear-gradient(90deg,#d4688a,#9b72f5,#d4688a);"></td>
+                </tr>
+              </table>
+
+              <!-- Card content -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding:44px 40px 40px;">
+
+                <!-- Icon -->
+                <tr>
+                  <td align="center" style="padding-bottom:28px;">
+                    <div style="display:inline-block;position:relative;">
+                      <!-- Outer glow ring -->
+                      <div style="width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(212,104,138,0.18) 0%,rgba(155,114,245,0.10) 60%,transparent 100%);display:flex;align-items:center;justify-content:center;border:1px solid rgba(212,104,138,0.22);">
+                        <!-- Inner icon -->
+                        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,rgba(212,104,138,0.25),rgba(155,114,245,0.2));border:1px solid rgba(212,104,138,0.35);display:flex;align-items:center;justify-content:center;font-size:24px;line-height:56px;text-align:center;">
+                          ✦
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Heading -->
+                <tr>
+                  <td align="center" style="padding-bottom:12px;">
+                    <h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.04em;line-height:1.15;">
+                      <span style="background:linear-gradient(135deg,#f0ebe3 30%,rgba(240,235,227,0.75));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">One step away.</span>
+                    </h1>
+                  </td>
+                </tr>
+
+                <!-- Subheading -->
+                <tr>
+                  <td align="center" style="padding-bottom:36px;">
+                    <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.42);line-height:1.7;max-width:320px;">
+                      Confirm your email and Maahi will be<br/>ready to meet you.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- CTA Button -->
+                <tr>
+                  <td align="center" style="padding-bottom:32px;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="border-radius:100px;background:linear-gradient(135deg,#d4688a,#9b72f5);box-shadow:0 8px 32px rgba(212,104,138,0.35),0 2px 8px rgba(0,0,0,0.3);">
+                          <a href="{{ .ConfirmationURL }}"
+                             style="display:inline-block;padding:15px 44px;font-size:15px;font-weight:700;letter-spacing:-0.01em;color:#ffffff;text-decoration:none;border-radius:100px;">
+                            Confirm my account
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Expiry note -->
+                <tr>
+                  <td align="center" style="padding-bottom:32px;">
+                    <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.22);line-height:1.6;">
+                      Link expires in 24 hours &nbsp;·&nbsp; If you didn't create an account, ignore this.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                  <td style="border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;">
+                    <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.2);line-height:1.6;">
+                      Or copy this link into your browser:<br/>
+                      <a href="{{ .ConfirmationURL }}" style="color:rgba(212,104,138,0.6);word-break:break-all;text-decoration:none;">{{ .ConfirmationURL }}</a>
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:32px;padding-bottom:8px;">
+              <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.16);line-height:1.8;">
+                BiggDate &nbsp;·&nbsp; For people who build things.<br/>
+                <a href="https://biggdate.com" style="color:rgba(255,255,255,0.22);text-decoration:none;">biggdate.com</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

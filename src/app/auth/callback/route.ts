@@ -5,7 +5,9 @@ import { cookies } from "next/headers";
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const type = searchParams.get("type"); // "signup" | "recovery" | etc.
+  const next = searchParams.get("next")
+    ?? (type === "recovery" ? "/auth?mode=reset" : "/auth?mode=login&confirmed=1");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/auth?error=missing_code`);

@@ -15,9 +15,10 @@ export function getMessageText(message: UIMessage): string {
   );
 }
 
-/** Remove "[CHIPS: ...]" suffix from text. */
+/** Remove "[CHIPS: ...]" from text. Splits on the marker so text before it is always preserved,
+ *  even when the AI incorrectly embeds [CHIPS:] mid-sentence. */
 function stripChips(text: string): string {
-  return text.replace(/\[CHIPS:[^\]]*\]/g, "").trim();
+  return text.split("[CHIPS:")[0].trim();
 }
 
 /**

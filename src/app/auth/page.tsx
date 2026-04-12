@@ -116,6 +116,9 @@ function AuthPageInner() {
     if (modeParam === "login" || modeParam === "signup" || modeParam === "reset" || modeParam === "forgot") {
       setMode(modeParam);
     }
+    if (searchParams.get("confirmed") === "1") {
+      setNotice("Email confirmed. You're in — log in below.");
+    }
     const errorParam = searchParams.get("error");
     if (errorParam === "auth_code_exchange_failed") {
       setError("The link has expired or was already used. Please try again.");

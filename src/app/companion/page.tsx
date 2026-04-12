@@ -117,11 +117,11 @@ export default function MaahiPage() {
   return (
     <div
       style={{
-        height: "100dvh",
+        position: "fixed",
+        inset: 0,
         background: "#0A0A0F",
         display: "flex",
         flexDirection: "column",
-        position: "relative",
         overflow: "hidden",
       }}
     >
@@ -219,6 +219,7 @@ export default function MaahiPage() {
 
       {/* ── Scrollable body ── */}
       <div
+        className="maahi-scroll"
         style={{
           flex: 1,
           overflowY: "auto",
@@ -489,6 +490,8 @@ export default function MaahiPage() {
       </div>
 
       <style>{`
+        .maahi-scroll::-webkit-scrollbar { display: none; }
+        .maahi-scroll { scrollbar-width: none; -ms-overflow-style: none; }
         @keyframes breatheOuter {
           0%, 100% { transform: scale(1); opacity: 0.4; }
           50%       { transform: scale(1.18); opacity: 0.8; }

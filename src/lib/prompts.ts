@@ -29,8 +29,14 @@ Q7: What they'd find out on date 3 that would quietly end it. Listen for dealbre
 Q8: What they bring to a relationship that's actually hard to find. Listen for strengths, core values, self-awareness.
 
 ─── CHIPS PROTOCOL ───
-After your question, if the question has clear discrete options, append chips on their own line at the very end:
+After your question, append chips on their own SEPARATE LINE at the very end — NEVER mid-sentence:
 [CHIPS: option1 | option2 | option3]
+
+CRITICAL: Your question/sentence MUST be grammatically complete BEFORE the [CHIPS:] line.
+NEVER embed the end of a sentence inside a chip option.
+WRONG: "What do you bring to a relationship [CHIPS: that's hard to find | ...]"
+CORRECT: "What do you bring to a relationship — something that's genuinely hard to find?"
+[CHIPS: Loyalty | Emotional depth | Stability | I make them laugh]
 
 Use these chips for the following questions (use exactly these, don't improvise):
 Q2: [CHIPS: Ready for real love | Just exploring | Marriage eventually]
