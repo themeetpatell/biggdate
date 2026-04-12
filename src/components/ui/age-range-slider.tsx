@@ -35,9 +35,10 @@ export function AgeRangeSlider({
             min={minBound}
             max={maxBound}
             value={minVal}
+            aria-label="Minimum age"
             onChange={(e) => {
               const next = Number(e.target.value);
-              onChange(next, Math.max(next + 1, maxVal));
+              onChange(next, Math.min(maxBound, Math.max(next + 1, maxVal)));
             }}
             className="bd-age-range flex-1"
           />
@@ -50,6 +51,7 @@ export function AgeRangeSlider({
             min={minBound}
             max={maxBound}
             value={maxVal}
+            aria-label="Maximum age"
             onChange={(e) => {
               const next = Number(e.target.value);
               onChange(Math.min(minVal, next - 1), next);
