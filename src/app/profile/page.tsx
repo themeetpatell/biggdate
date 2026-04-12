@@ -1242,107 +1242,114 @@ function ProfileEditor({
                         />
                       </Field>
                     </div>
+
+                    {/* Background — fills the gap in the left column */}
+                    <div className="border-t border-white/6 pt-4">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/35">Background</p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <Field label="Ethnicity">
+                          <SelectInput
+                            value={draft.ethnicity || ""}
+                            onChange={(e) => setField("ethnicity", e.target.value || null)}
+                          >
+                            <option value="">Prefer not to say</option>
+                            {ETHNICITY_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                        <Field label="Religion">
+                          <SelectInput
+                            value={
+                              draft.religion && (RELIGION_OPTIONS as readonly string[]).includes(draft.religion)
+                                ? draft.religion
+                                : draft.religion
+                                ? "Other"
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setField("religion", e.target.value === "Other" ? "" : e.target.value || null)
+                            }
+                          >
+                            <option value="">Select</option>
+                            {RELIGION_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                            <option value="Other">Other (specify)</option>
+                          </SelectInput>
+                          {draft.religion !== null &&
+                            draft.religion !== undefined &&
+                            !(RELIGION_OPTIONS as readonly string[]).includes(draft.religion) && (
+                              <TextInput
+                                value={draft.religion ?? ""}
+                                onChange={(e) => setField("religion", e.target.value || null)}
+                                placeholder="Your religion or belief system"
+                                className="mt-2"
+                              />
+                            )}
+                        </Field>
+                        <Field label="Politics">
+                          <SelectInput
+                            value={draft.politics || ""}
+                            onChange={(e) => setField("politics", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {POLITICS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
+                        </Field>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-5">
                     <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
-                      <p className="text-sm font-semibold text-white">Work and education</p>
-                      <Field label="Job title">
-                        <TextInput
-                          value={draft.jobTitle || ""}
-                          onChange={(event) => setField("jobTitle", event.target.value)}
-                          placeholder="Product designer"
-                        />
-                      </Field>
-                      <Field label="Company">
-                        <TextInput
-                          value={draft.company || ""}
-                          onChange={(event) => setField("company", event.target.value)}
-                          placeholder="Bigg Labs"
-                        />
-                      </Field>
-                      <Field label="Education">
-                        <TextInput
-                          value={draft.education || ""}
-                          onChange={(event) => setField("education", event.target.value)}
-                          placeholder="NYU"
-                        />
-                      </Field>
-                    </div>
-
-                    <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
-                      <p className="text-sm font-semibold text-white">Online presence</p>
-                      <Field label="LinkedIn">
-                        <TextInput
-                          value={draft.linkedinUrl || ""}
-                          onChange={(event) => setField("linkedinUrl", event.target.value || null)}
-                          placeholder="linkedin.com/in/yourname"
-                        />
-                      </Field>
-                      <Field label="Website / Portfolio">
-                        <TextInput
-                          value={draft.websiteUrl || ""}
-                          onChange={(event) => setField("websiteUrl", event.target.value || null)}
-                          placeholder="yoursite.com"
-                        />
-                      </Field>
-                    </div>
-
-                    <div className="space-y-4 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
-                      <p className="text-sm font-semibold text-white">Optional profile facts</p>
-                      <Field label="Ethnicity">
-                        <SelectInput
-                          value={draft.ethnicity || ""}
-                          onChange={(e) => setField("ethnicity", e.target.value || null)}
-                        >
-                          <option value="">Prefer not to say</option>
-                          {ETHNICITY_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </SelectInput>
-                      </Field>
-                      <Field label="Religion">
-                        <SelectInput
-                          value={
-                            draft.religion && (RELIGION_OPTIONS as readonly string[]).includes(draft.religion)
-                              ? draft.religion
-                              : draft.religion
-                              ? "Other"
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setField("religion", e.target.value === "Other" ? "" : e.target.value || null)
-                          }
-                        >
-                          <option value="">Select</option>
-                          {RELIGION_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                          <option value="Other">Other (specify)</option>
-                        </SelectInput>
-                        {draft.religion !== null &&
-                          draft.religion !== undefined &&
-                          !(RELIGION_OPTIONS as readonly string[]).includes(draft.religion) && (
+                      <p className="text-sm font-semibold text-white">Work, education &amp; online</p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <Field label="Job title">
+                          <TextInput
+                            value={draft.jobTitle || ""}
+                            onChange={(event) => setField("jobTitle", event.target.value)}
+                            placeholder="Product designer"
+                          />
+                        </Field>
+                        <Field label="Company">
+                          <TextInput
+                            value={draft.company || ""}
+                            onChange={(event) => setField("company", event.target.value)}
+                            placeholder="Bigg Labs"
+                          />
+                        </Field>
+                        <Field label="Education">
+                          <TextInput
+                            value={draft.education || ""}
+                            onChange={(event) => setField("education", event.target.value)}
+                            placeholder="NYU"
+                          />
+                        </Field>
+                      </div>
+                      <div className="border-t border-white/6 pt-4">
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/35">Online presence</p>
+                        <div className="grid gap-4">
+                          <Field label="LinkedIn">
                             <TextInput
-                              value={draft.religion ?? ""}
-                              onChange={(e) => setField("religion", e.target.value || null)}
-                              placeholder="Your religion or belief system"
-                              className="mt-2"
+                              value={draft.linkedinUrl || ""}
+                              onChange={(event) => setField("linkedinUrl", event.target.value || null)}
+                              placeholder="linkedin.com/in/yourname"
                             />
-                          )}
-                      </Field>
-                      <Field label="Politics">
-                        <SelectInput
-                          value={draft.politics || ""}
-                          onChange={(e) => setField("politics", e.target.value || null)}
-                        >
-                          <option value="">Select</option>
-                          {POLITICS_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </SelectInput>
-                      </Field>
+                          </Field>
+                          <Field label="Website / Portfolio">
+                            <TextInput
+                              value={draft.websiteUrl || ""}
+                              onChange={(event) => setField("websiteUrl", event.target.value || null)}
+                              placeholder="yoursite.com"
+                            />
+                          </Field>
+                        </div>
+                      </div>
                     </div>
+
                   </div>
                 </div>
               ) : null}

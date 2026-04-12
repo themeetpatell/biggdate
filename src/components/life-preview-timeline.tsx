@@ -30,7 +30,7 @@ export function LifePreviewTimeline() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || showSignupNudge) return;
     sendMessage({ text: input });
     setInput("");
   };
@@ -72,9 +72,9 @@ export function LifePreviewTimeline() {
           />
         </div>
         <div>
-          <p className="text-sm font-semibold tracking-tight">Maahi</p>
+          <p className="text-sm font-semibold tracking-tight">Maahi AI</p>
           <p className="text-[11px]" style={{ color: "var(--bd-text-faint)" }}>
-            Builder match intelligence · Online
+            By BiggVentures
           </p>
         </div>
         <div className="ml-auto">
@@ -149,8 +149,8 @@ export function LifePreviewTimeline() {
           );
         })}
 
-        {/* Suggestion chips — show only on initial state */}
-        {messages.length === 0 && (
+        {/* Suggestion chips — show only on initial state, hide once locked */}
+        {messages.length === 0 && !showSignupNudge && (
           <div className="flex flex-wrap gap-2 pt-1 animate-in fade-in slide-in-from-bottom-2" style={{ animationDuration: "400ms", animationDelay: "300ms", animationFillMode: "both" }}>
             {SUGGESTIONS.map((s) => (
               <button
@@ -234,14 +234,16 @@ export function LifePreviewTimeline() {
             background: "rgba(255,255,255,0.05)",
             border: "1px solid rgba(255,255,255,0.1)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+            opacity: showSignupNudge ? 0.45 : 1,
+            pointerEvents: showSignupNudge ? "none" : "auto",
           }}
         >
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tell Maahi what your life actually looks like..."
-            disabled={isLoading}
-            className="flex-1 bg-transparent px-2 text-sm text-[var(--bd-text)] outline-none placeholder:text-[var(--bd-text-faint)]"
+            onChange={(e) => !showSignupNudge && setInput(e.target.value)}
+            placeholder={showSignupNudge ? "Create a profile to keep chatting..." : "Tell Maahi what your life actually looks like..."}
+            disabled={isLoading || showSignupNudge}
+            className="flex-1 bg-transparent px-2 text-sm text-[var(--bd-text)] outline-none placeholder:text-[var(--bd-text-faint)] disabled:cursor-not-allowed"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -251,7 +253,7 @@ export function LifePreviewTimeline() {
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || showSignupNudge}
             className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30"
             style={{
               background: "linear-gradient(135deg, rgba(255,226,243,0.98), rgba(182,231,255,0.94))",
