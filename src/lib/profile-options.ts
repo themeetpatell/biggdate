@@ -17,7 +17,7 @@ export const ORIENTATION_OPTIONS = [
 export const ETHNICITY_OPTIONS = [
   "South Asian", "East Asian", "Southeast Asian", "Middle Eastern/MENA",
   "Black/African", "White/Caucasian", "Hispanic/Latino", "Indigenous",
-  "Mixed/Multiracial", "Prefer not to say",
+  "Mixed/Multiracial",
 ] as const;
 
 export const RELIGION_OPTIONS = [

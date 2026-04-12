@@ -1237,7 +1237,7 @@ function ProfileEditor({
                           {RELIGION_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>{opt}</option>
                           ))}
-                          <option value="Other">Other</option>
+                          <option value="Other">Other (specify)</option>
                         </SelectInput>
                         {draft.religion !== null &&
                           draft.religion !== undefined &&
