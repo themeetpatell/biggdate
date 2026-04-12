@@ -1280,14 +1280,16 @@ function ProfileEditor({
                   </div>
 
                   <div className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
-                    <Field label="Interests" hint="Comma or new line separated">
-                      <TextArea
-                        value={listValue(draft.interests)}
-                        onChange={(event) =>
-                          updateArrayInput(event, (next) => setField("interests", next))
-                        }
-                        placeholder="Pilates, live music, Sunday dinner, startups"
-                        className="min-h-[110px]"
+                    <Field
+                      label="Interests"
+                      hint={draft.interests.length > 0 ? `${draft.interests.length} selected` : undefined}
+                    >
+                      <MultiSelectChips
+                        groups={INTERESTS_GROUPS}
+                        value={draft.interests}
+                        onChange={(next) => setField("interests", next)}
+                        allowCustom
+                        placeholder="Add your own interest…"
                       />
                     </Field>
                   </div>
@@ -1368,17 +1370,51 @@ function ProfileEditor({
                           </SelectInput>
                         </Field>
                         <Field label="Relationship style">
-                          <TextInput
-                            value={draft.relationshipStyle || ""}
-                            onChange={(event) => setField("relationshipStyle", event.target.value)}
-                            placeholder="Monogamy"
-                          />
+                          <SelectInput
+                            value={
+                              draft.relationshipStyle &&
+                              (RELATIONSHIP_STYLE_OPTIONS as readonly string[]).includes(draft.relationshipStyle)
+                                ? draft.relationshipStyle
+                                : draft.relationshipStyle
+                                ? "Other"
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setField(
+                                "relationshipStyle",
+                                e.target.value === "Other" ? "" : e.target.value || null,
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            {RELATIONSHIP_STYLE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                            <option value="Other">Other (specify)</option>
+                          </SelectInput>
+                          {draft.relationshipStyle !== null &&
+                            draft.relationshipStyle !== undefined &&
+                            !(RELATIONSHIP_STYLE_OPTIONS as readonly string[]).includes(draft.relationshipStyle) && (
+                              <TextInput
+                                value={draft.relationshipStyle ?? ""}
+                                onChange={(e) => setField("relationshipStyle", e.target.value || null)}
+                                placeholder="Describe your relationship style"
+                                className="mt-2"
+                              />
+                            )}
                         </Field>
                         <Field label="Looking for">
-                          <TextInput
-                            value={draft.partnerGender || ""}
-                            onChange={(event) => setField("partnerGender", event.target.value)}
-                            placeholder="Men"
+                          <MultiSelectChips
+                            options={PARTNER_GENDER_OPTIONS}
+                            value={
+                              draft.partnerGender
+                                ? draft.partnerGender.split(", ").filter(Boolean)
+                                : []
+                            }
+                            onChange={(next) =>
+                              setField("partnerGender", next.join(", ") || null)
+                            }
+                            allowCustom={false}
                           />
                         </Field>
                         <Field label="Love language">
