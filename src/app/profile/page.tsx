@@ -1590,11 +1590,36 @@ function ProfileEditor({
                           </SelectInput>
                         </Field>
                         <Field label="Conflict style">
-                          <TextInput
-                            value={draft.conflictStyle}
-                            onChange={(event) => setField("conflictStyle", event.target.value)}
-                            placeholder="Direct but calm"
-                          />
+                          <SelectInput
+                            value={
+                              (CONFLICT_STYLE_OPTIONS as readonly string[]).includes(draft.conflictStyle)
+                                ? draft.conflictStyle
+                                : draft.conflictStyle
+                                ? "Other"
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setField(
+                                "conflictStyle",
+                                e.target.value === "Other" ? "" : e.target.value,
+                              )
+                            }
+                          >
+                            <option value="">Select</option>
+                            {CONFLICT_STYLE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                            <option value="Other">Other (specify)</option>
+                          </SelectInput>
+                          {draft.conflictStyle !== "" &&
+                            !(CONFLICT_STYLE_OPTIONS as readonly string[]).includes(draft.conflictStyle) && (
+                              <TextInput
+                                value={draft.conflictStyle}
+                                onChange={(e) => setField("conflictStyle", e.target.value)}
+                                placeholder="How do you handle conflict?"
+                                className="mt-2"
+                              />
+                            )}
                         </Field>
                         <Field label="Sleep schedule">
                           <SelectInput
@@ -1630,71 +1655,81 @@ function ProfileEditor({
                           </SelectInput>
                         </Field>
                         <Field label="Diet">
-                          <TextInput
-                            value={draft.diet || ""}
-                            onChange={(event) => setField("diet", event.target.value)}
-                            placeholder="Vegetarian-ish, halal, loves sushi"
+                          <MultiSelectChips
+                            options={DIET_OPTIONS}
+                            value={draft.diet ? draft.diet.split(", ").filter(Boolean) : []}
+                            onChange={(next) => setField("diet", next.join(", ") || null)}
+                            allowCustom
+                            placeholder="Add dietary preference…"
                           />
                         </Field>
-                        <Field label="Weekend style">
-                          <TextInput
-                            value={draft.weekendStyle || ""}
-                            onChange={(event) => setField("weekendStyle", event.target.value)}
-                            placeholder="Slow mornings, dinner plans, one good walk"
+                        <Field label="Weekend style" hint="Pick up to 3">
+                          <MultiSelectChips
+                            options={WEEKEND_STYLE_OPTIONS}
+                            value={
+                              draft.weekendStyle
+                                ? draft.weekendStyle.split(", ").filter(Boolean)
+                                : []
+                            }
+                            onChange={(next) =>
+                              setField("weekendStyle", next.join(", ") || null)
+                            }
+                            max={3}
+                            allowCustom
+                            placeholder="Add your own…"
                           />
                         </Field>
                         <Field label="Travel style">
-                          <TextInput
+                          <SelectInput
                             value={draft.travelStyle || ""}
-                            onChange={(event) => setField("travelStyle", event.target.value)}
-                            placeholder="Planner, spontaneous, one big trip person"
-                          />
+                            onChange={(e) => setField("travelStyle", e.target.value || null)}
+                          >
+                            <option value="">Select</option>
+                            {TRAVEL_STYLE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </SelectInput>
                         </Field>
                       </div>
 
-                      <Field label="Languages" hint="Comma or new line separated">
-                        <TextArea
-                          value={listValue(draft.languages)}
-                          onChange={(event) =>
-                            updateArrayInput(event, (next) => setField("languages", next))
-                          }
-                          placeholder="English, Hindi"
-                          className="min-h-[96px]"
+                      <Field label="Languages">
+                        <MultiSelectChips
+                          options={LANGUAGE_OPTIONS}
+                          value={draft.languages}
+                          onChange={(next) => setField("languages", next)}
+                          allowCustom
+                          placeholder="Add a language…"
                         />
                       </Field>
 
-                      <Field label="Pets" hint="Comma or new line separated">
-                        <TextArea
-                          value={listValue(draft.pets)}
-                          onChange={(event) =>
-                            updateArrayInput(event, (next) => setField("pets", next))
-                          }
-                          placeholder="Dog person, has a cat"
-                          className="min-h-[96px]"
+                      <Field label="Pets">
+                        <MultiSelectChips
+                          options={PETS_OPTIONS}
+                          value={draft.pets}
+                          onChange={(next) => setField("pets", next)}
+                          allowCustom={false}
                         />
                       </Field>
                     </div>
 
                     <div className="space-y-5 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
                       <p className="text-sm font-semibold text-white">Inner signal layer</p>
-                      <Field label="Strengths" hint="Comma or new line separated">
-                        <TextArea
-                          value={listValue(draft.strengths)}
-                          onChange={(event) =>
-                            updateArrayInput(event, (next) => setField("strengths", next))
-                          }
-                          placeholder="Emotionally steady, funny, loyal"
-                          className="min-h-[96px]"
+                      <Field label="Strengths">
+                        <MultiSelectChips
+                          options={STRENGTHS_OPTIONS}
+                          value={draft.strengths}
+                          onChange={(next) => setField("strengths", next)}
+                          allowCustom
+                          placeholder="Add a strength…"
                         />
                       </Field>
-                      <Field label="Growing toward" hint="Comma or new line separated">
-                        <TextArea
-                          value={listValue(draft.growthAreas)}
-                          onChange={(event) =>
-                            updateArrayInput(event, (next) => setField("growthAreas", next))
-                          }
-                          placeholder="Clearer communication, stronger boundaries"
-                          className="min-h-[96px]"
+                      <Field label="Growing toward">
+                        <MultiSelectChips
+                          options={GROWTH_AREAS_OPTIONS}
+                          value={draft.growthAreas}
+                          onChange={(next) => setField("growthAreas", next)}
+                          allowCustom
+                          placeholder="Add a growth area…"
                         />
                       </Field>
                       <Field label="What I bring" hint="Comma or new line separated">
