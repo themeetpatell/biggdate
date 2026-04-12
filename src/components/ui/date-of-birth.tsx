@@ -14,14 +14,15 @@ interface DateOfBirthProps {
 }
 
 export function DateOfBirth({ value, onChange }: DateOfBirthProps) {
-  const age = computeAgeFromBirthday(value ?? null);
-  const zodiac = getZodiacFromBirthday(value ?? null);
+  const age = computeAgeFromBirthday(value);
+  const zodiac = getZodiacFromBirthday(value);
   const zodiacEmoji = zodiac ? ZODIAC_EMOJI[zodiac] : null;
 
   return (
     <div className="space-y-2">
       <input
         type="date"
+        aria-label="Date of birth"
         value={value ?? ""}
         max={new Date().toISOString().slice(0, 10)}
         onChange={(e) => {
