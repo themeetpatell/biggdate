@@ -1,6 +1,6 @@
 # Auth Email Templates
 
-These emails are currently sent by Supabase Auth, so the actual HTML/subject lines need to be pasted into the Supabase dashboard email template settings.
+These emails are sent by Supabase Auth. If Resend is integrated directly in Supabase, the actual HTML/subject lines should live in the Supabase dashboard email settings.
 
 Tone target:
 - funny

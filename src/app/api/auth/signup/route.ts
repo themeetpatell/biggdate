@@ -62,7 +62,10 @@ export async function POST(req: Request) {
 
   if (error) {
     const message = error.message.toLowerCase();
-    const alreadyExists = message.includes("already") || message.includes("registered");
+    const alreadyExists =
+      message.includes("already") ||
+      message.includes("registered") ||
+      message.includes("exists");
     return NextResponse.json(
       { error: alreadyExists ? "Email already registered" : error.message },
       { status: alreadyExists ? 409 : 400 }
