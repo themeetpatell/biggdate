@@ -52,7 +52,7 @@ export default function OnboardingPage() {
   const profileCompleteDetected = useRef(false);
   const initMessageId = useRef<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Guard: redirect away if user already has a completed profile
   useEffect(() => {
@@ -77,6 +77,15 @@ export default function OnboardingPage() {
   const { messages, sendMessage, status } = useChat({ transport });
 
   const isStreaming = status === "streaming" || status === "submitted";
+
+  const scrollConversationToBottom = useCallback(
+    (behavior: ScrollBehavior = "smooth") => {
+      const el = scrollAreaRef.current;
+      if (!el) return;
+      el.scrollTo({ top: el.scrollHeight, behavior });
+    },
+    [],
+  );
 
   // Auto-start: fire __BEGIN__ only after auth is confirmed and user has no profile.
   // autoStarted is set INSIDE the timeout so that if the effect re-runs (e.g. due
@@ -152,8 +161,8 @@ export default function OnboardingPage() {
 
   // Auto-scroll to latest message
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isStreaming]);
+    scrollConversationToBottom("smooth");
+  }, [messages, isStreaming, scrollConversationToBottom]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -172,14 +181,33 @@ export default function OnboardingPage() {
 
     const visualViewport = window.visualViewport;
     visualViewport?.addEventListener("resize", updateViewportHeight);
-    visualViewport?.addEventListener("scroll", updateViewportHeight);
     window.addEventListener("orientationchange", updateViewportHeight);
 
     return () => {
       visualViewport?.removeEventListener("resize", updateViewportHeight);
-      visualViewport?.removeEventListener("scroll", updateViewportHeight);
       window.removeEventListener("orientationchange", updateViewportHeight);
       document.documentElement.style.removeProperty("--bd-viewport-height");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyHeight = document.body.style.height;
+    const previousHtmlHeight = document.documentElement.style.height;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.height = "100%";
+    document.documentElement.style.height = "100%";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.height = previousBodyHeight;
+      document.documentElement.style.height = previousHtmlHeight;
     };
   }, []);
 
@@ -187,11 +215,11 @@ export default function OnboardingPage() {
     if (!isInputFocused) return;
 
     const frame = window.requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      scrollConversationToBottom("smooth");
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [isInputFocused, viewportHeight]);
+  }, [isInputFocused, viewportHeight, scrollConversationToBottom]);
 
   // Derived state
   const aiMessageCount = messages.filter((m) => m.role === "assistant").length;
@@ -203,7 +231,7 @@ export default function OnboardingPage() {
     messages.filter(
       (m) => m.role === "user" && m.id !== initMessageId.current,
     ).length,
-    8,
+    11,
   );
 
   // Messages to display — filter init trigger + PROFILE_COMPLETE messages
@@ -329,7 +357,7 @@ export default function OnboardingPage() {
               transition={{ delay: 0.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               style={{ color: "var(--bd-text)" }}
             >
-              We see you.
+              Wait a few seconds, we are analysing.
             </motion.p>
           )}
         </div>
@@ -339,7 +367,7 @@ export default function OnboardingPage() {
 
   return (
     <div
-      className="relative flex min-h-0 flex-col overflow-hidden"
+      className="fixed inset-0 flex min-h-0 flex-col overflow-hidden"
       style={{
         background: "var(--bd-bg)",
         height: viewportHeight,
@@ -347,26 +375,67 @@ export default function OnboardingPage() {
     >
       <AmbientLayer act={act} />
 
-      {/* Minimal header */}
+      {/* Header */}
       <header
-        className="relative flex-shrink-0 px-6 py-4"
+        className="relative flex-shrink-0 px-4 pb-3 pt-4"
         style={{ zIndex: 10 }}
       >
-        <span
-          className="text-[11px] font-semibold tracking-[0.2em] uppercase"
-          style={{ color: accentColor, opacity: 0.55 }}
+        <div
+          className="mx-auto flex max-w-2xl items-center justify-between gap-4 rounded-[24px] px-4 py-3"
+          style={{
+            background: "rgba(12,16,30,0.72)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            backdropFilter: "blur(18px)",
+            boxShadow: "0 10px 34px rgba(0,0,0,0.18)",
+          }}
         >
-          BiggDate
-        </span>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex size-10 items-center justify-center rounded-2xl"
+              style={{
+                background: `linear-gradient(135deg, ${accentColor}30, rgba(255,255,255,0.08))`,
+                border: `1px solid ${accentColor}35`,
+                boxShadow: `0 8px 24px ${accentColor}18`,
+              }}
+            >
+              <span style={{ fontSize: 16 }}>✨</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--bd-text)", margin: 0 }}>
+                Maahi
+              </p>
+              <p className="text-[11px]" style={{ color: "var(--bd-text-faint)", opacity: 0.65, margin: 0 }}>
+                Building your profile, one real answer at a time
+              </p>
+            </div>
+          </div>
+
+          {!isWelcome && (
+            <div
+              className="rounded-full px-3 py-1 text-[11px] font-semibold tabular-nums"
+              style={{
+                color: accentColor,
+                background: `${accentColor}12`,
+                border: `1px solid ${accentColor}25`,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {completedQuestions}/11
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Content area */}
       <div
-        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        ref={scrollAreaRef}
+        className="onboarding-scroll relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
         style={{
           zIndex: 10,
           WebkitOverflowScrolling: "touch",
-          scrollPaddingBottom: "calc(12rem + env(safe-area-inset-bottom, 0px))",
+          scrollPaddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
         }}
       >
         <AnimatePresence mode="wait">
@@ -405,22 +474,22 @@ export default function OnboardingPage() {
           ) : (
             <motion.div
               key="conversation"
-              className="mx-auto max-w-2xl space-y-5 px-4 py-6 pb-36"
+              className="mx-auto w-full max-w-2xl px-4 pb-14 pt-8 sm:pt-10"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              {visibleMessages.map((message) => (
-                <OnboardingMessage
-                  key={message.id}
-                  message={message}
-                  act={act}
-                />
-              ))}
+              <div className="space-y-5">
+                {visibleMessages.map((message) => (
+                  <OnboardingMessage
+                    key={message.id}
+                    message={message}
+                    act={act}
+                  />
+                ))}
 
-              {status === "submitted" && <ThinkingPulse act={act} />}
-
-              <div ref={bottomRef} />
+                {status === "submitted" && <ThinkingPulse act={act} />}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -430,108 +499,116 @@ export default function OnboardingPage() {
       <AnimatePresence>
         {!isWelcome && (
           <motion.div
-            className="relative flex-shrink-0 px-6 pt-2"
+            className="relative flex-shrink-0 px-4 pt-2"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
             style={{
               zIndex: 10,
-              paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
+              paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))",
             }}
           >
             <div
-              className="pointer-events-none absolute inset-x-0 -top-10 h-10"
+              className="pointer-events-none absolute inset-x-0 -top-8 h-8"
               style={{
                 background: "linear-gradient(to top, var(--bd-bg), transparent)",
               }}
             />
             <div className="mx-auto max-w-2xl">
-              {showAnyInlineUI && (
-                <QuickReplies
-                  key={lastAIMessage?.id}
-                  chips={currentChips}
-                  multiSelectOptions={currentMultiSelect}
-                  showAgeRange={currentShowAgeRange}
-                  showDatePicker={currentShowDatePicker}
-                  act={act}
-                  onSelect={handleChipSelect}
-                  onMultiSelect={(selected) => handleSend(selected.join(", "))}
-                  onAgeRange={(min, max) => handleSend(`${min} to ${max}`)}
-                  onDatePick={(birthday, age, zodiac) =>
-                    handleSend(
-                      birthday
-                        ? `My birthday is ${birthday}. I'm ${age} years old.${zodiac ? ` My zodiac sign is ${zodiac}.` : ""}`
-                        : "I'd rather not share my birthday",
-                    )
-                  }
-                  onSayMore={handleSayMore}
-                />
-              )}
-              {/* Glass input card */}
               <div
-                className="flex items-end gap-3 rounded-2xl px-4 py-3"
+                className="rounded-[28px] px-4 pb-3 pt-3"
                 style={{
-                  background: "rgba(255,255,255,0.055)",
-                  border: "1px solid rgba(255,255,255,0.09)",
+                  background: "rgba(10,14,26,0.82)",
+                  border: "1px solid rgba(255,255,255,0.07)",
                   backdropFilter: "blur(20px)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+                  boxShadow: "0 10px 34px rgba(0,0,0,0.22)",
                 }}
               >
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={handleTextareaChange}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => setIsInputFocused(true)}
-                  onBlur={() => setIsInputFocused(false)}
-                  placeholder={PLACEHOLDERS[act]}
-                  rows={1}
-                  className="flex-1 resize-none border-0 bg-transparent py-0.5 text-[15px] focus:outline-none"
+                {showAnyInlineUI && (
+                  <QuickReplies
+                    key={lastAIMessage?.id}
+                    chips={currentChips}
+                    multiSelectOptions={currentMultiSelect}
+                    showAgeRange={currentShowAgeRange}
+                    showDatePicker={currentShowDatePicker}
+                    act={act}
+                    onSelect={handleChipSelect}
+                    onMultiSelect={(selected) => handleSend(selected.join(", "))}
+                    onAgeRange={(min, max) => handleSend(`${min} to ${max}`)}
+                    onDatePick={(birthday, age, zodiac) =>
+                      handleSend(
+                        birthday
+                          ? `My birthday is ${birthday}. I'm ${age} years old.${zodiac ? ` My zodiac sign is ${zodiac}.` : ""}`
+                          : "I'd rather not share my birthday",
+                      )
+                    }
+                    onSayMore={handleSayMore}
+                  />
+                )}
+
+                <div
+                  className="flex items-end gap-3 rounded-2xl px-4 py-3"
                   style={{
-                    color: "var(--bd-text)",
-                    maxHeight: "160px",
-                    caretColor: accentColor,
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
                   }}
-                />
-                <AnimatePresence>
-                  {input.trim() && !isStreaming && (
-                    <motion.button
-                      onClick={() => handleSend()}
-                      initial={{ opacity: 0, scale: 0.6 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.6 }}
-                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                      className="mb-0.5 flex size-8 flex-shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80"
-                      style={{ background: accentColor }}
-                      aria-label="Send"
+                >
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={handleTextareaChange}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setIsInputFocused(false)}
+                    placeholder={PLACEHOLDERS[act]}
+                    rows={1}
+                    className="flex-1 resize-none border-0 bg-transparent py-0.5 text-[15px] focus:outline-none"
+                    style={{
+                      color: "var(--bd-text)",
+                      maxHeight: "160px",
+                      caretColor: accentColor,
+                    }}
+                  />
+                  <button
+                    onClick={() => handleSend()}
+                    disabled={!input.trim() || isStreaming}
+                    className="mb-0.5 flex size-9 flex-shrink-0 items-center justify-center rounded-full transition-all"
+                    style={{
+                      background:
+                        input.trim() && !isStreaming
+                          ? accentColor
+                          : "rgba(255,255,255,0.06)",
+                      opacity: input.trim() && !isStreaming ? 1 : 0.55,
+                      cursor: input.trim() && !isStreaming ? "pointer" : "default",
+                    }}
+                    aria-label="Send"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      aria-hidden
                     >
-                      {/* Up-arrow icon */}
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        aria-hidden
-                      >
-                        <path
-                          d="M7 11.5V2.5M3 6.5l4-4 4 4"
-                          stroke="white"
-                          strokeWidth="1.6"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </motion.button>
-                  )}
-                </AnimatePresence>
+                      <path
+                        d="M7 11.5V2.5M3 6.5l4-4 4 4"
+                        stroke={input.trim() && !isStreaming ? "white" : "rgba(255,255,255,0.45)"}
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <p
+                  className="mt-2 text-center text-[10px]"
+                  style={{ color: "var(--bd-text-faint)", opacity: 0.34 }}
+                >
+                  Private and used only to build your profile
+                </p>
               </div>
-              <p
-                className="mt-2 text-center text-[10px]"
-                style={{ color: "var(--bd-text-faint)", opacity: 0.4 }}
-              >
-                Private and used only to build your profile
-              </p>
             </div>
           </motion.div>
         )}
@@ -552,6 +629,12 @@ export default function OnboardingPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <style>{`
+        .onboarding-scroll::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

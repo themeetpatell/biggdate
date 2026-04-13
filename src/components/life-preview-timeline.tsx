@@ -36,10 +36,10 @@ export function LifePreviewTimeline() {
   };
 
   const SUGGESTIONS = [
-    "I mass-reject on hinge lol",
-    "my calendar runs my love life",
-    "I'm lowkey afraid of settling",
-    "how do builders even date??",
+    "my schedule makes dating feel impossible",
+    "I keep meeting people who don't get my life",
+    "tired of explaining what I do on first date",
+    "haven't had time to even try, honestly",
   ];
 
   const displayMessages = messages.length > 0

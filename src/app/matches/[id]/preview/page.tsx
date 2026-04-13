@@ -196,12 +196,13 @@ function LifeTab({ match }: { match: Match }) {
 }
 
 // ─── Soul Knock UI ────────────────────────────────────────────────────────────
-function SoulKnock({ match, onSend, onPass, sending, sent }: {
+function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
   match: Match;
   onSend: (question: string) => void;
   onPass: () => void;
   sending: boolean;
   sent: boolean;
+  onViewPending: () => void;
 }) {
   const suggestions = getSoulKnockQuestions(match);
   const [selected, setSelected] = useState<number | null>(null);
@@ -214,10 +215,26 @@ function SoulKnock({ match, onSend, onPass, sending, sent }: {
     return (
       <div style={{ padding: "20px 20px 0" }}>
         <div style={{ padding: "20px 22px", borderRadius: 20, background: "rgba(79,255,176,0.07)", border: "1px solid rgba(79,255,176,0.2)", textAlign: "center" }}>
-          <p style={{ fontSize: 16, fontWeight: 700, color: "#4FFFB0", margin: "0 0 4px" }}>Soul Knock sent ✦</p>
+          <p style={{ fontSize: 16, fontWeight: 700, color: "#4FFFB0", margin: "0 0 4px" }}>Intention sent ✦</p>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>
-            {match.name} will see your question. If they respond, you&apos;re connected.
+            {match.name} can see it now. This is pending on their side until they answer.
           </p>
+          <button
+            onClick={onViewPending}
+            style={{
+              marginTop: 14,
+              padding: "11px 18px",
+              borderRadius: 999,
+              border: "1px solid rgba(79,255,176,0.22)",
+              background: "rgba(79,255,176,0.08)",
+              color: "#dfffea",
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Back to Connect
+          </button>
         </div>
       </div>
     );
@@ -335,7 +352,12 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
       await fetch("/api/intros/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId: match.id, matchName: match.name, userName: profile.name, message: question }),
+        body: JSON.stringify({
+          matchId: match.id,
+          matchName: match.name,
+          matchedUserId: match.matchedUserId,
+          soulKnockQuestion: question,
+        }),
       });
       setSent(true);
     } catch {
@@ -410,7 +432,14 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
 
       {/* Soul Knock */}
       <div style={{ position: "relative", zIndex: 10, maxWidth: 520, margin: "0 auto" }}>
-        <SoulKnock match={match} onSend={handleSend} onPass={handlePass} sending={sending} sent={sent} />
+        <SoulKnock
+          match={match}
+          onSend={handleSend}
+          onPass={handlePass}
+          sending={sending}
+          sent={sent}
+          onViewPending={() => router.push("/matches")}
+        />
       </div>
     </div>
   );

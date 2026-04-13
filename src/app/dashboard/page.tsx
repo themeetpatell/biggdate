@@ -30,19 +30,23 @@ function SealedCard({
   return (
     <div
       onClick={!revealed ? onReveal : undefined}
-      style={{
+      style={revealed ? {
+        position: "relative",
+        zIndex: index,
+        cursor: "default",
+      } : {
         position: "absolute",
         inset: 0,
         transform: `translateY(${offset}px) rotate(${rotate}deg) scale(${1 - (total - 1 - index) * 0.03})`,
         zIndex: index,
-        cursor: revealed ? "default" : "pointer",
+        cursor: "pointer",
         transition: "transform 0.4s cubic-bezier(0.16,1,0.3,1)",
       }}
     >
       <div
         style={{
           width: "100%",
-          height: "100%",
+          ...(revealed ? {} : { height: "100%" }),
           borderRadius: 24,
           border: revealed
             ? "1px solid rgba(212,104,138,0.25)"
@@ -216,8 +220,10 @@ export default function TodayPage() {
   const { profile, loading } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchLoading, setMatchLoading] = useState(true);
+  const [poolEmpty, setPoolEmpty] = useState(false);
   const [intention, setIntention] = useState<string>("");
   const [revealedIndex, setRevealedIndex] = useState<number | null>(null);
+  const [showAllMatches, setShowAllMatches] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -230,7 +236,11 @@ export default function TodayPage() {
       body: JSON.stringify({}),
     })
       .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d)) setMatches(d.slice(0, 3)); })
+      .then((d) => {
+        if (d.poolEmpty) { setPoolEmpty(true); return; }
+        const list = Array.isArray(d) ? d : (d.matches ?? []);
+        setMatches(list.slice(0, 3));
+      })
       .catch(() => {})
       .finally(() => setMatchLoading(false));
 
@@ -371,6 +381,33 @@ export default function TodayPage() {
                 Maahi is finding your matches…
               </p>
             </div>
+          ) : poolEmpty ? (
+            <div
+              style={{
+                height: 280,
+                borderRadius: 24,
+                border: "1px solid rgba(168,85,247,0.15)",
+                background: "rgba(168,85,247,0.04)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                textAlign: "center",
+                padding: "0 28px",
+              }}
+            >
+              <span style={{ fontSize: 36 }}>🌱</span>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#fff", margin: 0 }}>
+                Maahi is still building your pool
+              </p>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.6 }}>
+                More people are joining every day. When someone who fits your profile signs up, they'll be here waiting.
+              </p>
+              <p style={{ fontSize: 11, color: "rgba(168,85,247,0.6)", margin: 0 }}>
+                Check back tomorrow
+              </p>
+            </div>
           ) : matches.length === 0 ? (
             <div
               style={{
@@ -397,77 +434,194 @@ export default function TodayPage() {
             </div>
           ) : (
             <>
-              {/* Card fan — front card is last in array (highest z-index) */}
-              <div
-                style={{
-                  position: "relative",
-                  height: revealedIndex !== null ? "auto" : 320,
-                  minHeight: 320,
-                  marginBottom: revealedIndex !== null ? 16 : 0,
-                }}
-              >
-                {matches.map((match, i) =>
-                  revealedIndex === null || revealedIndex === i ? (
-                    <SealedCard
-                      key={match.id}
-                      match={match}
-                      index={i}
-                      total={revealedIndex !== null ? 1 : matches.length}
-                      revealed={revealedIndex === i}
-                      onReveal={() => setRevealedIndex(i)}
-                      onIntention={() => handleIntention(match)}
-                    />
-                  ) : null
-                )}
-              </div>
+              {showAllMatches ? (
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 14,
+                      overflowX: "auto",
+                      scrollSnapType: "x mandatory",
+                      paddingBottom: 10,
+                      margin: "0 -4px",
+                      paddingInline: 4,
+                    }}
+                  >
+                    {matches.map((match, i) => (
+                      <div
+                        key={match.id}
+                        style={{
+                          minWidth: "88%",
+                          scrollSnapAlign: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <SealedCard
+                          match={match}
+                          index={i}
+                          total={1}
+                          revealed
+                          onReveal={() => {}}
+                          onIntention={() => handleIntention(match)}
+                        />
+                      </div>
+                    ))}
+                  </div>
 
-              {/* Card dots */}
-              {revealedIndex === null && matches.length > 1 && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    gap: 6,
-                    marginTop: 16,
-                  }}
-                >
-                  {matches.map((_, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background:
-                          i === matches.length - 1
-                            ? "#d4688a"
-                            : "rgba(255,255,255,0.2)",
-                        transition: "background 0.2s",
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "rgba(255,255,255,0.3)",
+                      textAlign: "center",
+                      margin: "8px 0 0",
+                    }}
+                  >
+                    Swipe through all 3. Send intention when one lands.
+                  </p>
 
-              {/* Back button when revealed */}
-              {revealedIndex !== null && (
-                <button
-                  onClick={() => setRevealedIndex(null)}
-                  style={{
-                    width: "100%",
-                    padding: "11px 0",
-                    borderRadius: 999,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "rgba(255,255,255,0.4)",
-                    background: "transparent",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    cursor: "pointer",
-                    marginTop: 10,
-                  }}
-                >
-                  ← See all {matches.length} matches
-                </button>
+                  <button
+                    onClick={() => {
+                      setShowAllMatches(false);
+                      setRevealedIndex(null);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "11px 0",
+                      borderRadius: 999,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: "rgba(255,255,255,0.42)",
+                      background: "transparent",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      cursor: "pointer",
+                      marginTop: 14,
+                    }}
+                  >
+                    ← Back to stacked reveal
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Card fan — front card is last in array (highest z-index) */}
+                  <div
+                    style={{
+                      position: "relative",
+                      height: revealedIndex !== null ? "auto" : 320,
+                      minHeight: revealedIndex !== null ? 0 : 320,
+                      marginBottom: revealedIndex !== null ? 16 : 0,
+                    }}
+                  >
+                    {matches.map((match, i) =>
+                      revealedIndex === null || revealedIndex === i ? (
+                        <SealedCard
+                          key={match.id}
+                          match={match}
+                          index={i}
+                          total={revealedIndex !== null ? 1 : matches.length}
+                          revealed={revealedIndex === i}
+                          onReveal={() => {
+                            setShowAllMatches(false);
+                            setRevealedIndex(i);
+                          }}
+                          onIntention={() => handleIntention(match)}
+                        />
+                      ) : null
+                    )}
+                  </div>
+
+                  {revealedIndex === null && matches.length > 1 && (
+                    <>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: 6,
+                          marginTop: 16,
+                        }}
+                      >
+                        {matches.map((_, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              background:
+                                i === matches.length - 1
+                                  ? "#d4688a"
+                                  : "rgba(255,255,255,0.2)",
+                              transition: "background 0.2s",
+                            }}
+                          />
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setShowAllMatches(true);
+                          setRevealedIndex(null);
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "13px 0",
+                          borderRadius: 999,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          color: "#0A0A0F",
+                          background: "linear-gradient(135deg, #ff7ab8, #d4688a)",
+                          border: "none",
+                          cursor: "pointer",
+                          marginTop: 14,
+                          boxShadow: "0 16px 36px rgba(212,104,138,0.28)",
+                        }}
+                      >
+                        ✦ Heart blast all {matches.length}
+                      </button>
+                    </>
+                  )}
+
+                  {revealedIndex !== null && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                      <button
+                        onClick={() => {
+                          setShowAllMatches(true);
+                          setRevealedIndex(null);
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "13px 0",
+                          borderRadius: 999,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          color: "#0A0A0F",
+                          background: "linear-gradient(135deg, #ff7ab8, #d4688a)",
+                          border: "none",
+                          cursor: "pointer",
+                          boxShadow: "0 16px 36px rgba(212,104,138,0.28)",
+                        }}
+                      >
+                        ✦ Heart blast all {matches.length}
+                      </button>
+
+                      <button
+                        onClick={() => setRevealedIndex(null)}
+                        style={{
+                          width: "100%",
+                          padding: "11px 0",
+                          borderRadius: 999,
+                          fontSize: 13,
+                          fontWeight: 500,
+                          color: "rgba(255,255,255,0.4)",
+                          background: "transparent",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ← Back to stacked reveal
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

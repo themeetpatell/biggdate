@@ -119,10 +119,10 @@ export function MarketingFooter() {
               Log in
             </Link>
             <a
-              href="mailto:hello@biggdate.com"
+              href="mailto:meet@biggventures.com"
               className="col-span-2 rounded-xl border border-white/[0.06] bg-black/10 px-3 py-2 text-center transition-colors hover:text-[#a8aabe] sm:col-span-1 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
             >
-              hello@biggdate.com
+              meet@biggventures.com
             </a>
           </div>
         </div>

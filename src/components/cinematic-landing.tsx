@@ -15,15 +15,18 @@ import {
   Fingerprint,
   Eye,
   Compass,
-  Clock,
+  CalendarClock,
   Zap,
-  ShieldCheck,
-  Brain,
+  BrainCircuit,
+  BriefcaseBusiness,
   Check,
+  Crown,
   RefreshCw,
   Target,
   Lock,
   MessageCircle,
+  MessageCircleOff,
+  Hourglass,
   Flame,
   Menu,
 } from "lucide-react";
@@ -52,7 +55,7 @@ const STEPS = [
     icon: Fingerprint,
     color: "#ff1493",
     title: "Tell us how you actually live",
-    desc: "Your work hours, the texting style that drives you insane, the green flags nobody asks about. We use all of it.",
+    desc: "Your actual schedule. The texting style that ends relationships. The green flags no app has ever asked about.",
   },
   {
     num: "02",
@@ -91,64 +94,106 @@ const UPGRADES = [
 
 const HACKS = [
   {
-    icon: Clock,
-    color: "#ff1493",
+    icon: CalendarClock,
+    color: "#ff5f9f",
     title: "The Friday 7pm rule",
     desc: "If they won\u2019t spend a real evening with you, they\u2019re not spending a real life with you either.",
   },
   {
-    icon: Brain,
-    color: "#7b9fff",
+    icon: BrainCircuit,
+    color: "#7ea8ff",
     title: "Anxious \u2260 needy",
     desc: "Your attachment style is just your blueprint. We read it, match you accordingly, and don\u2019t make it weird.",
   },
   {
     icon: Zap,
-    color: "#d4688a",
+    color: "#ff9a62",
     title: "The spark is a scam",
     desc: "Butterflies are a terrible co-founder. The real test? Can you both survive a Wednesday at 9pm doing nothing.",
   },
   {
-    icon: ShieldCheck,
-    color: "#8fd4a4",
+    icon: MessageCircleOff,
+    color: "#6fe1c8",
     title: "They went quiet. On purpose.",
     desc: "If they vanish the second your life gets busy, they weren\u2019t your person. Maahi could see it from the start.",
+  },
+
+  {
+    icon: BriefcaseBusiness,
+    color: "#f3c66a",
+    title: "They called it \"bad communication.\"",
+    desc: "You were on call. In a board meeting. Closing a deal. Your 4-hour response window isn't a red flag. It's Tuesday.",
+  },
+
+  {
+    icon: Hourglass,
+    color: "#c59bff",
+    title: "The \"I'm not ready\" lie",
+    desc: "You're not unready. You're tired of starting from zero with someone who doesn't understand what your life actually costs.",
   },
 ];
 
 const ROASTS: {
   icon: typeof RefreshCw;
+  badge: string;
+  tint: string;
   title: string;
   roast: string;
-  span: "wide" | "narrow";
+  layout: string;
 }[] = [
   {
     icon: RefreshCw,
+    badge: "Infinite cardio",
+    tint: "#ff7a59",
     title: "The Swipe Treadmill",
     roast:
-      "10,000 swipes. 47 matches. 3 conversations. 1 date. They showed up 22 minutes late, ordered a water, and explained Web3 to you for 45 minutes. App still sends the \u2018You\u2019re on a roll!\u2019 notification.",
-    span: "wide",
+      "10,000 swipes for one date with a man who explained Web3 over tap water. The app called that momentum.",
+    layout: "md:col-span-3 lg:col-span-3",
   },
   {
     icon: Target,
+    badge: "Fake math",
+    tint: "#ff4db8",
     title: "The 97% Match",
     roast:
-      "The algorithm called it fate. You lasted one brunch. Turns out 97% compatible doesn\u2019t filter for \u2018still uses \u201clol\u201d unironically\u2019 or \u2018sends 6-minute voice notes.\u2019",
-    span: "narrow",
+      "97% compatible. Still said \u2018I don\u2019t really do plans\u2019 and sent a 6-minute gym voice note.",
+    layout: "md:col-span-2 lg:col-span-2",
+  },
+  {
+    icon: Crown,
+    badge: "Paid delusion",
+    tint: "#f3c969",
+    title: "The Premium Tier",
+    roast:
+      "Paid to get boosted into the exact same people. Now with a tiny crown and bigger regret.",
+    layout: "md:col-span-2 lg:col-span-2",
   },
   {
     icon: Lock,
+    badge: "Luxury cosplay",
+    tint: "#b887ff",
     title: "The Velvet Rope",
     roast:
-      "Six-week waitlist. Referral code. Linen-textured onboarding. First match had three photos and a bio that said \u2018ask me.\u2019 Very curated. Extremely mid.",
-    span: "narrow",
+      "Six-week waitlist for someone whose bio said \u2018ask me.\u2019 Very exclusive. Deeply underwhelming.",
+    layout: "md:col-span-3 lg:col-span-3",
   },
   {
     icon: MessageCircle,
+    badge: "Chat hospice",
+    tint: "#7b9fff",
     title: "The Hey Spiral",
     roast:
-      "\u2018Hey :)\u2019 \u2014 \u2018Heyy! How\u2019s your week?\u2019 \u2014 \u2018Good haha you?\u2019 \u2014 silence forever. App fires a push: \u2018Don\u2019t let this one get away!\u2019 Babe. They\u2019ve been gone for three days.",
-    span: "wide",
+      "\u2018Hey :)\u2019 became \u2018good haha u?\u2019 and then a state funeral. The app still sent \u2018Don\u2019t let this one get away!\u2019",
+    layout: "md:col-span-3 lg:col-span-3",
+  },
+  {
+    icon: Check,
+    badge: "Calendar fiction",
+    tint: "#73d8b5",
+    title: "The Date Mirage",
+    roast:
+      "Three days of 'let's lock something in next week' and then total vapor. Availability was apparently conceptual.",
+    layout: "md:col-span-2 lg:col-span-2",
   },
 ];
 
@@ -496,10 +541,10 @@ export function CinematicLanding() {
                       Enter BiggDate
                     </Link>
                     <a
-                      href="mailto:hello@biggdate.com"
+                      href="mailto:meet@biggventures.com"
                       className="inline-flex items-center justify-center rounded-full border border-[#ff1493]/18 bg-[#ff1493]/10 px-5 py-3 text-sm font-medium text-[#f8c6e8] transition-all hover:border-[#ff1493]/30 hover:bg-[#ff1493]/14"
                     >
-                      hello@biggdate.com
+                      meet@biggventures.com
                     </a>
                   </div>
                 </div>
@@ -527,7 +572,7 @@ export function CinematicLanding() {
             transition={{ duration: 0.8, ease: EASE }}
           >
             <span className="inline-block rounded-full border border-[#ff1493]/20 bg-[#ff1493]/[0.08] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#ff6ac7]">
-              Private beta — for busy humans
+              Private beta — for people who reschedule dates for work.
             </span>
           </motion.div>
 
@@ -591,9 +636,9 @@ export function CinematicLanding() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.15, ease: EASE }}
           >
-            You already optimize everything else.{" "}
+            Your calendar is blocked.{" "}
             <span className="font-medium text-[#f3a5d7]">
-              Your dating life deserves the same energy.
+              Your Love standards aren&apos;t.
             </span>
           </motion.p>
 
@@ -797,7 +842,7 @@ export function CinematicLanding() {
             </span>
           </h2>
           <p className="mx-auto mt-4 max-w-sm text-sm text-[#5a5d72]">
-            The loop you’ve been stuck in? That ends here.
+            You&apos;ve built a life worth being proud of. <br></br>You shouldn&apos;t have to settle for someone who doesn&apos;t understand it.
           </p>
         </motion.div>
 
@@ -995,23 +1040,18 @@ export function CinematicLanding() {
             </span>
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-[#a8aabe]">
-            A love letter to every app that wasted your Sunday.
-            <br className="hidden sm:block" />
-            No names. Absolutely no lawyers.
+            Six tiny obituaries for the apps that treated your weekend like a beta test.
           </p>
         </motion.div>
 
-        {/* bento grid — zigzag layout */}
-        <div className="grid gap-4 md:grid-cols-5">
+        {/* editorial grid */}
+        <div className="grid gap-4 md:grid-cols-5 lg:auto-rows-[minmax(240px,auto)]">
           {ROASTS.map((roast, i) => {
             const Icon = roast.icon;
-            const isWide = roast.span === "wide";
             return (
               <motion.div
                 key={i}
-                className={`group relative overflow-hidden rounded-2xl border border-[#ff4db8]/[0.1] bg-gradient-to-b from-[#161018] to-[#0f0a12] p-7 sm:p-8 ${
-                  isWide ? "md:col-span-3" : "md:col-span-2"
-                }`}
+                className={`group relative overflow-hidden rounded-[28px] border border-white/10 bg-[#120d16]/90 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/15 sm:p-7 ${roast.layout} min-h-[260px]`}
                 initial={{ opacity: 0, y: 44 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -1020,29 +1060,86 @@ export function CinematicLanding() {
                   delay: i * 0.1,
                   ease: EASE,
                 }}
+                style={{
+                  boxShadow: `0 24px 80px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px ${roast.tint}12`,
+                }}
               >
                 {/* top glow line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#ff4db8]/25 to-transparent" />
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${roast.tint}55, transparent)`,
+                  }}
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-80"
+                  style={{
+                    background: `radial-gradient(circle at top right, ${roast.tint}20, transparent 34%), radial-gradient(circle at bottom left, ${roast.tint}12, transparent 32%)`,
+                  }}
+                />
 
-                {/* icon + title */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#ff4db8]/[0.1] bg-[#ff4db8]/[0.06]">
-                    <Icon className="size-[18px] text-[#ff4db8]" />
+                <div className="relative flex h-full flex-col">
+                  <div className="flex items-start justify-between gap-4">
+                    <span
+                      className="inline-flex w-fit whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
+                      style={{
+                        borderColor: `${roast.tint}22`,
+                        color: roast.tint,
+                        background: `${roast.tint}10`,
+                      }}
+                    >
+                      {roast.badge}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-semibold tracking-[-0.01em] text-[#f0ebe3]">
-                    {roast.title}
-                  </h3>
+
+                  <div className="mt-6 flex items-start gap-4">
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border backdrop-blur-sm"
+                      style={{
+                        borderColor: `${roast.tint}30`,
+                        background: `linear-gradient(180deg, ${roast.tint}20, rgba(255,255,255,0.03))`,
+                        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 14px 32px ${roast.tint}14`,
+                      }}
+                    >
+                      <Icon className="size-5" style={{ color: roast.tint }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3
+                        className="max-w-[10.5ch] text-[2rem] font-semibold leading-[0.96] tracking-[-0.04em] text-[#f7f1ea] sm:text-[2.3rem]"
+                      >
+                        {roast.title}
+                      </h3>
+                      <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/30">
+                        Public service announcement
+                      </p>
+                    </div>
+                  </div>
+
+                  <p
+                    className="relative mt-7 max-w-[30rem] text-[16px] leading-8 text-[#d0c3bb] sm:text-[1.05rem]"
+                  >
+                    {roast.roast}
+                  </p>
+
+                  <div className="mt-auto pt-8">
+                    <div
+                      className="h-px w-full"
+                      style={{
+                        background: `linear-gradient(90deg, ${roast.tint}00, ${roast.tint}24, ${roast.tint}00)`,
+                      }}
+                    />
+                  </div>
                 </div>
 
-                {/* roast text */}
-                <p className="mt-4 text-[15px] leading-[1.7] text-[#9b8e82]">
-                  {roast.roast}
-                </p>
-
                 {/* corner glow on hover */}
-                <div className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(232,168,92,0.08),transparent_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div
+                  className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    background: `radial-gradient(circle, ${roast.tint}20, transparent 70%)`,
+                  }}
+                />
                 {/* subtle inner shine */}
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.02] to-transparent" />
+                <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-gradient-to-b from-white/[0.03] via-transparent to-transparent" />
               </motion.div>
             );
           })}
@@ -1089,7 +1186,7 @@ export function CinematicLanding() {
             return (
               <motion.div
                 key={i}
-                className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-7 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.14] hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+                className="group relative overflow-hidden rounded-[26px] border border-white/[0.08] bg-[#11131c]/90 p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14] hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -1106,21 +1203,29 @@ export function CinematicLanding() {
                     background: `linear-gradient(90deg, transparent, ${hack.color}25, transparent)`,
                   }}
                 />
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-70"
+                  style={{
+                    background: `radial-gradient(circle at top left, ${hack.color}12, transparent 28%), radial-gradient(circle at bottom right, ${hack.color}10, transparent 26%)`,
+                  }}
+                />
 
                 <div className="flex items-start gap-4">
                   <div
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.06]"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border"
                     style={{
-                      background: `linear-gradient(135deg, ${hack.color}18, ${hack.color}06)`,
+                      borderColor: `${hack.color}22`,
+                      background: `linear-gradient(180deg, ${hack.color}1f, rgba(255,255,255,0.03))`,
+                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 30px ${hack.color}12`,
                     }}
                   >
                     <Icon className="size-5" style={{ color: hack.color }} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold tracking-[-0.01em]">
+                    <h3 className="text-[1.05rem] font-semibold tracking-[-0.02em] text-[#f5efe9]">
                       {hack.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#a8aabe]">
+                    <p className="mt-2 text-sm leading-8 text-[#b0b3c5]">
                       {hack.desc}
                     </p>
                   </div>
@@ -1156,7 +1261,7 @@ export function CinematicLanding() {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7b9fff]/25 to-transparent" />
 
           <h2 className="font-display text-3xl font-bold tracking-[-0.02em] sm:text-4xl lg:text-5xl">
-            Your startup has a pitch deck.
+            Your career has a growth plan.
           </h2>
           <p className="mt-2 font-display text-3xl font-bold tracking-[-0.02em] sm:text-4xl lg:text-5xl">
             <span className="bg-gradient-to-r from-[#ff1493] via-[#d4688a] to-[#7b9fff] bg-clip-text text-transparent">
@@ -1165,7 +1270,7 @@ export function CinematicLanding() {
           </p>
 
           <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-[#a8aabe]">
-            Private beta. Real people. No algorithm pretending it knows your soul.
+            500+ verified professionals already waiting. Real people. No algorithm pretending it knows your soul.
           </p>
 
           <div className="mt-8">

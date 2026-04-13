@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import type { Match } from "@/lib/types";
 
+type SentIntro = {
+  id: string;
+  matchId: string;
+  matchName: string;
+  soulKnockQuestion: string | null;
+  receiverAnswered: boolean;
+  createdAt: string;
+  status: "pending" | "answered";
+};
+
 function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -212,7 +222,9 @@ export default function ConnectPage() {
   const router = useRouter();
   const { profile, loading: authLoading } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
+  const [pendingIntros, setPendingIntros] = useState<SentIntro[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingLoading, setPendingLoading] = useState(true);
 
   const fetchMatches = useCallback(async () => {
     setLoading(true);
@@ -223,18 +235,36 @@ export default function ConnectPage() {
         body: JSON.stringify({}),
       });
       const data = await res.json();
-      if (Array.isArray(data)) setMatches(data);
+      const list = Array.isArray(data) ? data : (data.matches ?? []);
+      if (Array.isArray(list)) setMatches(list);
     } catch {
       // silent
     }
     setLoading(false);
   }, []);
 
+  const fetchPendingIntros = useCallback(async () => {
+    setPendingLoading(true);
+    try {
+      const res = await fetch("/api/intros");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setPendingIntros(
+          data.filter((intro): intro is SentIntro => Boolean(intro?.id && intro?.matchName)),
+        );
+      }
+    } catch {
+      // silent
+    }
+    setPendingLoading(false);
+  }, []);
+
   useEffect(() => {
     if (authLoading) return;
     if (!profile) { router.push("/onboarding"); return; }
     fetchMatches();
-  }, [profile, authLoading, router, fetchMatches]);
+    fetchPendingIntros();
+  }, [profile, authLoading, router, fetchMatches, fetchPendingIntros]);
 
   if (authLoading || !profile) return null;
 
@@ -292,6 +322,104 @@ export default function ConnectPage() {
             Soul summaries first. Photos unlock after intention.
           </p>
         </div>
+
+        {!pendingLoading && pendingIntros.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    color: "#B48CFF",
+                    margin: "0 0 4px",
+                  }}
+                >
+                  Pending on their side
+                </p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.38)", margin: 0 }}>
+                  Keep track of who already received your intention.
+                </p>
+              </div>
+              <span
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  background: "rgba(180,140,255,0.08)",
+                  border: "1px solid rgba(180,140,255,0.15)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#B48CFF",
+                }}
+              >
+                {pendingIntros.length}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {pendingIntros.map((intro) => (
+                <button
+                  key={intro.id}
+                  onClick={() => router.push(`/matches/${intro.matchId}/preview`)}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    borderRadius: 18,
+                    border: "1px solid rgba(180,140,255,0.12)",
+                    background: "linear-gradient(145deg, rgba(22,18,32,0.96), rgba(15,12,22,0.98))",
+                    padding: "16px 18px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>{intro.matchName}</span>
+                        <span
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: 999,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                            color: intro.status === "answered" ? "#4FFFB0" : "#F5C842",
+                            background: intro.status === "answered" ? "rgba(79,255,176,0.09)" : "rgba(245,200,66,0.09)",
+                            border: intro.status === "answered" ? "1px solid rgba(79,255,176,0.18)" : "1px solid rgba(245,200,66,0.18)",
+                          }}
+                        >
+                          {intro.status === "answered" ? "They answered" : "Pending"}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 12, color: "rgba(255,255,255,0.46)", margin: "0 0 8px", lineHeight: 1.55 }}>
+                        {intro.status === "answered"
+                          ? "They replied. Open this connection and keep it moving."
+                          : "Your intention is sitting with them now. You don’t need to guess who has it."}
+                      </p>
+                      {intro.soulKnockQuestion && (
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: "rgba(180,140,255,0.72)",
+                            margin: 0,
+                            lineHeight: 1.5,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          You sent: “{intro.soulKnockQuestion}”
+                        </p>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 13, color: "rgba(255,255,255,0.2)", flexShrink: 0 }}>→</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Match list */}
         {loading ? (

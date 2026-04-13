@@ -72,7 +72,7 @@ export const MARKETING_SOCIAL_LINKS: readonly MarketingSocialLink[] = [
   },
   {
     label: "Email",
-    href: "mailto:hello@biggdate.com",
+    href: "mailto:meet@biggventures.com",
     Icon: Mail,
   },
   {
@@ -92,7 +92,7 @@ export const MARKETING_SOCIAL_LINKS: readonly MarketingSocialLink[] = [
   },
   {
     label: "Twitter",
-    href: "https://twitter.com/biggdate",
+    href: "https://twitter.com/biggdates",
     Icon: Twitter,
   },
   {

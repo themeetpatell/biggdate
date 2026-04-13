@@ -7,6 +7,12 @@ import type {
   LifePreview,
   SessionMemory,
   DebriefReflection,
+  Thread,
+  Message,
+  SoulKnockResponse,
+  UsageCounter,
+  GatedAction,
+  PlanGateResult,
 } from "./types";
 
 function createId(prefix: string) {
@@ -320,28 +326,47 @@ function rowToProfile(row: Record<string, unknown>): Profile {
 export async function saveMatchesForUser(userId: string, matches: Match[]) {
   await sql`DELETE FROM matches WHERE user_id = ${userId}`;
   for (const m of matches) {
+    const matchedUserId = m.matchedUserId ?? null;
+    const photosUnlocked = m.photosUnlocked ?? false;
     await sql`
-      INSERT INTO matches (id, user_id, match_data)
-      VALUES (${m.id || createId("match")}, ${userId}, ${JSON.stringify(m)})
+      INSERT INTO matches (id, user_id, match_data, matched_user_id, photos_unlocked)
+      VALUES (${m.id || createId("match")}, ${userId}, ${JSON.stringify(m)}, ${matchedUserId}, ${photosUnlocked})
     `;
   }
 }
 
 export async function getMatchesForUser(userId: string): Promise<Match[]> {
   const rows = await sql`
-    SELECT match_data FROM matches WHERE user_id = ${userId} ORDER BY created_at DESC
+    SELECT match_data, matched_user_id, photos_unlocked
+    FROM matches WHERE user_id = ${userId} ORDER BY created_at DESC
   `;
-  return (rows as { match_data: string }[])
-    .map((r) => safeParseJson<Match>(r.match_data, null as unknown as Match))
-    .filter(Boolean);
+  return (rows as { match_data: string; matched_user_id: string | null; photos_unlocked: boolean }[])
+    .map((r) => {
+      const m = safeParseJson<Match>(r.match_data, null as unknown as Match);
+      if (!m) return null;
+      return {
+        ...m,
+        matchedUserId: r.matched_user_id ?? m.matchedUserId,
+        photosUnlocked: r.photos_unlocked ?? m.photosUnlocked ?? false,
+      };
+    })
+    .filter(Boolean) as Match[];
 }
 
 export async function getMatchForUser(userId: string, matchId: string): Promise<Match | null> {
   const rows = await sql`
-    SELECT match_data FROM matches WHERE user_id = ${userId} AND id = ${matchId}
+    SELECT match_data, matched_user_id, photos_unlocked
+    FROM matches WHERE user_id = ${userId} AND id = ${matchId}
   `;
   if (rows.length) {
-    return safeParseJson<Match>((rows[0] as { match_data: string }).match_data, null as unknown as Match);
+    const r = rows[0] as { match_data: string; matched_user_id: string | null; photos_unlocked: boolean };
+    const m = safeParseJson<Match>(r.match_data, null as unknown as Match);
+    if (!m) return null;
+    return {
+      ...m,
+      matchedUserId: r.matched_user_id ?? m.matchedUserId,
+      photosUnlocked: r.photos_unlocked ?? m.photosUnlocked ?? false,
+    };
   }
   const all = await getMatchesForUser(userId);
   return all.find((m) => m.id === matchId) || null;
@@ -600,7 +625,7 @@ export async function getDebriefReflectionsForUser(userId: string): Promise<Debr
 export interface UserPlan {
   id: string;
   userId: string;
-  plan: "free" | "premium";
+  plan: "free" | "premium" | "pro";
   status: "active" | "trialing" | "inactive" | "canceled";
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
@@ -615,7 +640,7 @@ export async function getUserPlan(userId: string): Promise<UserPlan | null> {
   return {
     id: row.id as string,
     userId: row.user_id as string,
-    plan: (row.plan as "free" | "premium") ?? "free",
+    plan: (row.plan as "free" | "premium" | "pro") ?? "free",
     status: (row.status as UserPlan["status"]) ?? "inactive",
     stripeCustomerId: (row.stripe_customer_id as string) ?? null,
     stripeSubscriptionId: (row.stripe_subscription_id as string) ?? null,
@@ -658,13 +683,425 @@ export async function getUserPlanByStripeCustomer(stripeCustomerId: string): Pro
   return {
     id: row.id as string,
     userId: row.user_id as string,
-    plan: (row.plan as "free" | "premium") ?? "free",
+    plan: (row.plan as "free" | "premium" | "pro") ?? "free",
     status: (row.status as UserPlan["status"]) ?? "inactive",
     stripeCustomerId: (row.stripe_customer_id as string) ?? null,
     stripeSubscriptionId: (row.stripe_subscription_id as string) ?? null,
     trialEndsAt: (row.trial_ends_at as string) ?? null,
     currentPeriodEnd: (row.current_period_end as string) ?? null,
   };
+}
+
+// ─── Seen Matches ───
+
+export async function markUserSeen(userId: string, matchedUserId: string) {
+  await sql`
+    INSERT INTO seen_matches (user_id, matched_user_id, matched_date)
+    VALUES (${userId}, ${matchedUserId}, CURRENT_DATE)
+    ON CONFLICT DO NOTHING
+  `;
+}
+
+export async function getSeenUserIds(userId: string): Promise<string[]> {
+  const rows = await sql`
+    SELECT matched_user_id FROM seen_matches WHERE user_id = ${userId}
+  `;
+  return (rows as { matched_user_id: string }[]).map((r) => r.matched_user_id);
+}
+
+// ─── Blocked Users ───
+
+export async function blockUser(blockerId: string, blockedId: string) {
+  await sql`
+    INSERT INTO blocked_users (id, blocker_id, blocked_id)
+    VALUES (${createId("block")}, ${blockerId}, ${blockedId})
+    ON CONFLICT (blocker_id, blocked_id) DO NOTHING
+  `;
+}
+
+export async function getBlockedUserIds(userId: string): Promise<string[]> {
+  const rows = await sql`
+    SELECT blocked_id AS other_id FROM blocked_users WHERE blocker_id = ${userId}
+    UNION
+    SELECT blocker_id AS other_id FROM blocked_users WHERE blocked_id = ${userId}
+  `;
+  return (rows as { other_id: string }[]).map((r) => r.other_id);
+}
+
+// ─── Real User Candidates ───
+
+export interface CandidateProfile {
+  userId: string;
+  email: string;
+  profile: Profile;
+}
+
+export async function getRealUserCandidates(
+  userId: string,
+  userProfile: Profile,
+): Promise<CandidateProfile[]> {
+  const seenIds = await getSeenUserIds(userId);
+  const blockedIds = await getBlockedUserIds(userId);
+  const excludeIds = Array.from(new Set([userId, ...seenIds, ...blockedIds]));
+
+  // Build query with hard filters
+  const partnerGender = userProfile.partnerGender ?? null;
+  const ageMin = userProfile.partnerAgeMin ?? null;
+  const ageMax = userProfile.partnerAgeMax ?? null;
+
+  // We fetch up to 10 candidates and let the AI pick from them
+  const rows = await sql`
+    SELECT p.*, ah.email
+    FROM profiles p
+    JOIN account_handles ah ON ah.user_id = p.user_id
+    WHERE p.user_id != ALL(${excludeIds}::text[])
+      AND p.profile_visibility = 'visible'
+      AND (${partnerGender}::text IS NULL OR p.gender = ${partnerGender})
+      AND (${ageMin}::int IS NULL OR p.age >= ${ageMin})
+      AND (${ageMax}::int IS NULL OR p.age <= ${ageMax})
+    ORDER BY p.created_at DESC
+    LIMIT 10
+  `;
+
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    userId: row.user_id as string,
+    email: row.email as string,
+    profile: rowToProfile(row),
+  }));
+}
+
+// ─── Soul Knock Responses ───
+
+export async function saveSoulKnockResponse(
+  introId: string,
+  userId: string,
+  response: string,
+): Promise<SoulKnockResponse> {
+  const id = createId("skr");
+  const now = new Date().toISOString();
+  await sql`
+    INSERT INTO soul_knock_responses (id, intro_id, user_id, response)
+    VALUES (${id}, ${introId}, ${userId}, ${response})
+    ON CONFLICT (intro_id, user_id) DO UPDATE SET response = EXCLUDED.response
+  `;
+  return { id, introId, userId, response, createdAt: now };
+}
+
+export async function getSoulKnockResponses(introId: string): Promise<SoulKnockResponse[]> {
+  const rows = await sql`
+    SELECT * FROM soul_knock_responses WHERE intro_id = ${introId}
+  `;
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    id: row.id as string,
+    introId: row.intro_id as string,
+    userId: row.user_id as string,
+    response: row.response as string,
+    createdAt: row.created_at as string,
+  }));
+}
+
+// Mark an intro's answered flag for a given side
+export async function markIntroAnswered(introId: string, side: "sender" | "receiver") {
+  if (side === "sender") {
+    await sql`UPDATE intros SET sender_answered = true WHERE id = ${introId}`;
+  } else {
+    await sql`UPDATE intros SET receiver_answered = true WHERE id = ${introId}`;
+  }
+}
+
+// Returns the intro row (used to check mutual answer state)
+export async function getIntroById(introId: string) {
+  const rows = await sql`SELECT * FROM intros WHERE id = ${introId}`;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    matchId: row.match_id as string,
+    matchName: row.match_name as string,
+    matchedUserId: row.matched_user_id as string | null,
+    soulKnockQuestion: row.soul_knock_question as string | null,
+    senderAnswered: Boolean(row.sender_answered),
+    receiverAnswered: Boolean(row.receiver_answered),
+    icebreakers: safeParseJson(row.icebreakers as string, []),
+    createdAt: row.created_at as string,
+  };
+}
+
+// Update intro with matched_user_id + soul_knock_question when sent
+export async function updateIntroForSoulKnock(
+  introId: string,
+  matchedUserId: string,
+  soulKnockQuestion: string,
+) {
+  await sql`
+    UPDATE intros
+    SET matched_user_id = ${matchedUserId},
+        soul_knock_question = ${soulKnockQuestion},
+        sender_answered = true
+    WHERE id = ${introId}
+  `;
+}
+
+// Get all intros where this user is the receiver (their soul knock inbox)
+export async function getIntrosReceivedByUser(userId: string) {
+  const rows = await sql`
+    SELECT i.*, p.name AS sender_name, p.photos AS sender_photos
+    FROM intros i
+    JOIN profiles p ON p.user_id = i.user_id
+    WHERE i.matched_user_id = ${userId}
+    ORDER BY i.created_at DESC
+  `;
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    id: row.id as string,
+    senderUserId: row.user_id as string,
+    senderName: row.sender_name as string,
+    senderPhotos: safeParseJson<string[]>(row.sender_photos as string, []),
+    matchId: row.match_id as string,
+    matchName: row.match_name as string,
+    soulKnockQuestion: row.soul_knock_question as string | null,
+    senderAnswered: Boolean(row.sender_answered),
+    receiverAnswered: Boolean(row.receiver_answered),
+    createdAt: row.created_at as string,
+  }));
+}
+
+// ─── Threads ───
+
+export async function createThread(userAId: string, userBId: string, introId: string): Promise<Thread> {
+  const id = createId("thread");
+  const now = new Date().toISOString();
+  await sql`
+    INSERT INTO threads (id, user_a_id, user_b_id, intro_id)
+    VALUES (${id}, ${userAId}, ${userBId}, ${introId})
+    ON CONFLICT (intro_id) DO NOTHING
+  `;
+  // Return the actual row (in case DO NOTHING hit)
+  const rows = await sql`SELECT * FROM threads WHERE intro_id = ${introId}`;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    id: row.id as string,
+    userAId: row.user_a_id as string,
+    userBId: row.user_b_id as string,
+    introId: row.intro_id as string,
+    createdAt: (row.created_at as string) || now,
+  };
+}
+
+export async function getThreadsForUser(userId: string): Promise<Thread[]> {
+  const rows = await sql`
+    SELECT
+      t.*,
+      CASE WHEN t.user_a_id = ${userId} THEN pb.name ELSE pa.name END AS other_name,
+      CASE WHEN t.user_a_id = ${userId} THEN pb.photos ELSE pa.photos END AS other_photos,
+      m.body AS last_message,
+      m.created_at AS last_message_at,
+      (
+        SELECT COUNT(*)::int FROM messages
+        WHERE thread_id = t.id AND sender_id != ${userId} AND read_at IS NULL
+      ) AS unread_count
+    FROM threads t
+    JOIN profiles pa ON pa.user_id = t.user_a_id
+    JOIN profiles pb ON pb.user_id = t.user_b_id
+    LEFT JOIN LATERAL (
+      SELECT body, created_at FROM messages
+      WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1
+    ) m ON true
+    WHERE t.user_a_id = ${userId} OR t.user_b_id = ${userId}
+    ORDER BY COALESCE(m.created_at, t.created_at) DESC
+  `;
+  return (rows as Record<string, unknown>[]).map((row) => {
+    const otherPhotos = safeParseJson<string[]>(row.other_photos as string, []);
+    return {
+      id: row.id as string,
+      userAId: row.user_a_id as string,
+      userBId: row.user_b_id as string,
+      introId: row.intro_id as string,
+      createdAt: row.created_at as string,
+      otherUserName: row.other_name as string,
+      otherUserPhoto: otherPhotos[0] ?? undefined,
+      lastMessage: row.last_message as string | undefined,
+      lastMessageAt: row.last_message_at as string | undefined,
+      unreadCount: (row.unread_count as number) ?? 0,
+    };
+  });
+}
+
+export async function getThreadById(threadId: string, userId: string): Promise<Thread | null> {
+  const rows = await sql`
+    SELECT t.*,
+      CASE WHEN t.user_a_id = ${userId} THEN pb.name ELSE pa.name END AS other_name,
+      CASE WHEN t.user_a_id = ${userId} THEN pb.photos ELSE pa.photos END AS other_photos
+    FROM threads t
+    JOIN profiles pa ON pa.user_id = t.user_a_id
+    JOIN profiles pb ON pb.user_id = t.user_b_id
+    WHERE t.id = ${threadId}
+      AND (t.user_a_id = ${userId} OR t.user_b_id = ${userId})
+  `;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  const otherPhotos = safeParseJson<string[]>(row.other_photos as string, []);
+  return {
+    id: row.id as string,
+    userAId: row.user_a_id as string,
+    userBId: row.user_b_id as string,
+    introId: row.intro_id as string,
+    createdAt: row.created_at as string,
+    otherUserName: row.other_name as string,
+    otherUserPhoto: otherPhotos[0] ?? undefined,
+  };
+}
+
+// ─── Messages ───
+
+export async function getMessages(threadId: string): Promise<Message[]> {
+  const rows = await sql`
+    SELECT * FROM messages WHERE thread_id = ${threadId} ORDER BY created_at ASC
+  `;
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    id: row.id as string,
+    threadId: row.thread_id as string,
+    senderId: row.sender_id as string,
+    body: row.body as string,
+    createdAt: row.created_at as string,
+    readAt: (row.read_at as string) || null,
+  }));
+}
+
+export async function createMessage(threadId: string, senderId: string, body: string): Promise<Message> {
+  const id = createId("msg");
+  const now = new Date().toISOString();
+  await sql`
+    INSERT INTO messages (id, thread_id, sender_id, body)
+    VALUES (${id}, ${threadId}, ${senderId}, ${body})
+  `;
+  return { id, threadId, senderId, body, createdAt: now, readAt: null };
+}
+
+export async function markMessagesRead(threadId: string, readerId: string) {
+  await sql`
+    UPDATE messages
+    SET read_at = NOW()
+    WHERE thread_id = ${threadId} AND sender_id != ${readerId} AND read_at IS NULL
+  `;
+}
+
+// ─── Photo Unlock ───
+
+export async function unlockPhotosForBothUsers(introId: string) {
+  // intro has user_id (sender) and matched_user_id (receiver)
+  // matches are keyed by (user_id, match_id) — we find both rows by intro
+  await sql`
+    UPDATE matches
+    SET photos_unlocked = true
+    WHERE id IN (
+      SELECT m.id FROM matches m
+      JOIN intros i ON i.match_id = m.id
+      WHERE i.id = ${introId}
+        AND (m.user_id = i.user_id OR m.user_id = i.matched_user_id)
+    )
+  `;
+}
+
+// ─── Usage Counters / Plan Gate ───
+
+const PLAN_LIMITS: Record<string, Record<string, number>> = {
+  soul_knock:     { free: 3,  premium: 15, pro: Infinity },
+  maahi_session:  { free: 3,  premium: 15, pro: Infinity },
+  life_preview:   { free: 0,  premium: 2,  pro: Infinity },
+  daily_matches:  { free: 5,  premium: 20, pro: Infinity },
+};
+
+// Period start for each action: daily | weekly | monthly
+function periodStart(action: GatedAction): string {
+  const now = new Date();
+  if (action === "maahi_session") {
+    // start of ISO week (Monday)
+    const day = now.getDay(); // 0=Sun
+    const diff = (day + 6) % 7;
+    now.setDate(now.getDate() - diff);
+  } else if (action === "life_preview") {
+    now.setDate(1);
+  }
+  return now.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+export async function requirePlan(userId: string, action: GatedAction): Promise<PlanGateResult> {
+  const planRow = await getUserPlan(userId);
+  const plan = (planRow?.status === "active" || planRow?.status === "trialing")
+    ? (planRow.plan ?? "free")
+    : "free";
+
+  const limit = PLAN_LIMITS[action]?.[plan] ?? 0;
+  if (limit === Infinity) return { allowed: true, limit: -1, used: 0, plan };
+
+  const ps = periodStart(action);
+  const rows = await sql`
+    SELECT count FROM usage_counters
+    WHERE user_id = ${userId} AND action = ${action} AND period_start = ${ps}
+  `;
+  const used = rows.length ? (rows[0] as { count: number }).count : 0;
+  return { allowed: used < limit, limit, used, plan };
+}
+
+export async function incrementUsage(userId: string, action: GatedAction) {
+  const ps = periodStart(action);
+  await sql`
+    INSERT INTO usage_counters (id, user_id, action, count, period_start)
+    VALUES (${createId("uc")}, ${userId}, ${action}, 1, ${ps})
+    ON CONFLICT (user_id, action, period_start)
+    DO UPDATE SET count = usage_counters.count + 1
+  `;
+}
+
+export async function getUsageCounter(userId: string, action: GatedAction): Promise<UsageCounter | null> {
+  const ps = periodStart(action);
+  const rows = await sql`
+    SELECT * FROM usage_counters
+    WHERE user_id = ${userId} AND action = ${action} AND period_start = ${ps}
+  `;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    userId: row.user_id as string,
+    action: row.action as GatedAction,
+    count: row.count as number,
+    periodStart: row.period_start as string,
+  };
+}
+
+// ─── Safety (Block + Report) ───
+
+export async function createReport(
+  reporterId: string,
+  reportedId: string,
+  reason: string,
+  extraNotes?: string,
+) {
+  await sql`
+    INSERT INTO reports (id, reporter_id, reported_id, reason, extra_notes)
+    VALUES (${createId("rep")}, ${reporterId}, ${reportedId}, ${reason}, ${extraNotes ?? null})
+  `;
+}
+
+// Invalidate today's match cache (used after block)
+export async function invalidateMatchCache(userId: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  await sql`DELETE FROM match_cache WHERE user_id = ${userId} AND cache_date = ${today}`;
+}
+
+// ─── Notification Preferences ───
+
+export async function getNotificationPreferences(userId: string): Promise<Record<string, boolean>> {
+  const rows = await sql`
+    SELECT notification_preferences FROM profiles WHERE user_id = ${userId}
+  `;
+  if (!rows.length) return { matchReady: true, soulKnock: true, mutualMatch: true };
+  const row = rows[0] as { notification_preferences: Record<string, boolean> | string };
+  if (typeof row.notification_preferences === "string") {
+    return safeParseJson(row.notification_preferences, { matchReady: true, soulKnock: true, mutualMatch: true });
+  }
+  return row.notification_preferences ?? { matchReady: true, soulKnock: true, mutualMatch: true };
 }
 
 // ─── Helpers ───

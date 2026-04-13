@@ -91,6 +91,10 @@ export interface Match {
   city: string;
   profession: string;
   emoji: string;
+  // Real-user fields (populated when matched against a real profile)
+  matchedUserId?: string;       // the real user's auth ID — undefined for legacy AI matches
+  photos?: string[];            // unlocked after mutual intention
+  photosUnlocked?: boolean;     // true once both users have sent Soul Knocks
   // Narrative fields
   narrativeIntro: string;       // "You both earn trust slowly — and that's exactly why this works"
   connectionHook: string;       // The emotional core of why they'd click
@@ -104,6 +108,57 @@ export interface Match {
   };
   frictionPoint: string;        // ONE honest observation where they'll need to be intentional
   openingQuestion: string;      // AI-generated shared question both would answer to each other
+}
+
+// Messaging
+export interface Thread {
+  id: string;
+  userAId: string;
+  userBId: string;
+  introId: string;
+  createdAt: string;
+  // Hydrated fields
+  otherUserName?: string;
+  otherUserPhoto?: string;
+  lastMessage?: string;
+  lastMessageAt?: string;
+  unreadCount?: number;
+}
+
+export interface Message {
+  id: string;
+  threadId: string;
+  senderId: string;
+  body: string;
+  createdAt: string;
+  readAt: string | null;
+}
+
+// Soul Knock response
+export interface SoulKnockResponse {
+  id: string;
+  introId: string;
+  userId: string;
+  response: string;
+  createdAt: string;
+}
+
+// Usage counter
+export type GatedAction = "soul_knock" | "maahi_session" | "life_preview" | "daily_matches";
+
+export interface UsageCounter {
+  userId: string;
+  action: GatedAction;
+  count: number;
+  periodStart: string;
+}
+
+// Plan gate result
+export interface PlanGateResult {
+  allowed: boolean;
+  limit: number;
+  used: number;
+  plan: "free" | "premium" | "pro";
 }
 
 export interface LifePreview {

@@ -3,12 +3,17 @@ import { generateText } from "ai";
 import { getModel } from "@/lib/ai";
 import { lifePreviewPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
-import { getProfileByUserId, getLifePreview, saveLifePreview } from "@/lib/repo";
+import { getProfileByUserId, getLifePreview, saveLifePreview, requirePlan, incrementUsage } from "@/lib/repo";
 import type { Match } from "@/lib/types";
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
+
+  const gate = await requirePlan(auth.userId, "life_preview");
+  if (!gate.allowed) {
+    return NextResponse.json({ error: "Life Preview not available on your plan", gate }, { status: 403 });
+  }
 
   const { match }: { match: Match } = await req.json();
   const profile = await getProfileByUserId(auth.userId);
@@ -31,8 +36,9 @@ export async function POST(req: Request) {
     const previewData = JSON.parse(raw);
     const preview = { matchId: match.id, match, ...previewData };
 
-    // Cache in DB
+    // Cache in DB + count usage
     await saveLifePreview(auth.userId, match.id, preview);
+    await incrementUsage(auth.userId, "life_preview");
 
     return NextResponse.json(preview);
   } catch {

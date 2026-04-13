@@ -131,6 +131,13 @@ function AuthPageInner() {
   const normalizedEmail = email.trim().toLowerCase();
   const normalizedFullName = fullName.trim();
   const normalizedUsername = username.trim().toLowerCase();
+  const fieldSurfaceStyle = {
+    background:
+      "linear-gradient(180deg, rgba(22,28,48,0.92), rgba(14,19,34,0.96))",
+    border: "1px solid rgba(154,169,255,0.14)",
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.18), 0 12px 28px rgba(0,0,0,0.18)",
+  } as const;
 
   let canSubmit = false;
   if (mode === "signup") {
@@ -293,17 +300,25 @@ function AuthPageInner() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden px-6 py-10 sm:px-8 lg:px-10">
+    <div className="relative min-h-screen overflow-hidden bg-[#060913] px-6 py-10 sm:px-8 lg:px-10">
       <div
-        className="pointer-events-none fixed top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-25 blur-[120px]"
-        style={{ background: "var(--bd-accent)", animation: "orb1 15s ease-in-out infinite" }}
+        className="pointer-events-none fixed left-[-10%] top-[-14%] h-[560px] w-[560px] rounded-full opacity-30 blur-[140px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(229,39,224,0.55) 0%, rgba(123,72,255,0.18) 48%, transparent 72%)",
+          animation: "orb1 15s ease-in-out infinite",
+        }}
       />
       <div
-        className="pointer-events-none fixed bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full opacity-15 blur-[100px]"
-        style={{ background: "var(--bd-rose)", animation: "orb2 18s ease-in-out infinite" }}
+        className="pointer-events-none fixed bottom-[-22%] right-[-8%] h-[460px] w-[460px] rounded-full opacity-20 blur-[120px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(53,108,255,0.32) 0%, rgba(232,146,124,0.18) 52%, transparent 78%)",
+          animation: "orb2 18s ease-in-out infinite",
+        }}
       />
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.18]"
+        className="pointer-events-none absolute inset-0 opacity-[0.16]"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
@@ -311,58 +326,94 @@ function AuthPageInner() {
           maskImage: "linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.1))",
         }}
       />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 34%), linear-gradient(180deg, rgba(9,13,26,0.2), rgba(5,8,16,0.78) 58%, rgba(4,7,14,0.96))",
+        }}
+      />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-5xl items-center gap-12 lg:grid-cols-[1fr_1fr]">
-        <section className="page-enter max-w-lg">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-20">
+        <section className="page-enter relative max-w-xl">
           <div
-            className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em]"
+            className="pointer-events-none absolute -left-10 top-8 h-52 w-52 rounded-full blur-[90px]"
             style={{
-              borderColor: "rgba(255,0,255,0.25)",
-              background: "rgba(255,0,255,0.08)",
+              background:
+                "radial-gradient(circle, rgba(255,0,255,0.18) 0%, rgba(255,0,255,0.04) 58%, transparent 80%)",
+            }}
+          />
+          <div
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
+            style={{
+              borderColor: "rgba(255,0,255,0.28)",
+              background: "linear-gradient(180deg, rgba(45,16,70,0.42), rgba(21,13,40,0.28))",
               color: "var(--bd-accent)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 24px rgba(0,0,0,0.18)",
             }}
           >
             <Sparkles className="size-3.5" />
             BiggDate Access
           </div>
 
-          <div className="mt-8 space-y-4">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--bd-text-faint)]">
+          <div className="mt-10 space-y-5">
+            <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#7f95c2]">
               {content.eyebrow}
             </p>
-            <h1 className="text-4xl font-semibold leading-[1.12] tracking-[-0.04em] sm:text-5xl">
+            <h1 className="max-w-[11ch] text-4xl font-semibold leading-[1.04] tracking-[-0.05em] text-[#f4f7ff] sm:text-5xl md:text-6xl">
               {content.title}
             </h1>
           </div>
 
-          <div className="mt-8 h-px w-16" style={{ background: "linear-gradient(90deg, var(--bd-accent), transparent)" }} />
+          <div
+            className="mt-10 h-px w-24"
+            style={{ background: "linear-gradient(90deg, rgba(255,0,255,0.9), rgba(110,84,255,0.4), transparent)" }}
+          />
         </section>
 
         <Card
           className="page-enter page-enter-delay-1 backdrop-blur-xl"
           style={{
-            background: "linear-gradient(180deg, rgba(10,18,36,0.96), rgba(5,9,20,0.92))",
-            border: "1px solid rgba(255,0,255,0.15)",
-            boxShadow: "0 0 0 1px rgba(0,102,255,0.08), 0 30px 120px rgba(0,0,0,0.5), 0 0 80px rgba(255,0,255,0.06)",
+            background:
+              "linear-gradient(180deg, rgba(10,16,30,0.82), rgba(6,10,21,0.9))",
+            border: "1px solid rgba(132,105,255,0.18)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(255,0,255,0.05), 0 32px 90px rgba(0,0,0,0.42), 0 24px 80px rgba(34,16,74,0.24)",
           }}
         >
-          <CardContent className="p-5 sm:p-7">
+          <CardContent className="relative overflow-hidden p-5 sm:p-7">
+            <div
+              className="pointer-events-none absolute inset-x-8 top-0 h-24"
+              style={{
+                background:
+                  "radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 72%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute -right-20 top-10 h-44 w-44 rounded-full blur-[80px]"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(255,0,255,0.14) 0%, rgba(255,0,255,0.03) 62%, transparent 80%)",
+              }}
+            />
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-semibold tracking-[-0.03em]">
+                <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[#f5f7ff]">
                 {mode === "login" && "Log in"}
                 {mode === "signup" && "Create account"}
                 {mode === "forgot" && "Reset password"}
                 {mode === "reset" && "New password"}
               </h2>
-                <p className="mt-1 text-sm text-[var(--bd-text-muted)]">{content.hint}</p>
+                <p className="mt-1 text-sm text-[#89a0c8]">{content.hint}</p>
               </div>
               <div
-                className="shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                className="shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
                 style={{
-                  borderColor: "rgba(255,0,255,0.15)",
+                  borderColor: "rgba(255,0,255,0.2)",
                   color: "var(--bd-accent)",
-                  background: "rgba(255,0,255,0.06)",
+                  background:
+                    "linear-gradient(180deg, rgba(44,17,68,0.44), rgba(22,12,39,0.28))",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
                 }}
               >
                 Secure Flow
@@ -371,8 +422,13 @@ function AuthPageInner() {
 
             {(mode === "signup" || mode === "login") && (
               <div
-                className="mb-6 grid grid-cols-2 rounded-2xl border p-1"
-                style={{ borderColor: "rgba(255,0,255,0.12)", background: "rgba(255,0,255,0.04)" }}
+                className="mb-6 grid grid-cols-2 rounded-[22px] border p-1.5"
+                style={{
+                  borderColor: "rgba(140,124,255,0.16)",
+                  background:
+                    "linear-gradient(180deg, rgba(21,18,44,0.82), rgba(13,16,30,0.92))",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                }}
               >
                 {(["signup", "login"] as AuthMode[]).map((value) => {
                   const active = value === mode;
@@ -383,9 +439,13 @@ function AuthPageInner() {
                       onClick={() => switchMode(value)}
                       className="rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200"
                       style={{
-                        background: active ? "linear-gradient(135deg, rgba(255,0,255,0.28), rgba(0,102,255,0.28))" : "transparent",
-                        color: active ? "#fff" : "var(--bd-text-muted)",
-                        boxShadow: active ? "0 0 20px rgba(255,0,255,0.2)" : "none",
+                        background: active
+                          ? "linear-gradient(135deg, rgba(161,44,214,0.82), rgba(60,92,219,0.72))"
+                          : "transparent",
+                        color: active ? "#fff" : "#8b9bc1",
+                        boxShadow: active
+                          ? "inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 24px rgba(123,72,255,0.28)"
+                          : "none",
                       }}
                     >
                       {value === "signup" ? "Sign up" : "Log in"}
@@ -413,10 +473,7 @@ function AuthPageInner() {
                         onChange={(e) => setFullName(e.target.value)}
                         required
                         className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
-                        style={{
-                          background: "rgba(22,26,42,0.94)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                        }}
+                        style={fieldSurfaceStyle}
                       />
                     </div>
                   </label>
@@ -435,10 +492,7 @@ function AuthPageInner() {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                         className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
-                        style={{
-                          background: "rgba(22,26,42,0.94)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                        }}
+                        style={fieldSurfaceStyle}
                       />
                     </div>
                   </label>
@@ -461,10 +515,7 @@ function AuthPageInner() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
-                      style={{
-                        background: "rgba(22,26,42,0.94)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
+                      style={fieldSurfaceStyle}
                     />
                   </div>
                 </label>
@@ -486,10 +537,7 @@ function AuthPageInner() {
                       onChange={(e) => setLoginIdentifier(e.target.value)}
                       required
                       className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
-                      style={{
-                        background: "rgba(22,26,42,0.94)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
+                      style={fieldSurfaceStyle}
                     />
                   </div>
                 </label>
@@ -523,10 +571,7 @@ function AuthPageInner() {
                       required
                       minLength={6}
                       className="h-14 rounded-[1.8rem] px-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
-                      style={{
-                        background: "rgba(22,26,42,0.94)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
+                      style={fieldSurfaceStyle}
                     />
                     <button
                       type="button"
@@ -557,10 +602,7 @@ function AuthPageInner() {
                       required
                       minLength={6}
                       className="h-14 rounded-[1.8rem] px-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
-                      style={{
-                        background: "rgba(22,26,42,0.94)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
+                      style={fieldSurfaceStyle}
                     />
                   </div>
                 </label>
@@ -592,9 +634,12 @@ function AuthPageInner() {
                 className="h-12 w-full rounded-2xl border-0 text-base font-semibold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-100"
                 style={{
                   background: canSubmit
-                    ? "linear-gradient(135deg, #e8927c, #d4688a, #a855f7)"
-                    : "rgba(255,255,255,0.06)",
+                    ? "linear-gradient(135deg, #eb987f 0%, #d8698c 42%, #6d58ff 100%)"
+                    : "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03))",
                   color: canSubmit ? "#fff" : "var(--bd-text-faint)",
+                  boxShadow: canSubmit
+                    ? "inset 0 1px 0 rgba(255,255,255,0.16), 0 16px 34px rgba(153,87,255,0.26)"
+                    : "inset 0 1px 0 rgba(255,255,255,0.04)",
                 }}
               >
                 {loading ? "Working..." : content.cta}
