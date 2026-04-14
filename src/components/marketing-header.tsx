@@ -142,10 +142,10 @@ export function MarketingHeader({
                     Enter BiggDate
                   </Link>
                   <a
-                    href="mailto:hello@biggdate.com"
+                    href="mailto:meet@biggventures.com"
                     className="inline-flex items-center justify-center rounded-full border border-[#ff1493]/18 bg-[#ff1493]/10 px-5 py-3 text-sm font-medium text-[#f8c6e8] transition-all hover:border-[#ff1493]/30 hover:bg-[#ff1493]/14"
                   >
-                    hello@biggdate.com
+                    meet@biggventuress.com
                   </a>
                 </div>
               </div>

@@ -15,21 +15,21 @@ const CONTACT_LANES = [
     icon: MessageCircleMore,
     title: "General questions",
     copy: "Product feedback, feature ideas, and anything you want the team to see.",
-    href: "mailto:hello@biggventures.com?subject=BiggDate%20Question",
+    href: "mailto:meet@biggventures.com?subject=BiggDate%20Question",
     cta: "Email the team",
   },
   {
     icon: Users,
     title: "Beta access",
     copy: "Want in, want to refer someone, or want to understand who we're building for.",
-    href: "mailto:hello@biggventures.com?subject=BiggDate%20Beta%20Access",
+    href: "mailto:meet@biggventures.com?subject=BiggDate%20Beta%20Access",
     cta: "Ask about beta",
   },
   {
     icon: Mail,
     title: "Partnerships and press",
     copy: "Founder communities, events, partnerships, interviews, and thoughtful collaborations.",
-    href: "mailto:hello@biggventures.com?subject=BiggDate%20Partnership",
+    href: "mailto:meet@biggventures.com?subject=BiggDate%20Partnership",
     cta: "Start the conversation",
   },
 ];
@@ -106,10 +106,10 @@ export default function ContactPage() {
           </p>
           <div className="mt-8 grid gap-3 sm:max-w-md">
             <a
-              href="mailto:hello@biggventures.com"
+              href="mailto:meet@biggventures.com"
               className="inline-flex items-center justify-between rounded-[22px] border border-white/[0.08] bg-white/[0.05] px-5 py-4 text-sm font-medium text-[#f0ebe3] transition-all hover:border-white/[0.14] hover:bg-white/[0.08]"
             >
-              hello@biggdate.com
+              meet@biggventures.com
               <ArrowRight className="size-4" />
             </a>
             <div className="rounded-[22px] border border-white/[0.06] bg-black/15 px-5 py-4 text-sm leading-6 text-[#c7d3ea]">
