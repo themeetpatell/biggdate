@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: "home", label: "Today" },
   { href: "/matches", icon: "heart", label: "Connect" },
+  { href: "/messages", icon: "chat", label: "Messages" },
   { href: "/companion", icon: "sparkle", label: "Maahi" },
   { href: "/profile", icon: "user", label: "You" },
 ];
@@ -70,10 +72,39 @@ function UserIcon({ active, avatarUrl }: { active: boolean; avatarUrl?: string }
   );
 }
 
+function ChatIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill={active ? "white" : "none"} stroke="white" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
 export function BottomNav() {
   const pathname = usePathname();
   const { profile } = useAuth();
   const avatarUrl = profile?.photos?.[0];
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Poll for unread messages badge
+  useEffect(() => {
+    if (!profile) return;
+    const load = () => {
+      fetch("/api/messages")
+        .then((r) => r.json())
+        .then((d) => {
+          const total = (d.threads ?? []).reduce(
+            (sum: number, t: { unreadCount?: number }) => sum + (t.unreadCount ?? 0),
+            0,
+          );
+          setUnreadCount(total);
+        })
+        .catch(() => {});
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => clearInterval(id);
+  }, [profile]);
 
   if (
     pathname === "/" ||
@@ -133,6 +164,22 @@ export function BottomNav() {
             >
               {item.icon === "home" && <HomeIcon active={active} />}
               {item.icon === "heart" && <HeartIcon active={active} />}
+              {item.icon === "chat" && (
+                <div style={{ position: "relative" }}>
+                  <ChatIcon active={active} />
+                  {unreadCount > 0 && (
+                    <div style={{
+                      position: "absolute", top: -4, right: -4,
+                      width: 16, height: 16, borderRadius: "50%",
+                      background: "#a855f7", border: "2px solid #262626",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 9, fontWeight: 700, color: "#fff",
+                    }}>
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </div>
+                  )}
+                </div>
+              )}
               {item.icon === "sparkle" && <SparkleIcon active={active} />}
               {item.icon === "user" && <UserIcon active={active} avatarUrl={avatarUrl} />}
             </Link>

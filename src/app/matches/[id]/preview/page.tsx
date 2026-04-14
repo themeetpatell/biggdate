@@ -320,6 +320,80 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
+const REPORT_REASONS = [
+  "Fake profile",
+  "Inappropriate content",
+  "Harassment",
+  "Other",
+];
+
+function ReportSheet({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (reason: string) => Promise<void>;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!selected) return;
+    setSubmitting(true);
+    await onSubmit(selected);
+    setSubmitting(false);
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 50 }} />
+      {/* Sheet */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 51, background: "#161620", borderRadius: "20px 20px 0 0", padding: "24px 20px calc(28px + env(safe-area-inset-bottom, 0px))" }}>
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)", margin: "0 auto 20px" }} />
+        <h3 style={{ fontSize: 17, fontWeight: 700, color: "#fff", margin: "0 0 4px" }}>Report or Block</h3>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 20px", lineHeight: 1.5 }}>
+          They'll be blocked immediately and removed from your matches.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+          {REPORT_REASONS.map((r) => (
+            <button key={r} onClick={() => setSelected(r)} style={{
+              background: selected === r ? "rgba(168,85,247,0.12)" : "rgba(255,255,255,0.04)",
+              border: `1px solid ${selected === r ? "rgba(168,85,247,0.4)" : "rgba(255,255,255,0.08)"}`,
+              borderRadius: 12,
+              padding: "13px 16px",
+              fontSize: 14,
+              color: selected === r ? "#a855f7" : "rgba(255,255,255,0.6)",
+              textAlign: "left",
+              cursor: "pointer",
+              fontWeight: selected === r ? 600 : 400,
+            }}>
+              {r}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={!selected || submitting}
+          style={{
+            width: "100%",
+            background: selected ? "#ef4444" : "rgba(239,68,68,0.2)",
+            color: selected ? "#fff" : "rgba(255,255,255,0.3)",
+            border: "none",
+            borderRadius: 12,
+            padding: "14px",
+            fontSize: 15,
+            fontWeight: 700,
+            cursor: selected ? "pointer" : "default",
+          }}
+        >
+          {submitting ? "Submitting…" : "Block & Report"}
+        </button>
+      </div>
+    </>
+  );
+}
+
 export default function MatchProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -329,6 +403,7 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
   const [tab, setTab] = useState<"soul" | "chemistry" | "life">("soul");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [showReportSheet, setShowReportSheet] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -378,6 +453,17 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
     router.push("/matches");
   }, [match, router]);
 
+  const handleReport = useCallback(async (reason: string) => {
+    if (!match?.matchedUserId) return;
+    await fetch("/api/safety/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reportedId: match.matchedUserId, reason }),
+    });
+    setShowReportSheet(false);
+    router.push("/matches");
+  }, [match, router]);
+
   if (loading || !match) {
     return (
       <div style={{ minHeight: "100dvh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -410,6 +496,14 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
               {[match.city, match.profession].filter(Boolean).join("  ·  ")}
             </p>
           </div>
+          {match.matchedUserId && (
+            <button
+              onClick={() => setShowReportSheet(true)}
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, fontSize: 16, color: "rgba(255,255,255,0.4)" }}
+            >
+              ⋯
+            </button>
+          )}
         </div>
 
         {/* Tab bar */}
@@ -441,6 +535,13 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
           onViewPending={() => router.push("/matches")}
         />
       </div>
+
+      {showReportSheet && (
+        <ReportSheet
+          onClose={() => setShowReportSheet(false)}
+          onSubmit={handleReport}
+        />
+      )}
     </div>
   );
 }
