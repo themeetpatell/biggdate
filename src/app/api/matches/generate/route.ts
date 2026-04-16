@@ -32,29 +32,43 @@ export async function POST(req: Request) {
   }
 
   const profile = await getProfileByUserId(auth.userId);
-  if (!profile) {
+  let userProfile = profile;
+
+  if (!userProfile) {
     // Allow profile from request body during onboarding
     const body = await req.json().catch(() => ({}));
     if (!body.profile) {
       return NextResponse.json({ error: "No profile found" }, { status: 400 });
     }
+    userProfile = body.profile;
   }
 
-  const userProfile = profile ?? (await req.json().catch(() => ({}))).profile;
-
   // Find real user candidates
-  const candidates = await getRealUserCandidates(auth.userId, userProfile);
+  const candidates = await getRealUserCandidates(auth.userId, userProfile!);
 
   if (candidates.length === 0) {
     return NextResponse.json({ matches: [], poolEmpty: true });
   }
 
-  const result = await generateText({
-    model: getModel(),
-    prompt: realUserMatchPrompt(userProfile, candidates),
-  });
+  let aiText: string;
+  try {
+    const result = await generateText({
+      model: getModel(),
+      prompt: realUserMatchPrompt(userProfile!, candidates),
+    });
+    aiText = result.text || "";
+  } catch (err) {
+    console.error("[matches/generate] AI call failed:", err);
+    return NextResponse.json({ error: "AI unavailable, try again" }, { status: 503 });
+  }
 
-  const raw = (result.text || "").replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+  // Strip markdown fences then find the outermost JSON object
+  const stripped = aiText.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+  const jsonStart = stripped.indexOf("{");
+  const jsonEnd = stripped.lastIndexOf("}");
+  const raw = jsonStart >= 0 && jsonEnd > jsonStart
+    ? stripped.slice(jsonStart, jsonEnd + 1)
+    : stripped;
 
   try {
     const parsed = JSON.parse(raw);
@@ -85,6 +99,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ matches: withIds });
   } catch {
+    console.error("[matches/generate] JSON parse failed. raw response:", raw);
     return NextResponse.json({ error: "Failed to parse matches", raw }, { status: 500 });
   }
 }

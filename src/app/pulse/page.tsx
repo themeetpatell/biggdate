@@ -33,6 +33,29 @@ function TimeAgo({ iso }: { iso: string }) {
   return <span>{Math.floor(hrs / 24)}d</span>;
 }
 
+function AnonDot({ verified }: { verified: boolean }) {
+  // Small avatar dot — verified gets pink gradient, unverified gets muted
+  return (
+    <div style={{
+      width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+      background: verified
+        ? "linear-gradient(135deg, #e91e8c, #ff6ec7)"
+        : "var(--bd-border)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      {verified ? (
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
 function PostCard({
   post,
   onResonate,
@@ -42,17 +65,20 @@ function PostCard({
   onResonate: (id: string) => void;
   onFlag: (id: string) => void;
 }) {
-  const [showReplies, setShowReplies] = useState(false);
+  // Three states: closed | thread (show replies) | replying (show replies + input focused)
+  const [threadState, setThreadState] = useState<"closed" | "thread" | "replying">("closed");
   const [replies, setReplies] = useState<PulseReply[]>([]);
   const [replyText, setReplyText] = useState("");
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [submittingReply, setSubmittingReply] = useState(false);
   const [flagged, setFlagged] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const canReply = post.type === "prompt_response" || post.type === "question";
+  const threadOpen = threadState !== "closed";
 
   const loadReplies = useCallback(async () => {
-    if (loadingReplies) return;
+    if (loadingReplies || replies.length > 0) return;
     setLoadingReplies(true);
     try {
       const r = await fetch(`/api/pulse/posts/${post.id}/replies`);
@@ -61,11 +87,20 @@ function PostCard({
     } finally {
       setLoadingReplies(false);
     }
-  }, [post.id, loadingReplies]);
+  }, [post.id, loadingReplies, replies.length]);
 
-  const toggleReplies = () => {
-    if (!showReplies && replies.length === 0) loadReplies();
-    setShowReplies((v) => !v);
+  // "N replies" button — expand/collapse thread without focusing input
+  const handleViewThread = () => {
+    if (threadOpen) { setThreadState("closed"); return; }
+    loadReplies();
+    setThreadState("thread");
+  };
+
+  // "Reply" button — open thread AND focus input
+  const handleReply = () => {
+    loadReplies();
+    setThreadState("replying");
+    setTimeout(() => inputRef.current?.focus(), 80);
   };
 
   const submitReply = async () => {
@@ -84,6 +119,7 @@ function PostCard({
           { id: d.id, postId: post.id, content: replyText.trim(), isVerified: false, resonateCount: 0, createdAt: new Date().toISOString() },
         ]);
         setReplyText("");
+        setThreadState("thread"); // back to view-only after posting
       }
     } finally {
       setSubmittingReply(false);
@@ -97,102 +133,148 @@ function PostCard({
 
   if (flagged) return null;
 
+  const replyCount = post.replyCount + replies.filter(r => !post.replyCount).length;
+
   return (
-    <div style={{
-      background: "var(--bd-surface)",
-      borderRadius: 16,
-      border: "1px solid var(--bd-border)",
-      padding: "16px 18px",
-      marginBottom: 10,
-    }}>
-      {post.promptContent && (
-        <p style={{
-          fontSize: 11, color: "var(--bd-accent)", fontWeight: 600,
-          textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8,
-        }}>
-          {post.promptContent}
+    <div style={{ marginBottom: 10 }}>
+      {/* ── Original post ── */}
+      <div style={{
+        background: "var(--bd-surface)",
+        borderRadius: threadOpen ? "16px 16px 0 0" : 16,
+        border: "1px solid var(--bd-border)",
+        borderBottom: threadOpen ? "none" : "1px solid var(--bd-border)",
+        padding: "16px 18px",
+      }}>
+        {post.promptContent && (
+          <p style={{
+            fontSize: 11, color: "var(--bd-accent)", fontWeight: 600,
+            textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8,
+          }}>
+            {post.promptContent}
+          </p>
+        )}
+
+        <p style={{ fontSize: 15, color: "var(--bd-text)", lineHeight: 1.6, marginBottom: 14 }}>
+          {post.content}
         </p>
-      )}
 
-      <p style={{ fontSize: 15, color: "var(--bd-text)", lineHeight: 1.6, marginBottom: 14 }}>
-        {post.content}
-      </p>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        {/* Resonate */}
-        <button
-          onClick={() => onResonate(post.id)}
-          style={{
-            display: "flex", alignItems: "center", gap: 5,
-            background: "none", border: "none", cursor: "pointer", padding: 0,
-            color: post.isResonated ? "#e91e8c" : "var(--bd-text-faint)",
-            fontSize: 13, fontWeight: 500,
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24"
-            fill={post.isResonated ? "currentColor" : "none"}
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-          {post.resonateCount > 0 && <span>{post.resonateCount}</span>}
-        </button>
-
-        {/* Replies */}
-        {canReply && (
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* Resonate */}
           <button
-            onClick={toggleReplies}
+            onClick={() => onResonate(post.id)}
             style={{
               display: "flex", alignItems: "center", gap: 5,
               background: "none", border: "none", cursor: "pointer", padding: 0,
-              color: "var(--bd-text-faint)", fontSize: 13, fontWeight: 500,
+              color: post.isResonated ? "#e91e8c" : "var(--bd-text-faint)",
+              fontSize: 13, fontWeight: 500,
             }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+            <svg width="14" height="14" viewBox="0 0 24 24"
+              fill={post.isResonated ? "currentColor" : "none"}
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            {post.replyCount > 0 ? post.replyCount : "Reply"}
+            {post.resonateCount > 0 && <span>{post.resonateCount}</span>}
           </button>
-        )}
 
-        <div style={{ flex: 1 }} />
+          {/* View thread (only if replies exist) */}
+          {canReply && post.replyCount > 0 && (
+            <button
+              onClick={handleViewThread}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "none", border: "none", cursor: "pointer", padding: 0,
+                color: threadOpen ? "var(--bd-accent)" : "var(--bd-text-faint)",
+                fontSize: 13, fontWeight: 500,
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              {post.replyCount}
+            </button>
+          )}
 
-        {/* Tick + time */}
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          {post.isVerified && <PinkTick />}
-          <span style={{ fontSize: 11, color: "var(--bd-text-faint)" }}>
-            <TimeAgo iso={post.createdAt} />
-          </span>
+          {/* Reply button — always visible for threadable posts */}
+          {canReply && (
+            <button
+              onClick={handleReply}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "none", border: "none", cursor: "pointer", padding: 0,
+                color: "var(--bd-text-faint)", fontSize: 13, fontWeight: 500,
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 17 4 12 9 7" />
+                <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+              </svg>
+              Reply
+            </button>
+          )}
+
+          <div style={{ flex: 1 }} />
+
+          {/* Tick + time */}
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            {post.isVerified && <PinkTick />}
+            <span style={{ fontSize: 11, color: "var(--bd-text-faint)" }}>
+              <TimeAgo iso={post.createdAt} />
+            </span>
+          </div>
+
+          {/* Flag */}
+          <button
+            onClick={handleFlag}
+            title="Report"
+            style={{ background: "none", border: "none", cursor: "pointer",
+              color: "var(--bd-text-faint)", opacity: 0.3, padding: 0, lineHeight: 1 }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+              <line x1="4" y1="22" x2="4" y2="15" />
+            </svg>
+          </button>
         </div>
-
-        {/* Flag */}
-        <button
-          onClick={handleFlag}
-          title="Report"
-          style={{ background: "none", border: "none", cursor: "pointer",
-            color: "var(--bd-text-faint)", opacity: 0.35, padding: 0, lineHeight: 1 }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-            <line x1="4" y1="22" x2="4" y2="15" />
-          </svg>
-        </button>
       </div>
 
-      {/* Replies thread */}
-      {showReplies && (
-        <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--bd-border)" }}>
+      {/* ── Thread panel (Threads-style left-line) ── */}
+      {threadOpen && (
+        <div style={{
+          background: "var(--bd-surface)",
+          border: "1px solid var(--bd-border)",
+          borderTop: "1px solid rgba(255,255,255,0.04)",
+          borderRadius: "0 0 16px 16px",
+          padding: "0 18px 16px",
+        }}>
+          {/* Thin divider line */}
+          <div style={{ height: 1, background: "var(--bd-border)", marginBottom: 14 }} />
+
           {loadingReplies && (
-            <p style={{ fontSize: 13, color: "var(--bd-text-faint)", marginBottom: 10 }}>Loading…</p>
+            <p style={{ fontSize: 13, color: "var(--bd-text-faint)", paddingLeft: 36, marginBottom: 10 }}>
+              Loading thread…
+            </p>
           )}
-          {replies.map((reply) => (
-            <div key={reply.id} style={{ marginBottom: 12 }}>
-              <p style={{ fontSize: 14, color: "var(--bd-text-muted)", lineHeight: 1.55 }}>
-                {reply.content}
-              </p>
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4 }}>
-                {reply.isVerified && <PinkTick />}
+
+          {/* Reply rows with left connector line */}
+          {replies.map((reply, i) => (
+            <div key={reply.id} style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+              {/* Avatar + vertical line */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                <AnonDot verified={reply.isVerified} />
+                {i < replies.length - 1 && (
+                  <div style={{ width: 2, flex: 1, minHeight: 12, marginTop: 4,
+                    background: "var(--bd-border)", borderRadius: 1 }} />
+                )}
+              </div>
+              {/* Reply content */}
+              <div style={{ flex: 1, paddingTop: 4 }}>
+                <p style={{ fontSize: 14, color: "var(--bd-text-muted)", lineHeight: 1.55, margin: "0 0 4px" }}>
+                  {reply.content}
+                </p>
                 <span style={{ fontSize: 11, color: "var(--bd-text-faint)" }}>
                   <TimeAgo iso={reply.createdAt} />
                 </span>
@@ -200,32 +282,62 @@ function PostCard({
             </div>
           ))}
 
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <input
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Reply anonymously…"
-              maxLength={300}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitReply(); } }}
-              style={{
-                flex: 1, background: "var(--bd-bg)", border: "1px solid var(--bd-border)",
-                borderRadius: 10, padding: "8px 12px", fontSize: 13,
-                color: "var(--bd-text)", outline: "none",
-              }}
-            />
-            <button
-              onClick={submitReply}
-              disabled={replyText.trim().length < 3 || submittingReply}
-              style={{
-                background: "var(--bd-accent)", color: "black", border: "none",
-                borderRadius: 10, padding: "8px 14px", fontSize: 14, fontWeight: 700,
-                cursor: replyText.trim().length >= 3 ? "pointer" : "default",
-                opacity: replyText.trim().length >= 3 ? 1 : 0.4,
-              }}
-            >
-              →
-            </button>
-          </div>
+          {/* Reply input — only shown in "replying" state */}
+          {threadState === "replying" ? (
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginTop: replies.length > 0 ? 4 : 0 }}>
+              <AnonDot verified={false} />
+              <div style={{ flex: 1 }}>
+                <input
+                  ref={inputRef}
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Add to thread…"
+                  maxLength={300}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitReply(); } }}
+                  onBlur={() => { if (!replyText.trim()) setThreadState(post.replyCount > 0 ? "thread" : "closed"); }}
+                  style={{
+                    width: "100%", background: "transparent",
+                    border: "none", borderBottom: "1px solid var(--bd-border)",
+                    padding: "6px 0", fontSize: 14,
+                    color: "var(--bd-text)", outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+                {replyText.trim().length >= 3 && (
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                    <button
+                      onClick={submitReply}
+                      disabled={submittingReply}
+                      style={{
+                        background: "var(--bd-accent)", color: "black", border: "none",
+                        borderRadius: 20, padding: "6px 18px", fontSize: 13, fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {submittingReply ? "…" : "Post"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Collapsed reply hint */
+            replies.length > 0 && (
+              <button
+                onClick={handleReply}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  background: "none", border: "none", cursor: "pointer",
+                  padding: "4px 0", width: "100%", textAlign: "left",
+                }}
+              >
+                <AnonDot verified={false} />
+                <span style={{ fontSize: 13, color: "var(--bd-text-faint)", fontStyle: "italic" }}>
+                  Add to thread…
+                </span>
+              </button>
+            )
+          )}
         </div>
       )}
     </div>
