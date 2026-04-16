@@ -222,6 +222,7 @@ export default function TodayPage() {
   const [matchLoading, setMatchLoading] = useState(true);
   const [poolEmpty, setPoolEmpty] = useState(false);
   const [intention, setIntention] = useState<string>("");
+  const [pulsePrompt, setPulsePrompt] = useState<string>("");
   const [revealedIndex, setRevealedIndex] = useState<number | null>(null);
   const [showAllMatches, setShowAllMatches] = useState(false);
 
@@ -243,6 +244,12 @@ export default function TodayPage() {
       })
       .catch(() => {})
       .finally(() => setMatchLoading(false));
+
+    // Fetch today's Pulse prompt
+    fetch("/api/pulse/prompts/today")
+      .then((r) => r.json())
+      .then((d) => { if (d.prompt) setPulsePrompt(d.prompt.content); })
+      .catch(() => {});
 
     // Fetch daily intention from Maahi
     fetch("/api/companion/daily", {
@@ -659,6 +666,33 @@ export default function TodayPage() {
               }}
             >
               &ldquo;{intention}&rdquo;
+            </p>
+          </div>
+        )}
+
+        {/* Pulse prompt widget */}
+        {pulsePrompt && (
+          <div
+            onClick={() => router.push("/pulse")}
+            style={{
+              background: "linear-gradient(135deg, rgba(233,30,140,0.09), rgba(233,30,140,0.02))",
+              border: "1px solid rgba(233,30,140,0.2)",
+              borderRadius: 18, padding: "16px 20px", marginBottom: 12, cursor: "pointer",
+            }}
+          >
+            <p style={{ fontSize: 11, color: "#e91e8c", fontWeight: 700,
+              textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 7 }}>
+              Today on Pulse
+            </p>
+            <p style={{
+              fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.55,
+              margin: "0 0 8px",
+              display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+            } as React.CSSProperties}>
+              {pulsePrompt}
+            </p>
+            <p style={{ fontSize: 12, color: "rgba(233,30,140,0.65)", margin: 0 }}>
+              Respond anonymously →
             </p>
           </div>
         )}

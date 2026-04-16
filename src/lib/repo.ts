@@ -13,6 +13,7 @@ import type {
   UsageCounter,
   GatedAction,
   PlanGateResult,
+  PulsePostType,
 } from "./types";
 
 function createId(prefix: string) {
@@ -1113,4 +1114,239 @@ function safeParseJson<T>(str: string | null | undefined, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+// ─── Pulse ───────────────────────────────────────────────────────────────────
+
+export async function getTodayPulsePrompt() {
+  const rows = await sql`
+    SELECT id, content, published_at, is_active, created_at
+    FROM pulse_prompts
+    WHERE is_active = true
+    ORDER BY published_at DESC
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  const r = rows[0] as Record<string, unknown>;
+  return {
+    id: r.id as string,
+    content: r.content as string,
+    publishedAt: r.published_at as string,
+    isActive: r.is_active as boolean,
+    createdAt: r.created_at as string,
+  };
+}
+
+export async function createPulsePrompt(content: string) {
+  await sql`UPDATE pulse_prompts SET is_active = false WHERE is_active = true`;
+  const id = createId("pp");
+  await sql`
+    INSERT INTO pulse_prompts (id, content, is_active, published_at, created_at)
+    VALUES (${id}, ${content}, true, NOW(), NOW())
+  `;
+  return id;
+}
+
+export async function getPulseFeed(currentUserId: string, cursor?: string, limit = 20) {
+  const rows = cursor
+    ? await sql`
+        SELECT p.id, p.type, p.prompt_id, p.content, p.is_verified,
+               p.resonate_count, p.reply_count, p.created_at,
+               pr.content AS prompt_content,
+               EXISTS(
+                 SELECT 1 FROM pulse_reactions r
+                 WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
+               ) AS is_resonated
+        FROM pulse_posts p
+        LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
+        WHERE p.is_hidden = false AND p.created_at < ${cursor}
+        ORDER BY p.created_at DESC
+        LIMIT ${limit}
+      `
+    : await sql`
+        SELECT p.id, p.type, p.prompt_id, p.content, p.is_verified,
+               p.resonate_count, p.reply_count, p.created_at,
+               pr.content AS prompt_content,
+               EXISTS(
+                 SELECT 1 FROM pulse_reactions r
+                 WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
+               ) AS is_resonated
+        FROM pulse_posts p
+        LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
+        WHERE p.is_hidden = false
+        ORDER BY p.created_at DESC
+        LIMIT ${limit}
+      `;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      type: row.type as PulsePostType,
+      promptId: (row.prompt_id as string) || null,
+      promptContent: (row.prompt_content as string) || null,
+      content: row.content as string,
+      isVerified: row.is_verified as boolean,
+      resonateCount: row.resonate_count as number,
+      replyCount: row.reply_count as number,
+      isResonated: row.is_resonated as boolean,
+      createdAt: row.created_at as string,
+    };
+  });
+}
+
+export async function createPulsePost({
+  userId, type, promptId, content, isVerified,
+}: {
+  userId: string;
+  type: PulsePostType;
+  promptId?: string;
+  content: string;
+  isVerified: boolean;
+}) {
+  const id = createId("ppost");
+  await sql`
+    INSERT INTO pulse_posts (id, user_id, type, prompt_id, content, is_verified, created_at)
+    VALUES (${id}, ${userId}, ${type}, ${promptId ?? null}, ${content}, ${isVerified}, NOW())
+  `;
+  return id;
+}
+
+export async function togglePulseReaction(postId: string, userId: string): Promise<boolean> {
+  const existing = await sql`
+    SELECT id FROM pulse_reactions WHERE post_id = ${postId} AND user_id = ${userId}
+  `;
+  if (existing.length) {
+    await sql`DELETE FROM pulse_reactions WHERE post_id = ${postId} AND user_id = ${userId}`;
+    await sql`
+      UPDATE pulse_posts SET resonate_count = GREATEST(resonate_count - 1, 0) WHERE id = ${postId}
+    `;
+    return false;
+  }
+  const id = createId("pr");
+  await sql`INSERT INTO pulse_reactions (id, post_id, user_id, created_at) VALUES (${id}, ${postId}, ${userId}, NOW())`;
+  await sql`UPDATE pulse_posts SET resonate_count = resonate_count + 1 WHERE id = ${postId}`;
+  return true;
+}
+
+export async function getPulseReplies(postId: string) {
+  const rows = await sql`
+    SELECT id, content, is_verified, resonate_count, created_at
+    FROM pulse_replies
+    WHERE post_id = ${postId} AND is_hidden = false
+    ORDER BY created_at ASC
+  `;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      postId,
+      content: row.content as string,
+      isVerified: row.is_verified as boolean,
+      resonateCount: row.resonate_count as number,
+      createdAt: row.created_at as string,
+    };
+  });
+}
+
+export async function createPulseReply({
+  postId, userId, content, isVerified,
+}: {
+  postId: string;
+  userId: string;
+  content: string;
+  isVerified: boolean;
+}) {
+  const id = createId("prely");
+  await sql`
+    INSERT INTO pulse_replies (id, post_id, user_id, content, is_verified, created_at)
+    VALUES (${id}, ${postId}, ${userId}, ${content}, ${isVerified}, NOW())
+  `;
+  await sql`UPDATE pulse_posts SET reply_count = reply_count + 1 WHERE id = ${postId}`;
+  return id;
+}
+
+export async function flagPulsePost(postId: string, userId: string, reason: string) {
+  const id = createId("pf");
+  await sql`
+    INSERT INTO pulse_flags (id, post_id, user_id, reason, created_at)
+    VALUES (${id}, ${postId}, ${userId}, ${reason}, NOW())
+    ON CONFLICT (post_id, user_id) DO NOTHING
+  `;
+  await sql`
+    UPDATE pulse_posts
+    SET flag_count = flag_count + 1,
+        is_hidden  = CASE WHEN flag_count + 1 >= 3 THEN true ELSE is_hidden END
+    WHERE id = ${postId}
+  `;
+}
+
+export async function getUserVerificationStatus(userId: string): Promise<boolean> {
+  const rows = await sql`SELECT is_verified FROM profiles WHERE user_id = ${userId} LIMIT 1`;
+  if (!rows.length) return false;
+  return (rows[0] as Record<string, unknown>).is_verified as boolean;
+}
+
+export async function saveVerificationSubmission(
+  userId: string,
+  linkedinUrl: string,
+  selfieUrl: string
+) {
+  await sql`
+    UPDATE profiles SET linkedin_url = ${linkedinUrl}, selfie_url = ${selfieUrl}
+    WHERE user_id = ${userId}
+  `;
+}
+
+export async function approveVerification(userId: string) {
+  await sql`
+    UPDATE profiles SET is_verified = true, verified_at = NOW()
+    WHERE user_id = ${userId}
+  `;
+}
+
+export async function getFlaggedPulsePosts() {
+  const rows = await sql`
+    SELECT id, type, content, is_verified, resonate_count, reply_count,
+           flag_count, is_hidden, created_at
+    FROM pulse_posts
+    WHERE flag_count > 0
+    ORDER BY flag_count DESC, created_at DESC
+    LIMIT 50
+  `;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      type: row.type as PulsePostType,
+      content: row.content as string,
+      isVerified: row.is_verified as boolean,
+      resonateCount: row.resonate_count as number,
+      replyCount: row.reply_count as number,
+      flagCount: row.flag_count as number,
+      isHidden: row.is_hidden as boolean,
+      createdAt: row.created_at as string,
+    };
+  });
+}
+
+export async function setPulsePostVisibility(postId: string, isHidden: boolean) {
+  await sql`UPDATE pulse_posts SET is_hidden = ${isHidden} WHERE id = ${postId}`;
+}
+
+export async function getPendingVerifications() {
+  const rows = await sql`
+    SELECT user_id, linkedin_url, selfie_url, is_verified
+    FROM profiles
+    WHERE linkedin_url != '' AND selfie_url != '' AND is_verified = false
+    ORDER BY updated_at DESC
+    LIMIT 50
+  `;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      userId: row.user_id as string,
+      linkedinUrl: row.linkedin_url as string,
+      selfieUrl: row.selfie_url as string,
+    };
+  });
 }

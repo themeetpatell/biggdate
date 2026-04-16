@@ -134,6 +134,17 @@ function DebriefContent() {
                 </CardContent>
               </Card>
             )}
+            <button
+              onClick={() => router.push("/pulse")}
+              style={{
+                width: "100%", padding: "13px",
+                background: "rgba(233,30,140,0.1)", border: "1px solid rgba(233,30,140,0.25)",
+                borderRadius: 12, fontSize: 14, color: "#e91e8c", fontWeight: 600,
+                cursor: "pointer", marginBottom: 12,
+              }}
+            >
+              Share this moment on Pulse (anonymous) →
+            </button>
             <div className="flex gap-3">
               <Button onClick={() => { setStep("name"); setMatchName(""); setAnswers({ chemistry: "", surprise: "", decision: "" }); setResult(null); }}
                 variant="outline" className="flex-1 rounded-xl border-[var(--bd-border)] text-[var(--bd-text-muted)]">Another Debrief</Button>

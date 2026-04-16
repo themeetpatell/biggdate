@@ -214,3 +214,37 @@ export interface DebriefReflection {
   aiInsight: string;
   createdAt: string;
 }
+
+// ─── Pulse Feed ──────────────────────────────────────────────────────────────
+
+export type PulsePostType = "prompt_response" | "confession" | "question";
+
+export interface PulsePrompt {
+  id: string;
+  content: string;
+  publishedAt: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface PulsePost {
+  id: string;
+  type: PulsePostType;
+  promptId: string | null;
+  promptContent: string | null;
+  content: string;
+  isVerified: boolean;
+  resonateCount: number;
+  replyCount: number;
+  isResonated: boolean;
+  createdAt: string;
+}
+
+export interface PulseReply {
+  id: string;
+  postId: string;
+  content: string;
+  isVerified: boolean;
+  resonateCount: number;
+  createdAt: string;
+}

@@ -8,9 +8,9 @@ import { useAuth } from "@/components/auth-provider";
 const NAV_ITEMS = [
   { href: "/dashboard", icon: "home", label: "Today" },
   { href: "/matches", icon: "heart", label: "Connect" },
+  { href: "/pulse", icon: "pulse", label: "Pulse" },
   { href: "/messages", icon: "chat", label: "Messages" },
   { href: "/companion", icon: "sparkle", label: "Maahi" },
-  { href: "/profile", icon: "user", label: "You" },
 ];
 
 function HomeIcon({ active }: { active: boolean }) {
@@ -72,6 +72,16 @@ function UserIcon({ active, avatarUrl }: { active: boolean; avatarUrl?: string }
   );
 }
 
+function PulseIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="white" strokeWidth={active ? 2.2 : 1.7}
+      strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    </svg>
+  );
+}
+
 function ChatIcon({ active }: { active: boolean }) {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill={active ? "white" : "none"} stroke="white" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -85,6 +95,16 @@ export function BottomNav() {
   const { profile } = useAuth();
   const avatarUrl = profile?.photos?.[0];
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasPulse, setHasPulse] = useState(false);
+
+  // Check for today's Pulse prompt (dot indicator)
+  useEffect(() => {
+    if (!profile) return;
+    fetch("/api/pulse/prompts/today")
+      .then((r) => r.json())
+      .then((d) => { if (d.prompt) setHasPulse(true); })
+      .catch(() => {});
+  }, [profile]);
 
   // Poll for unread messages badge
   useEffect(() => {
@@ -164,6 +184,18 @@ export function BottomNav() {
             >
               {item.icon === "home" && <HomeIcon active={active} />}
               {item.icon === "heart" && <HeartIcon active={active} />}
+              {item.icon === "pulse" && (
+                <div style={{ position: "relative" }}>
+                  <PulseIcon active={active} />
+                  {hasPulse && !active && (
+                    <div style={{
+                      position: "absolute", top: -2, right: -2,
+                      width: 7, height: 7, borderRadius: "50%",
+                      background: "#e91e8c", border: "2px solid #262626",
+                    }} />
+                  )}
+                </div>
+              )}
               {item.icon === "chat" && (
                 <div style={{ position: "relative" }}>
                   <ChatIcon active={active} />
