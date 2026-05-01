@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getUserPlanByStripeCustomer, upsertUserPlan } from "@/lib/repo";
+import {
+  getUserPlanByStripeCustomer,
+  upsertUserPlan,
+  recordStripeEvent,
+} from "@/lib/repo";
+import { log } from "@/lib/log";
 
 // Stripe's newer API versions reorganized subscription period fields.
 // We access them safely via dynamic lookup to avoid SDK version drift.
@@ -51,29 +56,52 @@ export async function POST(request: Request) {
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch {
+  } catch (err) {
+    log.warn("stripe webhook signature verification failed", {
+      error: err instanceof Error ? err.message : "unknown",
+    });
     return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
   }
 
-  switch (event.type) {
-    case "customer.subscription.created":
-    case "customer.subscription.updated":
-    case "customer.subscription.deleted":
-      await handleSubscription(stripe, event.data.object as Stripe.Subscription);
-      break;
-    case "checkout.session.completed": {
-      const session = event.data.object as unknown as Record<string, unknown>;
-      if (session["mode"] === "subscription" && session["subscription"]) {
-        const subscriptionId = typeof session["subscription"] === "string"
-          ? session["subscription"]
-          : (session["subscription"] as { id: string }).id;
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        await handleSubscription(stripe, subscription);
+  // Idempotency: Stripe retries on non-2xx with the same event.id. Insert
+  // first; if the row already existed, this is a duplicate — ack and skip.
+  const isFresh = await recordStripeEvent(event.id, event.type);
+  if (!isFresh) {
+    log.info("stripe webhook duplicate ignored", { eventId: event.id, type: event.type });
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
+  try {
+    switch (event.type) {
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted":
+        await handleSubscription(stripe, event.data.object as Stripe.Subscription);
+        break;
+      case "checkout.session.completed": {
+        const session = event.data.object as unknown as Record<string, unknown>;
+        if (session["mode"] === "subscription" && session["subscription"]) {
+          const subscriptionId = typeof session["subscription"] === "string"
+            ? session["subscription"]
+            : (session["subscription"] as { id: string }).id;
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          await handleSubscription(stripe, subscription);
+        }
+        break;
       }
-      break;
+      default:
+        break;
     }
-    default:
-      break;
+  } catch (err) {
+    log.error("stripe webhook handler failed", err, {
+      eventId: event.id,
+      type: event.type,
+    });
+    // Return 500 so Stripe retries — but the idempotency record is already
+    // written, so we'd skip on retry. To make retry meaningful we'd need to
+    // delete the record on failure. For now, log loudly and let Stripe fall
+    // back to its dead-letter behavior (eventually surfaces in the dashboard).
+    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

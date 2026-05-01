@@ -14,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
+import { trackSignUp, trackLogin } from "@/lib/gtm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -110,6 +111,7 @@ function AuthPageInner() {
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
 
   useEffect(() => {
     const modeParam = searchParams.get("mode");
@@ -145,7 +147,8 @@ function AuthPageInner() {
       normalizedFullName.length > 0 &&
       normalizedUsername.length >= 3 &&
       normalizedEmail.length > 0 &&
-      password.length >= 6;
+      password.length >= 6 &&
+      ageConfirmed;
   } else if (mode === "login") {
     canSubmit = loginIdentifier.trim().length >= 3 && password.length >= 6;
   } else if (mode === "forgot") {
@@ -196,6 +199,10 @@ function AuthPageInner() {
     }
     if (mode === "login" && nextLoginIdentifier.length < 3) {
       setError("Enter your username.");
+      return;
+    }
+    if (mode === "signup" && !ageConfirmed) {
+      setError("You must confirm you are 18 or older to use BiggDate.");
       return;
     }
 
@@ -288,6 +295,9 @@ function AuthPageInner() {
         setError("Your session was created, but we could not load your account. Refresh and try once more.");
         return;
       }
+
+      if (mode === "signup") trackSignUp();
+      if (mode === "login") trackLogin();
 
       await refresh();
       router.replace(me.hasProfile ? "/dashboard" : "/onboarding");
@@ -608,6 +618,39 @@ function AuthPageInner() {
                 </label>
               )}
 
+              {mode === "signup" && (
+                <label
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-[13px] leading-snug transition-colors"
+                  style={{
+                    borderColor: ageConfirmed
+                      ? "rgba(229,39,224,0.32)"
+                      : "rgba(140,124,255,0.16)",
+                    background: ageConfirmed
+                      ? "linear-gradient(180deg, rgba(45,16,70,0.36), rgba(21,13,40,0.24))"
+                      : "linear-gradient(180deg, rgba(21,18,44,0.6), rgba(13,16,30,0.7))",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={ageConfirmed}
+                    onChange={(e) => setAgeConfirmed(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[#e527e0]"
+                    aria-label="Confirm you are 18 or older and agree to terms"
+                  />
+                  <span style={{ color: "var(--bd-text-muted)" }}>
+                    I confirm I am 18 or older and I agree to the{" "}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--bd-text)" }}>
+                      Terms
+                    </a>{" "}
+                    and{" "}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--bd-text)" }}>
+                      Privacy Policy
+                    </a>
+                    .
+                  </span>
+                </label>
+              )}
+
               {(error || notice) && (
                 <div
                   className="rounded-2xl border px-4 py-3 text-sm"
@@ -696,6 +739,16 @@ function AuthPageInner() {
                   </button>
                 </>
               )}
+            </p>
+
+            <p className="mt-4 text-center text-[11px] text-[var(--bd-text-faint)]">
+              <a href="/privacy" className="underline underline-offset-2 hover:text-[var(--bd-text-muted)]">
+                Privacy
+              </a>
+              <span className="mx-2 opacity-50">·</span>
+              <a href="/terms" className="underline underline-offset-2 hover:text-[var(--bd-text-muted)]">
+                Terms
+              </a>
             </p>
           </CardContent>
         </Card>

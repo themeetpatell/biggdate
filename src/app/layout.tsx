@@ -7,15 +7,45 @@ import { AuthProvider } from "@/components/auth-provider";
 import { MaahiChat } from "@/components/maahi-chat";
 import "./globals.css";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
+const APP_TITLE = "BiggDate — For People Who Build Things";
+const APP_DESCRIPTION =
+  "A relationship product for founders, operators, PMs, engineers, designers, and investors. BiggDate helps builders date with context, schedule intelligence, and sharper compatibility.";
+
 export const metadata: Metadata = {
-  title: "BiggDate — For People Who Build Things",
-  description:
-    "A relationship product for founders, operators, PMs, engineers, designers, and investors. BiggDate helps builders date with context, schedule intelligence, and sharper compatibility.",
+  metadataBase: new URL(APP_URL),
+  title: APP_TITLE,
+  description: APP_DESCRIPTION,
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "BiggDate",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "BiggDate",
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    url: APP_URL,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BiggDate — relationship product for builders",
+      },
+    ],
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: APP_URL,
   },
 };
 
@@ -44,16 +74,14 @@ export default function RootLayout({
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-57R8WX5N');
         `}</Script>
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-GSPNZ2N4CL"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag" strategy="afterInteractive">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-GSPNZ2N4CL');
+        {/* Google Analytics is loaded via GTM (tag: GA4 - G-GSPNZ2N4CL) */}
+        {/* Microsoft Clarity */}
+        <Script id="clarity" strategy="afterInteractive">{`
+          (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window,document,"clarity","script","wk9ecuiovr");
         `}</Script>
       </head>
       <body className="antialiased bg-[var(--bd-bg)] text-[var(--bd-text)] min-h-screen pb-nav">

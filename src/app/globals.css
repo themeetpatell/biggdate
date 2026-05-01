@@ -132,19 +132,48 @@
 
 /* ─── BiggDate Design Tokens ─── */
 :root {
+  color-scheme: light;
+  --bd-color-scheme: light;
+  --bd-bg: #f7f8ff;
+  --bd-surface: #ffffff;
+  --bd-surface-hover: #eef2ff;
+  --bd-accent: #c026d3;
+  --bd-accent-soft: rgba(192, 38, 211, 0.12);
+  --bd-accent-glow: rgba(192, 38, 211, 0.22);
+  --bd-blue: #2563eb;
+  --bd-blue-glow: rgba(37, 99, 235, 0.18);
+  --bd-pink: #db2777;
+  --bd-pink-glow: rgba(219, 39, 119, 0.18);
+  --bd-cyan: #0891b2;
+  --bd-cyan-glow: rgba(8, 145, 178, 0.18);
+  --bd-rose: var(--bd-blue);
+  --bd-rose-glow: var(--bd-blue-glow);
+  --bd-gold: var(--bd-pink);
+  --bd-gold-glow: var(--bd-pink-glow);
+  --bd-green: var(--bd-cyan);
+  --bd-green-glow: var(--bd-cyan-glow);
+  --bd-text: #141827;
+  --bd-text-muted: #5d6880;
+  --bd-text-faint: #8b96aa;
+  --bd-border: rgba(20, 24, 39, 0.1);
+  --bd-border-glow: rgba(192, 38, 211, 0.22);
+}
+
+.dark {
+  color-scheme: dark;
+  --bd-color-scheme: dark;
   --bd-bg: #050914;
   --bd-surface: #0a1224;
   --bd-surface-hover: #10203d;
   --bd-accent: #ff00ff;
-  --bd-accent-soft: rgba(255,0,255,0.16);
-  --bd-accent-glow: rgba(255,0,255,0.44);
+  --bd-accent-soft: rgba(255, 0, 255, 0.16);
+  --bd-accent-glow: rgba(255, 0, 255, 0.44);
   --bd-blue: #0066ff;
-  --bd-blue-glow: rgba(0,102,255,0.3);
+  --bd-blue-glow: rgba(0, 102, 255, 0.3);
   --bd-pink: #ff1493;
-  --bd-pink-glow: rgba(255,20,147,0.28);
+  --bd-pink-glow: rgba(255, 20, 147, 0.28);
   --bd-cyan: #00ccff;
-  --bd-cyan-glow: rgba(0,204,255,0.28);
-  /* Semantic aliases */
+  --bd-cyan-glow: rgba(0, 204, 255, 0.28);
   --bd-rose: var(--bd-blue);
   --bd-rose-glow: var(--bd-blue-glow);
   --bd-gold: var(--bd-pink);
@@ -154,8 +183,8 @@
   --bd-text: #edf5ff;
   --bd-text-muted: #8ea6c5;
   --bd-text-faint: #5f7695;
-  --bd-border: rgba(255,255,255,0.07);
-  --bd-border-glow: rgba(255,0,255,0.28);
+  --bd-border: rgba(255, 255, 255, 0.07);
+  --bd-border-glow: rgba(255, 0, 255, 0.28);
 }
 
 /* ─── BiggDate Animations ─── */

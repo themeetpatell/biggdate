@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { trackMatchViewed, trackMatchConnect } from "@/lib/gtm";
 import type { Match } from "@/lib/types";
 
 type SentIntro = {
@@ -18,6 +19,11 @@ type SentIntro = {
 function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void }) {
   const [expanded, setExpanded] = useState(false);
 
+  const handleExpand = () => {
+    if (!expanded) trackMatchViewed(match.id);
+    setExpanded((v) => !v);
+  };
+
   return (
     <div
       style={{
@@ -30,7 +36,7 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
     >
       {/* Summary row — always visible */}
       <div
-        onClick={() => setExpanded((v) => !v)}
+        onClick={handleExpand}
         style={{
           display: "flex",
           alignItems: "center",
@@ -197,7 +203,7 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
           )}
 
           <button
-            onClick={(e) => { e.stopPropagation(); onConnect(); }}
+            onClick={(e) => { e.stopPropagation(); trackMatchConnect(match.id); onConnect(); }}
             style={{
               width: "100%",
               padding: "13px 0",

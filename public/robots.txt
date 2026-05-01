@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /matches
+Disallow: /messages
+Disallow: /companion
+Disallow: /coach
+Disallow: /debrief
+Disallow: /profile
+Disallow: /soul-snapshot
+Disallow: /soul-card
+Disallow: /report
+Disallow: /onboarding
+Disallow: /pulse
+Disallow: /monitoring
+
+Sitemap: https://biggdate.app/sitemap.xml

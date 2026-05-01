@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { after } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { sendNotification } from "@/lib/notifications";
 
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
@@ -40,10 +42,19 @@ export async function GET(req: Request) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     return NextResponse.redirect(`${origin}/auth?error=auth_code_exchange_failed`);
+  }
+
+  // Fire welcome email on first signup confirmation. Recovery flows get nothing.
+  // We use after() so the redirect isn't blocked by Resend.
+  const userId = data.user?.id;
+  if (userId && type !== "recovery") {
+    after(async () => {
+      await sendNotification({ event: "welcome", toUserId: userId });
+    });
   }
 
   return response;

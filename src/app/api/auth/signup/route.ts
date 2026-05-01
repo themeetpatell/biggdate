@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import { getAccountHandleByUsername, upsertAccountHandle } from "@/lib/repo";
+import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  // 3 signups per IP per hour blocks the most common abuse vector — burst
+  // account creation for spam/abuse — without hurting a real user who
+  // mistypes once.
+  const rl = await checkRateLimit("auth:signup", clientIp(req), {
+    limit: 3,
+    windowSec: 3600,
+  });
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   let body: {
     email?: string;
     password?: string;

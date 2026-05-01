@@ -15,14 +15,24 @@ export function getMessageText(message: UIMessage): string {
   );
 }
 
-/** Remove "[CHIPS: ...]" from text. Splits on the marker so text before it is always preserved,
- *  even when the AI incorrectly embeds [CHIPS:] mid-sentence. */
+/** Remove inline UI markers, phase markers, and any leaked internal-state phrases. */
 function stripChips(text: string): string {
   return text
     .replace(/\[CHIPS:[^\]]*\]/g, "")
     .replace(/\[MULTISELECT:[^\]]*\]/g, "")
     .replace(/\[AGERANGE\]/g, "")
     .replace(/\[DATEPICKER\]/g, "")
+    .replace(/\[ADVANCE\]/g, "")
+    .replace(/\[FOLLOWUP\]/g, "")
+    .replace(/\bPHASE_1_DONE\b/g, "")
+    .replace(/\bPHASE_2_DONE\b/g, "")
+    // Defensive: strip leaked internal-state phrases. The prompt already forbids
+    // these, but if the AI slips, the user should never see scaffolding.
+    .replace(/\s*\(?\s*Follow[- ]?ups?\s+remaining[:\s]*\d+\s*\)?\.?/gi, "")
+    .replace(/\s*\(?\s*spine\s*(?:index|\[?\d+\]?|question\s+\d+)\s*\)?\.?/gi, "")
+    // Collapse double spaces / leftover whitespace from the strips above
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+\n/g, "\n")
     .trim();
 }
 

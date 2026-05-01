@@ -1350,3 +1350,94 @@ export async function getPendingVerifications() {
     };
   });
 }
+
+// ─── Stripe webhook idempotency ───
+
+/**
+ * Records a Stripe event ID. Returns true if this is a fresh event,
+ * false if it has already been processed. Stripe sends retries with the
+ * same event.id, so this prevents double-processing.
+ */
+export async function recordStripeEvent(eventId: string, type: string): Promise<boolean> {
+  const rows = await sql`
+    INSERT INTO stripe_events (event_id, type)
+    VALUES (${eventId}, ${type})
+    ON CONFLICT (event_id) DO NOTHING
+    RETURNING event_id
+  `;
+  return rows.length > 0;
+}
+
+// ─── Photo moderation ───
+
+export type PhotoModerationStatus = "pending" | "safe" | "flagged" | "rejected";
+
+export interface PhotoModerationEntry {
+  id: string;
+  userId: string;
+  photoUrl: string;
+  status: PhotoModerationStatus;
+  provider: string | null;
+  scores: Record<string, unknown> | null;
+  reason: string | null;
+  createdAt: string;
+}
+
+export async function recordPhotoModeration(params: {
+  userId: string;
+  photoUrl: string;
+  status: PhotoModerationStatus;
+  provider?: string;
+  scores?: Record<string, unknown>;
+  reason?: string;
+}): Promise<string> {
+  const id = createId("mod");
+  await sql`
+    INSERT INTO photo_moderation (id, user_id, photo_url, status, provider, scores, reason)
+    VALUES (
+      ${id},
+      ${params.userId},
+      ${params.photoUrl},
+      ${params.status},
+      ${params.provider ?? null},
+      ${params.scores ? JSON.stringify(params.scores) : null},
+      ${params.reason ?? null}
+    )
+  `;
+  return id;
+}
+
+export async function getFlaggedPhotos(): Promise<PhotoModerationEntry[]> {
+  const rows = await sql`
+    SELECT id, user_id, photo_url, status, provider, scores, reason, created_at
+    FROM photo_moderation
+    WHERE status = 'flagged'
+    ORDER BY created_at DESC
+    LIMIT 100
+  `;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      userId: row.user_id as string,
+      photoUrl: row.photo_url as string,
+      status: row.status as PhotoModerationStatus,
+      provider: (row.provider as string) || null,
+      scores: (row.scores as Record<string, unknown>) || null,
+      reason: (row.reason as string) || null,
+      createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    };
+  });
+}
+
+export async function resolvePhotoModeration(
+  id: string,
+  reviewerId: string,
+  status: "safe" | "rejected",
+): Promise<void> {
+  await sql`
+    UPDATE photo_moderation
+    SET status = ${status}, reviewed_by = ${reviewerId}, reviewed_at = NOW()
+    WHERE id = ${id}
+  `;
+}

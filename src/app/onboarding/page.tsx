@@ -17,22 +17,132 @@ import {
 import { SoulSignal } from "@/components/onboarding/soul-signal";
 import { OnboardingMessage, getMessageText } from "@/components/chat-message";
 import { useAuth } from "@/components/auth-provider";
+import { trackOnboardingStart, trackOnboardingPhase, trackOnboardingComplete } from "@/lib/gtm";
+import type { UIMessage } from "ai";
 
-function getAct(aiMessageCount: number): Act {
-  if (aiMessageCount <= 2) return 1;
-  if (aiMessageCount <= 4) return 2;
-  if (aiMessageCount <= 6) return 3;
-  if (aiMessageCount <= 7) return 4;
+const BASIC_SPINE_LEN = 8;
+const PSYCH_SPINE_LEN = 9;
+
+type Phase = "basic" | "psychological" | "complete";
+
+function isSystemTrigger(text: string): boolean {
+  return text.includes("__BEGIN__") || text.includes("__BEGIN_PHASE_2__");
+}
+
+function isPhaseSentinel(text: string): boolean {
+  // True only when the message is *exactly* a sentinel — not when the sentinel
+  // appears as part of a longer message.
+  const trimmed = text.trim();
+  return trimmed === "PHASE_1_DONE" || trimmed === "PHASE_2_DONE";
+}
+
+function computePhaseState(messages: UIMessage[]): {
+  phase: Phase;
+  basicAnswered: number;
+  psychAdvances: number;
+  psychFollowups: number;
+  phase1Detected: boolean;
+  phase2Detected: boolean;
+} {
+  let phase: Phase = "basic";
+  let phase1Index = -1;
+  let phase2Index = -1;
+
+  messages.forEach((m, i) => {
+    if (m.role !== "assistant") return;
+    const text = getMessageText(m);
+    if (text.includes("PHASE_1_DONE") && phase1Index === -1) {
+      phase1Index = i;
+      phase = "psychological";
+    }
+    if (text.includes("PHASE_2_DONE") && phase2Index === -1) {
+      phase2Index = i;
+      phase = "complete";
+    }
+  });
+
+  // Basic phase answers — bounded by phase 1 marker to avoid spilling into phase 2
+  const basicCutoff = phase1Index >= 0 ? phase1Index : messages.length;
+  let basicAnswered = 0;
+  for (let i = 0; i < basicCutoff; i++) {
+    const m = messages[i];
+    if (m.role !== "user") continue;
+    if (isSystemTrigger(getMessageText(m))) continue;
+    basicAnswered++;
+  }
+
+  let psychAdvances = 0;
+  let psychFollowups = 0;
+  if (phase1Index >= 0) {
+    for (let i = phase1Index + 1; i < messages.length; i++) {
+      const m = messages[i];
+      if (m.role !== "assistant") continue;
+      const text = getMessageText(m);
+      if (text.includes("[ADVANCE]")) psychAdvances++;
+      else if (text.includes("[FOLLOWUP]")) psychFollowups++;
+    }
+  }
+
+  return {
+    phase,
+    basicAnswered,
+    psychAdvances,
+    psychFollowups,
+    phase1Detected: phase1Index >= 0,
+    phase2Detected: phase2Index >= 0,
+  };
+}
+
+// Map phase + progress to the existing Act color theming
+function phaseToAct(phase: Phase, basicAnswered: number, psychAdvances: number): Act {
+  if (phase === "basic") {
+    if (basicAnswered <= 2) return 1;
+    if (basicAnswered <= 5) return 2;
+    return 3;
+  }
+  // psychological
+  if (psychAdvances <= 3) return 3;
+  if (psychAdvances <= 6) return 4;
   return 5;
 }
 
-const PLACEHOLDERS: Record<Act, string> = {
-  1: "What feels true right now...",
-  2: "Take your time...",
-  3: "Be honest...",
-  4: "Dream a little...",
-  5: "Last thing...",
+const PLACEHOLDERS: Record<Phase, string> = {
+  basic: "Take your time...",
+  psychological: "Be honest...",
+  complete: "Last thing...",
 };
+
+const ANALYZING_STEPS = [
+  "Reading your story…",
+  "Mapping how you connect…",
+  "Hearing what you need…",
+  "Putting it together…",
+];
+
+function AnalyzingMessage() {
+  const [stepIndex, setStepIndex] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => {
+      setStepIndex((i) => Math.min(i + 1, ANALYZING_STEPS.length - 1));
+    }, 2200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <AnimatePresence mode="wait">
+      <motion.p
+        key={stepIndex}
+        className="text-2xl font-light tracking-wide"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        style={{ color: "var(--bd-text)" }}
+      >
+        {ANALYZING_STEPS[stepIndex]}
+      </motion.p>
+    </AnimatePresence>
+  );
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -43,22 +153,26 @@ export default function OnboardingPage() {
 
   const [input, setInput] = useState("");
   const [revealing, setRevealing] = useState(false);
-  const [derivingStarted, setDerivingStarted] = useState(false);
-  const [deriveError, setDeriveError] = useState(false);
+  const [phase2DerivingStarted, setPhase2DerivingStarted] = useState(false);
+  const [deriveError, setDeriveError] = useState<string | null>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [viewportHeight, setViewportHeight] = useState("100dvh");
 
   const autoStarted = useRef(false);
-  const profileCompleteDetected = useRef(false);
-  const initMessageId = useRef<string | null>(null);
+  const phase1DeriveStarted = useRef(false);
+  const phase2BeginSent = useRef(false);
+  const phase2CompleteDetected = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Guard: redirect away if user already has a completed profile
+  // Guard: only redirect away after a *completed* psychological phase.
+  // We use `summary` because that field is only written by the Phase 2 derive call —
+  // a user with just basic facts saved (Phase 1 done, Phase 2 in progress) should
+  // be allowed to continue onboarding.
   useEffect(() => {
     if (authLoading) return;
-    if (!userId) return; // AuthProvider handles unauthenticated redirect
-    if (profile?.name) {
+    if (!userId) return;
+    if (profile?.summary) {
       router.replace("/soul-snapshot");
     }
   }, [authLoading, userId, profile, router]);
@@ -87,74 +201,101 @@ export default function OnboardingPage() {
     [],
   );
 
-  // Auto-start: fire __BEGIN__ only after auth is confirmed and user has no profile.
-  // autoStarted is set INSIDE the timeout so that if the effect re-runs (e.g. due
-  // to sendMessage identity change) we clear the stale timer and reschedule — the
-  // last scheduled invocation wins and sets the flag only when it actually fires.
+  // Auto-start: fire __BEGIN__ once after auth is confirmed and user has no completed profile.
   useEffect(() => {
-    if (authLoading || !userId || profile?.name) return;
+    if (authLoading || !userId || profile?.summary) return;
     if (autoStarted.current) return;
     const timer = setTimeout(() => {
       if (autoStarted.current) return;
       autoStarted.current = true;
+      trackOnboardingStart();
       sendMessage({ text: "__BEGIN__" });
     }, 1200);
     return () => clearTimeout(timer);
   }, [authLoading, userId, profile, sendMessage]);
 
-  // Track the ID of the init trigger message (first user message)
-  useEffect(() => {
-    const firstUser = messages.find((m) => m.role === "user");
-    if (firstUser && !initMessageId.current) {
-      initMessageId.current = firstUser.id;
-    }
-  }, [messages]);
+  const phaseState = useMemo(() => computePhaseState(messages), [messages]);
 
-  // Detect PROFILE_COMPLETE in latest AI message — fires only once
+  // Phase 1 done → fire phase 1 derive (background) + auto-send __BEGIN_PHASE_2__ to bridge
   useEffect(() => {
-    if (profileCompleteDetected.current) return;
+    if (!phaseState.phase1Detected) return;
+    if (phase1DeriveStarted.current) return;
     if (isStreaming) return;
-    const lastAI = messages.filter((m) => m.role === "assistant").at(-1);
-    if (!lastAI) return;
-    const text = getMessageText(lastAI);
-    if (text.includes("PROFILE_COMPLETE")) {
-      profileCompleteDetected.current = true;
-      setRevealing(true);
-    }
-  }, [messages, isStreaming]);
-
-  // Derive profile — runs once when revealing becomes true
-  useEffect(() => {
-    if (!revealing || derivingStarted) return;
-    setDerivingStarted(true);
+    phase1DeriveStarted.current = true;
+    trackOnboardingPhase("psychological");
 
     const transcript = messages
       .map((m) => `${m.role}: ${getMessageText(m)}`)
       .join("\n");
 
-    fetch("/api/profile/derive", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript }),
-      })
+    void fetch("/api/profile/derive?phase=basic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcript }),
+    })
       .then(async (response) => {
-        const profile = await response.json();
-        if (!response.ok) {
-          throw new Error(profile?.error || "Failed to derive profile");
-        }
-        return profile;
-      })
-      .then((profile) => {
-        if (profile?.name) {
-          hydrateProfile(profile);
-          router.replace("/soul-snapshot");
-          void refresh();
-        } else {
-          setDeriveError(true);
+        const data = await response.json();
+        if (response.ok && data?.name) {
+          hydrateProfile(data);
         }
       })
       .catch(() => {
-        setDeriveError(true);
+        // Phase 1 derive failures are non-fatal — the conversation continues into
+        // Phase 2. The user's basic facts will simply be missing until Phase 2's
+        // derive (which extracts overlapping facts from the full transcript) runs.
+      });
+
+    // Bridge into Phase 2 by auto-sending the system trigger
+    if (!phase2BeginSent.current) {
+      phase2BeginSent.current = true;
+      // small delay so the PHASE_1_DONE message renders cleanly before next AI turn
+      setTimeout(() => sendMessage({ text: "__BEGIN_PHASE_2__" }), 400);
+    }
+  }, [phaseState.phase1Detected, isStreaming, messages, hydrateProfile, sendMessage]);
+
+  // Phase 2 done → trigger ritual reveal + phase 2 derive
+  useEffect(() => {
+    if (!phaseState.phase2Detected) return;
+    if (phase2CompleteDetected.current) return;
+    if (isStreaming) return;
+    phase2CompleteDetected.current = true;
+    setRevealing(true);
+  }, [phaseState.phase2Detected, isStreaming]);
+
+  // Phase 2 derive — runs once when revealing becomes true
+  useEffect(() => {
+    if (!revealing || phase2DerivingStarted) return;
+    setPhase2DerivingStarted(true);
+
+    const transcript = messages
+      .map((m) => `${m.role}: ${getMessageText(m)}`)
+      .join("\n");
+
+    fetch("/api/profile/derive?phase=psychological", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcript }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.error || "Failed to derive profile");
+        }
+        return data;
+      })
+      .then((data) => {
+        if (data?.summary) {
+          hydrateProfile(data);
+          trackOnboardingComplete();
+          router.replace("/soul-snapshot");
+          void refresh();
+        } else {
+          setDeriveError("Profile saved but missing key fields. Try again.");
+        }
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Something went wrong";
+        setDeriveError(msg);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealing]);
@@ -221,32 +362,36 @@ export default function OnboardingPage() {
     return () => window.cancelAnimationFrame(frame);
   }, [isInputFocused, viewportHeight, scrollConversationToBottom]);
 
-  // Derived state
-  const aiMessageCount = messages.filter((m) => m.role === "assistant").length;
-  const act = getAct(aiMessageCount);
+  // Derived state — phase-aware theming and progress
+  const act = phaseToAct(
+    phaseState.phase,
+    phaseState.basicAnswered,
+    phaseState.psychAdvances,
+  );
   const accentColor = ACT_COLORS[act];
 
-  // User answers excluding the init trigger
-  const completedQuestions = Math.min(
-    messages.filter(
-      (m) => m.role === "user" && m.id !== initMessageId.current,
-    ).length,
-    11,
-  );
+  // Phase-aware progress: spine position within the current phase
+  const progressLabel =
+    phaseState.phase === "basic"
+      ? `Basic · ${Math.min(phaseState.basicAnswered, BASIC_SPINE_LEN)}/${BASIC_SPINE_LEN}`
+      : `Personality · ${Math.min(phaseState.psychAdvances, PSYCH_SPINE_LEN)}/${PSYCH_SPINE_LEN}`;
 
-  // Messages to display — filter init trigger + PROFILE_COMPLETE messages
+  // Messages to display — filter system triggers, exact phase sentinels, and an
+  // assistant message that's *only* a sentinel (those are bookkeeping messages).
   const visibleMessages = messages.filter((m) => {
-    if (m.id === initMessageId.current) return false;
-    if (getMessageText(m).includes("PROFILE_COMPLETE")) return false;
+    const text = getMessageText(m);
+    if (m.role === "user" && isSystemTrigger(text)) return false;
+    if (m.role === "assistant" && isPhaseSentinel(text)) return false;
     return true;
   });
 
-  // Extract chips from last AI message (only when streaming is done)
+  // Extract chips from last AI message (only when streaming is done).
+  // Skip phase sentinel messages — they shouldn't drive chip rendering.
   const lastAIMessage = messages.filter((m) => m.role === "assistant").at(-1);
   const lastAIText = useMemo(() => {
     if (isStreaming || !lastAIMessage) return "";
     const text = getMessageText(lastAIMessage);
-    if (text.includes("PROFILE_COMPLETE")) return "";
+    if (isPhaseSentinel(text)) return "";
     return text;
   }, [lastAIMessage, isStreaming]);
 
@@ -298,8 +443,8 @@ export default function OnboardingPage() {
 
   const isWelcome = visibleMessages.length === 0 && !isStreaming;
 
-  // Blank screen while auth loads or while redirecting a user with existing profile
-  if (authLoading || (!authLoading && userId && profile?.name)) {
+  // Blank screen while auth loads or while redirecting a user with a fully completed profile
+  if (authLoading || (!authLoading && userId && profile?.summary)) {
     return (
       <div
         style={{
@@ -316,7 +461,7 @@ export default function OnboardingPage() {
       <>
         <AmbientLayer act={5} />
         <div
-          className="fixed inset-0 flex flex-col items-center justify-center gap-6"
+          className="fixed inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center"
           style={{ zIndex: 10 }}
         >
           {deriveError ? (
@@ -330,10 +475,19 @@ export default function OnboardingPage() {
               >
                 Something went wrong building your profile.
               </motion.p>
+              <motion.p
+                className="max-w-md text-xs"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                style={{ color: "var(--bd-text-faint)" }}
+              >
+                {deriveError}
+              </motion.p>
               <motion.button
                 onClick={() => {
-                  setDeriveError(false);
-                  setDerivingStarted(false);
+                  setDeriveError(null);
+                  setPhase2DerivingStarted(false);
                   setRevealing(true);
                 }}
                 initial={{ opacity: 0 }}
@@ -350,15 +504,7 @@ export default function OnboardingPage() {
               </motion.button>
             </>
           ) : (
-            <motion.p
-              className="text-2xl font-light tracking-wide"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              style={{ color: "var(--bd-text)" }}
-            >
-              Wait a few seconds, we are analysing.
-            </motion.p>
+            <AnalyzingMessage />
           )}
         </div>
       </>
@@ -420,7 +566,7 @@ export default function OnboardingPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              {completedQuestions}/11
+              {progressLabel}
             </div>
           )}
         </div>
@@ -561,7 +707,7 @@ export default function OnboardingPage() {
                     onKeyDown={handleKeyDown}
                     onFocus={() => setIsInputFocused(true)}
                     onBlur={() => setIsInputFocused(false)}
-                    placeholder={PLACEHOLDERS[act]}
+                    placeholder={PLACEHOLDERS[phaseState.phase]}
                     rows={1}
                     className="flex-1 resize-none border-0 bg-transparent py-0.5 text-[15px] focus:outline-none"
                     style={{
@@ -616,7 +762,7 @@ export default function OnboardingPage() {
 
       {/* Soul Signal */}
       <AnimatePresence>
-        {!isWelcome && completedQuestions > 0 && (
+        {!isWelcome && (phaseState.basicAnswered + phaseState.psychAdvances) > 0 && (
           <motion.div
             className="fixed bottom-6 left-6"
             initial={{ opacity: 0, scale: 0.5 }}
@@ -625,7 +771,13 @@ export default function OnboardingPage() {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             style={{ zIndex: 20 }}
           >
-            <SoulSignal completed={completedQuestions} act={act} />
+            <SoulSignal
+              completed={Math.min(
+                phaseState.basicAnswered + phaseState.psychAdvances,
+                8,
+              )}
+              act={act}
+            />
           </motion.div>
         )}
       </AnimatePresence>

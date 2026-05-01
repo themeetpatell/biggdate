@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { trackSoulCardViewed } from "@/lib/gtm";
 import { ZODIAC_EMOJI } from "@/lib/zodiac";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +14,7 @@ export default function SoulCardPage() {
 
   useEffect(() => {
     if (!authLoading && !profile) router.push("/onboarding");
+    if (!authLoading && profile) trackSoulCardViewed();
   }, [profile, authLoading, router]);
 
   const handleShare = async () => {

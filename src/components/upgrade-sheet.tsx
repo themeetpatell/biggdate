@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Check, Zap } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { trackBeginCheckout, trackUpgradeSheetOpen } from "@/lib/gtm";
 
 /* ── Types ── */
 
@@ -165,6 +166,8 @@ export function UpgradeSheet({
     if (plan.id === "free" || plan.id === currentPlan) return;
     setLoadingPlan(plan.id);
     const envKey = billing === "monthly" ? plan.envKeyMonthly : plan.envKeyQuarterly;
+    const price = billing === "monthly" ? (plan.monthlyPrice ?? 0) : (plan.quarterlyPrice ?? 0);
+    trackBeginCheckout(plan.name, billing, price);
     try {
       await startCheckout("subscription", getPriceId(envKey));
     } finally {
@@ -174,6 +177,8 @@ export function UpgradeSheet({
 
   const handleAddon = async (addon: AddOnDef) => {
     setLoadingAddon(addon.envKey);
+    const priceNum = parseFloat(addon.price.replace(/[^0-9.]/g, "")) || 0;
+    trackBeginCheckout(addon.name, "one_time", priceNum);
     try {
       await startCheckout(addon.type, getPriceId(addon.envKey));
     } finally {
@@ -182,7 +187,7 @@ export function UpgradeSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={(v) => { if (v) trackUpgradeSheetOpen(context); onOpenChange(v); }}>
       <SheetContent
         side="right"
         showCloseButton={false}

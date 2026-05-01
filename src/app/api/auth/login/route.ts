@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import { getAccountHandleByUsername } from "@/lib/repo";
+import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  const rl = await checkRateLimit("auth:login", clientIp(req), {
+    limit: 5,
+    windowSec: 60,
+  });
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   let body: { email?: string; username?: string; password?: string };
   try {
     body = await req.json();

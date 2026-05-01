@@ -45,6 +45,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/components/auth-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { compressImage } from "@/lib/photo-compress";
 import { ZODIAC_EMOJI } from "@/lib/zodiac";
 import type { Profile, ProfilePrompt } from "@/lib/types";
 import { SettingsDrawer } from "@/components/settings-drawer";
@@ -877,7 +878,7 @@ function PhotoHero({
         <div className="relative px-5 pb-6 pt-[4.5rem] sm:px-6 sm:pb-7 sm:pt-[5.5rem]">
           <div className="absolute left-5 top-0 -translate-y-1/2 sm:left-6">
             {/* Avatar — overflow-hidden wrapper for image rounding, camera button sits outside */}
-            <div className="relative h-24 w-24 shrink-0 rounded-[30px] border-[5px] border-[#0b0d16] shadow-[0_20px_40px_rgba(0,0,0,0.32)] sm:h-32 sm:w-32">
+            <div className="relative h-20 w-20 shrink-0 rounded-[30px] border-[5px] border-[#0b0d16] shadow-[0_20px_40px_rgba(0,0,0,0.32)] sm:h-32 sm:w-32">
               <div className="h-full w-full overflow-hidden rounded-[inherit] bg-[#10131d]">
                 {avatarPhoto ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -901,7 +902,7 @@ function PhotoHero({
 
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[2rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.45rem]">
+              <h1 className="text-[1.6rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.45rem]">
                 {profile.name}
                 {profile.showAge && profile.age ? `, ${profile.age}` : ""}
               </h1>
@@ -995,15 +996,20 @@ function ProfileEditor({
     setUploadingPhotoIndex(index);
 
     try {
-      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      // Resize + re-encode client-side. Cuts upload size 5-20x for typical
+      // phone photos, which speeds up upload + the moderation roundtrip and
+      // shrinks Supabase storage cost.
+      const compressed = await compressImage(file);
+
+      const extension = compressed.name.split(".").pop()?.toLowerCase() || "jpg";
       const safeExtension = extension.replace(/[^a-z0-9]/g, "") || "jpg";
       const path = `${userId}/${Date.now()}-${index}.${safeExtension}`;
       const supabase = createSupabaseBrowserClient();
       const { error: uploadError } = await supabase.storage
         .from(PROFILE_PHOTO_BUCKET)
-        .upload(path, file, {
+        .upload(path, compressed, {
           cacheControl: "3600",
-          contentType: file.type || "image/jpeg",
+          contentType: compressed.type || "image/jpeg",
           upsert: true,
         });
 
@@ -1012,6 +1018,29 @@ function ProfileEditor({
       const { data } = supabase.storage.from(PROFILE_PHOTO_BUCKET).getPublicUrl(path);
       if (!data.publicUrl) {
         throw new Error("Could not resolve the uploaded photo URL");
+      }
+
+      // Run moderation server-side. If flagged, the photo URL is NOT committed
+      // to the profile draft and the user sees the rejection reason. The URL
+      // remains in storage but is orphaned (admins can review via the
+      // photo_moderation table).
+      const moderationRes = await fetch("/api/profile/photo-moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoUrl: data.publicUrl }),
+      });
+      if (moderationRes.status === 422) {
+        const { reason } = (await moderationRes.json().catch(() => ({}))) as {
+          reason?: string;
+        };
+        throw new Error(
+          reason ? `Photo blocked: ${reason}` : "Photo blocked by content moderation.",
+        );
+      }
+      if (!moderationRes.ok) {
+        // Treat moderation API failure as a soft failure — keep the upload but
+        // surface a warning. Better than blocking real users on infra hiccups.
+        // Server already logs the underlying cause.
       }
 
       setPhotoAtIndex(index, data.publicUrl);

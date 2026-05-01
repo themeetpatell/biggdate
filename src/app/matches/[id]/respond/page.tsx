@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { trackMatchRespond } from "@/lib/gtm";
 import type { Match } from "@/lib/types";
 
 export default function RespondPage({ params }: { params: Promise<{ id: string }> }) {
@@ -61,6 +62,7 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
         body: JSON.stringify({ introId, response: response.trim() }),
       });
       const data = await res.json();
+      trackMatchRespond(id, "accept");
       setMutual(data.mutual);
       setThreadId(data.thread?.id ?? null);
       setDone(true);

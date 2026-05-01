@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase";
+import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  // 3 reset emails per IP per 10 minutes — generous enough for a real user who
+  // mistyped, tight enough to block reset-flood abuse.
+  const rl = await checkRateLimit("auth:forgot", clientIp(req), {
+    limit: 3,
+    windowSec: 600,
+  });
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   let body: { email?: string };
   try {
     body = await req.json();

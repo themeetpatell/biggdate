@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { trackPulsePostCreated, trackPulseReaction } from "@/lib/gtm";
 import type { PulsePost, PulsePrompt, PulseReply } from "@/lib/types";
 
 function PinkTick() {
@@ -369,6 +370,7 @@ function ComposeSheet({
       });
       const d = await r.json();
       if (!r.ok) { setError(d.error ?? "Failed to post"); return; }
+      trackPulsePostCreated();
       onPosted({
         id: d.id, type: "prompt_response",
         promptId: prompt?.id ?? null, promptContent: prompt?.content ?? null,
@@ -502,6 +504,7 @@ export default function PulsePage() {
   const handleResonate = async (postId: string) => {
     const r = await fetch(`/api/pulse/posts/${postId}/react`, { method: "POST" });
     const { resonated } = await r.json();
+    trackPulseReaction(postId, resonated ? "resonate" : "un-resonate");
     setPosts((prev) =>
       prev.map((p) =>
         p.id !== postId ? p : {

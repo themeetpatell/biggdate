@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { trackMessageSent } from "@/lib/gtm";
 import type { Thread, Message } from "@/lib/types";
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
@@ -71,6 +72,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       });
       if (res.ok) {
         const msg = await res.json();
+        trackMessageSent(threadId);
         setMessages((prev) =>
           prev.map((m) => (m.id === optimistic.id ? msg : m)),
         );

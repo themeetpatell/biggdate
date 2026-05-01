@@ -27,7 +27,17 @@ export function useAuth() {
 }
 
 // Routes that don't require auth
-const PUBLIC_ROUTES = ["/", "/auth", "/about", "/contact"];
+const PUBLIC_ROUTES = ["/", "/auth", "/about", "/contact", "/privacy", "/terms"];
+
+/**
+ * A profile is "complete" only after Phase 2 onboarding has run, which writes
+ * the `summary` field. A profile with just basic facts (name, city, etc.) means
+ * the user finished Phase 1 and bailed before Phase 2 — they belong on
+ * /onboarding so they can finish, not /dashboard which expects full data.
+ */
+function isProfileComplete(profile: Profile | null): boolean {
+  return Boolean(profile?.summary);
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -93,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
     if (userId && pathname === "/auth") {
-      router.replace(profile ? "/dashboard" : "/onboarding");
+      router.replace(isProfileComplete(profile) ? "/dashboard" : "/onboarding");
       return;
     }
 

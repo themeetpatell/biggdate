@@ -4,9 +4,96 @@ import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
 import { getSessionMemoryDb, upsertSessionMemory, getAccountHandleByUserId } from "@/lib/repo";
 import {
-  onboardingSystemPrompt,
+  onboardingBasicPrompt,
+  onboardingPsychologicalPrompt,
+  BASIC_SPINE,
+  PSYCH_SPINE,
+  PSYCH_FOLLOWUP_BUDGET,
   memoryExtractionPrompt,
 } from "@/lib/prompts";
+
+function getMessageText(m: UIMessage): string {
+  return (
+    m.parts
+      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+      .map((p) => p.text)
+      .join("") ?? ""
+  );
+}
+
+/**
+ * Compute phase / spine index / followups from the message history.
+ *
+ * Phase 1 ends when an assistant message contains PHASE_1_DONE.
+ * Phase 2 ends when an assistant message contains PHASE_2_DONE.
+ * Phase 2 follow-ups are counted via [FOLLOWUP] markers; advances via [ADVANCE].
+ *
+ * Within Phase 1 (no follow-ups allowed): spineIndex = number of user answers
+ * since phase start (excluding the __BEGIN__ trigger).
+ *
+ * Within Phase 2: spineIndex = number of [ADVANCE] markers seen so far.
+ * followupsUsed = number of [FOLLOWUP] markers.
+ */
+function computePhaseState(messages: UIMessage[]): {
+  phase: "basic" | "psychological" | "complete";
+  spineIndex: number;
+  followupsRemaining: number;
+  isPhaseStart: boolean;
+} {
+  let phase: "basic" | "psychological" | "complete" = "basic";
+  let phase1DoneIndex = -1;
+  let phase2DoneIndex = -1;
+
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i];
+    if (m.role !== "assistant") continue;
+    const text = getMessageText(m);
+    if (text.includes("PHASE_1_DONE") && phase1DoneIndex === -1) {
+      phase1DoneIndex = i;
+      phase = "psychological";
+    }
+    if (text.includes("PHASE_2_DONE") && phase2DoneIndex === -1) {
+      phase2DoneIndex = i;
+      phase = "complete";
+    }
+  }
+
+  if (phase === "basic") {
+    // spineIndex = count user answers (skip system triggers like __BEGIN__)
+    const userAnswers = messages.filter((m) => {
+      if (m.role !== "user") return false;
+      const t = getMessageText(m);
+      return !t.includes("__BEGIN__") && !t.includes("__BEGIN_PHASE_2__");
+    }).length;
+    return {
+      phase,
+      spineIndex: Math.min(userAnswers, BASIC_SPINE.length - 1),
+      followupsRemaining: 0,
+      isPhaseStart: userAnswers === 0,
+    };
+  }
+
+  if (phase === "psychological") {
+    // Count [ADVANCE] / [FOLLOWUP] markers in assistant messages after PHASE_1_DONE
+    let advances = 0;
+    let followups = 0;
+    for (let i = phase1DoneIndex + 1; i < messages.length; i++) {
+      const m = messages[i];
+      if (m.role !== "assistant") continue;
+      const text = getMessageText(m);
+      if (text.includes("[ADVANCE]")) advances++;
+      else if (text.includes("[FOLLOWUP]")) followups++;
+    }
+    return {
+      phase,
+      spineIndex: Math.min(advances, PSYCH_SPINE.length - 1),
+      followupsRemaining: Math.max(0, PSYCH_FOLLOWUP_BUDGET - followups),
+      isPhaseStart: advances === 0 && followups === 0,
+    };
+  }
+
+  return { phase, spineIndex: 0, followupsRemaining: 0, isPhaseStart: false };
+}
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
@@ -17,56 +104,45 @@ export async function POST(req: Request) {
     sessionId,
   }: { messages: UIMessage[]; sessionId: string } = await req.json();
 
-  const [memory, accountHandle] = await Promise.all([
-    getSessionMemoryDb(auth.userId, sessionId || "default"),
-    getAccountHandleByUserId(auth.userId),
-  ]);
+  const accountHandle = await getAccountHandleByUserId(auth.userId);
 
-  // Use just the first name so Maahi sounds natural, not formal
   const firstName = accountHandle?.fullName
     ? accountHandle.fullName.trim().split(/\s+/)[0]
     : undefined;
 
-  // Extract questions already asked from assistant messages (synchronous, no async lag)
-  const assistantMessages = messages.filter((m) => m.role === "assistant");
+  const { phase, spineIndex, followupsRemaining, isPhaseStart } =
+    computePhaseState(messages);
 
-  const askedTopics: string[] = assistantMessages.flatMap((m) => {
-    const text = m.parts
-      ?.filter((p: { type: string }): p is { type: "text"; text: string } => p.type === "text")
-      .map((p: { text: string }) => p.text)
-      .join("") || "";
-    // Pull out every sentence ending with a question mark
-    const questions = text.match(/[^.!?]*\?/g) || [];
-    return questions.map((q) => q.trim()).filter((q) => q.length > 10);
-  });
-
-  const coveredTopics = memory?.coveredTopics || [];
-
-  // Factual memory context only — no phase/question-ordering instructions
-  // (the system prompt handles the 8-question arc explicitly)
-  const memoryContext = memory
-    ? `\nWhat you already know about this person:\nSummary: ${memory.summary || "none yet"}\nTraits observed: ${memory.traits.join(", ") || "none yet"}\nNeeds observed: ${memory.needs.join(", ") || "none yet"}\nTopics already covered: ${coveredTopics.join(", ") || "none yet"}\nAttachment signal: ${memory.attachmentGuess || "unclear yet"}`
-    : "";
+  // Build the right system prompt for the current phase
+  let system: string;
+  if (phase === "basic") {
+    system = onboardingBasicPrompt(spineIndex, firstName);
+  } else if (phase === "psychological") {
+    system = onboardingPsychologicalPrompt(
+      spineIndex,
+      followupsRemaining,
+      firstName,
+      isPhaseStart,
+    );
+  } else {
+    // Phase complete — should not be called, but produce a safe fallback
+    system = `You are Maahi. Onboarding is complete. Respond with a single line: PHASE_2_DONE`;
+  }
 
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
     model: getModel(),
-    system: onboardingSystemPrompt(memoryContext, askedTopics, firstName),
+    system,
     messages: modelMessages,
     maxOutputTokens: 500,
     temperature: 0.5,
   });
 
-  if (messages.length >= 4 && messages.length % 2 === 0) {
+  // Background memory extraction — only meaningful in psych phase
+  if (phase === "psychological" && messages.length >= 4 && messages.length % 2 === 0) {
     const transcript = messages
-      .map((m) => {
-        const text = m.parts
-          ?.filter((p: { type: string }): p is { type: "text"; text: string } => p.type === "text")
-          .map((p: { text: string }) => p.text)
-          .join("") || "";
-        return `${m.role}: ${text}`;
-      })
+      .map((m) => `${m.role}: ${getMessageText(m)}`)
       .join("\n");
 
     after(async () => {
@@ -85,10 +161,14 @@ export async function POST(req: Request) {
         };
         await upsertSessionMemory(auth.userId, sessionId || "default", patch);
       } catch {
-        // silent
+        // silent — memory extraction is best-effort
       }
     });
   }
+
+  // Touch session memory so we have a row for downstream features.
+  // Reads are kept off the hot path; the existing companion + matching code reads from this table.
+  void getSessionMemoryDb(auth.userId, sessionId || "default");
 
   return result.toUIMessageStreamResponse();
 }

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { trackOnboardingComplete, trackSoulSnapshotViewed } from "@/lib/gtm";
 
 // ─── Attachment descriptions — second person, warm, 2 sentences ───
 const ATTACHMENT_DESC: Record<string, string> = {
@@ -128,6 +129,13 @@ export default function SoulSnapshotPage() {
   useEffect(() => {
     if (!loading && !profile) router.push("/onboarding");
   }, [profile, loading, router]);
+
+  // Fire snapshot viewed once on mount
+  useEffect(() => {
+    if (loading || !profile) return;
+    trackSoulSnapshotViewed();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   // Auto-advance to dashboard after letting them absorb the card
   useEffect(() => {

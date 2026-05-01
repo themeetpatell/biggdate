@@ -14,7 +14,13 @@
       "Bash(node -e ':*)",
       "Bash(kill %%)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/onboarding)",
-      "Bash(vercel --prod)"
+      "Bash(vercel --prod)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(lsof -i :3000 -sTCP:LISTEN)",
+      "Bash(npx eslint *)",
+      "Read(//Users/themeetpetal/Startups/biggdate/**)",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(echo \"eslint exit: $?\")"
     ],
     "additionalDirectories": [
       "/tmp"

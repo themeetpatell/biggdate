@@ -8,6 +8,7 @@ const FROM = process.env.RESEND_FROM || "Maahi from BiggDate <maahi@biggdate.app
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://biggdate.app";
 
 type EmailEvent =
+  | { event: "welcome"; toUserId: string }
   | { event: "match_ready"; toUserId: string }
   | { event: "soul_knock_received"; toUserId: string; senderName: string; question: string }
   | { event: "soul_knock_answered"; toUserId: string; responderName: string }
@@ -15,6 +16,17 @@ type EmailEvent =
 
 function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
   switch (body.event) {
+    case "welcome":
+      return {
+        to: toEmail,
+        subject: `Welcome to BiggDate, ${toName}`,
+        html: emailHtml(
+          `Welcome, ${toName}`,
+          "You're in. Maahi is your guide here — she'll ask the questions that actually matter, build your soul profile, and only show you people worth meeting. Tap below to start when you're ready.",
+          "Start Onboarding",
+          `${APP_URL}/onboarding`,
+        ),
+      };
     case "match_ready":
       return {
         to: toEmail,
@@ -115,13 +127,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ skipped: true, reason: "no email" });
   }
 
-  const prefs = await getNotificationPreferences(body.toUserId);
-  const prefKey =
-    body.event === "match_ready" ? "matchReady" :
-    body.event === "mutual_match" ? "mutualMatch" : "soulKnock";
+  // Welcome emails are transactional — they always send, regardless of prefs.
+  // Other events respect the user's notification preferences.
+  if (body.event !== "welcome") {
+    const prefs = await getNotificationPreferences(body.toUserId);
+    const prefKey =
+      body.event === "match_ready" ? "matchReady" :
+      body.event === "mutual_match" ? "mutualMatch" : "soulKnock";
 
-  if (prefs[prefKey] === false) {
-    return NextResponse.json({ skipped: true, reason: "opt-out" });
+    if (prefs[prefKey] === false) {
+      return NextResponse.json({ skipped: true, reason: "opt-out" });
+    }
   }
 
   const toName = handle.fullName?.split(" ")[0] || "there";
