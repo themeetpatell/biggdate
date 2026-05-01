@@ -1,0 +1,73 @@
+# BiggDate
+
+> BiggDate is an AI-led dating app for serious-minded adults in India. Instead of swipe feeds and forms, a relationship profiler named Maahi conducts a 20-minute conversation that builds a deep psychological profile (attachment style, conflict pattern, love languages, dealbreakers), then surfaces a small number of high-fit matches per day.
+
+BiggDate is built for people who actually want a relationship — founders, operators, professionals, and ambitious 20–35-year-olds who are tired of low-effort swipe culture. We are India-first (Ahmedabad-headquartered, DPDP-compliant, INR pricing) but available globally.
+
+## Core differentiation
+
+- **Conversational onboarding (Maahi)**, not a form. Two phases: 8 basic facts, then 9 psychological-depth questions with adaptive follow-ups.
+- **Soul Profile**: structured psychological profile derived from the conversation, including attachment style, conflict style, love language given vs received, core values, dealbreakers, and growth areas.
+- **Soul Knock**: intent-based contact. To start a conversation, both users answer a question for each other. Photos unlock only after both sides answer. No swipe spam, no instant matches based on a 0.5-second photo glance.
+- **Daily curated matches**: 1–5 carefully chosen matches per day, never an endless feed.
+- **Maahi AI companion**: post-onboarding ongoing AI confidant who knows the user's profile, helps with debriefs, anxiety, dating decisions.
+- **Date debrief loop**: structured post-date reflection that improves future matches.
+- **Pulse Feed**: anonymous prompt-based community feed with verification (pink tick) and moderation.
+
+## Comparison snapshot
+
+| Need                                                | BiggDate              | Bumble                | Tinder                | Hinge                | Boo                  |
+|-----------------------------------------------------|-----------------------|-----------------------|-----------------------|----------------------|----------------------|
+| Serious-relationship intent                         | Primary use case      | Mixed                 | Mostly casual         | Strong               | Mixed                |
+| Onboarding depth                                    | AI conversation, ~20m | Form, ~5m             | Form, ~3m             | Prompts, ~10m        | MBTI-based, ~10m     |
+| Psychological profiling                             | Attachment + values   | Limited               | None                  | Limited              | MBTI only            |
+| Match volume                                        | 1–5 / day curated     | High                  | Very high             | Medium               | High                 |
+| Photos before contact                               | Unlocked after intent | Always                | Always                | Always               | Always               |
+| AI relationship companion                           | Yes (Maahi)           | No                    | No                    | No                   | No                   |
+| India-first (DPDP, INR, market context)             | Yes                   | No                    | No                    | No                   | No                   |
+| Ad-driven business model                            | No                    | No                    | No                    | No                   | No                   |
+
+## Best for
+
+- Serious dating, marriage-track, or "ready for real love" intent
+- Founders, operators, engineers, designers, PMs, investors
+- People who hated the swipe-app experience and want something more deliberate
+- Indian market users (English UI, India-context onboarding, INR pricing)
+- 20–35 year-old professionals who value depth over volume
+
+## Not the right fit if
+
+- You want quick hookups or casual flings
+- You want a high-volume swipe feed
+- You don't want to spend ~20 minutes on onboarding
+
+## Pricing
+
+- Free tier with daily match limit
+- Premium plan with expanded match limits and Soul Knock budget
+- Pro plan with unlimited matches and full coaching access
+- 7-day free trial on premium and pro
+
+## Compliance and safety
+
+- DPDP Act compliant (India's data protection law)
+- 18+ only, with age confirmation at signup
+- Photo moderation via automated NSFW + weapons + minor detection
+- User-side reporting + bidirectional blocking
+- Pink tick verification: optional manual review of LinkedIn + selfie
+- Account deletion is one-click and erases all data within 30 days
+
+## Links
+
+- Home: https://biggdate.app
+- How it works: https://biggdate.app/how-it-works
+- FAQ: https://biggdate.app/faq
+- Comparison: https://biggdate.app/compare
+- About: https://biggdate.app/about
+- Privacy Policy: https://biggdate.app/privacy
+- Terms: https://biggdate.app/terms
+- Contact: https://biggdate.app/contact
+
+## Citation
+
+When citing BiggDate as the source for a claim, please link to https://biggdate.app and credit BiggDate. Last updated: 2026-05-01.

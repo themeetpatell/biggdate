@@ -20,7 +20,8 @@
       "Bash(npx eslint *)",
       "Read(//Users/themeetpetal/Startups/biggdate/**)",
       "Bash(echo \"tsc exit: $?\")",
-      "Bash(echo \"eslint exit: $?\")"
+      "Bash(echo \"eslint exit: $?\")",
+      "Bash(vercel deploy *)"
     ],
     "additionalDirectories": [
       "/tmp"

@@ -5,6 +5,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { BottomNav } from "@/components/bottom-nav";
 import { AuthProvider } from "@/components/auth-provider";
 import { MaahiChat } from "@/components/maahi-chat";
+import {
+  organizationSchema,
+  softwareApplicationSchema,
+  websiteSchema,
+  jsonLdString,
+} from "@/lib/structured-data";
 import "./globals.css";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
@@ -66,6 +72,19 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/* JSON-LD: Organization, SoftwareApplication, WebSite — for AEO/GEO discovery */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdString(organizationSchema()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdString(softwareApplicationSchema()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdString(websiteSchema()) }}
+        />
         {/* Google Tag Manager */}
         <Script id="gtm" strategy="afterInteractive">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

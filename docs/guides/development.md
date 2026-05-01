@@ -1,33 +1,18 @@
-# Development Guide
+# Development Workflow
 
-## Setup
-
-1. Install dependencies.
-2. Copy env template to `.env.local`.
-3. Configure provider and database values.
-4. Run `npm run dev`.
+For full setup, architecture, API, env, and deployment guidance, see [Developer Guide](../dev-guide.md).
 
 ## Daily Workflow
 
-1. `npm run lint`
-2. `npm run typecheck`
-3. `npm run repo:check`
-4. `npm run docs:check`
-5. Implement feature.
-6. Re-run checks before opening PR.
+1. Pull latest changes.
+2. Install dependencies when lockfile changes: `npm install`.
+3. Run local app: `npm run dev`.
+4. Before PR: `npm run ci`.
 
-## Project Scripts
+## Structural Rules
 
-- `npm run dev`: start local server.
-- `npm run lint`: static analysis.
-- `npm run typecheck`: TypeScript checks.
-- `npm run repo:check`: repository structure and hygiene checks.
-- `npm run docs:check`: validate required docs and internal links.
-- `npm run check`: combined verification run.
-
-## Structural Guidelines
-
-- Add new route features under `src/app/` with colocated files.
-- Put cross-route shared logic in `src/lib/`.
-- Put shared UI in `src/components/`.
-- Keep scripts in `scripts/` and make them idempotent when possible.
+- Add route UI and API handlers under `src/app`.
+- Put shared UI in `src/components`.
+- Put shared logic, repositories, providers, and guards in `src/lib`.
+- Add database changes under `supabase/migrations`.
+- Keep `.env.example`, README, and docs updated with behavior changes.

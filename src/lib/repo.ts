@@ -1368,6 +1368,13 @@ export async function recordStripeEvent(eventId: string, type: string): Promise<
   return rows.length > 0;
 }
 
+export async function deleteStripeEvent(eventId: string): Promise<void> {
+  await sql`
+    DELETE FROM stripe_events
+    WHERE event_id = ${eventId}
+  `;
+}
+
 // ─── Photo moderation ───
 
 export type PhotoModerationStatus = "pending" | "safe" | "flagged" | "rejected";

@@ -4,6 +4,7 @@ import {
   getUserPlanByStripeCustomer,
   upsertUserPlan,
   recordStripeEvent,
+  deleteStripeEvent,
 } from "@/lib/repo";
 import { log } from "@/lib/log";
 
@@ -97,10 +98,8 @@ export async function POST(request: Request) {
       eventId: event.id,
       type: event.type,
     });
-    // Return 500 so Stripe retries — but the idempotency record is already
-    // written, so we'd skip on retry. To make retry meaningful we'd need to
-    // delete the record on failure. For now, log loudly and let Stripe fall
-    // back to its dead-letter behavior (eventually surfaces in the dashboard).
+    // Clear the idempotency marker so Stripe retries can actually reprocess.
+    await deleteStripeEvent(event.id);
     return NextResponse.json({ error: "Handler failed" }, { status: 500 });
   }
 

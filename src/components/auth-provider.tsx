@@ -26,8 +26,19 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-// Routes that don't require auth
-const PUBLIC_ROUTES = ["/", "/auth", "/about", "/contact", "/privacy", "/terms"];
+// Routes that don't require auth — also includes the AEO/GEO discoverability
+// pages so search engines and AI crawlers can index them without sign-in.
+const PUBLIC_ROUTES = [
+  "/",
+  "/auth",
+  "/about",
+  "/contact",
+  "/privacy",
+  "/terms",
+  "/faq",
+  "/compare",
+  "/how-it-works",
+];
 
 /**
  * A profile is "complete" only after Phase 2 onboarding has run, which writes

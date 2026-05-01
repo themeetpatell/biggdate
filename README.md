@@ -1,83 +1,51 @@
 # BiggDate
 
-BiggDate is a Next.js 16 application with App Router, Supabase, Stripe, and AI-assisted product features.
-
-## Repository Architecture
-
-The repository is organized by responsibility:
-
-- `src/app`: routes, pages, and route handlers.
-- `src/components`: reusable UI and feature components.
-- `src/lib`: shared business and infrastructure utilities.
-- `scripts`: operational and maintenance scripts.
-- `supabase/migrations`: canonical schema evolution.
-- `docs`: standards, guides, and operational documentation.
-
-For standards and governance:
-
-- [Documentation Index](docs/README.md)
-- [Product Documentation](docs/product/README.md)
-- [Repository Standards](docs/standards/repository-standards.md)
-- [Contribution Guide](CONTRIBUTING.md)
+BiggDate is an AI-assisted dating product for intentional relationships. It supports onboarding, profiles, discovery, intros, messaging, coaching, Pulse community flows, verification, moderation, premium billing, and admin operations.
 
 ## Quick Start
 
-1. Install dependencies.
-
 ```bash
 npm install
-```
-
-2. Copy environment template.
-
-```bash
 cp .env.example .env.local
-```
-
-3. Configure AI provider in `.env.local`.
-
-```env
-AI_PROVIDER=gemini
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-4. Configure Supabase in `.env.local`.
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_DB_URL=postgresql://postgres.<project_ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
-```
-
-`DATABASE_URL` is also supported as fallback.
-
-5. Apply migrations from `supabase/migrations` to your Supabase project.
-
-6. Start development server.
-
-```bash
 npm run dev
 ```
 
-## Quality Gates
+Open http://localhost:3000.
 
-Run these before pushing changes:
+## Scripts
 
-```bash
-npm run lint
-npm run typecheck
-npm run repo:check
-```
+- `npm run dev`: local app
+- `npm run build`: production build
+- `npm run start`: run production build
+- `npm run lint`: ESLint
+- `npm run typecheck`: TypeScript
+- `npm run check`: lint, typecheck, repo checks, docs checks
+- `npm run ci`: full CI check plus build
+- `npm run seed`: seed profile data
+- `npm run seed:reset`: reset and seed profile data
 
-Or run all at once:
+## Architecture
 
-```bash
-npm run check
-```
+- `src/app`: Next App Router pages and route handlers
+- `src/components`: reusable UI and product components
+- `src/lib`: data access, providers, billing, auth, moderation, logging
+- `src/proxy.ts`: request proxy/auth boundary
+- `supabase/migrations`: database schema
+- `scripts`: repo and data operations
+- `docs`: user, developer, product, and standards docs
 
-## Notes
+## Production Setup
 
-- The app uses the `pg` driver for direct Supabase Postgres access.
-- Build and generated artifacts should not be committed.
-- Structural changes should update docs in the same PR.
+1. Configure all required env vars from `.env.example`.
+2. Apply `supabase/migrations` to Supabase.
+3. Configure Stripe products, prices, and webhook endpoint `/api/billing/webhook`.
+4. Configure Resend, Upstash Redis, AI provider keys, Sentry, and moderation provider.
+5. Deploy on Vercel and verify `/api/health`.
+
+## Documentation
+
+- [User Guide](docs/user-guide.md)
+- [Developer Guide](docs/dev-guide.md)
+- [Launch Readiness](docs/launch-readiness.md)
+- [Contribution Guide](CONTRIBUTING.md)
+- [Documentation Index](docs/README.md)

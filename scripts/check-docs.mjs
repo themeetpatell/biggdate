@@ -7,16 +7,16 @@ const requiredDocs = [
   "README.md",
   "CONTRIBUTING.md",
   "docs/README.md",
+  "docs/user-guide.md",
+  "docs/dev-guide.md",
+  "docs/launch-readiness.md",
   "docs/guides/development.md",
   "docs/standards/repository-standards.md",
 ];
 
 const markdownFiles = [
-  "README.md",
-  "CONTRIBUTING.md",
-  "docs/README.md",
-  "docs/guides/development.md",
-  "docs/standards/repository-standards.md",
+  ...requiredDocs,
+  "docs/product/api-reference.md",
 ];
 
 let hasError = false;

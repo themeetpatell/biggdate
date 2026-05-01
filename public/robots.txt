@@ -1,7 +1,14 @@
 User-agent: *
 Allow: /
+Allow: /how-it-works
+Allow: /compare
+Allow: /faq
+Allow: /about
+Allow: /contact
 Allow: /privacy
 Allow: /terms
+Allow: /llms.txt
+Allow: /llms-full.txt
 Disallow: /api/
 Disallow: /admin/
 Disallow: /auth/
@@ -18,5 +25,6 @@ Disallow: /report
 Disallow: /onboarding
 Disallow: /pulse
 Disallow: /monitoring
+Disallow: /sentry-example-page
 
 Sitemap: https://biggdate.app/sitemap.xml

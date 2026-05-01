@@ -1,21 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/require-auth";
 import { moderatePhoto } from "@/lib/photo-moderation";
 import { recordPhotoModeration } from "@/lib/repo";
 
-// Initialize Supabase client with service role for server-side operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: { persistSession: false }
+// Lazy-initialize Supabase admin client. Building a client at module load
+// trips Next.js's "Collecting page data" phase when env vars aren't injected
+// yet — defer until first request so the build can finish without secrets.
+let _adminClient: SupabaseClient | null = null;
+function getAdminClient(): SupabaseClient {
+  if (_adminClient) return _adminClient;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+    );
   }
-);
+  _adminClient = createClient(url, key, { auth: { persistSession: false } });
+  return _adminClient;
+}
 
 export async function POST(request: NextRequest) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
+
+  const supabase = getAdminClient();
 
   try {
     const formData = await request.formData();

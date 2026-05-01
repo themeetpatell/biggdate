@@ -8,7 +8,6 @@ This is a product-focused API reference grouped by domain. For implementation sp
 ## 1. Health and Diagnostics
 
 - GET /api/health
-- GET /api/sentry-example-api
 
 ## 2. Auth
 
