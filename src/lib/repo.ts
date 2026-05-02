@@ -441,6 +441,10 @@ export async function getSessionMemoryDb(userId: string, sessionKey: string): Pr
     currentSituation: (row.current_situation as string) || "",
     recurringThemes: safeParseJson(row.recurring_themes as string, []),
     lastEmotionalState: (row.last_emotional_state as string) || "",
+    relationshipCore: safeParseJson(row.relationship_core as string, {}),
+    patternEngine: safeParseJson(row.pattern_engine as string, {}),
+    relationshipOS: safeParseJson(row.relationship_os as string, {}),
+    conversationCount: Number(row.conversation_count ?? 0),
   };
 }
 
@@ -449,6 +453,28 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
 
   const mergeArr = (a: string[], b: string[], max: number) =>
     Array.from(new Set([...a, ...b])).slice(0, max);
+
+  const mergeRecord = <T extends Record<string, unknown>>(a: T | undefined, b: T | undefined): T => ({
+    ...(a || ({} as T)),
+    ...(b || ({} as T)),
+  });
+
+  const existingOs = existing?.relationshipOS;
+  const patchOs = patch.relationshipOS;
+  const mergedRelationshipOS = {
+    stableIdentity: mergeRecord(existingOs?.stableIdentity, patchOs?.stableIdentity),
+    datingStyle: mergeRecord(existingOs?.datingStyle, patchOs?.datingStyle),
+    currentReality: mergeRecord(existingOs?.currentReality, patchOs?.currentReality),
+    growthHistory: {
+      improved: mergeArr(existingOs?.growthHistory?.improved || [], patchOs?.growthHistory?.improved || [], 24),
+      repeated: mergeArr(existingOs?.growthHistory?.repeated || [], patchOs?.growthHistory?.repeated || [], 24),
+      handledBetterThisTime: mergeArr(
+        existingOs?.growthHistory?.handledBetterThisTime || [],
+        patchOs?.growthHistory?.handledBetterThisTime || [],
+        24,
+      ),
+    },
+  };
 
   const merged: SessionMemory = {
     summary: patch.summary || existing?.summary || "",
@@ -472,6 +498,28 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
     currentSituation: patch.currentSituation || existing?.currentSituation || "",
     recurringThemes: mergeArr(existing?.recurringThemes || [], patch.recurringThemes || [], 8),
     lastEmotionalState: patch.lastEmotionalState || existing?.lastEmotionalState || "",
+    relationshipCore: mergeRecord(existing?.relationshipCore, patch.relationshipCore),
+    patternEngine: {
+      ...mergeRecord(existing?.patternEngine, patch.patternEngine),
+      repeatingPatterns: mergeArr(
+        existing?.patternEngine?.repeatingPatterns || [],
+        patch.patternEngine?.repeatingPatterns || [],
+        24,
+      ),
+      selfSabotageLoops: mergeArr(
+        existing?.patternEngine?.selfSabotageLoops || [],
+        patch.patternEngine?.selfSabotageLoops || [],
+        24,
+      ),
+      healthyShifts: mergeArr(existing?.patternEngine?.healthyShifts || [], patch.patternEngine?.healthyShifts || [], 24),
+      partnerSelectionBias: mergeArr(
+        existing?.patternEngine?.partnerSelectionBias || [],
+        patch.patternEngine?.partnerSelectionBias || [],
+        24,
+      ),
+    },
+    relationshipOS: mergedRelationshipOS,
+    conversationCount: patch.conversationCount ?? existing?.conversationCount ?? 0,
   };
 
   if (existing) {
@@ -496,6 +544,10 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         current_situation = ${merged.currentSituation},
         recurring_themes = ${JSON.stringify(merged.recurringThemes)},
         last_emotional_state = ${merged.lastEmotionalState},
+        relationship_core = ${JSON.stringify(merged.relationshipCore)},
+        pattern_engine = ${JSON.stringify(merged.patternEngine)},
+        relationship_os = ${JSON.stringify(merged.relationshipOS)},
+        conversation_count = ${merged.conversationCount},
         updated_at = NOW()
       WHERE user_id = ${userId} AND session_key = ${sessionKey}
     `;
@@ -506,7 +558,8 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         emotional_patterns, triggers, reassurance_style, communication_style,
         companion_notes, attachment_guess, readiness, previous_questions,
         conversation_phase, covered_topics,
-        stable_traits, growth_edges, current_situation, recurring_themes, last_emotional_state
+        stable_traits, growth_edges, current_situation, recurring_themes, last_emotional_state,
+        relationship_core, pattern_engine, relationship_os, conversation_count
       ) VALUES (
         ${createId("mem")}, ${userId}, ${sessionKey},
         ${merged.summary}, ${JSON.stringify(merged.traits)}, ${JSON.stringify(merged.needs)},
@@ -517,7 +570,8 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         ${merged.conversationPhase}, ${JSON.stringify(merged.coveredTopics)},
         ${JSON.stringify(merged.stableTraits)}, ${JSON.stringify(merged.growthEdges)},
         ${merged.currentSituation}, ${JSON.stringify(merged.recurringThemes)},
-        ${merged.lastEmotionalState}
+        ${merged.lastEmotionalState}, ${JSON.stringify(merged.relationshipCore)},
+        ${JSON.stringify(merged.patternEngine)}, ${JSON.stringify(merged.relationshipOS)}, ${merged.conversationCount}
       )
     `;
   }
@@ -714,8 +768,8 @@ export async function getSeenUserIds(userId: string): Promise<string[]> {
 
 export async function blockUser(blockerId: string, blockedId: string) {
   await sql`
-    INSERT INTO blocked_users (id, blocker_id, blocked_id)
-    VALUES (${createId("block")}, ${blockerId}, ${blockedId})
+    INSERT INTO blocked_users (blocker_id, blocked_id)
+    VALUES (${blockerId}, ${blockedId})
     ON CONFLICT (blocker_id, blocked_id) DO NOTHING
   `;
 }
@@ -778,14 +832,14 @@ export async function saveSoulKnockResponse(
   userId: string,
   response: string,
 ): Promise<SoulKnockResponse> {
-  const id = createId("skr");
-  const now = new Date().toISOString();
-  await sql`
-    INSERT INTO soul_knock_responses (id, intro_id, user_id, response)
-    VALUES (${id}, ${introId}, ${userId}, ${response})
+  const rows = await sql`
+    INSERT INTO soul_knock_responses (intro_id, user_id, response)
+    VALUES (${introId}, ${userId}, ${response})
     ON CONFLICT (intro_id, user_id) DO UPDATE SET response = EXCLUDED.response
+    RETURNING id, created_at
   `;
-  return { id, introId, userId, response, createdAt: now };
+  const row = rows[0] as { id: string; created_at: string };
+  return { id: row.id, introId, userId, response, createdAt: row.created_at };
 }
 
 export async function getSoulKnockResponses(introId: string): Promise<SoulKnockResponse[]> {
@@ -870,11 +924,10 @@ export async function getIntrosReceivedByUser(userId: string) {
 // ─── Threads ───
 
 export async function createThread(userAId: string, userBId: string, introId: string): Promise<Thread> {
-  const id = createId("thread");
   const now = new Date().toISOString();
   await sql`
-    INSERT INTO threads (id, user_a_id, user_b_id, intro_id)
-    VALUES (${id}, ${userAId}, ${userBId}, ${introId})
+    INSERT INTO threads (user_a_id, user_b_id, intro_id)
+    VALUES (${userAId}, ${userBId}, ${introId})
     ON CONFLICT (intro_id) DO NOTHING
   `;
   // Return the actual row (in case DO NOTHING hit)
@@ -970,13 +1023,13 @@ export async function getMessages(threadId: string): Promise<Message[]> {
 }
 
 export async function createMessage(threadId: string, senderId: string, body: string): Promise<Message> {
-  const id = createId("msg");
-  const now = new Date().toISOString();
-  await sql`
-    INSERT INTO messages (id, thread_id, sender_id, body)
-    VALUES (${id}, ${threadId}, ${senderId}, ${body})
+  const rows = await sql`
+    INSERT INTO messages (thread_id, sender_id, body)
+    VALUES (${threadId}, ${senderId}, ${body})
+    RETURNING id, created_at
   `;
-  return { id, threadId, senderId, body, createdAt: now, readAt: null };
+  const row = rows[0] as { id: string; created_at: string };
+  return { id: row.id, threadId, senderId, body, createdAt: row.created_at, readAt: null };
 }
 
 export async function markMessagesRead(threadId: string, readerId: string) {
@@ -1048,8 +1101,8 @@ export async function requirePlan(userId: string, action: GatedAction): Promise<
 export async function incrementUsage(userId: string, action: GatedAction) {
   const ps = periodStart(action);
   await sql`
-    INSERT INTO usage_counters (id, user_id, action, count, period_start)
-    VALUES (${createId("uc")}, ${userId}, ${action}, 1, ${ps})
+    INSERT INTO usage_counters (user_id, action, count, period_start)
+    VALUES (${userId}, ${action}, 1, ${ps})
     ON CONFLICT (user_id, action, period_start)
     DO UPDATE SET count = usage_counters.count + 1
   `;
@@ -1080,8 +1133,8 @@ export async function createReport(
   extraNotes?: string,
 ) {
   await sql`
-    INSERT INTO reports (id, reporter_id, reported_id, reason, extra_notes)
-    VALUES (${createId("rep")}, ${reporterId}, ${reportedId}, ${reason}, ${extraNotes ?? null})
+    INSERT INTO reports (reporter_id, reported_id, reason, extra_notes)
+    VALUES (${reporterId}, ${reportedId}, ${reason}, ${extraNotes ?? null})
   `;
 }
 

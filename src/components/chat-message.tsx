@@ -168,7 +168,7 @@ export function ChatMessage({ message }: { message: UIMessage }) {
         style={{
           background: "rgba(255,255,255,0.06)",
           border: "1px solid rgba(255,255,255,0.08)",
-          color: "var(--bd-text)",
+          color: "rgba(237,245,255,0.94)",
           borderRadius: "4px 20px 20px 20px",
           backdropFilter: "blur(16px)",
         }}

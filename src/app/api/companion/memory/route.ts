@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   const [memResult, emotionResult] = await Promise.allSettled([
     generateText({
       model: getModel(),
-      prompt: maahiMemoryExtractionPrompt(transcript),
+      prompt: maahiMemoryExtractionPrompt(transcript, existing),
     }),
     lastUserMsg
       ? generateText({
@@ -104,6 +104,10 @@ export async function POST(req: Request) {
     stableTraits: (patch.stableTraits as string[]) || [],
     growthEdges: (patch.growthEdges as string[]) || [],
     currentSituation: (patch.currentSituation as string) || undefined,
+    relationshipCore: (patch.relationshipCore as Record<string, unknown>) || {},
+    patternEngine: (patch.patternEngine as Record<string, unknown>) || {},
+    relationshipOS: (patch.relationshipOS as Record<string, unknown>) || {},
+    conversationCount: (existing?.conversationCount ?? 0) + 1,
     ...(lastEmotionalState ? { lastEmotionalState } : {}),
   });
 

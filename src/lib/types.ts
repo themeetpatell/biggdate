@@ -199,6 +199,55 @@ export interface SessionMemory {
   currentSituation: string;
   recurringThemes: string[];
   lastEmotionalState: string;
+  // Relationship OS core
+  relationshipCore: Partial<{
+    relationshipStage: "healing" | "exploring" | "dating" | "confused" | "attached" | "committed";
+    mainBlock:
+      | "trust"
+      | "fear of rejection"
+      | "poor selection"
+      | "low self-worth"
+      | "emotional unavailability";
+    nextBestAction: "pause" | "message" | "reflect" | "clarify" | "meet" | "exit";
+    partnerLifeGoal: "casual companionship" | "serious relationship" | "marriage" | "life-building partner";
+    progressScore: number;
+  }>;
+  patternEngine: Partial<{
+    repeatingPatterns: string[];
+    selfSabotageLoops: string[];
+    healthyShifts: string[];
+    partnerSelectionBias: string[];
+    growthTrend: "improving" | "stagnant" | "regressing";
+  }>;
+  relationshipOS: Partial<{
+    stableIdentity: {
+      values: string[];
+      boundaries: string[];
+      attachmentTendencies: string;
+      familyCultureViews: string;
+      lifeGoals: string;
+    };
+    datingStyle: {
+      textingPattern: string;
+      pacing: string;
+      conflictTendencies: string;
+      reassuranceNeeds: string;
+      attractionPatterns: string;
+    };
+    currentReality: {
+      whoTheyAreTalkingTo: string;
+      howInvestedTheyAre: string;
+      activeConfusion: string;
+      recentDate: string;
+      recentDisappointment: string;
+    };
+    growthHistory: {
+      improved: string[];
+      repeated: string[];
+      handledBetterThisTime: string[];
+    };
+  }>;
+  conversationCount: number;
 }
 
 // L4 BiggDate: structured 3-Q post-date reflection
