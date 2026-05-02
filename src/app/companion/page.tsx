@@ -5,6 +5,7 @@ import { DefaultChatTransport } from "ai";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { LoadingScreen } from "@/components/loading-screen";
 import { ChatMessage } from "@/components/chat-message";
 
 // ── Conversation starters — no emojis, just honest words ────────────────────
@@ -112,7 +113,7 @@ export default function MaahiPage() {
     setInput("");
   };
 
-  if (authLoading || !profile) return null;
+  if (authLoading || !profile) return <LoadingScreen message="Waking Maahi…" />;
 
   return (
     <div

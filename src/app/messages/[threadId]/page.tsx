@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { LoadingScreen } from "@/components/loading-screen";
 import { trackMessageSent } from "@/lib/gtm";
 import type { Thread, Message } from "@/lib/types";
 
@@ -93,7 +94,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
     }
   };
 
-  if (authLoading || !profile) return null;
+  if (authLoading || !profile) return <LoadingScreen message="Opening conversation…" />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100svh", background: "#0A0A0F" }}>

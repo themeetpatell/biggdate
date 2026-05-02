@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { LoadingScreen } from "@/components/loading-screen";
 import type { Thread } from "@/lib/types";
 
 function timeAgo(iso: string) {
@@ -32,7 +33,7 @@ export default function MessagesPage() {
       .finally(() => setPageLoading(false));
   }, [profile, authLoading, router]);
 
-  if (authLoading || !profile) return null;
+  if (authLoading || !profile) return <LoadingScreen message="Loading conversations…" />;
 
   return (
     <div style={{ minHeight: "100vh", background: "#0A0A0F", paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))" }}>

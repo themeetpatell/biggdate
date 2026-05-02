@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { trackPulsePostCreated, trackPulseReaction } from "@/lib/gtm";
@@ -24,8 +24,21 @@ function PinkTick() {
   );
 }
 
+const subscribeToMinute = (cb: () => void) => {
+  const id = setInterval(cb, 60000);
+  return () => clearInterval(id);
+};
+
 function TimeAgo({ iso }: { iso: string }) {
-  const diff = Date.now() - new Date(iso).getTime();
+  // useSyncExternalStore avoids setState-in-effect; returns 0 on the server,
+  // current ms on the client, and re-renders once a minute.
+  const now = useSyncExternalStore(
+    subscribeToMinute,
+    () => Date.now(),
+    () => 0,
+  );
+  if (now === 0) return <span>·</span>;
+  const diff = now - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return <span>now</span>;
   if (mins < 60) return <span>{mins}m</span>;

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { LoadingScreen } from "@/components/loading-screen";
 
 export default function VerifyPage() {
   const router = useRouter();
@@ -62,7 +63,7 @@ export default function VerifyPage() {
     border: "1px solid var(--bd-border)", padding: "18px 20px", marginBottom: 12,
   };
 
-  if (!status) return null;
+  if (!status) return <LoadingScreen message="Loading verification status…" />;
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bd-bg)", paddingBottom: 100 }}>
@@ -70,7 +71,10 @@ export default function VerifyPage() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <button
-            onClick={() => router.back()}
+            onClick={() => {
+              if (window.history.length > 1) router.back();
+              else router.push("/profile");
+            }}
             style={{ background: "none", border: "none", color: "var(--bd-text-faint)", cursor: "pointer", fontSize: 22 }}
           >←</button>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--bd-text)", margin: 0 }}>Get Verified</h1>

@@ -7,6 +7,7 @@ import {
   deleteStripeEvent,
 } from "@/lib/repo";
 import { log } from "@/lib/log";
+import { getStripe, getStripeWebhookSecret, isStripeWebhookConfigured } from "@/lib/stripe";
 
 // Stripe's newer API versions reorganized subscription period fields.
 // We access them safely via dynamic lookup to avoid SDK version drift.
@@ -44,8 +45,12 @@ async function handleSubscription(stripe: Stripe, subscription: Stripe.Subscript
 }
 
 export async function POST(request: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  if (!isStripeWebhookConfigured()) {
+    log.error("billing/webhook called but Stripe env vars are not set");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
+  }
+  const stripe = getStripe();
+  const webhookSecret = getStripeWebhookSecret();
 
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");

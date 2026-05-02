@@ -3,6 +3,19 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/require-auth";
 import { moderatePhoto } from "@/lib/photo-moderation";
 import { recordPhotoModeration } from "@/lib/repo";
+import { log } from "@/lib/log";
+
+// MIME-driven extension. Never trust user-supplied filenames — `evil.jpg.js`
+// would write a JS file to public storage if we used file.name's extension.
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/heic": "heic",
+  "image/heif": "heif",
+  "image/gif": "gif",
+};
 
 // Lazy-initialize Supabase admin client. Building a client at module load
 // trips Next.js's "Collecting page data" phase when env vars aren't injected
@@ -45,8 +58,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 });
     }
 
-    // Generate unique filename
-    const fileExt = file.name.split(".").pop();
+    const fileExt = MIME_TO_EXT[file.type.toLowerCase()];
+    if (!fileExt) {
+      return NextResponse.json({ error: "Unsupported image type" }, { status: 400 });
+    }
     const fileName = `${auth.userId}/${Date.now()}.${fileExt}`;
 
     // Convert File to ArrayBuffer for upload
@@ -54,7 +69,7 @@ export async function POST(request: NextRequest) {
     const buffer = new Uint8Array(arrayBuffer);
 
     // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("photos")
       .upload(fileName, buffer, {
         contentType: file.type,
@@ -62,7 +77,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error("Upload error:", uploadError);
+      log.error("photo upload failed", uploadError, { userId: auth.userId });
       return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
     }
 
@@ -102,7 +117,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("Photo upload error:", error);
+    log.error("photo upload error", error, { userId: auth.userId });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -112,6 +112,8 @@ function AuthPageInner() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [sessionLoadFailed, setSessionLoadFailed] = useState(false);
+  const [retryingSession, setRetryingSession] = useState(false);
 
   useEffect(() => {
     const modeParam = searchParams.get("mode");
@@ -292,7 +294,8 @@ function AuthPageInner() {
       };
 
       if (!meRes.ok) {
-        setError("Your session was created, but we could not load your account. Refresh and try once more.");
+        setError("Your session was created, but we could not load your account.");
+        setSessionLoadFailed(true);
         return;
       }
 
@@ -664,6 +667,8 @@ function AuthPageInner() {
               {(error || notice) && (
                 <div
                   className="rounded-2xl px-4 py-3 text-sm"
+                  role="alert"
+                  aria-live="polite"
                   style={{
                     border: `1px solid ${error ? "rgba(219,39,119,0.4)" : "rgba(8,145,178,0.4)"}`,
                     background: error
@@ -678,7 +683,36 @@ function AuthPageInner() {
                     ) : (
                       <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
                     )}
-                    <p>{error || notice}</p>
+                    <div className="flex-1">
+                      <p>{error || notice}</p>
+                      {sessionLoadFailed && (
+                        <button
+                          type="button"
+                          disabled={retryingSession}
+                          onClick={async () => {
+                            setRetryingSession(true);
+                            try {
+                              const res = await fetch("/api/auth/me", { cache: "no-store" });
+                              if (res.ok) {
+                                const me = (await res.json()) as { hasProfile?: boolean };
+                                setSessionLoadFailed(false);
+                                setError("");
+                                await refresh();
+                                router.replace(me.hasProfile ? "/dashboard" : "/onboarding");
+                                router.refresh();
+                              }
+                            } catch {
+                              // leave error in place
+                            } finally {
+                              setRetryingSession(false);
+                            }
+                          }}
+                          className="mt-2 rounded-lg px-3 py-1.5 text-xs font-semibold underline disabled:opacity-50"
+                        >
+                          {retryingSession ? "Retrying…" : "Try again"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { getSessionFromCookies } from "@/lib/auth";
 import { getUserPlan, upsertUserPlan } from "@/lib/repo";
-
-function getStripe() {
-  return new Stripe(process.env.STRIPE_SECRET_KEY!);
-}
+import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { log } from "@/lib/log";
 
 async function getOrCreateCustomer(userId: string, email: string | null): Promise<string> {
   const existing = await getUserPlan(userId);
@@ -22,12 +19,20 @@ async function getOrCreateCustomer(userId: string, email: string | null): Promis
 }
 
 export async function POST(request: Request) {
+  if (!isStripeConfigured()) {
+    log.error("billing/checkout called but STRIPE_SECRET_KEY is not set");
+    return NextResponse.json({ error: "Billing is not configured" }, { status: 503 });
+  }
+
   const session = await getSessionFromCookies();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   const { type, priceId } = await request.json() as { type: "subscription" | "payment"; priceId: string };
+  if (!priceId || typeof priceId !== "string") {
+    return NextResponse.json({ error: "Invalid priceId" }, { status: 400 });
+  }
   const origin = request.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const customerId = await getOrCreateCustomer(session.userId, session.email);
   const stripe = getStripe();

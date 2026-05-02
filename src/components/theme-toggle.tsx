@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
 
@@ -17,15 +17,20 @@ const THEMES = [
 
 type ThemeValue = (typeof THEMES)[number]["value"];
 
+const noopSubscribe = () => () => {};
+
+// Hydration-safe mounted flag — false during SSR, true after hydration.
+// Avoids setState-in-effect while preserving the no-flash render.
+function useIsClient() {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}
+
 export function ThemeToggle({
   variant = "icon",
   className = "",
 }: ThemeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Avoid hydration mismatch — theme is unknowable on the server
-  useEffect(() => setMounted(true), []);
+  const mounted = useIsClient();
 
   if (variant === "segment") {
     return (

@@ -41,9 +41,11 @@ function parseNullableNumber(value: unknown) {
   return Number.isFinite(num) ? num : null;
 }
 
+// Allowlist patch: only fields enumerated below survive. Extra keys in the
+// request body are silently dropped — prevents privilege escalation via
+// unknown columns (e.g. is_verified, role).
 function normalizePatch(body: Partial<Profile>): Partial<Profile> {
   return {
-    ...body,
     name: typeof body.name === "string" ? body.name.trim() : body.name,
     city: typeof body.city === "string" ? body.city.trim() : body.city,
     birthday: trimOptional(body.birthday),

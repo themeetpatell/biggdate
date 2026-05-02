@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { LoadingScreen } from "@/components/loading-screen";
 import type { Match } from "@/lib/types";
 
 // ── Sealed match card ────────────────────────────────────────────────────────
@@ -112,7 +113,7 @@ function SealedCard({
                 fontWeight: 600,
               }}
             >
-              {(match as unknown as { harmonyScore?: number }).harmonyScore || Math.floor(78 + Math.random() * 15)}% harmony
+              {(match as unknown as { harmonyScore?: number }).harmonyScore ?? (78 + (match.id.charCodeAt(match.id.length - 1) % 16))}% harmony
             </div>
           </div>
         ) : (
@@ -266,7 +267,7 @@ export default function TodayPage() {
     router.push(`/matches/${match.id}/preview`);
   }, [router]);
 
-  if (loading || !profile) return null;
+  if (loading || !profile) return <LoadingScreen message="Setting up your dashboard…" />;
 
   const todayLabel = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -409,7 +410,7 @@ export default function TodayPage() {
                 Maahi is still building your pool
               </p>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.6 }}>
-                More people are joining every day. When someone who fits your profile signs up, they'll be here waiting.
+                More people are joining every day. When someone who fits your profile signs up, they&apos;ll be here waiting.
               </p>
               <p style={{ fontSize: 11, color: "rgba(168,85,247,0.6)", margin: 0 }}>
                 Check back tomorrow

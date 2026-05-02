@@ -33,7 +33,7 @@ function Pill({ children, color = "#4FFFB0" }: { children: React.ReactNode; colo
 }
 
 // ─── Match Hero (no photos in Match type — use gradient + emoji) ───────────────
-function MatchHero({ match }: { match: Match }) {
+function MatchHero({ match, onBack }: { match: Match; onBack: () => void }) {
   return (
     <div style={{ position: "relative", width: "100%", height: "52svh", overflow: "hidden" }}>
       <div style={{
@@ -64,7 +64,7 @@ function MatchHero({ match }: { match: Match }) {
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 100, background: "linear-gradient(to top, #0A0A0F, transparent)", pointerEvents: "none" }} />
       {/* Back button */}
       <button
-        onClick={() => history.back()}
+        onClick={onBack}
         style={{ position: "absolute", top: 16, left: 16, width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", backdropFilter: "blur(8px)" }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
@@ -353,7 +353,7 @@ function ReportSheet({
         <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)", margin: "0 auto 20px" }} />
         <h3 style={{ fontSize: 17, fontWeight: 700, color: "#fff", margin: "0 0 4px" }}>Report or Block</h3>
         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 20px", lineHeight: 1.5 }}>
-          They'll be blocked immediately and removed from your matches.
+          They&apos;ll be blocked immediately and removed from your matches.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
           {REPORT_REASONS.map((r) => (
@@ -483,7 +483,13 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
     <div style={{ minHeight: "100dvh", background: "#0A0A0F", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
       <div aria-hidden style={{ position: "fixed", top: "-8%", right: "-12%", width: 300, height: 300, borderRadius: "50%", background: "#d4688a", opacity: 0.055, filter: "blur(90px)", pointerEvents: "none", zIndex: 0 }} />
 
-      <MatchHero match={match} />
+      <MatchHero
+        match={match}
+        onBack={() => {
+          if (typeof window !== "undefined" && window.history.length > 1) router.back();
+          else router.push("/matches");
+        }}
+      />
 
       {/* Identity strip */}
       <div style={{ position: "relative", zIndex: 10, padding: "22px 20px 0", background: "#0A0A0F" }}>

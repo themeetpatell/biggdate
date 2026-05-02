@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { getSessionFromCookies } from "@/lib/auth";
 import { getUserPlan } from "@/lib/repo";
+import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { log } from "@/lib/log";
 
 export async function POST(request: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  if (!isStripeConfigured()) {
+    log.error("billing/portal called but STRIPE_SECRET_KEY is not set");
+    return NextResponse.json({ error: "Billing is not configured" }, { status: 503 });
+  }
+
   const session = await getSessionFromCookies();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
+  const stripe = getStripe();
 
   const plan = await getUserPlan(session.userId);
   if (!plan?.stripeCustomerId) {

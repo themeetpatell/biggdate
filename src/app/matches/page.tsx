@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { LoadingScreen } from "@/components/loading-screen";
 import { trackMatchViewed, trackMatchConnect } from "@/lib/gtm";
 import type { Match } from "@/lib/types";
 
@@ -233,7 +234,6 @@ export default function ConnectPage() {
   const [pendingLoading, setPendingLoading] = useState(true);
 
   const fetchMatches = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch("/api/matches/generate", {
         method: "POST",
@@ -249,30 +249,50 @@ export default function ConnectPage() {
     setLoading(false);
   }, []);
 
-  const fetchPendingIntros = useCallback(async () => {
-    setPendingLoading(true);
-    try {
-      const res = await fetch("/api/intros");
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setPendingIntros(
-          data.filter((intro): intro is SentIntro => Boolean(intro?.id && intro?.matchName)),
-        );
-      }
-    } catch {
-      // silent
-    }
-    setPendingLoading(false);
-  }, []);
-
   useEffect(() => {
     if (authLoading) return;
     if (!profile) { router.push("/onboarding"); return; }
-    fetchMatches();
-    fetchPendingIntros();
-  }, [profile, authLoading, router, fetchMatches, fetchPendingIntros]);
+    let cancelled = false;
 
-  if (authLoading || !profile) return null;
+    void (async () => {
+      try {
+        const res = await fetch("/api/matches/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json();
+        if (cancelled) return;
+        const list = Array.isArray(data) ? data : (data.matches ?? []);
+        if (Array.isArray(list)) setMatches(list);
+      } catch {
+        // silent
+      }
+      if (!cancelled) setLoading(false);
+    })();
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/intros");
+        const data = await res.json();
+        if (cancelled) return;
+        if (Array.isArray(data)) {
+          setPendingIntros(
+            data.filter((intro): intro is SentIntro => Boolean(intro?.id && intro?.matchName)),
+          );
+        }
+      } catch {
+        // silent
+      }
+      if (!cancelled) setPendingLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profile, authLoading, router]);
+
+  if (authLoading || !profile) return <LoadingScreen message="Finding your matches…" />;
 
   return (
     <div

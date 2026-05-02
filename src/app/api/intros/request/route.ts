@@ -7,10 +7,18 @@ import {
   updateIntroForSoulKnock,
   getProfileByUserId,
 } from "@/lib/repo";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
+
+  // Hard ceiling on Soul Knocks regardless of plan tier — abuse-prevention
+  // backstop in case a plan misconfig hands premium someone unlimited intros.
+  const rl = await checkRateLimit("intros:request", auth.userId, { limit: 10, windowSec: 3600 });
+  if (!rl.allowed) return rateLimitResponse(rl);
 
   // Feature gate: soul knock limit
   const gate = await requirePlan(auth.userId, "soul_knock");
@@ -18,7 +26,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Soul Knock limit reached", gate }, { status: 403 });
   }
 
-  const { matchId, matchName, matchedUserId, soulKnockQuestion } = await req.json();
+  const body = (await req.json()) as {
+    matchId?: unknown;
+    matchName?: unknown;
+    matchedUserId?: unknown;
+    soulKnockQuestion?: unknown;
+  };
+  const matchId = typeof body.matchId === "string" ? body.matchId.trim() : "";
+  const matchName = typeof body.matchName === "string" ? body.matchName.trim().slice(0, 120) : "";
+  const matchedUserId =
+    typeof body.matchedUserId === "string" && UUID_RE.test(body.matchedUserId)
+      ? body.matchedUserId
+      : undefined;
+  const soulKnockQuestion =
+    typeof body.soulKnockQuestion === "string"
+      ? body.soulKnockQuestion.trim().slice(0, 280)
+      : undefined;
+
+  if (!matchId || matchId.length > 200) {
+    return NextResponse.json({ error: "Invalid matchId" }, { status: 400 });
+  }
 
   const intro = await createIntro(auth.userId, matchId, matchName);
 
