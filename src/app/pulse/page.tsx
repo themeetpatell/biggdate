@@ -396,7 +396,7 @@ function ComposeSheet({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "100%", maxWidth: 480, margin: "0 auto",
+          width: "100%", maxWidth: "var(--bd-app-max-w)", margin: "0 auto",
           background: "var(--bd-surface)", borderRadius: "20px 20px 0 0",
           padding: "24px 20px 44px",
         }}
@@ -527,7 +527,7 @@ export default function PulsePage() {
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: "var(--bd-bg)", paddingBottom: 100 }}>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "20px 16px 0" }}>
+      <div style={{ maxWidth: "var(--bd-app-max-w)", margin: "0 auto", padding: "20px 16px 0" }}>
         <div style={{ height: 28, width: 80, borderRadius: 8, background: "var(--bd-surface)", marginBottom: 20 }} />
         {[1, 2, 3].map((i) => (
           <div key={i} style={{
@@ -545,7 +545,7 @@ export default function PulsePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bd-bg)", paddingBottom: 100 }}>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
+      <div style={{ maxWidth: "var(--bd-app-max-w)", margin: "0 auto", padding: "0 16px" }}>
 
         {/* Header */}
         <div style={{ padding: "20px 0 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

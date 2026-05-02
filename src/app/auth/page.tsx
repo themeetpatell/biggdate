@@ -134,11 +134,11 @@ function AuthPageInner() {
   const normalizedFullName = fullName.trim();
   const normalizedUsername = username.trim().toLowerCase();
   const fieldSurfaceStyle = {
-    background:
-      "linear-gradient(180deg, rgba(22,28,48,0.92), rgba(14,19,34,0.96))",
-    border: "1px solid rgba(154,169,255,0.14)",
+    background: "var(--bd-surface)",
+    border: "1px solid var(--bd-border)",
+    color: "var(--bd-text)",
     boxShadow:
-      "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.18), 0 12px 28px rgba(0,0,0,0.18)",
+      "inset 0 1px 0 var(--bd-surface-overlay), 0 12px 28px rgba(0,0,0,0.08)",
   } as const;
 
   let canSubmit = false;
@@ -310,37 +310,34 @@ function AuthPageInner() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#060913] px-6 py-10 sm:px-8 lg:px-10">
+    <div
+      className="relative min-h-screen overflow-hidden px-6 py-10 sm:px-8 lg:px-10"
+      style={{ background: "var(--bd-bg)", color: "var(--bd-text)" }}
+    >
       <div
-        className="pointer-events-none fixed left-[-10%] top-[-14%] h-[560px] w-[560px] rounded-full opacity-30 blur-[140px]"
+        className="pointer-events-none fixed left-[-10%] top-[-14%] h-[560px] w-[560px] rounded-full opacity-50 blur-[140px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(229,39,224,0.55) 0%, rgba(123,72,255,0.18) 48%, transparent 72%)",
+            "radial-gradient(circle, var(--bd-accent-glow) 0%, var(--bd-blue-glow) 48%, transparent 72%)",
           animation: "orb1 15s ease-in-out infinite",
         }}
       />
       <div
-        className="pointer-events-none fixed bottom-[-22%] right-[-8%] h-[460px] w-[460px] rounded-full opacity-20 blur-[120px]"
+        className="pointer-events-none fixed bottom-[-22%] right-[-8%] h-[460px] w-[460px] rounded-full opacity-40 blur-[120px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(53,108,255,0.32) 0%, rgba(232,146,124,0.18) 52%, transparent 78%)",
+            "radial-gradient(circle, var(--bd-blue-glow) 0%, var(--bd-pink-glow) 52%, transparent 78%)",
           animation: "orb2 18s ease-in-out infinite",
         }}
       />
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.16]"
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
+            "linear-gradient(var(--bd-text-faint) 1px, transparent 1px), linear-gradient(90deg, var(--bd-text-faint) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
-          maskImage: "linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.1))",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 34%), linear-gradient(180deg, rgba(9,13,26,0.2), rgba(5,8,16,0.78) 58%, rgba(4,7,14,0.96))",
+          maskImage:
+            "linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.1))",
         }}
       />
 
@@ -354,12 +351,13 @@ function AuthPageInner() {
             }}
           />
           <div
-            className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
             style={{
-              borderColor: "rgba(255,0,255,0.28)",
-              background: "linear-gradient(180deg, rgba(45,16,70,0.42), rgba(21,13,40,0.28))",
+              border: "1px solid var(--bd-border-glow)",
+              background: "var(--bd-accent-soft)",
               color: "var(--bd-accent)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 24px rgba(0,0,0,0.18)",
+              boxShadow:
+                "inset 0 1px 0 var(--bd-surface-overlay), 0 10px 24px rgba(0,0,0,0.1)",
             }}
           >
             <Sparkles className="size-3.5" />
@@ -367,28 +365,38 @@ function AuthPageInner() {
           </div>
 
           <div className="mt-10 space-y-5">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#7f95c2]">
+            <p
+              className="text-sm font-medium uppercase tracking-[0.24em]"
+              style={{ color: "var(--bd-text-muted)" }}
+            >
               {content.eyebrow}
             </p>
-            <h1 className="max-w-[11ch] text-4xl font-semibold leading-[1.04] tracking-[-0.05em] text-[#f4f7ff] sm:text-5xl md:text-6xl">
+            <h1
+              className="max-w-[11ch] text-4xl font-semibold leading-[1.04] tracking-[-0.05em] sm:text-5xl md:text-6xl"
+              style={{ color: "var(--bd-text)" }}
+            >
               {content.title}
             </h1>
           </div>
 
           <div
             className="mt-10 h-px w-24"
-            style={{ background: "linear-gradient(90deg, rgba(255,0,255,0.9), rgba(110,84,255,0.4), transparent)" }}
+            style={{
+              background:
+                "linear-gradient(90deg, var(--bd-accent), var(--bd-blue), transparent)",
+              opacity: 0.7,
+            }}
           />
         </section>
 
         <Card
           className="page-enter page-enter-delay-1 backdrop-blur-xl"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(10,16,30,0.82), rgba(6,10,21,0.9))",
-            border: "1px solid rgba(132,105,255,0.18)",
+            background: "var(--bd-glass-bg)",
+            border: "1px solid var(--bd-border)",
+            color: "var(--bd-text)",
             boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(255,0,255,0.05), 0 32px 90px rgba(0,0,0,0.42), 0 24px 80px rgba(34,16,74,0.24)",
+              "inset 0 1px 0 var(--bd-surface-overlay), 0 0 0 1px var(--bd-border-glow), 0 32px 90px rgba(0,0,0,0.18)",
           }}
         >
           <CardContent className="relative overflow-hidden p-5 sm:p-7">
@@ -408,22 +416,28 @@ function AuthPageInner() {
             />
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[#f5f7ff]">
-                {mode === "login" && "Log in"}
-                {mode === "signup" && "Create account"}
-                {mode === "forgot" && "Reset password"}
-                {mode === "reset" && "New password"}
-              </h2>
-                <p className="mt-1 text-sm text-[#89a0c8]">{content.hint}</p>
+                <h2
+                  className="text-2xl font-semibold tracking-[-0.03em]"
+                  style={{ color: "var(--bd-text)" }}
+                >
+                  {mode === "login" && "Log in"}
+                  {mode === "signup" && "Create account"}
+                  {mode === "forgot" && "Reset password"}
+                  {mode === "reset" && "New password"}
+                </h2>
+                <p
+                  className="mt-1 text-sm"
+                  style={{ color: "var(--bd-text-muted)" }}
+                >
+                  {content.hint}
+                </p>
               </div>
               <div
-                className="shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
+                className="shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
                 style={{
-                  borderColor: "rgba(255,0,255,0.2)",
+                  border: "1px solid var(--bd-border-glow)",
                   color: "var(--bd-accent)",
-                  background:
-                    "linear-gradient(180deg, rgba(44,17,68,0.44), rgba(22,12,39,0.28))",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+                  background: "var(--bd-accent-soft)",
                 }}
               >
                 Secure Flow
@@ -432,12 +446,10 @@ function AuthPageInner() {
 
             {(mode === "signup" || mode === "login") && (
               <div
-                className="mb-6 grid grid-cols-2 rounded-[22px] border p-1.5"
+                className="mb-6 grid grid-cols-2 rounded-[22px] p-1.5"
                 style={{
-                  borderColor: "rgba(140,124,255,0.16)",
-                  background:
-                    "linear-gradient(180deg, rgba(21,18,44,0.82), rgba(13,16,30,0.92))",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                  border: "1px solid var(--bd-border)",
+                  background: "var(--bd-surface-sunken)",
                 }}
               >
                 {(["signup", "login"] as AuthMode[]).map((value) => {
@@ -452,7 +464,7 @@ function AuthPageInner() {
                         background: active
                           ? "linear-gradient(135deg, rgba(161,44,214,0.82), rgba(60,92,219,0.72))"
                           : "transparent",
-                        color: active ? "#fff" : "#8b9bc1",
+                        color: active ? "#fff" : "var(--bd-text-muted)",
                         boxShadow: active
                           ? "inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 24px rgba(123,72,255,0.28)"
                           : "none",
@@ -470,11 +482,11 @@ function AuthPageInner() {
               {mode === "signup" && (
                 <>
                   <label className="block space-y-2">
-                    <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[#b8c7e8]">
+                    <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
                       Full name
                     </span>
                     <div className="relative">
-                      <User className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#7088ab]" />
+                      <User className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                       <Input
                         type="text"
                         placeholder="Your full name"
@@ -482,18 +494,18 @@ function AuthPageInner() {
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         required
-                        className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                        className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                         style={fieldSurfaceStyle}
                       />
                     </div>
                   </label>
 
                   <label className="block space-y-2">
-                    <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[#b8c7e8]">
+                    <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
                       Username
                     </span>
                     <div className="relative">
-                      <AtSign className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#7088ab]" />
+                      <AtSign className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                       <Input
                         type="text"
                         placeholder="Choose a username"
@@ -501,7 +513,7 @@ function AuthPageInner() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                        className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                         style={fieldSurfaceStyle}
                       />
                     </div>
@@ -512,11 +524,11 @@ function AuthPageInner() {
               {/* ── email field: signup & forgot ── */}
               {(mode === "signup" || mode === "forgot") && (
                 <label className="block space-y-2">
-                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[#b8c7e8]">
+                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
                     Email
                   </span>
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#7088ab]" />
+                    <Mail className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                     <Input
                       type="email"
                       placeholder="you@example.com"
@@ -524,7 +536,7 @@ function AuthPageInner() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                      className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                       style={fieldSurfaceStyle}
                     />
                   </div>
@@ -534,11 +546,11 @@ function AuthPageInner() {
               {/* ── username field: login ── */}
               {mode === "login" && (
                 <label className="block space-y-2">
-                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[#b8c7e8]">
+                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
                     Username
                   </span>
                   <div className="relative">
-                    <AtSign className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#7088ab]" />
+                    <AtSign className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                     <Input
                       type="text"
                       placeholder="Your username"
@@ -546,7 +558,7 @@ function AuthPageInner() {
                       value={loginIdentifier}
                       onChange={(e) => setLoginIdentifier(e.target.value)}
                       required
-                      className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                      className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                       style={fieldSurfaceStyle}
                     />
                   </div>
@@ -557,7 +569,7 @@ function AuthPageInner() {
               {(mode === "signup" || mode === "login" || mode === "reset") && (
                 <label className="block space-y-2">
                   <span className="flex items-center justify-between pl-1 pr-1">
-                    <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#b8c7e8]">
+                    <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
                       {mode === "reset" ? "New password" : "Password"}
                     </span>
                     {mode === "login" && (
@@ -571,7 +583,7 @@ function AuthPageInner() {
                     )}
                   </span>
                   <div className="relative">
-                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#7088ab]" />
+                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder={mode === "signup" || mode === "reset" ? "At least 6 characters" : "Enter your password"}
@@ -580,7 +592,7 @@ function AuthPageInner() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="h-14 rounded-[1.8rem] px-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                      className="h-14 rounded-[1.8rem] px-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                       style={fieldSurfaceStyle}
                     />
                     <button
@@ -598,11 +610,11 @@ function AuthPageInner() {
               {/* ── confirm password field: reset only ── */}
               {mode === "reset" && (
                 <label className="block space-y-2">
-                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[#b8c7e8]">
+                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
                     Confirm password
                   </span>
                   <div className="relative">
-                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[#7088ab]" />
+                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Re-enter your password"
@@ -611,7 +623,7 @@ function AuthPageInner() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="h-14 rounded-[1.8rem] px-12 text-lg text-[var(--bd-text)] placeholder:text-[#7088ab] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                      className="h-14 rounded-[1.8rem] px-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                       style={fieldSurfaceStyle}
                     />
                   </div>
@@ -620,14 +632,12 @@ function AuthPageInner() {
 
               {mode === "signup" && (
                 <label
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-[13px] leading-snug transition-colors"
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3 text-[13px] leading-snug transition-colors"
                   style={{
-                    borderColor: ageConfirmed
-                      ? "rgba(229,39,224,0.32)"
-                      : "rgba(140,124,255,0.16)",
+                    border: `1px solid ${ageConfirmed ? "var(--bd-border-glow)" : "var(--bd-border)"}`,
                     background: ageConfirmed
-                      ? "linear-gradient(180deg, rgba(45,16,70,0.36), rgba(21,13,40,0.24))"
-                      : "linear-gradient(180deg, rgba(21,18,44,0.6), rgba(13,16,30,0.7))",
+                      ? "var(--bd-accent-soft)"
+                      : "var(--bd-surface-sunken)",
                   }}
                 >
                   <input
@@ -653,11 +663,13 @@ function AuthPageInner() {
 
               {(error || notice) && (
                 <div
-                  className="rounded-2xl border px-4 py-3 text-sm"
+                  className="rounded-2xl px-4 py-3 text-sm"
                   style={{
-                    borderColor: error ? "rgba(255,20,147,0.3)" : "rgba(0,204,255,0.24)",
-                    background: error ? "rgba(255,20,147,0.08)" : "rgba(0,204,255,0.08)",
-                    color: error ? "#ff86c8" : "#8fe8ff",
+                    border: `1px solid ${error ? "rgba(219,39,119,0.4)" : "rgba(8,145,178,0.4)"}`,
+                    background: error
+                      ? "var(--bd-pink-glow)"
+                      : "var(--bd-cyan-glow)",
+                    color: error ? "var(--bd-pink)" : "var(--bd-cyan)",
                   }}
                 >
                   <div className="flex items-start gap-3">

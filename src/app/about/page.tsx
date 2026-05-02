@@ -48,7 +48,7 @@ const FOUNDERS = [
     title: "Founder / CEO",
     focus:
       "Owns product vision, brand conviction, and the standard for a dating experience that feels premium without becoming performative.",
-    accent: "rgba(255,20,147,0.18)",
+    accentVar: "var(--bd-pink)",
     avatarGradient: "from-[#ff1493] to-[#d4688a]",
   },
   {
@@ -58,7 +58,7 @@ const FOUNDERS = [
     title: "Founder / CTO",
     focus:
       "Builds the systems layer: matching logic, AI intelligence, and the infrastructure that keeps the experience sharp, fast, and trustworthy.",
-    accent: "rgba(123,159,255,0.18)",
+    accentVar: "var(--bd-blue)",
     avatarGradient: "from-[#7b9fff] to-[#a855f7]",
   },
   {
@@ -68,10 +68,16 @@ const FOUNDERS = [
     title: "Founder / CGO",
     focus:
       "Drives growth, partnerships, and community loops so the product reaches the right people instead of chasing empty top-of-funnel volume.",
-    accent: "rgba(255,106,199,0.18)",
+    accentVar: "var(--bd-accent)",
     avatarGradient: "from-[#ff6ac7] to-[#f04fb8]",
   },
 ];
+
+const cardSurface: React.CSSProperties = {
+  background: "var(--bd-glass-bg)",
+  border: "1px solid var(--bd-border)",
+  boxShadow: "0 24px 70px rgba(0,0,0,0.14)",
+};
 
 export default function AboutPage() {
   return (
@@ -89,24 +95,46 @@ export default function AboutPage() {
       activePage="about"
     >
       <section className="mx-auto grid max-w-5xl items-stretch gap-8 px-6 pb-14 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="relative overflow-hidden rounded-[36px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(15,18,30,0.96),rgba(28,14,31,0.88))] p-8 shadow-[0_32px_90px_rgba(0,0,0,0.3)] sm:p-10">
-          <div className="absolute inset-y-8 left-8 w-px bg-gradient-to-b from-[#ff1493]/0 via-[#ff1493]/50 to-[#7b9fff]/0 sm:left-10" />
+        <div
+          className="relative overflow-hidden rounded-[36px] p-8 sm:p-10"
+          style={cardSurface}
+        >
+          <div
+            className="absolute inset-y-8 left-8 w-px sm:left-10"
+            style={{
+              background:
+                "linear-gradient(180deg, transparent, var(--bd-pink), var(--bd-blue), transparent)",
+              opacity: 0.5,
+            }}
+          />
           <div className="pl-6 sm:pl-8">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#7b9fff]">
+            <span
+              className="text-[11px] font-semibold uppercase tracking-[0.3em]"
+              style={{ color: "var(--bd-blue)" }}
+            >
               Why we exist
             </span>
-            <p className="mt-5 max-w-2xl font-display text-2xl leading-[1.35] tracking-[-0.02em] text-[#f4efe8] sm:text-3xl">
+            <p
+              className="mt-5 max-w-2xl font-display text-2xl leading-[1.35] tracking-[-0.02em] sm:text-3xl"
+              style={{ color: "var(--bd-text)" }}
+            >
               Dating apps kept asking thoughtful people to act like volume
               machines. BiggDate is what happens when the product starts
               respecting time, context, and actual adult lives.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <p className="text-sm leading-7 text-[#a8aabe] sm:text-base">
+              <p
+                className="text-sm leading-7 sm:text-base"
+                style={{ color: "var(--bd-text-muted)" }}
+              >
                 We kept seeing the same pattern: smart people with full,
                 ambitious lives were being pushed into high-volume dating
                 behavior that rewarded stamina over substance.
               </p>
-              <p className="text-sm leading-7 text-[#a8aabe] sm:text-base">
+              <p
+                className="text-sm leading-7 sm:text-base"
+                style={{ color: "var(--bd-text-muted)" }}
+              >
                 BiggDate is our answer to that. We want it to feel closer to a
                 good intro from someone who actually knows you: grounded,
                 contextual, and honest about what makes a match workable.
@@ -115,8 +143,14 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="flex h-full flex-col rounded-[36px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(13,18,20,0.9),rgba(11,11,18,0.82))] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.24)] sm:p-10">
-          <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8fd4a4]">
+        <div
+          className="flex h-full flex-col rounded-[36px] p-8 sm:p-10"
+          style={cardSurface}
+        >
+          <div
+            className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.3em]"
+            style={{ color: "var(--bd-cyan)" }}
+          >
             <Sparkles className="size-3.5" />
             Who it&apos;s for
           </div>
@@ -124,12 +158,24 @@ export default function AboutPage() {
             {AUDIENCE.map((item, index) => (
               <div
                 key={item}
-                className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-black/18 px-5 py-5"
+                className="relative overflow-hidden rounded-[24px] px-5 py-5"
+                style={{
+                  background: "var(--bd-surface-sunken)",
+                  border: "1px solid var(--bd-border)",
+                }}
               >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#8fd4a4]/70">
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-[0.28em]"
+                  style={{ color: "var(--bd-cyan)", opacity: 0.7 }}
+                >
                   0{index + 1}
                 </span>
-                <p className="mt-3 text-base leading-7 text-[#dceadf]">{item}</p>
+                <p
+                  className="mt-3 text-base leading-7"
+                  style={{ color: "var(--bd-text)" }}
+                >
+                  {item}
+                </p>
               </div>
             ))}
           </div>
@@ -138,7 +184,10 @@ export default function AboutPage() {
 
       <section className="mx-auto max-w-5xl px-6 pb-14">
         <div className="mb-8">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#d4688a]">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.3em]"
+            style={{ color: "var(--bd-pink)" }}
+          >
             Our principles
           </span>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.02em] sm:text-4xl">
@@ -153,23 +202,48 @@ export default function AboutPage() {
             return (
               <div
                 key={principle.title}
-                className="group relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(18,20,31,0.92),rgba(11,11,18,0.82))] p-7 sm:p-8"
+                className="group relative overflow-hidden rounded-[30px] p-7 sm:p-8"
+                style={cardSurface}
               >
-                <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white/[0.04] to-transparent" />
+                <div
+                  className="absolute inset-y-0 left-0 w-20"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, var(--bd-surface-overlay), transparent)",
+                  }}
+                />
                 <div className="relative grid gap-5 sm:grid-cols-[84px_1fr] sm:items-start">
                   <div className="flex items-center gap-4 sm:block">
-                    <div className="text-4xl font-semibold tracking-[-0.04em] text-white/10">
+                    <div
+                      className="text-4xl font-semibold tracking-[-0.04em]"
+                      style={{ color: "var(--bd-text-faint)", opacity: 0.4 }}
+                    >
                       0{index + 1}
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-                      <Icon className="size-5 text-[#f19bc5]" />
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                      style={{
+                        background: "var(--bd-surface-overlay)",
+                        border: "1px solid var(--bd-border)",
+                      }}
+                    >
+                      <Icon
+                        className="size-5"
+                        style={{ color: "var(--bd-pink)" }}
+                      />
                     </div>
                   </div>
                   <div className="pt-0.5">
-                    <h3 className="text-xl font-semibold tracking-[-0.02em]">
+                    <h3
+                      className="text-xl font-semibold tracking-[-0.02em]"
+                      style={{ color: "var(--bd-text)" }}
+                    >
                       {principle.title}
                     </h3>
-                    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#a8aabe] sm:text-base">
+                    <p
+                      className="mt-3 max-w-3xl text-sm leading-7 sm:text-base"
+                      style={{ color: "var(--bd-text-muted)" }}
+                    >
                       {principle.body}
                     </p>
                   </div>
@@ -182,7 +256,10 @@ export default function AboutPage() {
 
       <section className="mx-auto max-w-5xl px-6 pb-14">
         <div className="mb-8">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6ac7]">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.3em]"
+            style={{ color: "var(--bd-accent)" }}
+          >
             Founding team
           </span>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.02em] sm:text-4xl">
@@ -194,14 +271,14 @@ export default function AboutPage() {
           {FOUNDERS.map((founder, index) => (
             <div
               key={founder.name}
-              className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(16,18,28,0.94),rgba(24,12,25,0.9))] p-7 sm:p-8"
+              className="relative overflow-hidden rounded-[32px] p-7 sm:p-8"
+              style={cardSurface}
             >
               <div
                 className="absolute inset-y-0 left-0 w-1"
-                style={{ background: founder.accent }}
+                style={{ background: founder.accentVar }}
               />
               <div className="flex items-center gap-6">
-                {/* Avatar */}
                 <div className="shrink-0">
                   <FounderAvatar
                     src={founder.image}
@@ -211,21 +288,31 @@ export default function AboutPage() {
                   />
                 </div>
 
-                {/* Info */}
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xl font-semibold tracking-[-0.02em]">
+                  <h3
+                    className="text-xl font-semibold tracking-[-0.02em]"
+                    style={{ color: "var(--bd-text)" }}
+                  >
                     {founder.name}
                   </h3>
-                  <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8f92ab]">
+                  <div
+                    className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.25em]"
+                    style={{ color: "var(--bd-text-faint)" }}
+                  >
                     {founder.title}
                   </div>
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-[#a8aabe] sm:text-base">
+                  <p
+                    className="mt-3 max-w-3xl text-sm leading-7 sm:text-base"
+                    style={{ color: "var(--bd-text-muted)" }}
+                  >
                     {founder.focus}
                   </p>
                 </div>
 
-                {/* Index */}
-                <div className="hidden text-right text-5xl font-semibold tracking-[-0.06em] text-white/[0.06] sm:block">
+                <div
+                  className="hidden text-right text-5xl font-semibold tracking-[-0.06em] sm:block"
+                  style={{ color: "var(--bd-text-faint)", opacity: 0.25 }}
+                >
                   0{index + 1}
                 </div>
               </div>
@@ -235,23 +322,38 @@ export default function AboutPage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-6 pb-16 sm:pb-24">
-        <div className="flex flex-col gap-6 rounded-[30px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(10,14,26,0.92),rgba(22,14,24,0.9))] p-8 sm:flex-row sm:items-end sm:justify-between sm:p-10">
+        <div
+          className="flex flex-col gap-6 rounded-[30px] p-8 sm:flex-row sm:items-end sm:justify-between sm:p-10"
+          style={cardSurface}
+        >
           <div className="max-w-2xl">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6ac7]">
+            <span
+              className="text-[11px] font-semibold uppercase tracking-[0.3em]"
+              style={{ color: "var(--bd-accent)" }}
+            >
               Keep in touch
             </span>
             <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.02em] sm:text-4xl">
               If this sounds like your kind of dating product, say hi.
             </h2>
-            <p className="mt-3 text-sm leading-7 text-[#a8aabe] sm:text-base">
-              We&apos;re still early, which means the sharpest product input usually
-              comes straight from people who are tired of the current options.
+            <p
+              className="mt-3 text-sm leading-7 sm:text-base"
+              style={{ color: "var(--bd-text-muted)" }}
+            >
+              We&apos;re still early, which means the sharpest product input
+              usually comes straight from people who are tired of the current
+              options.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.05] px-5 py-3 text-sm font-medium text-[#f0ebe3] transition-all hover:border-white/[0.14] hover:bg-white/[0.08]"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition-all"
+              style={{
+                background: "var(--bd-surface)",
+                border: "1px solid var(--bd-border)",
+                color: "var(--bd-text)",
+              }}
             >
               Contact us
             </Link>

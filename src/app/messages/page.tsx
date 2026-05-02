@@ -44,7 +44,7 @@ export default function MessagesPage() {
         </p>
       </div>
 
-      <div style={{ maxWidth: 600, margin: "0 auto" }}>
+      <div style={{ maxWidth: "var(--bd-app-max-w)", margin: "0 auto" }}>
         {pageLoading ? (
           <div style={{ padding: "20px" }}>
             {[0, 1, 2].map((i) => (

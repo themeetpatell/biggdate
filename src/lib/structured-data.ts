@@ -131,6 +131,108 @@ export function breadcrumbSchema(items: BreadcrumbItem[]) {
 }
 
 /**
+ * `DefinedTerm` is the entity AI engines use to ground concepts in their
+ * knowledge graphs. One term per page, scoped to a `DefinedTermSet` that
+ * represents the BiggDate glossary as a whole.
+ */
+export function definedTermSchema(params: {
+  term: string;
+  description: string;
+  url: string;
+  alternateNames?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    name: params.term,
+    description: params.description,
+    url: params.url,
+    inDefinedTermSet: {
+      "@type": "DefinedTermSet",
+      "@id": `${APP_URL}/glossary`,
+      name: "BiggDate Glossary",
+      url: `${APP_URL}/glossary`,
+    },
+    ...(params.alternateNames?.length
+      ? { alternateName: params.alternateNames }
+      : {}),
+  };
+}
+
+/**
+ * `QAPage` is the right schema for single-question pages (one URL, one
+ * question, one canonical answer). `FAQPage` is for multi-question pages
+ * — they're not interchangeable for AI Overviews and Perplexity citations.
+ */
+export function qaPageSchema(params: {
+  question: string;
+  answer: string;
+  url: string;
+  dateAuthored?: string;
+  authorName?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "QAPage",
+    mainEntity: {
+      "@type": "Question",
+      name: params.question,
+      text: params.question,
+      ...(params.dateAuthored ? { dateCreated: params.dateAuthored } : {}),
+      ...(params.authorName
+        ? { author: { "@type": "Organization", name: params.authorName } }
+        : {}),
+      answerCount: 1,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: params.answer,
+        url: params.url,
+        ...(params.dateAuthored ? { dateCreated: params.dateAuthored } : {}),
+        ...(params.authorName
+          ? { author: { "@type": "Organization", name: params.authorName } }
+          : {}),
+      },
+    },
+  };
+}
+
+/**
+ * Comparison pages benefit from an `ItemList` whose elements are the products
+ * being compared. Pair this with `faqPageSchema` for the questions on the page.
+ */
+export interface ComparedProduct {
+  name: string;
+  url?: string;
+  description?: string;
+}
+
+export function comparisonItemListSchema(params: {
+  name: string;
+  url: string;
+  items: ComparedProduct[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: params.name,
+    url: params.url,
+    numberOfItems: params.items.length,
+    itemListElement: params.items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "SoftwareApplication",
+        name: item.name,
+        applicationCategory: "LifestyleApplication",
+        applicationSubCategory: "Dating",
+        ...(item.url ? { url: item.url } : {}),
+        ...(item.description ? { description: item.description } : {}),
+      },
+    })),
+  };
+}
+
+/**
  * Render a JSON-LD payload as a string suitable for direct injection into a
  * <script type="application/ld+json"> tag. We collapse to a single line and
  * escape `</` to defeat any future XSS sneakery on the payload boundary.

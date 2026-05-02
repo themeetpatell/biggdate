@@ -22,6 +22,10 @@ const csp = [
 
 const nextConfig: NextConfig = {
   distDir: "dist",
+  // Hide the Next.js dev-mode route indicator. Note: this never appears in
+  // production builds — it's a `next dev`-only widget. Setting false also
+  // removes it from local dev. Build/runtime errors still surface.
+  devIndicators: false,
   async headers() {
     return [
       {

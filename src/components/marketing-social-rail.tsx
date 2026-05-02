@@ -18,7 +18,14 @@ export function MarketingSocialRail() {
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="group flex h-36 w-[52px] flex-col items-center justify-center gap-3 rounded-l-full border border-r-0 border-white/[0.08] bg-[linear-gradient(180deg,rgba(19,22,36,0.96),rgba(12,12,22,0.92))] text-[#f0ebe3] shadow-[-14px_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all hover:border-white/[0.14]"
+          className="group flex h-36 w-[52px] flex-col items-center justify-center gap-3 rounded-l-full backdrop-blur-xl transition-all"
+          style={{
+            background: "var(--bd-glass-bg-strong)",
+            border: "1px solid var(--bd-border)",
+            borderRight: "0",
+            color: "var(--bd-text)",
+            boxShadow: "-14px 22px 60px rgba(0,0,0,0.18)",
+          }}
           aria-label={open ? "Hide social icons" : "Show social icons"}
           aria-expanded={open}
         >
@@ -27,15 +34,33 @@ export function MarketingSocialRail() {
           ) : (
             <ChevronLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
           )}
-          <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[#ff6ac7] [writing-mode:vertical-rl]">
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.32em] [writing-mode:vertical-rl]"
+            style={{ color: "var(--bd-pink)" }}
+          >
             Follow us
           </span>
         </button>
 
-        <aside className="flex flex-col gap-2 rounded-l-[32px] border border-r-0 border-white/[0.08] bg-[linear-gradient(180deg,rgba(19,22,36,0.96),rgba(12,12,22,0.92))] px-3 py-4 shadow-[-18px_28px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+        <aside
+          className="flex flex-col gap-2 rounded-l-[32px] px-3 py-4 backdrop-blur-xl"
+          style={{
+            background: "var(--bd-glass-bg-strong)",
+            border: "1px solid var(--bd-border)",
+            borderRight: "0",
+            boxShadow: "-18px 28px 80px rgba(0,0,0,0.18)",
+          }}
+        >
           {MARKETING_SOCIAL_LINKS.map((item) => {
             const iconButton = (
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-black/15 text-[#f0ebe3] transition-all hover:border-[#ff1493]/22 hover:bg-white/[0.06] hover:text-[#ff6ac7]">
+              <span
+                className="flex h-10 w-10 items-center justify-center rounded-full transition-all"
+                style={{
+                  background: "var(--bd-surface-sunken)",
+                  border: "1px solid var(--bd-border)",
+                  color: "var(--bd-text)",
+                }}
+              >
                 <item.Icon className="size-4" />
                 <span className="sr-only">{item.label}</span>
               </span>
@@ -52,7 +77,11 @@ export function MarketingSocialRail() {
                 {iconButton}
               </a>
             ) : (
-              <div key={item.label} aria-label={item.label} className="opacity-75">
+              <div
+                key={item.label}
+                aria-label={item.label}
+                className="opacity-75"
+              >
                 {iconButton}
               </div>
             );

@@ -174,7 +174,7 @@ export default function MaahiPage() {
         >
           <div
             style={{
-              maxWidth: 480,
+              maxWidth: "var(--bd-app-max-w)",
               margin: "0 auto",
               display: "flex",
               alignItems: "center",
@@ -230,7 +230,7 @@ export default function MaahiPage() {
       >
         <div
           style={{
-            maxWidth: 480,
+            maxWidth: "var(--bd-app-max-w)",
             margin: "0 auto",
             padding: hasMessages
               ? "24px 20px 160px"
@@ -398,7 +398,7 @@ export default function MaahiPage() {
       >
         <div
           style={{
-            maxWidth: 480,
+            maxWidth: "var(--bd-app-max-w)",
             margin: "0 auto",
             display: "flex",
             gap: 10,

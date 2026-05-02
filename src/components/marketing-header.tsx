@@ -11,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV_LINKS = [
   { href: "/#how", label: "Product" },
@@ -26,16 +27,29 @@ export function MarketingHeader({
 }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
-      <nav className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-2 overflow-hidden rounded-[28px] border border-white/[0.08] bg-[rgba(10,12,22,0.86)] px-3 py-3 shadow-[0_18px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl backdrop-saturate-150 sm:gap-3 sm:px-5">
+      <nav
+        className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-2 overflow-hidden rounded-[28px] px-3 py-3 backdrop-blur-2xl backdrop-saturate-150 sm:gap-3 sm:px-5"
+        style={{
+          background: "var(--bd-glass-bg)",
+          border: "1px solid var(--bd-border)",
+          boxShadow: "0 18px 48px rgba(0,0,0,0.18)",
+        }}
+      >
         <div
           className="pointer-events-none absolute inset-0"
           aria-hidden
           style={{
             background:
-              "radial-gradient(circle at top left, rgba(212,104,138,0.18), transparent 36%), radial-gradient(circle at top right, rgba(123,159,255,0.14), transparent 34%)",
+              "radial-gradient(circle at top left, var(--bd-pink-glow), transparent 36%), radial-gradient(circle at top right, var(--bd-blue-glow), transparent 34%)",
           }}
         />
-        <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+        <div
+          className="pointer-events-none absolute inset-x-10 top-0 h-px"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, var(--bd-border-strong), transparent)",
+          }}
+        />
 
         <Link
           href="/"
@@ -48,12 +62,21 @@ export function MarketingHeader({
             height={40}
             className="h-10 w-10 rounded-xl"
           />
-          <span className="block truncate text-sm font-medium text-[#f0ebe3]">
+          <span
+            className="block truncate text-sm font-medium"
+            style={{ color: "var(--bd-text)" }}
+          >
             BiggDate
           </span>
         </Link>
 
-        <div className="hidden items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.04] p-1 md:flex">
+        <div
+          className="hidden items-center gap-1 rounded-full p-1 md:flex"
+          style={{
+            background: "var(--bd-surface-overlay)",
+            border: "1px solid var(--bd-border)",
+          }}
+        >
           {NAV_LINKS.map((link) => {
             const isActive = link.key === activePage;
 
@@ -62,11 +85,11 @@ export function MarketingHeader({
                 key={link.href}
                 href={link.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.24em] transition-all ${
-                  isActive
-                    ? "bg-[#7b9fff]/[0.14] text-[#f0ebe3]"
-                    : "text-[#9ea2ba] hover:bg-[#7b9fff]/[0.14] hover:text-[#f0ebe3]"
-                }`}
+                className="rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.24em] transition-all"
+                style={{
+                  background: isActive ? "var(--bd-accent-soft)" : "transparent",
+                  color: isActive ? "var(--bd-text)" : "var(--bd-text-muted)",
+                }}
               >
                 {link.label}
               </Link>
@@ -74,22 +97,33 @@ export function MarketingHeader({
           })}
         </div>
 
-          <div className="relative flex shrink-0 items-center gap-2">
+        <div className="relative flex shrink-0 items-center gap-2">
+          <ThemeToggle className="hidden sm:inline-flex" />
+
           <Link
             href="/auth?mode=login"
-            className="hidden h-11 items-center rounded-full border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02] px-5 text-sm font-medium text-[#d7d9e5] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-[#f0ebe3] sm:inline-flex"
+            className="hidden h-11 items-center rounded-full px-5 text-sm font-medium transition-all sm:inline-flex"
+            style={{
+              background: "var(--bd-surface)",
+              border: "1px solid var(--bd-border)",
+              color: "var(--bd-text)",
+              boxShadow: "inset 0 1px 0 var(--bd-surface-overlay)",
+            }}
           >
             Enter BiggDate
           </Link>
           <Link
             href="/auth?mode=signup"
-            className="group relative inline-flex h-11 items-center overflow-hidden rounded-full px-3 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(255,20,147,0.3),0_12px_32px_rgba(212,104,138,0.4)] transition-all hover:scale-[1.01] hover:shadow-[0_0_0_1px_rgba(255,20,147,0.4),0_16px_40px_rgba(212,104,138,0.5)] sm:px-6"
+            className="group relative inline-flex h-11 items-center overflow-hidden rounded-full px-3 text-sm font-semibold text-white transition-all hover:scale-[1.01] sm:px-6"
+            style={{
+              boxShadow:
+                "0 0 0 1px rgba(255,20,147,0.3), 0 12px 32px rgba(212,104,138,0.4)",
+            }}
           >
             <span className="absolute inset-0 bg-gradient-to-r from-[#ff1493] via-[#d4688a] to-[#a855f7]" />
             <span className="absolute inset-0 bg-gradient-to-r from-[#ff6ac7] via-[#f04fb8] to-[#b86ef7] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <span className="relative z-10 inline-flex items-center gap-2">
-              <span className="hidden sm:inline">Start Dating</span>
-              <span className="sm:hidden">Start Dating</span>
+              <span>Start Dating</span>
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </Link>
@@ -97,17 +131,32 @@ export function MarketingHeader({
           <Sheet>
             <SheetTrigger
               aria-label="Open navigation menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-[#f0ebe3] transition-all hover:border-white/[0.14] hover:bg-white/[0.08] md:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full transition-all md:hidden"
+              style={{
+                background: "var(--bd-surface)",
+                border: "1px solid var(--bd-border)",
+                color: "var(--bd-text)",
+              }}
             >
               <Menu className="size-4" />
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[85vw] border-white/[0.08] bg-[#0b0d17]/95 text-[#f0ebe3] backdrop-blur-2xl sm:max-w-sm"
+              className="w-[85vw] backdrop-blur-2xl sm:max-w-sm"
+              style={{
+                background: "var(--bd-glass-bg-strong)",
+                borderColor: "var(--bd-border)",
+                color: "var(--bd-text)",
+              }}
             >
-              <SheetHeader className="border-b border-white/[0.06] px-5 py-5">
-                <SheetTitle className="text-[#f0ebe3]">Navigate BiggDate</SheetTitle>
-                <SheetDescription className="text-[#8f92ab]">
+              <SheetHeader
+                className="px-5 py-5"
+                style={{ borderBottom: "1px solid var(--bd-border)" }}
+              >
+                <SheetTitle style={{ color: "var(--bd-text)" }}>
+                  Navigate BiggDate
+                </SheetTitle>
+                <SheetDescription style={{ color: "var(--bd-text-muted)" }}>
                   Open product sections, About us, and Contact from mobile.
                 </SheetDescription>
               </SheetHeader>
@@ -121,11 +170,16 @@ export function MarketingHeader({
                       key={link.href}
                       href={link.href}
                       aria-current={isActive ? "page" : undefined}
-                      className={`rounded-2xl border px-4 py-4 text-sm font-medium transition-all ${
-                        isActive
-                          ? "border-[#ff1493]/20 bg-[#ff1493]/10 text-[#f8c6e8]"
-                          : "border-white/[0.06] bg-white/[0.03] text-[#c2c5d8] hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-[#f0ebe3]"
-                      }`}
+                      className="rounded-2xl px-4 py-4 text-sm font-medium transition-all"
+                      style={{
+                        background: isActive
+                          ? "var(--bd-accent-soft)"
+                          : "var(--bd-surface)",
+                        border: `1px solid ${isActive ? "var(--bd-border-glow)" : "var(--bd-border)"}`,
+                        color: isActive
+                          ? "var(--bd-accent)"
+                          : "var(--bd-text-muted)",
+                      }}
                     >
                       {link.label}
                     </Link>
@@ -133,19 +187,41 @@ export function MarketingHeader({
                 })}
               </div>
 
-              <div className="mt-auto border-t border-white/[0.06] px-5 py-5">
+              <div
+                className="mt-auto px-5 py-5"
+                style={{ borderTop: "1px solid var(--bd-border)" }}
+              >
                 <div className="grid gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      className="text-[11px] font-semibold uppercase tracking-[0.24em]"
+                      style={{ color: "var(--bd-text-faint)" }}
+                    >
+                      Theme
+                    </span>
+                    <ThemeToggle variant="segment" />
+                  </div>
                   <Link
                     href="/auth?mode=login"
-                    className="inline-flex items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] px-5 py-3 text-sm font-medium text-[#f0ebe3] transition-all hover:border-white/[0.14] hover:bg-white/[0.08]"
+                    className="inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all"
+                    style={{
+                      background: "var(--bd-surface)",
+                      border: "1px solid var(--bd-border)",
+                      color: "var(--bd-text)",
+                    }}
                   >
                     Enter BiggDate
                   </Link>
                   <a
                     href="mailto:meet@biggventures.com"
-                    className="inline-flex items-center justify-center rounded-full border border-[#ff1493]/18 bg-[#ff1493]/10 px-5 py-3 text-sm font-medium text-[#f8c6e8] transition-all hover:border-[#ff1493]/30 hover:bg-[#ff1493]/14"
+                    className="inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all"
+                    style={{
+                      background: "var(--bd-accent-soft)",
+                      border: "1px solid var(--bd-border-glow)",
+                      color: "var(--bd-accent)",
+                    }}
                   >
-                    meet@biggventuress.com
+                    meet@biggventures.com
                   </a>
                 </div>
               </div>

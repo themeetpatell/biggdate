@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { BottomNav } from "@/components/bottom-nav";
 import { AuthProvider } from "@/components/auth-provider";
 import { MaahiChat } from "@/components/maahi-chat";
+import { ProfileLauncher } from "@/components/profile-launcher";
+import { ThemeProvider } from "@/components/theme-provider";
 import {
   organizationSchema,
   softwareApplicationSchema,
@@ -61,7 +63,10 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0A0A0F",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f8ff" },
+    { media: "(prefers-color-scheme: dark)", color: "#050914" },
+  ],
 };
 
 export default function RootLayout({
@@ -70,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* JSON-LD: Organization, SoftwareApplication, WebSite — for AEO/GEO discovery */}
         <script
@@ -113,13 +118,21 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        <TooltipProvider>
-          <AuthProvider>
-            {children}
-            <BottomNav />
-            <MaahiChat />
-          </AuthProvider>
-        </TooltipProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <AuthProvider>
+              {children}
+              <ProfileLauncher />
+              <BottomNav />
+              <MaahiChat />
+            </AuthProvider>
+          </TooltipProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

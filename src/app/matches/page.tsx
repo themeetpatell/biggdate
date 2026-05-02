@@ -303,7 +303,7 @@ export default function ConnectPage() {
         style={{
           position: "relative",
           zIndex: 10,
-          maxWidth: 520,
+          maxWidth: "var(--bd-app-max-w)",
           margin: "0 auto",
           padding: "48px 20px 0",
         }}

@@ -21,7 +21,8 @@
       "Read(//Users/themeetpetal/Startups/biggdate/**)",
       "Bash(echo \"tsc exit: $?\")",
       "Bash(echo \"eslint exit: $?\")",
-      "Bash(vercel deploy *)"
+      "Bash(vercel deploy *)",
+      "Bash(xargs cat *)"
     ],
     "additionalDirectories": [
       "/tmp"
