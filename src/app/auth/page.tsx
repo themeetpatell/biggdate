@@ -10,11 +10,12 @@ import {
   EyeOff,
   LockKeyhole,
   Mail,
-  Sparkles,
+  Phone,
   User,
 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { trackSignUp, trackLogin } from "@/lib/gtm";
+import { COUNTRY_PHONE_OPTIONS, TIMEZONE_TO_ISO2 } from "@/lib/location-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +27,19 @@ type AuthResponse = {
   message?: string;
   status?: "authenticated" | "pending_confirmation";
 };
+
+function iso2ToFlag(iso2: string) {
+  return String.fromCodePoint(
+    ...iso2
+      .toUpperCase()
+      .split("")
+      .map((char) => 127397 + char.charCodeAt(0)),
+  );
+}
+
+function formatPhoneOptionLabel(option: (typeof COUNTRY_PHONE_OPTIONS)[number]) {
+  return `${iso2ToFlag(option.iso2)} ${option.dialCode} ${option.iso2}`;
+}
 
 const MODE_CONTENT: Record<
   AuthMode,
@@ -75,6 +89,38 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function normalizePhone(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function isValidPhone(value: string) {
+  return /^\+\d{8,15}$/.test(value);
+}
+
+function inferIso2FromBrowser(): string {
+  if (typeof navigator !== "undefined") {
+    const locales = [navigator.language, ...(navigator.languages || [])].filter(Boolean);
+    for (const locale of locales) {
+      const parts = locale.split("-");
+      const region = parts[parts.length - 1]?.toUpperCase();
+      if (region && COUNTRY_PHONE_OPTIONS.some((option) => option.iso2 === region)) {
+        return region;
+      }
+    }
+  }
+
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz && TIMEZONE_TO_ISO2[tz]) {
+      return TIMEZONE_TO_ISO2[tz];
+    }
+  } catch {
+    // no-op
+  }
+
+  return "IN";
+}
+
 async function readAuthResponse(response: Response): Promise<AuthResponse> {
   const raw = await response.text();
   if (!raw) {
@@ -105,6 +151,8 @@ function AuthPageInner() {
   const [username, setUsername] = useState("");
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneCountryIso2, setPhoneCountryIso2] = useState("IN");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -114,6 +162,10 @@ function AuthPageInner() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [sessionLoadFailed, setSessionLoadFailed] = useState(false);
   const [retryingSession, setRetryingSession] = useState(false);
+
+  useEffect(() => {
+    setPhoneCountryIso2(inferIso2FromBrowser());
+  }, []);
 
   useEffect(() => {
     const modeParam = searchParams.get("mode");
@@ -133,8 +185,12 @@ function AuthPageInner() {
 
   const content = MODE_CONTENT[mode];
   const normalizedEmail = email.trim().toLowerCase();
+  const normalizedPhone = normalizePhone(phone);
   const normalizedFullName = fullName.trim();
   const normalizedUsername = username.trim().toLowerCase();
+  const selectedPhoneOption =
+    COUNTRY_PHONE_OPTIONS.find((option) => option.iso2 === phoneCountryIso2) || COUNTRY_PHONE_OPTIONS[0];
+  const fullPhoneNumber = `${selectedPhoneOption.dialCode}${normalizedPhone}`;
   const fieldSurfaceStyle = {
     background: "var(--bd-surface)",
     border: "1px solid var(--bd-border)",
@@ -149,10 +205,12 @@ function AuthPageInner() {
       normalizedFullName.length > 0 &&
       normalizedUsername.length >= 3 &&
       normalizedEmail.length > 0 &&
+      isValidPhone(fullPhoneNumber) &&
       password.length >= 6 &&
       ageConfirmed;
   } else if (mode === "login") {
-    canSubmit = loginIdentifier.trim().length >= 3 && password.length >= 6;
+    const loginValue = loginIdentifier.trim().toLowerCase();
+    canSubmit = (isValidEmail(loginValue) || loginValue.length >= 3) && password.length >= 6;
   } else if (mode === "forgot") {
     canSubmit = normalizedEmail.length > 0;
   } else if (mode === "reset") {
@@ -170,6 +228,10 @@ function AuthPageInner() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextEmail = email.trim().toLowerCase();
+    const nextPhone = normalizePhone(phone);
+    const nextPhoneOption =
+      COUNTRY_PHONE_OPTIONS.find((option) => option.iso2 === phoneCountryIso2) || COUNTRY_PHONE_OPTIONS[0];
+    const nextFullPhone = `${nextPhoneOption.dialCode}${nextPhone}`;
     const nextFullName = fullName.trim();
     const nextUsername = username.trim().toLowerCase();
     const nextLoginIdentifier = loginIdentifier.trim().toLowerCase();
@@ -199,8 +261,12 @@ function AuthPageInner() {
       setError("Enter a valid email address.");
       return;
     }
-    if (mode === "login" && nextLoginIdentifier.length < 3) {
-      setError("Enter your username.");
+    if (mode === "signup" && !isValidPhone(nextFullPhone)) {
+      setError("Enter a valid phone number.");
+      return;
+    }
+    if (mode === "login" && !isValidEmail(nextLoginIdentifier) && nextLoginIdentifier.length < 3) {
+      setError("Enter your username or email.");
       return;
     }
     if (mode === "signup" && !ageConfirmed) {
@@ -265,6 +331,8 @@ function AuthPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: mode === "signup" ? nextEmail : undefined,
+          phone: mode === "signup" ? nextFullPhone : undefined,
+          phoneCountryIso2: mode === "signup" ? nextPhoneOption.iso2 : undefined,
           password,
           fullName: mode === "signup" ? nextFullName : undefined,
           username: mode === "signup" ? nextUsername : nextLoginIdentifier,
@@ -314,7 +382,7 @@ function AuthPageInner() {
 
   return (
     <div
-      className="relative min-h-screen overflow-hidden px-6 py-10 sm:px-8 lg:px-10"
+      className="relative -mb-[calc(88px+env(safe-area-inset-bottom,0px))] overflow-hidden px-6 py-4 sm:px-8 sm:py-10 lg:mb-0 lg:min-h-screen lg:px-10"
       style={{ background: "var(--bd-bg)", color: "var(--bd-text)" }}
     >
       <div
@@ -344,8 +412,8 @@ function AuthPageInner() {
         }}
       />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-20">
-        <section className="page-enter relative max-w-xl">
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-start gap-8 lg:min-h-[calc(100vh-5rem)] lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-20">
+        <section className="page-enter relative max-w-xl lg:pt-0">
           <div
             className="pointer-events-none absolute -left-10 top-8 h-52 w-52 rounded-full blur-[90px]"
             style={{
@@ -353,21 +421,7 @@ function AuthPageInner() {
                 "radial-gradient(circle, rgba(255,0,255,0.18) 0%, rgba(255,0,255,0.04) 58%, transparent 80%)",
             }}
           />
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
-            style={{
-              border: "1px solid var(--bd-border-glow)",
-              background: "var(--bd-accent-soft)",
-              color: "var(--bd-accent)",
-              boxShadow:
-                "inset 0 1px 0 var(--bd-surface-overlay), 0 10px 24px rgba(0,0,0,0.1)",
-            }}
-          >
-            <Sparkles className="size-3.5" />
-            BiggDate Access
-          </div>
-
-          <div className="mt-10 space-y-5">
+          <div className="mt-7 space-y-4 sm:mt-10 sm:space-y-5">
             <p
               className="text-sm font-medium uppercase tracking-[0.24em]"
               style={{ color: "var(--bd-text-muted)" }}
@@ -375,7 +429,7 @@ function AuthPageInner() {
               {content.eyebrow}
             </p>
             <h1
-              className="max-w-[11ch] text-4xl font-semibold leading-[1.04] tracking-[-0.05em] sm:text-5xl md:text-6xl"
+              className="max-w-[16ch] text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] sm:max-w-[15ch] sm:text-5xl sm:leading-[1.04] sm:tracking-[-0.05em] md:max-w-[12ch] md:text-6xl"
               style={{ color: "var(--bd-text)" }}
             >
               {content.title}
@@ -383,7 +437,7 @@ function AuthPageInner() {
           </div>
 
           <div
-            className="mt-10 h-px w-24"
+            className="mt-7 h-px w-20 sm:mt-10 sm:w-24"
             style={{
               background:
                 "linear-gradient(90deg, var(--bd-accent), var(--bd-blue), transparent)",
@@ -434,16 +488,6 @@ function AuthPageInner() {
                 >
                   {content.hint}
                 </p>
-              </div>
-              <div
-                className="shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] backdrop-blur-xl"
-                style={{
-                  border: "1px solid var(--bd-border-glow)",
-                  color: "var(--bd-accent)",
-                  background: "var(--bd-accent-soft)",
-                }}
-              >
-                Secure Flow
               </div>
             </div>
 
@@ -546,17 +590,55 @@ function AuthPageInner() {
                 </label>
               )}
 
+              {mode === "signup" && (
+                <label className="block space-y-2">
+                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
+                    Phone number
+                  </span>
+                  <div className="grid grid-cols-[144px_1fr] gap-2">
+                    <div className="relative">
+                      <select
+                        value={phoneCountryIso2}
+                        onChange={(e) => setPhoneCountryIso2(e.target.value)}
+                        className="h-14 w-full appearance-none rounded-[1.2rem] pl-4 pr-8 text-sm text-[var(--bd-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                        style={fieldSurfaceStyle}
+                        aria-label="Country code"
+                      >
+                        {COUNTRY_PHONE_OPTIONS.map((option) => (
+                          <option key={`${option.iso2}-${option.dialCode}`} value={option.iso2}>
+                            {formatPhoneOptionLabel(option)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="relative">
+                    <Phone className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
+                    <Input
+                      type="tel"
+                      placeholder="98765 43210"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
+                      style={fieldSurfaceStyle}
+                    />
+                    </div>
+                  </div>
+                </label>
+              )}
+
               {/* ── username field: login ── */}
               {mode === "login" && (
                 <label className="block space-y-2">
                   <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
-                    Username
+                    Username or email
                   </span>
                   <div className="relative">
                     <AtSign className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                     <Input
                       type="text"
-                      placeholder="Your username"
+                      placeholder="username or you@example.com"
                       autoComplete="username"
                       value={loginIdentifier}
                       onChange={(e) => setLoginIdentifier(e.target.value)}

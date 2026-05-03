@@ -2,20 +2,41 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUp, X, Sparkles } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
+
+const ANON_STARTERS = [
+  "How do you actually work?",
+  "Is this just another dating app?",
+  "What's a soul profile?",
+];
+
+const AUTH_STARTERS = [
+  "What's my attachment style?",
+  "Tell me about my latest match",
+  "Am I repeating any patterns?",
+];
 
 export function MaahiChat() {
   const pathname = usePathname();
+  const { userId, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/maahi" }),
-  });
+  // Stable transport — recreating on every render breaks the connection
+  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/maahi" }), []);
+  const { messages, sendMessage, status } = useChat({ transport });
+
+  const isAuthed = Boolean(userId);
+  const starters = isAuthed ? AUTH_STARTERS : ANON_STARTERS;
+  const greeting = isAuthed && profile?.name ? `Hey ${profile.name.split(" ")[0]}` : "Hey, I'm Maahi";
+  const subtitle = isAuthed
+    ? "Quick check-ins live here. For deep work, head to your full Maahi space."
+    : "Your relationship guide. Ask me anything about how this works or what makes us different.";
 
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -124,27 +145,25 @@ export function MaahiChat() {
                 >
                   <Sparkles className="size-5" style={{ color: "var(--bd-accent)" }} />
                 </div>
-                <p className="text-sm font-medium">Hey, I&apos;m Maahi</p>
+                <p className="text-sm font-medium">{greeting}</p>
                 <p className="mt-1.5 max-w-[240px] text-xs leading-relaxed" style={{ color: "var(--bd-text-muted)" }}>
-                  Your relationship guide. Ask me anything about dating, compatibility, or your profile.
+                  {subtitle}
                 </p>
                 <div className="mt-5 flex flex-wrap justify-center gap-1.5">
-                  {["How do I improve my profile?", "What's my attachment style?", "Dating tips for founders"].map(
-                    (q) => (
-                      <button
-                        key={q}
-                        onClick={() => sendMessage({ text: q })}
-                        className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors hover:bg-[var(--bd-surface-hover)]"
-                        style={{
-                          background: "var(--bd-surface)",
-                          border: "1px solid var(--bd-border)",
-                          color: "var(--bd-text-muted)",
-                        }}
-                      >
-                        {q}
-                      </button>
-                    ),
-                  )}
+                  {starters.map((q) => (
+                    <button
+                      key={q}
+                      onClick={() => sendMessage({ text: q })}
+                      className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors hover:bg-[var(--bd-surface-hover)]"
+                      style={{
+                        background: "var(--bd-surface)",
+                        border: "1px solid var(--bd-border)",
+                        color: "var(--bd-text-muted)",
+                      }}
+                    >
+                      {q}
+                    </button>
+                  ))}
                 </div>
               </div>
             ) : (
@@ -228,7 +247,10 @@ export function MaahiChat() {
 
       {/* Floating trigger button — pinned to the right edge of the centered frame */}
       <div className="pointer-events-none fixed inset-x-0 z-50" style={{ bottom: "calc(82px + env(safe-area-inset-bottom, 0px))" }}>
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
+        <div
+          className="relative mx-auto px-4 sm:px-6"
+          style={{ maxWidth: "var(--bd-app-max-w)" }}
+        >
           <button
             onClick={() => setOpen((v) => !v)}
             className="pointer-events-auto absolute right-4 flex size-14 items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 sm:right-6"

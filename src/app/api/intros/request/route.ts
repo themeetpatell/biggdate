@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/require-auth";
 import {
   createIntro,
+  getIntroByUserAndMatchedUser,
   requirePlan,
   incrementUsage,
   updateIntroForSoulKnock,
@@ -45,6 +46,13 @@ export async function POST(req: Request) {
 
   if (!matchId || matchId.length > 200) {
     return NextResponse.json({ error: "Invalid matchId" }, { status: 400 });
+  }
+
+  if (matchedUserId) {
+    const existing = await getIntroByUserAndMatchedUser(auth.userId, matchedUserId);
+    if (existing) {
+      return NextResponse.json({ ...existing, alreadySent: true });
+    }
   }
 
   const intro = await createIntro(auth.userId, matchId, matchName);

@@ -16,6 +16,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
+  BadgeCheck,
   BriefcaseBusiness,
   Camera,
   Eye,
@@ -44,6 +45,7 @@ import {
 } from "@/components/ui/select";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/components/auth-provider";
+import { getTier1Tier2CitiesForCountry, COUNTRY_PHONE_OPTIONS } from "@/lib/location-data";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { compressImage } from "@/lib/photo-compress";
 import { ZODIAC_EMOJI } from "@/lib/zodiac";
@@ -87,6 +89,7 @@ import {
   FAMILY_INVOLVEMENT_OPTIONS,
   CULTURAL_ALIGNMENT_OPTIONS,
   MARRIAGE_TYPE_OPTIONS,
+  EDUCATION_OPTIONS,
 } from "@/lib/profile-options";
 
 const MAX_PHOTOS = 6;
@@ -902,9 +905,14 @@ function PhotoHero({
 
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[1.6rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.45rem]">
-                {profile.name}
-                {profile.showAge && profile.age ? `, ${profile.age}` : ""}
+              <h1 className="inline-flex flex-wrap items-center gap-2 text-[1.6rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.45rem]">
+                <span>
+                  {profile.name}
+                  {profile.showAge && profile.age ? `, ${profile.age}` : ""}
+                </span>
+                {profile.isVerified && (
+                  <BadgeCheck className="h-7 w-7 shrink-0 text-[#1d9bf0] sm:h-9 sm:w-9" aria-label="Verified" />
+                )}
               </h1>
               {headline ? (
                 <p className="mt-2 max-w-[44rem] text-[1.05rem] leading-8 text-white/78">
@@ -934,6 +942,7 @@ function PhotoHero({
 
 function ProfileEditor({
   userId,
+  countryIso2,
   draft,
   setDraft,
   activeTab,
@@ -946,6 +955,7 @@ function ProfileEditor({
   error,
 }: {
   userId: string;
+  countryIso2: string | null;
   draft: HydratedProfile | null;
   setDraft: Dispatch<SetStateAction<HydratedProfile | null>>;
   activeTab: EditorTab;
@@ -971,6 +981,8 @@ function ProfileEditor({
       });
     }
   }, [open, activeTab, focusedTab]);
+
+  const cityOptions = useMemo(() => getTier1Tier2CitiesForCountry(countryIso2), [countryIso2]);
 
   if (!draft) return null;
 
@@ -1144,7 +1156,7 @@ function ProfileEditor({
                         <TextInput
                           value={draft.name}
                           onChange={(event) => setField("name", event.target.value)}
-                          placeholder="Your first name"
+                          placeholder="Your full name"
                         />
                       </Field>
                       <Field label="Date of birth">
@@ -1256,19 +1268,40 @@ function ProfileEditor({
                           placeholder={`5'7"`}
                         />
                       </Field>
+                      {countryIso2 && (
+                        <p className="-mb-2 text-xs text-white/40">
+                          Cities in {COUNTRY_PHONE_OPTIONS.find((o) => o.iso2 === countryIso2)?.name ?? countryIso2}
+                        </p>
+                      )}
                       <Field label="City">
-                        <TextInput
+                        <SelectInput
                           value={draft.city}
                           onChange={(event) => setField("city", event.target.value)}
-                          placeholder="Dubai"
-                        />
+                          placeholder="Select city"
+                        >
+                          <option value="">Select city</option>
+                          {cityOptions.map((city) => (
+                            <option key={city} value={city}>{city}</option>
+                          ))}
+                          {draft.city && !cityOptions.includes(draft.city) ? (
+                            <option value={draft.city}>{draft.city} (saved)</option>
+                          ) : null}
+                        </SelectInput>
                       </Field>
                       <Field label="Hometown">
-                        <TextInput
+                        <SelectInput
                           value={draft.hometown || ""}
-                          onChange={(event) => setField("hometown", event.target.value)}
-                          placeholder="Mumbai"
-                        />
+                          onChange={(event) => setField("hometown", event.target.value || null)}
+                          placeholder="Select hometown"
+                        >
+                          <option value="">Select hometown</option>
+                          {cityOptions.map((city) => (
+                            <option key={`h-${city}`} value={city}>{city}</option>
+                          ))}
+                          {draft.hometown && !cityOptions.includes(draft.hometown) ? (
+                            <option value={draft.hometown}>{draft.hometown} (saved)</option>
+                          ) : null}
+                        </SelectInput>
                       </Field>
                     </div>
 
@@ -1351,11 +1384,22 @@ function ProfileEditor({
                           />
                         </Field>
                         <Field label="Education">
-                          <TextInput
-                            value={draft.education || ""}
-                            onChange={(event) => setField("education", event.target.value)}
-                            placeholder="NYU"
-                          />
+                          <SelectInput
+                            value={
+                              draft.education && (EDUCATION_OPTIONS as readonly string[]).includes(draft.education)
+                                ? draft.education
+                                : ""
+                            }
+                            onChange={(event) => setField("education", event.target.value || null)}
+                          >
+                            <option value="">Select education level</option>
+                            {EDUCATION_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                            {draft.education && !(EDUCATION_OPTIONS as readonly string[]).includes(draft.education) ? (
+                              <option value={draft.education}>{draft.education} (saved)</option>
+                            ) : null}
+                          </SelectInput>
                         </Field>
                       </div>
                       <div className="border-t border-white/6 pt-4">
@@ -2301,6 +2345,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [signupCountryIso2, setSignupCountryIso2] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !profile) {
@@ -2313,6 +2358,25 @@ export default function ProfilePage() {
       setDraft(createEditorDraft(profile));
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    let cancelled = false;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (typeof data?.phoneCountryIso2 === "string" && data.phoneCountryIso2.trim()) {
+          setSignupCountryIso2(data.phoneCountryIso2.trim().toUpperCase());
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const hydrated = useMemo(() => (profile ? hydrateProfile(profile) : null), [profile]);
   const completion = useMemo(() => (hydrated ? getCompletion(hydrated) : null), [hydrated]);
@@ -2927,6 +2991,7 @@ export default function ProfilePage() {
       {editorOpen ? (
         <ProfileEditor
           userId={userId!}
+          countryIso2={signupCountryIso2}
           draft={draft}
           setDraft={setDraft}
           activeTab={editorTab}

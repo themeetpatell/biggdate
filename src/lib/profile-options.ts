@@ -165,3 +165,18 @@ export const CULTURAL_ALIGNMENT_OPTIONS = [
 export const MARRIAGE_TYPE_OPTIONS = [
   "Love marriage", "Arranged marriage", "Hybrid / semi-arranged",
 ] as const;
+
+export const EDUCATION_OPTIONS = [
+  "High school",
+  "Some college",
+  "Bachelor's degree",
+  "Master's degree",
+  "MBA",
+  "PhD / Doctorate",
+  "Medical degree (MD/MBBS)",
+  "Law degree (JD/LLB)",
+  "Trade / Vocational",
+  "Currently studying",
+  "Self-taught",
+  "Other",
+] as const;

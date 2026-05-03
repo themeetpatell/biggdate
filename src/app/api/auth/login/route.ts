@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const normalizedPassword = typeof password === "string" ? password : "";
 
   if (!identifier || !normalizedPassword) {
-    return NextResponse.json({ error: "Username and password required" }, { status: 400 });
+    return NextResponse.json({ error: "Username or email and password required" }, { status: 400 });
   }
 
   let normalizedEmail = identifier;
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    return NextResponse.json({ error: "Invalid username/email or password" }, { status: 401 });
   }
 
   return NextResponse.json({

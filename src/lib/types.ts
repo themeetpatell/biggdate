@@ -81,6 +81,7 @@ export interface Profile {
   loveLanguageReceive?: string[];
   linkedinUrl?: string | null;
   websiteUrl?: string | null;
+  isVerified?: boolean;
 }
 
 // L2 BiggDate v2.0: narrative + compatibility signals, no zodiac/score
@@ -92,7 +93,7 @@ export interface Match {
   profession: string;
   emoji: string;
   // Real-user fields (populated when matched against a real profile)
-  matchedUserId?: string;       // the real user's auth ID — undefined for legacy AI matches
+  matchedUserId?: string;       // auth user ID of the matched real user
   photos?: string[];            // unlocked after mutual intention
   photosUnlocked?: boolean;     // true once both users have sent Soul Knocks
   // Narrative fields
@@ -283,6 +284,8 @@ export interface PulsePost {
   promptContent: string | null;
   content: string;
   isVerified: boolean;
+  isAuthor: boolean;
+  authorHandle: string;
   resonateCount: number;
   replyCount: number;
   isResonated: boolean;
@@ -294,6 +297,17 @@ export interface PulseReply {
   postId: string;
   content: string;
   isVerified: boolean;
+  authorHandle: string;
   resonateCount: number;
   createdAt: string;
+}
+
+export type PulseSort = "hot" | "new";
+
+export interface PulseUserStats {
+  lifetimeHearts: number;
+  currentStreak: number;
+  bestStreak: number;
+  postsToday: number;
+  heartsToday: number;
 }

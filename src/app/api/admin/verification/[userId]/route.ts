@@ -14,6 +14,9 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const { userId } = await params;
-  await approveVerification(userId);
+  const result = await approveVerification(userId);
+  if (!result.ok) {
+    return NextResponse.json({ error: result.reason }, { status: 400 });
+  }
   return NextResponse.json({ ok: true });
 }

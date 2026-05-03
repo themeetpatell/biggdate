@@ -48,7 +48,7 @@ export default function VerifyPage() {
         });
         if (!r.ok) { setMessage("Selfie upload failed"); return; }
       }
-      setMessage("Submitted! You'll get your pink tick once our team reviews it.");
+      setMessage("Submitted! Your badge appears automatically once your profile is complete and LinkedIn is added.");
       setStatus((prev) => prev
         ? { ...prev, hasLinkedin: Boolean(linkedinUrl || prev.hasLinkedin), hasSelfie: Boolean(selfiePreview || prev.hasSelfie) }
         : prev
@@ -103,7 +103,7 @@ export default function VerifyPage() {
           <>
             <div style={card}>
               <p style={{ fontSize: 14, color: "var(--bd-text-faint)", lineHeight: 1.6, margin: 0 }}>
-                Verify your identity to earn a pink tick on Pulse. Your name stays hidden — the tick just shows you&apos;re a real person in the builder community.
+                Add your LinkedIn and complete your profile to unlock the verified badge. Your name stays hidden — the tick just shows you&apos;re a real person in the builder community.
               </p>
             </div>
 

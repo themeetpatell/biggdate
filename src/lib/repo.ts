@@ -14,7 +14,10 @@ import type {
   GatedAction,
   PlanGateResult,
   PulsePostType,
+  PulseSort,
+  PulseUserStats,
 } from "./types";
+import { createHash } from "node:crypto";
 
 function createId(prefix: string) {
   return `${prefix}_${randomUUID()}`;
@@ -24,7 +27,7 @@ function createId(prefix: string) {
 
 export async function getAccountHandleByUserId(userId: string) {
   const rows = await sql`
-    SELECT user_id, email, username, full_name
+    SELECT user_id, email, username, full_name, phone_number
     FROM account_handles
     WHERE user_id = ${userId}
     LIMIT 1
@@ -36,12 +39,13 @@ export async function getAccountHandleByUserId(userId: string) {
     email: row.email as string,
     username: row.username as string,
     fullName: (row.full_name as string) || "",
+    phoneNumber: (row.phone_number as string) || null,
   };
 }
 
 export async function getAccountHandleByUsername(username: string) {
   const rows = await sql`
-    SELECT user_id, email, username, full_name
+    SELECT user_id, email, username, full_name, phone_number
     FROM account_handles
     WHERE username = ${username}
     LIMIT 1
@@ -53,6 +57,7 @@ export async function getAccountHandleByUsername(username: string) {
     email: row.email as string,
     username: row.username as string,
     fullName: (row.full_name as string) || "",
+    phoneNumber: (row.phone_number as string) || null,
   };
 }
 
@@ -61,19 +66,22 @@ export async function upsertAccountHandle({
   email,
   username,
   fullName,
+  phoneNumber,
 }: {
   userId: string;
   email: string;
   username: string;
   fullName: string;
+  phoneNumber?: string | null;
 }) {
   await sql`
-    INSERT INTO account_handles (user_id, email, username, full_name)
-    VALUES (${userId}, ${email}, ${username}, ${fullName})
+    INSERT INTO account_handles (user_id, email, username, full_name, phone_number)
+    VALUES (${userId}, ${email}, ${username}, ${fullName}, ${phoneNumber ?? null})
     ON CONFLICT (user_id) DO UPDATE SET
       email = EXCLUDED.email,
       username = EXCLUDED.username,
       full_name = EXCLUDED.full_name,
+      phone_number = EXCLUDED.phone_number,
       updated_at = NOW()
   `;
 }
@@ -241,6 +249,8 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
       )
     `;
   }
+
+  await syncAutoVerificationStatus(userId);
 }
 
 function rowToProfile(row: Record<string, unknown>): Profile {
@@ -319,6 +329,7 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     loveLanguageReceive: safeParseJson(row.love_language_receive as string, []),
     linkedinUrl: (row.linkedin_url as string) || null,
     websiteUrl: (row.website_url as string) || null,
+    isVerified: Boolean(row.is_verified),
   };
 }
 
@@ -580,6 +591,24 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
 // ─── Intros / Passes / Debriefs ───
 
 export async function createIntro(userId: string, matchId: string, matchName: string, icebreakers: string[] = []) {
+  const existing = await sql`
+    SELECT * FROM intros
+    WHERE user_id = ${userId} AND match_id = ${matchId}
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+  if (existing.length) {
+    const row = existing[0] as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      matchId: row.match_id as string,
+      matchName: row.match_name as string,
+      status: (row.status as string) || "requested",
+      icebreakers: safeParseJson(row.icebreakers as string, []),
+      createdAt: (row.created_at as string) || new Date().toISOString(),
+    };
+  }
+
   const id = createId("intro");
   await sql`
     INSERT INTO intros (id, user_id, match_id, match_name, icebreakers)
@@ -588,8 +617,38 @@ export async function createIntro(userId: string, matchId: string, matchName: st
   return { id, matchId, matchName, status: "requested", icebreakers, createdAt: new Date().toISOString() };
 }
 
+export async function getIntroByUserAndMatchedUser(userId: string, matchedUserId: string) {
+  const rows = await sql`
+    SELECT * FROM intros
+    WHERE user_id = ${userId} AND matched_user_id = ${matchedUserId}
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    matchId: row.match_id as string,
+    matchName: row.match_name as string,
+    status: (row.status as string) || "requested",
+    matchedUserId: (row.matched_user_id as string) || null,
+    soulKnockQuestion: (row.soul_knock_question as string) || null,
+    icebreakers: safeParseJson(row.icebreakers as string, []),
+    createdAt: row.created_at as string,
+  };
+}
+
 export async function getIntrosForUser(userId: string) {
-  const rows = await sql`SELECT * FROM intros WHERE user_id = ${userId} ORDER BY created_at DESC`;
+  const rows = await sql`
+    SELECT * FROM (
+      SELECT DISTINCT ON (COALESCE(matched_user_id::text, match_id)) *
+      FROM intros
+      WHERE user_id = ${userId}
+      ORDER BY COALESCE(matched_user_id::text, match_id), created_at DESC
+    ) deduped
+    ORDER BY created_at DESC
+  `;
   return rows.map((r) => {
     const row = r as Record<string, unknown>;
     return {
@@ -608,6 +667,33 @@ export async function updateIntroDateNudge(introId: string, venueSuggestion: str
     UPDATE intros SET date_nudge_sent_at = NOW(), venue_suggestion = ${venueSuggestion}
     WHERE id = ${introId}
   `;
+}
+
+export async function withdrawPendingIntro(userId: string, introId: string): Promise<boolean> {
+  const rows = await sql`
+    DELETE FROM intros
+    WHERE id = ${introId}
+      AND user_id = ${userId}
+      AND COALESCE(receiver_answered, false) = false
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+export async function modifySoulKnockQuestion(
+  userId: string,
+  introId: string,
+  soulKnockQuestion: string,
+): Promise<boolean> {
+  const rows = await sql`
+    UPDATE intros
+    SET soul_knock_question = ${soulKnockQuestion}
+    WHERE id = ${introId}
+      AND user_id = ${userId}
+      AND COALESCE(receiver_answered, false) = false
+    RETURNING id
+  `;
+  return rows.length > 0;
 }
 
 export async function createPass(userId: string, matchId: string, matchName: string, reason: string) {
@@ -811,6 +897,8 @@ export async function getRealUserCandidates(
     JOIN account_handles ah ON ah.user_id = p.user_id
     WHERE p.user_id != ALL(${excludeIds}::text[])
       AND p.profile_visibility = 'visible'
+      AND ah.email NOT LIKE ${"%@seed.biggdate.app"}
+      AND ah.email NOT LIKE ${"%+seed@%"}
       AND (${partnerGender}::text IS NULL OR p.gender = ${partnerGender})
       AND (${ageMin}::int IS NULL OR p.age >= ${ageMin})
       AND (${ageMax}::int IS NULL OR p.age <= ${ageMax})
@@ -939,6 +1027,54 @@ export async function createThread(userAId: string, userBId: string, introId: st
     userBId: row.user_b_id as string,
     introId: row.intro_id as string,
     createdAt: (row.created_at as string) || now,
+  };
+}
+
+// ─── Dashboard Check-in ───
+
+export type DashboardCheckinMood = "drained" | "neutral" | "open" | "energized";
+
+export async function getTodayDashboardCheckin(userId: string): Promise<{
+  mood: DashboardCheckinMood;
+  note: string | null;
+  createdAt: string;
+  checkinDate: string;
+} | null> {
+  const rows = await sql`
+    SELECT mood, note, created_at, checkin_date
+    FROM dashboard_checkins
+    WHERE user_id = ${userId}
+      AND checkin_date = CURRENT_DATE
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    mood: row.mood as DashboardCheckinMood,
+    note: (row.note as string) ?? null,
+    createdAt: String(row.created_at ?? ""),
+    checkinDate: String(row.checkin_date ?? ""),
+  };
+}
+
+export async function upsertTodayDashboardCheckin(userId: string, mood: DashboardCheckinMood, note?: string | null) {
+  const rows = await sql`
+    INSERT INTO dashboard_checkins (user_id, checkin_date, mood, note)
+    VALUES (${userId}, CURRENT_DATE, ${mood}, ${note ?? null})
+    ON CONFLICT (user_id, checkin_date) DO UPDATE SET
+      mood = EXCLUDED.mood,
+      note = EXCLUDED.note,
+      updated_at = NOW()
+    RETURNING mood, note, created_at, checkin_date
+  `;
+
+  const row = rows[0] as Record<string, unknown>;
+  return {
+    mood: row.mood as DashboardCheckinMood,
+    note: (row.note as string) ?? null,
+    createdAt: String(row.created_at ?? ""),
+    checkinDate: String(row.checkin_date ?? ""),
   };
 }
 
@@ -1171,27 +1307,45 @@ function safeParseJson<T>(str: string | null | undefined, fallback: T): T {
 
 // ─── Pulse ───────────────────────────────────────────────────────────────────
 
-export async function getTodayPulsePrompt() {
+// Per-thread anonymous handle: stable within one post's thread, unlinkable across threads.
+// hash(scopeId + userId) → "Anon-X##" where X is a letter and ## a number.
+const ANON_SECRET = process.env.PULSE_ANON_SECRET ?? "biggdate-pulse-anon-v1";
+function anonHandle(scopeId: string, userId: string): string {
+  const h = createHash("sha256").update(`${ANON_SECRET}|${scopeId}|${userId}`).digest();
+  const letter = String.fromCharCode(65 + (h[0] % 26));
+  const num = ((h[1] << 8) | h[2]) % 100;
+  return `Anon-${letter}${num.toString().padStart(2, "0")}`;
+}
+
+export async function getActivePulsePrompts(limit = 5) {
   const rows = await sql`
     SELECT id, content, published_at, is_active, created_at
     FROM pulse_prompts
     WHERE is_active = true
     ORDER BY published_at DESC
-    LIMIT 1
+    LIMIT ${limit}
   `;
-  if (!rows.length) return null;
-  const r = rows[0] as Record<string, unknown>;
-  return {
-    id: r.id as string,
-    content: r.content as string,
-    publishedAt: r.published_at as string,
-    isActive: r.is_active as boolean,
-    createdAt: r.created_at as string,
-  };
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      content: row.content as string,
+      publishedAt: row.published_at as string,
+      isActive: row.is_active as boolean,
+      createdAt: row.created_at as string,
+    };
+  });
+}
+
+// Kept for compatibility; returns the most recent active prompt or null.
+export async function getTodayPulsePrompt() {
+  const list = await getActivePulsePrompts(1);
+  return list[0] ?? null;
 }
 
 export async function createPulsePrompt(content: string) {
-  await sql`UPDATE pulse_prompts SET is_active = false WHERE is_active = true`;
+  // Multiple prompts can stay active simultaneously — feed shows them as
+  // an inspo carousel, not a single daily ritual.
   const id = createId("pp");
   await sql`
     INSERT INTO pulse_prompts (id, content, is_active, published_at, created_at)
@@ -1200,49 +1354,134 @@ export async function createPulsePrompt(content: string) {
   return id;
 }
 
-export async function getPulseFeed(currentUserId: string, cursor?: string, limit = 20) {
-  const rows = cursor
-    ? await sql`
-        SELECT p.id, p.type, p.prompt_id, p.content, p.is_verified,
-               p.resonate_count, p.reply_count, p.created_at,
-               pr.content AS prompt_content,
-               EXISTS(
-                 SELECT 1 FROM pulse_reactions r
-                 WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
-               ) AS is_resonated
-        FROM pulse_posts p
-        LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
-        WHERE p.is_hidden = false AND p.created_at < ${cursor}
-        ORDER BY p.created_at DESC
-        LIMIT ${limit}
-      `
-    : await sql`
-        SELECT p.id, p.type, p.prompt_id, p.content, p.is_verified,
-               p.resonate_count, p.reply_count, p.created_at,
-               pr.content AS prompt_content,
-               EXISTS(
-                 SELECT 1 FROM pulse_reactions r
-                 WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
-               ) AS is_resonated
-        FROM pulse_posts p
-        LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
-        WHERE p.is_hidden = false
-        ORDER BY p.created_at DESC
-        LIMIT ${limit}
-      `;
+export async function getAllPulsePrompts(limit = 100) {
+  const rows = await sql`
+    SELECT id, content, published_at, is_active, created_at
+    FROM pulse_prompts
+    ORDER BY is_active DESC, published_at DESC
+    LIMIT ${limit}
+  `;
   return rows.map((r) => {
     const row = r as Record<string, unknown>;
     return {
       id: row.id as string,
+      content: row.content as string,
+      publishedAt: row.published_at as string,
+      isActive: row.is_active as boolean,
+      createdAt: row.created_at as string,
+    };
+  });
+}
+
+export async function setPulsePromptActive(id: string, isActive: boolean) {
+  await sql`UPDATE pulse_prompts SET is_active = ${isActive} WHERE id = ${id}`;
+}
+
+export async function deletePulsePrompt(id: string) {
+  // pulse_posts.prompt_id is FK with ON DELETE SET NULL → posts survive, just lose the label
+  await sql`DELETE FROM pulse_prompts WHERE id = ${id}`;
+}
+
+export async function getPulseFeed(
+  currentUserId: string,
+  opts: { sort?: PulseSort; cursor?: string; limit?: number; promptId?: string } = {}
+) {
+  const sort: PulseSort = opts.sort ?? "hot";
+  const limit = opts.limit ?? 20;
+  const cursor = opts.cursor;
+  const promptId = opts.promptId;
+
+  // Hot score: hearts / (hours_since + 2)^1.5 — matches the design.
+  // Cursor for "hot" is the last row's hot_score (string-encoded for stable JSON);
+  // cursor for "new" is the last row's created_at.
+  const rows = sort === "hot"
+    ? (cursor
+        ? await sql`
+            SELECT p.id, p.user_id, p.type, p.prompt_id, p.content, p.is_verified,
+                   p.resonate_count, p.reply_count, p.created_at,
+                   pr.content AS prompt_content,
+                   EXISTS(
+                     SELECT 1 FROM pulse_reactions r
+                     WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
+                   ) AS is_resonated,
+                   (p.resonate_count::float / power(extract(epoch from (now() - p.created_at)) / 3600.0 + 2, 1.5)) AS hot_score
+            FROM pulse_posts p
+            LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
+            WHERE p.is_hidden = false
+              AND (${promptId ?? null}::text IS NULL OR p.prompt_id = ${promptId ?? null})
+              AND (p.resonate_count::float / power(extract(epoch from (now() - p.created_at)) / 3600.0 + 2, 1.5)) < ${parseFloat(cursor)}
+            ORDER BY hot_score DESC, p.created_at DESC
+            LIMIT ${limit}
+          `
+        : await sql`
+            SELECT p.id, p.user_id, p.type, p.prompt_id, p.content, p.is_verified,
+                   p.resonate_count, p.reply_count, p.created_at,
+                   pr.content AS prompt_content,
+                   EXISTS(
+                     SELECT 1 FROM pulse_reactions r
+                     WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
+                   ) AS is_resonated,
+                   (p.resonate_count::float / power(extract(epoch from (now() - p.created_at)) / 3600.0 + 2, 1.5)) AS hot_score
+            FROM pulse_posts p
+            LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
+            WHERE p.is_hidden = false
+              AND (${promptId ?? null}::text IS NULL OR p.prompt_id = ${promptId ?? null})
+            ORDER BY hot_score DESC, p.created_at DESC
+            LIMIT ${limit}
+          `)
+    : (cursor
+        ? await sql`
+            SELECT p.id, p.user_id, p.type, p.prompt_id, p.content, p.is_verified,
+                   p.resonate_count, p.reply_count, p.created_at,
+                   pr.content AS prompt_content,
+                   EXISTS(
+                     SELECT 1 FROM pulse_reactions r
+                     WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
+                   ) AS is_resonated,
+                   NULL::float AS hot_score
+            FROM pulse_posts p
+            LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
+            WHERE p.is_hidden = false
+              AND (${promptId ?? null}::text IS NULL OR p.prompt_id = ${promptId ?? null})
+              AND p.created_at < ${cursor}
+            ORDER BY p.created_at DESC
+            LIMIT ${limit}
+          `
+        : await sql`
+            SELECT p.id, p.user_id, p.type, p.prompt_id, p.content, p.is_verified,
+                   p.resonate_count, p.reply_count, p.created_at,
+                   pr.content AS prompt_content,
+                   EXISTS(
+                     SELECT 1 FROM pulse_reactions r
+                     WHERE r.post_id = p.id AND r.user_id = ${currentUserId}
+                   ) AS is_resonated,
+                   NULL::float AS hot_score
+            FROM pulse_posts p
+            LEFT JOIN pulse_prompts pr ON pr.id = p.prompt_id
+            WHERE p.is_hidden = false
+              AND (${promptId ?? null}::text IS NULL OR p.prompt_id = ${promptId ?? null})
+            ORDER BY p.created_at DESC
+            LIMIT ${limit}
+          `);
+
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    const id = row.id as string;
+    const userId = row.user_id as string;
+    return {
+      id,
       type: row.type as PulsePostType,
       promptId: (row.prompt_id as string) || null,
       promptContent: (row.prompt_content as string) || null,
       content: row.content as string,
       isVerified: row.is_verified as boolean,
+      isAuthor: userId === currentUserId,
+      authorHandle: anonHandle(id, userId),
       resonateCount: row.resonate_count as number,
       replyCount: row.reply_count as number,
       isResonated: row.is_resonated as boolean,
       createdAt: row.created_at as string,
+      _hotScore: row.hot_score as number | null,
     };
   });
 }
@@ -1283,7 +1522,7 @@ export async function togglePulseReaction(postId: string, userId: string): Promi
 
 export async function getPulseReplies(postId: string) {
   const rows = await sql`
-    SELECT id, content, is_verified, resonate_count, created_at
+    SELECT id, user_id, content, is_verified, resonate_count, created_at
     FROM pulse_replies
     WHERE post_id = ${postId} AND is_hidden = false
     ORDER BY created_at ASC
@@ -1295,10 +1534,40 @@ export async function getPulseReplies(postId: string) {
       postId,
       content: row.content as string,
       isVerified: row.is_verified as boolean,
+      authorHandle: anonHandle(postId, row.user_id as string),
       resonateCount: row.resonate_count as number,
       createdAt: row.created_at as string,
     };
   });
+}
+
+export async function getPulseUserStats(userId: string): Promise<PulseUserStats> {
+  const statsRows = await sql`
+    SELECT lifetime_hearts, current_streak, best_streak
+    FROM pulse_user_stats
+    WHERE user_id = ${userId}
+    LIMIT 1
+  `;
+  const todayRows = await sql`
+    SELECT
+      (SELECT COUNT(*)::int FROM pulse_posts
+       WHERE user_id = ${userId}
+         AND created_at >= (now() at time zone 'utc')::date) AS posts_today,
+      (SELECT COUNT(*)::int FROM pulse_reactions r
+       JOIN pulse_posts p ON p.id = r.post_id
+       WHERE p.user_id = ${userId}
+         AND r.user_id <> ${userId}
+         AND r.created_at >= (now() at time zone 'utc')::date) AS hearts_today
+  `;
+  const stat = (statsRows[0] as Record<string, unknown> | undefined) ?? {};
+  const t = todayRows[0] as Record<string, unknown>;
+  return {
+    lifetimeHearts: (stat.lifetime_hearts as number | undefined) ?? 0,
+    currentStreak: (stat.current_streak as number | undefined) ?? 0,
+    bestStreak: (stat.best_streak as number | undefined) ?? 0,
+    postsToday: (t.posts_today as number) ?? 0,
+    heartsToday: (t.hearts_today as number) ?? 0,
+  };
 }
 
 export async function createPulseReply({
@@ -1339,6 +1608,53 @@ export async function getUserVerificationStatus(userId: string): Promise<boolean
   return (rows[0] as Record<string, unknown>).is_verified as boolean;
 }
 
+function isProfileCompleteForVerification(profile: Profile): boolean {
+  const interests = profile.interests ?? [];
+  const prompts = profile.prompts ?? [];
+  const loveLanguageGive = profile.loveLanguageGive ?? [];
+  const loveLanguageReceive = profile.loveLanguageReceive ?? [];
+  const attractionPreferences = profile.attractionPreferences ?? [];
+
+  const checks = [
+    profile.photos.length >= 3,
+    Boolean(profile.summary),
+    Boolean(profile.intent || profile.relationshipTimeline),
+    Boolean(profile.jobTitle || profile.education),
+    Boolean(profile.exercise || profile.drinking || profile.smoking),
+    interests.length >= 3,
+    prompts.filter((p) => p.answer).length >= 2,
+    loveLanguageGive.length > 0 || loveLanguageReceive.length > 0,
+    attractionPreferences.length > 0,
+    Boolean(profile.emotionalAvailability),
+    Boolean(profile.profileVisibility),
+  ];
+
+  return checks.every(Boolean);
+}
+
+async function syncAutoVerificationStatus(userId: string): Promise<boolean> {
+  const rows = await sql`SELECT * FROM profiles WHERE user_id = ${userId} LIMIT 1`;
+  if (!rows.length) return false;
+
+  const profile = rowToProfile(rows[0] as Record<string, unknown>);
+  const hasLinkedin = Boolean((profile.linkedinUrl || "").trim());
+  const isEligible = hasLinkedin && isProfileCompleteForVerification(profile);
+
+  await sql`
+    UPDATE profiles
+    SET
+      is_verified = ${isEligible},
+      verified_at = CASE
+        WHEN ${isEligible} THEN COALESCE(verified_at, NOW())
+        ELSE NULL
+      END,
+      updated_at = NOW()
+    WHERE user_id = ${userId}
+  `;
+
+  return isEligible;
+}
+
 export async function saveVerificationSubmission(
   userId: string,
   linkedinUrl: string,
@@ -1348,13 +1664,20 @@ export async function saveVerificationSubmission(
     UPDATE profiles SET linkedin_url = ${linkedinUrl}, selfie_url = ${selfieUrl}
     WHERE user_id = ${userId}
   `;
+
+  await syncAutoVerificationStatus(userId);
 }
 
-export async function approveVerification(userId: string) {
-  await sql`
-    UPDATE profiles SET is_verified = true, verified_at = NOW()
-    WHERE user_id = ${userId}
-  `;
+export async function approveVerification(userId: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const isEligible = await syncAutoVerificationStatus(userId);
+  if (!isEligible) {
+    return {
+      ok: false,
+      reason: "Verification requires a 100% complete profile and a LinkedIn URL",
+    };
+  }
+
+  return { ok: true };
 }
 
 export async function getFlaggedPulsePosts() {
@@ -1388,20 +1711,24 @@ export async function setPulsePostVisibility(postId: string, isHidden: boolean) 
 
 export async function getPendingVerifications() {
   const rows = await sql`
-    SELECT user_id, linkedin_url, selfie_url, is_verified
+    SELECT *
     FROM profiles
     WHERE linkedin_url != '' AND selfie_url != '' AND is_verified = false
     ORDER BY updated_at DESC
     LIMIT 50
   `;
-  return rows.map((r) => {
-    const row = r as Record<string, unknown>;
-    return {
+  return rows
+    .map((r) => {
+      const row = r as Record<string, unknown>;
+      const profile = rowToProfile(row);
+      return { row, profile };
+    })
+    .filter(({ profile }) => Boolean((profile.linkedinUrl || "").trim()) && isProfileCompleteForVerification(profile))
+    .map(({ row, profile }) => ({
       userId: row.user_id as string,
-      linkedinUrl: row.linkedin_url as string,
-      selfieUrl: row.selfie_url as string,
-    };
-  });
+      linkedinUrl: profile.linkedinUrl || "",
+      selfieUrl: (row.selfie_url as string) || "",
+    }));
 }
 
 // ─── Stripe webhook idempotency ───

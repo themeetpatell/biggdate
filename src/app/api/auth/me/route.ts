@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionFromCookies } from "@/lib/auth";
-import { getProfileByUserId } from "@/lib/repo";
+import { inferCountryIso2FromPhone } from "@/lib/location-data";
+import { getAccountHandleByUserId, getProfileByUserId } from "@/lib/repo";
 
 export async function GET() {
   const session = await getSessionFromCookies();
@@ -12,11 +13,15 @@ export async function GET() {
   }
 
   const profile = await getProfileByUserId(session.userId);
+  const accountHandle = await getAccountHandleByUserId(session.userId);
+  const phoneCountryIso2 =
+    session.phoneCountryIso2 ?? inferCountryIso2FromPhone(accountHandle?.phoneNumber ?? null);
 
   return NextResponse.json(
     {
       userId: session.userId,
       email: session.email,
+      phoneCountryIso2,
       hasProfile: !!profile,
       profile,
     },

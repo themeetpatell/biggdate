@@ -3,7 +3,17 @@
 import { useEffect, useState, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { UpgradeSheet } from "@/components/upgrade-sheet";
 import type { Match } from "@/lib/types";
+
+interface ExistingIntro {
+  id: string;
+  matchId: string;
+  matchedUserId: string | null;
+  soulKnockQuestion: string | null;
+  status: "pending" | "answered";
+  createdAt: string;
+}
 
 // ─── Soul Knock questions (AI suggestion + curated fallbacks) ─────────────────
 function getSoulKnockQuestions(match: Match): string[] {
@@ -195,6 +205,189 @@ function LifeTab({ match }: { match: Match }) {
   );
 }
 
+// ─── Already-sent state — replaces the Soul Knock send UI when an intro exists ─
+
+function AlreadySent({
+  match,
+  intro,
+  onWithdraw,
+  onModify,
+  onViewConnect,
+}: {
+  match: Match;
+  intro: ExistingIntro;
+  onWithdraw: () => Promise<void>;
+  onModify: () => Promise<void>;
+  onViewConnect: () => void;
+}) {
+  const sentAt = intro.createdAt
+    ? new Date(intro.createdAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+  const isAnswered = intro.status === "answered";
+  const accent = isAnswered ? "#4FFFB0" : "#F5C842";
+
+  return (
+    <div style={{ padding: "20px 20px 0" }}>
+      <div
+        style={{
+          padding: "20px 20px 16px",
+          borderRadius: 22,
+          border: `1px solid ${accent}28`,
+          background: `${accent}0A`,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+          <span style={{ fontSize: 14, color: accent }}>✦</span>
+          <p
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              color: accent,
+              margin: 0,
+            }}
+          >
+            {isAnswered ? "They answered" : "Soul Knock sent"}
+          </p>
+          {sentAt && (
+            <span
+              style={{
+                marginLeft: "auto",
+                fontSize: 11,
+                color: "rgba(255,255,255,0.32)",
+              }}
+            >
+              {sentAt}
+            </span>
+          )}
+        </div>
+
+        {intro.soulKnockQuestion ? (
+          <div
+            style={{
+              padding: "14px 16px",
+              borderRadius: 14,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              marginBottom: 14,
+            }}
+          >
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                color: "rgba(255,255,255,0.3)",
+                margin: "0 0 8px",
+              }}
+            >
+              You asked
+            </p>
+            <p
+              style={{
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.78)",
+                margin: 0,
+                fontStyle: "italic",
+              }}
+            >
+              &ldquo;{intro.soulKnockQuestion}&rdquo;
+            </p>
+          </div>
+        ) : (
+          <p
+            style={{
+              fontSize: 13,
+              color: "rgba(255,255,255,0.45)",
+              lineHeight: 1.6,
+              margin: "0 0 14px",
+            }}
+          >
+            Your intention is with {match.name}.
+          </p>
+        )}
+
+        <p
+          style={{
+            fontSize: 12,
+            color: "rgba(255,255,255,0.4)",
+            lineHeight: 1.55,
+            margin: "0 0 16px",
+          }}
+        >
+          {isAnswered
+            ? `${match.name} answered. Open Connect to see their reply.`
+            : `Pending on ${match.name}'s side. You don't need to send another.`}
+        </p>
+
+        {/* Withdraw + Modify */}
+        {!isAnswered && (
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <button
+              onClick={() => void onWithdraw()}
+              style={{
+                flex: 1,
+                padding: "12px 0",
+                borderRadius: 12,
+                fontSize: 13,
+                fontWeight: 600,
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.04)",
+                color: "rgba(255,255,255,0.7)",
+                cursor: "pointer",
+              }}
+            >
+              Withdraw
+            </button>
+            <button
+              onClick={() => void onModify()}
+              style={{
+                flex: 1,
+                padding: "12px 0",
+                borderRadius: 12,
+                fontSize: 13,
+                fontWeight: 600,
+                border: "1px solid rgba(212,104,138,0.28)",
+                background: "rgba(212,104,138,0.1)",
+                color: "#f58bc2",
+                cursor: "pointer",
+              }}
+            >
+              Modify
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={onViewConnect}
+          style={{
+            width: "100%",
+            padding: "14px 0",
+            borderRadius: 14,
+            fontSize: 14,
+            fontWeight: 700,
+            border: "none",
+            cursor: "pointer",
+            background: isAnswered
+              ? "linear-gradient(135deg, #4FFFB0, #2dd4bf)"
+              : "rgba(255,255,255,0.06)",
+            color: isAnswered ? "#0A0A0F" : "rgba(255,255,255,0.65)",
+            letterSpacing: "0.01em",
+          }}
+        >
+          {isAnswered ? "Open in Connect →" : "Back to Connect"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Soul Knock UI ────────────────────────────────────────────────────────────
 function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
   match: Match;
@@ -349,7 +542,7 @@ function ReportSheet({
       {/* Backdrop */}
       <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 50 }} />
       {/* Sheet */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 51, background: "#161620", borderRadius: "20px 20px 0 0", padding: "24px 20px calc(28px + env(safe-area-inset-bottom, 0px))" }}>
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "var(--bd-app-max-w)", zIndex: 51, background: "#161620", borderRadius: "20px 20px 0 0", padding: "24px 20px calc(28px + env(safe-area-inset-bottom, 0px))" }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)", margin: "0 auto 20px" }} />
         <h3 style={{ fontSize: 17, fontWeight: 700, color: "#fff", margin: "0 0 4px" }}>Report or Block</h3>
         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 20px", lineHeight: 1.5 }}>
@@ -404,27 +597,52 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [showReportSheet, setShowReportSheet] = useState(false);
+  const [existingIntro, setExistingIntro] = useState<ExistingIntro | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeContext, setUpgradeContext] = useState<string | undefined>();
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [modifying, setModifying] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
     if (!profile) { router.push("/onboarding"); return; }
 
-    fetch("/api/matches")
-      .then(r => r.json())
-      .then((matches: Match[]) => {
-        const m = Array.isArray(matches) ? matches.find(x => x.id === id) : null;
+    let cancelled = false;
+    Promise.all([
+      fetch("/api/matches").then((r) => r.json() as Promise<Match[] | unknown>),
+      fetch("/api/intros").then((r) => r.json() as Promise<ExistingIntro[] | unknown>),
+    ])
+      .then(([matchesRes, introsRes]) => {
+        if (cancelled) return;
+        const matches = Array.isArray(matchesRes) ? (matchesRes as Match[]) : [];
+        const m = matches.find((x) => x.id === id) ?? null;
         if (!m) { router.push("/matches"); return; }
         setMatch(m);
+
+        const intros = Array.isArray(introsRes) ? (introsRes as ExistingIntro[]) : [];
+        const existing =
+          intros.find(
+            (intro) =>
+              intro.matchId === m.id ||
+              (m.matchedUserId != null && intro.matchedUserId === m.matchedUserId),
+          ) ?? null;
+        setExistingIntro(existing);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, profile, authLoading, router]);
 
   const handleSend = useCallback(async (question: string) => {
     if (!match || !profile || sending) return;
     setSending(true);
     try {
-      await fetch("/api/intros/request", {
+      const res = await fetch("/api/intros/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -434,12 +652,89 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
           soulKnockQuestion: question,
         }),
       });
+      const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+      if (data && typeof data.id === "string") {
+        const intro: ExistingIntro = {
+          id: data.id,
+          matchId: typeof data.matchId === "string" ? data.matchId : match.id,
+          matchedUserId:
+            typeof data.matchedUserId === "string"
+              ? data.matchedUserId
+              : (match.matchedUserId ?? null),
+          soulKnockQuestion:
+            typeof data.soulKnockQuestion === "string" ? data.soulKnockQuestion : question,
+          status: data.status === "answered" ? "answered" : "pending",
+          createdAt:
+            typeof data.createdAt === "string" ? data.createdAt : new Date().toISOString(),
+        };
+        setExistingIntro(intro);
+      }
       setSent(true);
     } catch {
       // best-effort
     }
     setSending(false);
   }, [match, profile, sending]);
+
+  const openUpgrade = useCallback((context: string) => {
+    setUpgradeContext(context);
+    setUpgradeOpen(true);
+  }, []);
+
+  const handleWithdraw = useCallback(async () => {
+    if (!existingIntro || withdrawing) return;
+    setWithdrawing(true);
+    try {
+      const res = await fetch("/api/intros/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ introId: existingIntro.id }),
+      });
+      if (res.ok) {
+        setExistingIntro(null);
+        setSent(false);
+      }
+    } catch {
+      // best-effort
+    }
+    setWithdrawing(false);
+  }, [existingIntro, withdrawing]);
+
+  const handleModify = useCallback(async () => {
+    if (!existingIntro || modifying) return;
+    const currentQuestion = existingIntro.soulKnockQuestion ?? "";
+    const draft = typeof window !== "undefined"
+      ? window.prompt("Modify your Soul Knock", currentQuestion)
+      : null;
+    if (draft == null) return;
+    const soulKnockQuestion = draft.trim().slice(0, 280);
+    if (!soulKnockQuestion) return;
+
+    setModifying(true);
+    try {
+      const res = await fetch("/api/intros/modify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ introId: existingIntro.id, soulKnockQuestion }),
+      });
+
+      if (res.status === 403) {
+        openUpgrade("modify_soul_knock");
+        return;
+      }
+
+      if (res.ok) {
+        setExistingIntro((prev) => {
+          if (!prev) return prev;
+          return { ...prev, soulKnockQuestion };
+        });
+      }
+    } catch {
+      // best-effort
+    } finally {
+      setModifying(false);
+    }
+  }, [existingIntro, modifying, openUpgrade]);
 
   const handlePass = useCallback(async () => {
     if (!match) return;
@@ -483,16 +778,17 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
     <div style={{ minHeight: "100dvh", background: "#0A0A0F", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
       <div aria-hidden style={{ position: "fixed", top: "-8%", right: "-12%", width: 300, height: 300, borderRadius: "50%", background: "#d4688a", opacity: 0.055, filter: "blur(90px)", pointerEvents: "none", zIndex: 0 }} />
 
-      <MatchHero
-        match={match}
-        onBack={() => {
-          if (typeof window !== "undefined" && window.history.length > 1) router.back();
-          else router.push("/matches");
-        }}
-      />
+      <div style={{ position: "relative", zIndex: 10, maxWidth: "var(--bd-app-max-w)", margin: "0 auto" }}>
+        <MatchHero
+          match={match}
+          onBack={() => {
+            if (typeof window !== "undefined" && window.history.length > 1) router.back();
+            else router.push("/matches");
+          }}
+        />
 
-      {/* Identity strip */}
-      <div style={{ position: "relative", zIndex: 10, padding: "22px 20px 0", background: "#0A0A0F" }}>
+        {/* Identity strip */}
+        <div style={{ position: "relative", zIndex: 10, padding: "22px 20px 0", background: "#0A0A0F" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.025em" }}>
@@ -521,25 +817,36 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
             </button>
           ))}
         </div>
-      </div>
+        </div>
 
-      {/* Tab content */}
-      <div style={{ position: "relative", zIndex: 10 }}>
-        {tab === "soul" && <SoulTab match={match} />}
-        {tab === "chemistry" && <ChemistryTab match={match} />}
-        {tab === "life" && <LifeTab match={match} />}
-      </div>
+        {/* Tab content */}
+        <div style={{ position: "relative", zIndex: 10 }}>
+          {tab === "soul" && <SoulTab match={match} />}
+          {tab === "chemistry" && <ChemistryTab match={match} />}
+          {tab === "life" && <LifeTab match={match} />}
+        </div>
 
-      {/* Soul Knock */}
-      <div style={{ position: "relative", zIndex: 10, maxWidth: 520, margin: "0 auto" }}>
-        <SoulKnock
-          match={match}
-          onSend={handleSend}
-          onPass={handlePass}
-          sending={sending}
-          sent={sent}
-          onViewPending={() => router.push("/matches")}
-        />
+        {/* Soul Knock — switches between send UI and already-sent state */}
+        <div style={{ position: "relative", zIndex: 10, maxWidth: 520, margin: "0 auto" }}>
+          {existingIntro ? (
+            <AlreadySent
+              match={match}
+              intro={existingIntro}
+              onWithdraw={handleWithdraw}
+              onModify={handleModify}
+              onViewConnect={() => router.push("/matches")}
+            />
+          ) : (
+            <SoulKnock
+              match={match}
+              onSend={handleSend}
+              onPass={handlePass}
+              sending={sending}
+              sent={sent}
+              onViewPending={() => router.push("/matches")}
+            />
+          )}
+        </div>
       </div>
 
       {showReportSheet && (
@@ -548,6 +855,12 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
           onSubmit={handleReport}
         />
       )}
+
+      <UpgradeSheet
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        context={upgradeContext}
+      />
     </div>
   );
 }

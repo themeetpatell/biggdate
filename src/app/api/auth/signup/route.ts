@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import { getAccountHandleByUsername, upsertAccountHandle } from "@/lib/repo";
+import {
+  inferCountryIso2FromPhone,
+  normalizeCountryIso2,
+} from "@/lib/location-data";
 import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -18,23 +22,46 @@ export async function POST(req: Request) {
     password?: string;
     fullName?: string;
     username?: string;
+    phone?: string;
+    phoneCountryIso2?: string;
   };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
-  const { email, password, fullName, username } = body;
+  const { email, password, fullName, username, phone, phoneCountryIso2 } = body;
   const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   const normalizedPassword = typeof password === "string" ? password : "";
   const normalizedFullName = typeof fullName === "string" ? fullName.trim() : "";
   const normalizedUsername = typeof username === "string" ? username.trim().toLowerCase() : "";
+  const normalizedPhone =
+    typeof phone === "string"
+      ? (() => {
+          const trimmed = phone.trim();
+          if (!trimmed) return "";
+          const hasPlus = trimmed.startsWith("+");
+          const digits = trimmed.replace(/\D/g, "");
+          return hasPlus ? `+${digits}` : digits;
+        })()
+      : "";
+  const normalizedPhoneCountryIso2 =
+    normalizeCountryIso2(phoneCountryIso2) ?? inferCountryIso2FromPhone(normalizedPhone);
 
   if (!normalizedEmail || !normalizedPassword) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
   }
   if (!normalizedFullName) {
     return NextResponse.json({ error: "Full name required" }, { status: 400 });
+  }
+  if (!normalizedPhone) {
+    return NextResponse.json({ error: "Phone number required" }, { status: 400 });
+  }
+  if (!/^\+?\d{8,15}$/.test(normalizedPhone)) {
+    return NextResponse.json(
+      { error: "Enter a valid phone number with country code if outside India" },
+      { status: 400 }
+    );
   }
   if (!normalizedUsername || normalizedUsername.length < 3) {
     return NextResponse.json({ error: "Username must be at least 3 characters" }, { status: 400 });
@@ -66,6 +93,8 @@ export async function POST(req: Request) {
       data: {
         full_name: normalizedFullName,
         username: normalizedUsername,
+        phone_number: normalizedPhone,
+        phone_country_iso2: normalizedPhoneCountryIso2,
       },
     },
   });
@@ -98,6 +127,7 @@ export async function POST(req: Request) {
       email: normalizedEmail,
       username: normalizedUsername,
       fullName: normalizedFullName,
+      phoneNumber: normalizedPhone,
     });
   } catch (handleError) {
     const message =

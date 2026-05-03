@@ -2,48 +2,69 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 
+const HIDDEN_ROUTES = [
+  "/",
+  "/about",
+  "/contact",
+  "/auth",
+  "/onboarding",
+  "/soul-snapshot",
+  "/compare",
+  "/faq",
+  "/how-it-works",
+  "/glossary",
+  "/questions",
+  "/vs",
+  "/privacy",
+  "/terms",
+  "/profile",
+  "/messages",
+];
+
 /**
- * Floating top-right profile entry. Renders inside the protected app
- * (dashboard, matches, messages, pulse, companion, coach, debrief, profile).
+ * Floating top-right messages entry. Renders inside protected app surfaces
+ * that do not already have their own top-right action controls.
  * Hidden on marketing/auth/onboarding routes — those have their own header
  * with auth CTAs.
  */
 export function ProfileLauncher() {
   const pathname = usePathname();
-  const { profile, userId } = useAuth();
+  const { userId } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Hide on routes that already have their own top-right CTA, plus auth/onboarding
-  const hiddenRoutes = [
-    "/",
-    "/about",
-    "/contact",
-    "/auth",
-    "/onboarding",
-    "/soul-snapshot",
-    "/compare",
-    "/faq",
-    "/how-it-works",
-    "/glossary",
-    "/questions",
-    "/vs",
-    "/privacy",
-    "/terms",
-  ];
+  // Hide on routes that already have their own top-right CTA, plus auth/onboarding.
   const isHidden =
-    hiddenRoutes.some(
+    HIDDEN_ROUTES.some(
       (r) => pathname === r || pathname.startsWith(`${r}/`),
     ) || pathname.startsWith("/admin");
+  const shouldRender = Boolean(userId) && !isHidden;
 
-  if (isHidden) return null;
+  useEffect(() => {
+    if (!shouldRender) {
+      setUnreadCount(0);
+      return;
+    }
+    const load = () => {
+      fetch("/api/messages")
+        .then((r) => r.json())
+        .then((d) => {
+          const total = (d.threads ?? []).reduce(
+            (sum: number, t: { unreadCount?: number }) => sum + (t.unreadCount ?? 0),
+            0,
+          );
+          setUnreadCount(total);
+        })
+        .catch(() => {});
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => clearInterval(id);
+  }, [shouldRender]);
 
-  // Don't render until we know auth state — avoids a flash of the launcher
-  // for visitors who hit a protected page while logged out.
-  if (!userId) return null;
-
-  const avatarUrl = profile?.photos?.[0];
-  const initials = getInitials(profile?.name);
+  if (!shouldRender) return null;
 
   return (
     <div
@@ -55,8 +76,8 @@ export function ProfileLauncher() {
         style={{ maxWidth: "var(--bd-app-max-w)" }}
       >
         <Link
-          href="/profile"
-          aria-label="Open your profile"
+          href="/messages"
+          aria-label="Open messages"
           className="pointer-events-auto absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full transition-all hover:scale-[1.04] sm:right-6 sm:top-6"
           style={{
             background: "var(--bd-glass-bg-strong)",
@@ -67,23 +88,42 @@ export function ProfileLauncher() {
             WebkitBackdropFilter: "blur(12px)",
           }}
         >
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt=""
-              className="h-9 w-9 rounded-full object-cover"
-            />
-          ) : (
+          <span
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "linear-gradient(145deg, rgba(180,140,255,0.18), rgba(68,200,255,0.12))",
+              border: "1px solid rgba(255,255,255,0.14)",
+            }}
+          >
+            <MessageGlyph />
+          </span>
+          {unreadCount > 0 && (
             <span
-              className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold uppercase"
               style={{
-                background:
-                  "linear-gradient(135deg, var(--bd-accent), var(--bd-blue))",
+                position: "absolute",
+                top: -2,
+                right: -2,
+                minWidth: 18,
+                height: 18,
+                borderRadius: 999,
+                background: "linear-gradient(135deg, #f43f5e, #a855f7)",
+                border: "2px solid var(--bd-bg)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0 4px",
+                fontSize: 10,
+                fontWeight: 700,
                 color: "#fff",
+                lineHeight: 1,
               }}
             >
-              {initials}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </Link>
@@ -92,10 +132,22 @@ export function ProfileLauncher() {
   );
 }
 
-function getInitials(name: string | undefined): string {
-  if (!name) return "·";
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "·";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+function MessageGlyph() {
+  return (
+    <svg
+      width="19"
+      height="19"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.15"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ color: "#f4f7ff" }}
+    >
+      <path d="M12 20.5c4.97 0 9-3.58 9-8s-4.03-8-9-8-9 3.58-9 8c0 2.07.9 3.95 2.39 5.37L5 21l3.42-1.79A9.9 9.9 0 0 0 12 20.5Z" />
+      <path d="M8.5 11.5h7" />
+      <path d="M8.5 14.5h4.5" />
+    </svg>
+  );
 }
