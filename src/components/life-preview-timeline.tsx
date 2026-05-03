@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { ArrowUp, Sparkles } from "lucide-react";
 import { DefaultChatTransport } from "ai";
 import Link from "next/link";
+import { splitAssistantBubbles } from "@/components/chat-message";
 
 export function LifePreviewTimeline() {
   const [input, setInput] = useState("");
@@ -102,6 +103,7 @@ export function LifePreviewTimeline() {
               .join("") || "";
 
           if (!textContent) return null;
+          const bubbles = isYou ? [textContent] : splitAssistantBubbles(textContent);
 
           return (
             <div
@@ -121,29 +123,31 @@ export function LifePreviewTimeline() {
                 </div>
               )}
 
-              <div className={`max-w-[80%] ${isYou ? "items-end" : "items-start"} flex flex-col gap-1`}>
-                <div
-                  className="px-4 py-3 rounded-2xl text-sm leading-relaxed"
-                  style={
-                    isYou
-                      ? {
-                          background: "linear-gradient(135deg, rgba(113,134,255,0.98), rgba(238,134,195,0.92))",
-                          color: "#fff",
-                          borderRadius: "18px 4px 18px 18px",
-                          boxShadow: "0 16px 34px rgba(111,134,255,0.22)",
-                        }
-                      : {
-                          background: "rgba(255,255,255,0.07)",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          color: "var(--bd-text)",
-                          borderRadius: "4px 18px 18px 18px",
-                          whiteSpace: "pre-wrap",
-                          backdropFilter: "blur(20px)",
-                        }
-                  }
-                >
-                  {textContent}
-                </div>
+              <div className={`max-w-[80%] ${isYou ? "items-end" : "items-start"} flex flex-col gap-1.5`}>
+                {bubbles.map((bubble, index) => (
+                  <div
+                    key={index}
+                    className="px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
+                    style={
+                      isYou
+                        ? {
+                            background: "linear-gradient(135deg, rgba(113,134,255,0.98), rgba(238,134,195,0.92))",
+                            color: "#fff",
+                            borderRadius: "18px 4px 18px 18px",
+                            boxShadow: "0 16px 34px rgba(111,134,255,0.22)",
+                          }
+                        : {
+                            background: "rgba(255,255,255,0.07)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            color: "var(--bd-text)",
+                            borderRadius: index === 0 ? "4px 18px 18px 18px" : "18px",
+                            backdropFilter: "blur(20px)",
+                          }
+                    }
+                  >
+                    {bubble}
+                  </div>
+                ))}
               </div>
             </div>
           );

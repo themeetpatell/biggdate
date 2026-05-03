@@ -15,6 +15,14 @@ export function getMessageText(message: UIMessage): string {
   );
 }
 
+export function splitAssistantBubbles(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+}
+
 /** Remove inline UI markers, phase markers, and any leaked internal-state phrases. */
 function stripChips(text: string): string {
   return text
@@ -152,6 +160,8 @@ export function ChatMessage({ message }: { message: UIMessage }) {
     );
   }
 
+  const bubbles = splitAssistantBubbles(text);
+
   return (
     <div className="flex items-end gap-2.5">
       <div
@@ -163,17 +173,22 @@ export function ChatMessage({ message }: { message: UIMessage }) {
       >
         <Sparkles className="size-3 text-white/60" />
       </div>
-      <div
-        className="max-w-[80%] px-4 py-2.5 text-[14.5px] leading-relaxed"
-        style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          color: "rgba(237,245,255,0.94)",
-          borderRadius: "4px 20px 20px 20px",
-          backdropFilter: "blur(16px)",
-        }}
-      >
-        {text}
+      <div className="flex max-w-[80%] flex-col items-start gap-1.5">
+        {bubbles.map((bubble, index) => (
+          <div
+            key={index}
+            className="px-4 py-2.5 text-[14.5px] leading-relaxed whitespace-pre-wrap"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "rgba(237,245,255,0.94)",
+              borderRadius: index === 0 ? "4px 20px 20px 20px" : "20px",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            {bubble}
+          </div>
+        ))}
       </div>
     </div>
   );

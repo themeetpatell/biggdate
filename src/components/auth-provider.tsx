@@ -31,6 +31,8 @@ export function useAuth() {
 const PUBLIC_ROUTES = [
   "/",
   "/auth",
+  "/simulation",
+  "/onboarding",
   "/about",
   "/contact",
   "/privacy",

@@ -6,6 +6,7 @@ import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUp, X, Sparkles } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
+import { splitAssistantBubbles } from "@/components/chat-message";
 
 const ANON_STARTERS = [
   "How do you actually work?",
@@ -177,26 +178,32 @@ export function MaahiChat() {
                       .join("") || "";
                   if (!text) return null;
                   const isUser = m.role === "user";
+                  const bubbles = isUser ? [text] : splitAssistantBubbles(text);
                   return (
                     <div
                       key={m.id}
                       className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                     >
-                      <div
-                        className="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed"
-                        style={
-                          isUser
-                            ? {
-                                background: "rgba(255,0,255,0.12)",
-                                color: "var(--bd-text)",
-                              }
-                            : {
-                                background: "var(--bd-surface)",
-                                color: "var(--bd-text)",
-                              }
-                        }
-                      >
-                        {text}
+                      <div className={`flex max-w-[85%] flex-col gap-1.5 ${isUser ? "items-end" : "items-start"}`}>
+                        {bubbles.map((bubble, index) => (
+                          <div
+                            key={index}
+                            className="rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap"
+                            style={
+                              isUser
+                                ? {
+                                    background: "rgba(255,0,255,0.12)",
+                                    color: "var(--bd-text)",
+                                  }
+                                : {
+                                    background: "var(--bd-surface)",
+                                    color: "var(--bd-text)",
+                                  }
+                            }
+                          >
+                            {bubble}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   );

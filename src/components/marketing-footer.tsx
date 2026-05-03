@@ -3,9 +3,8 @@ import Image from "next/image";
 import { MARKETING_SOCIAL_LINKS } from "@/components/marketing-social-links";
 
 const PRIMARY_LINKS = [
-  { href: "/#demo", label: "Product" },
-  { href: "/#how", label: "How it works" },
-  { href: "/#hacks", label: "Dating intel" },
+  { href: "/", label: "Home" },
+  { href: "/simulation", label: "Experience it" },
   { href: "/about", label: "About us" },
   { href: "/contact", label: "Contact" },
 ];
@@ -20,11 +19,24 @@ const LEARN_LINKS = [
 ];
 
 const LEGAL_LINKS = [
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-  { href: "/auth", label: "Join beta" },
-  { href: "/auth", label: "Log in" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
 ];
+
+const mobileLinkClass =
+  "rounded-xl border px-3 py-2 text-center transition-colors sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0";
+
+const mobilePanelLinkStyle = {
+  background: "var(--bd-surface-sunken)",
+  borderColor: "var(--bd-border)",
+  color: "var(--bd-text-muted)",
+} as const;
+
+const mobileSoftLinkStyle = {
+  background: "var(--bd-surface-sunken)",
+  borderColor: "var(--bd-border)",
+  color: "var(--bd-text-faint)",
+} as const;
 
 export function MarketingFooter() {
   return (
@@ -43,7 +55,7 @@ export function MarketingFooter() {
         }}
       />
 
-      <div className="mx-auto max-w-5xl px-6 pb-10 pt-10">
+      <div className="mx-auto max-w-6xl px-6 pb-12 pt-12">
         <div
           className="rounded-[28px] px-5 py-5 backdrop-blur-xl sm:px-6"
           style={{
@@ -118,115 +130,112 @@ export function MarketingFooter() {
           }}
         />
 
-        <div className="flex flex-col items-center justify-between gap-8 sm:flex-row sm:items-start">
-          <Link
-            href="/"
-            className="mx-auto flex items-center gap-3 text-center transition-opacity hover:opacity-90 sm:mx-0 sm:text-left"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl">
-              <Image
-                src="/Biggdate-logo.png"
-                alt="BiggDate"
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-xl"
-              />
-            </div>
-            <div>
-              <span
-                className="block text-sm font-semibold uppercase tracking-[0.2em]"
-                style={{ color: "var(--bd-text)" }}
-              >
-                BiggDate
-              </span>
-              <span
-                className="block text-[11px]"
-                style={{ color: "var(--bd-text-faint)" }}
-              >
-                Dating that respects your time
-              </span>
-            </div>
-          </Link>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-14">
+          <div className="space-y-5">
+            <Link
+              href="/"
+              className="mx-auto flex items-center gap-4 text-center transition-opacity hover:opacity-90 sm:mx-0 sm:text-left"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl">
+                <Image
+                  src="/Biggdate-logo.png"
+                  alt="BiggDate"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-2xl"
+                />
+              </div>
+              <div>
+                <span
+                  className="block text-lg font-semibold uppercase tracking-[0.24em]"
+                  style={{ color: "var(--bd-text)" }}
+                >
+                  BiggDate
+                </span>
+                <span
+                  className="block text-sm"
+                  style={{ color: "var(--bd-text-faint)" }}
+                >
+                  Dating that respects your time
+                </span>
+              </div>
+            </Link>
 
-          <div className="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
-            {PRIMARY_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-2xl px-4 py-3 text-center text-sm transition-all sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-left"
-                style={{
-                  background: "var(--bd-surface)",
-                  border: "1px solid var(--bd-border)",
-                  color: "var(--bd-text-muted)",
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <p
+              className="max-w-xl text-sm leading-7 text-center sm:text-left"
+              style={{ color: "var(--bd-text-muted)" }}
+            >
+              Built for people who are done settling for mid. BiggDate filters for intent,
+              emotional maturity, and actual follow-through.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-3">
+              {PRIMARY_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`${mobileLinkClass} text-sm sm:font-medium`}
+                  style={mobilePanelLinkStyle}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="rounded-[28px] px-5 py-5 sm:px-6"
+            style={{
+              background: "linear-gradient(180deg, rgba(8, 20, 44, 0.84), rgba(10, 18, 36, 0.96))",
+              border: "1px solid rgba(56, 83, 132, 0.28)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+            }}
+          >
+            <span
+              className="block text-center text-[11px] font-semibold uppercase tracking-[0.34em] sm:text-left"
+              style={{ color: "var(--bd-pink)" }}
+            >
+              Learn
+            </span>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {LEARN_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`${mobileLinkClass} text-sm sm:rounded-xl sm:border sm:px-4 sm:py-3 sm:text-left`}
+                  style={{
+                    background: "rgba(255,255,255,0.02)",
+                    borderColor: "rgba(98, 125, 176, 0.2)",
+                    color: "rgba(231, 237, 249, 0.88)",
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div
-          className="mt-8 rounded-[24px] px-5 py-5 sm:rounded-[28px]"
-          style={{
-            background: "var(--bd-surface)",
-            border: "1px solid var(--bd-border)",
-          }}
-        >
-          <span
-            className="block text-center text-[11px] font-semibold uppercase tracking-[0.3em] sm:text-left"
-            style={{ color: "var(--bd-pink)" }}
-          >
-            Learn
-          </span>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-3">
-            {LEARN_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-xl px-3 py-2 text-center text-xs transition-colors sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-sm"
-                style={{
-                  background: "var(--bd-surface-sunken)",
-                  border: "1px solid var(--bd-border)",
-                  color: "var(--bd-text-muted)",
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-[24px] px-5 py-5 sm:px-0 sm:py-0">
-          <p
-            className="text-center text-xs sm:text-left"
-            style={{ color: "var(--bd-text-faint)" }}
-          >
-            Built for people who are done settling for mid.
+        <div className="mt-8 flex flex-col gap-4 border-t pt-5 sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderColor: "var(--bd-border)" }}>
+          <p className="text-center text-xs sm:text-left" style={{ color: "var(--bd-text-faint)" }}>
+            BiggDate is for people who want fewer matches, better conversations, and clearer intent.
           </p>
-          <div className="mt-4 grid w-full grid-cols-2 gap-3 text-xs sm:mt-4 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-center sm:gap-5">
+          <div className="grid w-full grid-cols-2 gap-3 text-xs sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end sm:gap-5">
             {LEGAL_LINKS.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="rounded-xl px-3 py-2 text-center transition-colors sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
-                style={{
-                  background: "var(--bd-surface-sunken)",
-                  border: "1px solid var(--bd-border)",
-                  color: "var(--bd-text-faint)",
-                }}
+                className={mobileLinkClass}
+                style={mobileSoftLinkStyle}
               >
                 {link.label}
               </Link>
             ))}
             <a
               href="mailto:meet@biggventures.com"
-              className="col-span-2 rounded-xl px-3 py-2 text-center transition-colors sm:col-span-1 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
-              style={{
-                background: "var(--bd-surface-sunken)",
-                border: "1px solid var(--bd-border)",
-                color: "var(--bd-text-faint)",
-              }}
+              className={`col-span-2 ${mobileLinkClass} sm:col-span-1`}
+              style={mobileSoftLinkStyle}
             >
               meet@biggventures.com
             </a>

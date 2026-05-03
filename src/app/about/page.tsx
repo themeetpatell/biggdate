@@ -40,11 +40,18 @@ const AUDIENCE = [
   "Daters who want warmth, not games, and substance, not performance",
 ];
 
-const FOUNDERS = [
+const FOUNDERS: {
+  name: string;
+  initials: string;
+  image?: string;
+  title: string;
+  focus: string;
+  accentVar: string;
+  avatarGradient: string;
+}[] = [
   {
     name: "Meet Patel",
     initials: "MP",
-    image: "/founders/meet-patel.jpg",
     title: "Founder / CEO",
     focus:
       "Owns product vision, brand conviction, and the standard for a dating experience that feels premium without becoming performative.",
@@ -54,7 +61,6 @@ const FOUNDERS = [
   {
     name: "Dipen Patel",
     initials: "DP",
-    image: "/founders/dipen-patel.jpg",
     title: "Founder / CTO",
     focus:
       "Builds the systems layer: matching logic, AI intelligence, and the infrastructure that keeps the experience sharp, fast, and trustworthy.",
@@ -64,7 +70,6 @@ const FOUNDERS = [
   {
     name: "Drashty Soni",
     initials: "DS",
-    image: "/founders/drashty-soni.jpg",
     title: "Founder / CGO",
     focus:
       "Drives growth, partnerships, and community loops so the product reaches the right people instead of chasing empty top-of-funnel volume.",

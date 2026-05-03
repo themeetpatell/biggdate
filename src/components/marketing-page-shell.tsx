@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import { Nunito } from "next/font/google";
 import { MarketingFooter } from "@/components/marketing-footer";
-import { MarketingHeader } from "@/components/marketing-header";
+import {
+  MarketingHeader,
+  type MarketingHeaderActivePage,
+} from "@/components/marketing-header";
 import { MarketingSocialRail } from "@/components/marketing-social-rail";
 
 const nunito = Nunito({
@@ -20,7 +23,7 @@ export function MarketingPageShell({
   eyebrow: string;
   title: ReactNode;
   description: string;
-  activePage: "about" | "contact";
+  activePage: MarketingHeaderActivePage;
   children: ReactNode;
 }) {
   return (

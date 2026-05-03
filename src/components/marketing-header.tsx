@@ -11,11 +11,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ThemeToggle } from "@/components/theme-toggle";
 
-const NAV_LINKS = [
-  { href: "/#how", label: "Product" },
-  { href: "/#hacks", label: "Dating intel" },
+export type MarketingHeaderActivePage =
+  | "home"
+  | "simulation"
+  | "about"
+  | "contact";
+
+const NAV_LINKS: { href: string; label: string; key: MarketingHeaderActivePage }[] = [
+  { href: "/", label: "Home", key: "home" },
+  { href: "/simulation", label: "Experience it", key: "simulation" },
   { href: "/about", label: "About us", key: "about" },
   { href: "/contact", label: "Contact", key: "contact" },
 ];
@@ -23,7 +28,7 @@ const NAV_LINKS = [
 export function MarketingHeader({
   activePage,
 }: {
-  activePage: "about" | "contact";
+  activePage: MarketingHeaderActivePage;
 }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
@@ -60,6 +65,7 @@ export function MarketingHeader({
             alt="BiggDate"
             width={40}
             height={40}
+            priority
             className="h-10 w-10 rounded-xl"
           />
           <span
@@ -98,20 +104,6 @@ export function MarketingHeader({
         </div>
 
         <div className="relative flex shrink-0 items-center gap-2">
-          <ThemeToggle className="hidden sm:inline-flex" />
-
-          <Link
-            href="/auth?mode=login"
-            className="hidden h-11 items-center rounded-full px-5 text-sm font-medium transition-all sm:inline-flex"
-            style={{
-              background: "var(--bd-surface)",
-              border: "1px solid var(--bd-border)",
-              color: "var(--bd-text)",
-              boxShadow: "inset 0 1px 0 var(--bd-surface-overlay)",
-            }}
-          >
-            Enter BiggDate
-          </Link>
           <Link
             href="/auth?mode=signup"
             className="group relative inline-flex h-11 items-center overflow-hidden rounded-full px-3 text-sm font-semibold text-white transition-all hover:scale-[1.01] sm:px-6"
@@ -191,39 +183,17 @@ export function MarketingHeader({
                 className="mt-auto px-5 py-5"
                 style={{ borderTop: "1px solid var(--bd-border)" }}
               >
-                <div className="grid gap-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <span
-                      className="text-[11px] font-semibold uppercase tracking-[0.24em]"
-                      style={{ color: "var(--bd-text-faint)" }}
-                    >
-                      Theme
-                    </span>
-                    <ThemeToggle variant="segment" />
-                  </div>
-                  <Link
-                    href="/auth?mode=login"
-                    className="inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all"
-                    style={{
-                      background: "var(--bd-surface)",
-                      border: "1px solid var(--bd-border)",
-                      color: "var(--bd-text)",
-                    }}
-                  >
-                    Enter BiggDate
-                  </Link>
-                  <a
-                    href="mailto:meet@biggventures.com"
-                    className="inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all"
-                    style={{
-                      background: "var(--bd-accent-soft)",
-                      border: "1px solid var(--bd-border-glow)",
-                      color: "var(--bd-accent)",
-                    }}
-                  >
-                    meet@biggventures.com
-                  </a>
-                </div>
+                <a
+                  href="mailto:meet@biggventures.com"
+                  className="inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all"
+                  style={{
+                    background: "var(--bd-accent-soft)",
+                    border: "1px solid var(--bd-border-glow)",
+                    color: "var(--bd-accent)",
+                  }}
+                >
+                  meet@biggventures.com
+                </a>
               </div>
             </SheetContent>
           </Sheet>

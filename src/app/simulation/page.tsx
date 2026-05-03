@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingHeader } from "@/components/marketing-header";
+import { MarketingSocialRail } from "@/components/marketing-social-rail";
 import { SimulationLanding } from "@/components/simulation-landing";
 
 export const metadata: Metadata = {
@@ -8,8 +11,19 @@ export const metadata: Metadata = {
 
 export default function SimulationPage() {
   return (
-    <div style={{ background: "#030308", minHeight: "100vh" }}>
+    <main
+      className="relative min-h-screen overflow-x-hidden"
+      style={{
+        background: "#060605",
+        color: "var(--bd-text)",
+      }}
+    >
+      <MarketingHeader activePage="simulation" />
+
       <SimulationLanding />
-    </div>
+
+      <MarketingFooter />
+      <MarketingSocialRail />
+    </main>
   );
 }

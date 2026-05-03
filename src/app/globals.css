@@ -130,6 +130,17 @@
   }
 }
 
+/* Ensure the document scrolling element has a non-static position so
+   Framer Motion's `useScroll({ target })` can compute offsets correctly.
+   Kept outside @layer base because Tailwind v4 strips raw declarations
+   that share a selector block with @apply. */
+html {
+  position: relative;
+}
+body {
+  position: relative;
+}
+
 /* ─── BiggDate Design Tokens ─── */
 :root {
   /* App-shell width — the centered phone-shaped column used by all

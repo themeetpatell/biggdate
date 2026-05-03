@@ -9,7 +9,7 @@ export function FounderAvatar({
   alt,
   avatarGradient,
 }: {
-  src: string;
+  src?: string;
   initials: string;
   alt: string;
   avatarGradient: string;
@@ -22,7 +22,7 @@ export function FounderAvatar({
         <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/80">
           {initials}
         </div>
-        {!imgFailed && (
+        {src && !imgFailed && (
           <Image
             src={src}
             alt={alt}
