@@ -433,12 +433,12 @@ export function CinematicLanding() {
           </a>
 
           <div className="hidden items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.04] p-1 md:flex">
-            <a
-              href="#how"
+            <Link
+              href="/simulation"
               className="rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[#9ea2ba] transition-all hover:bg-[#7b9fff]/[0.14] hover:text-[#f0ebe3]"
             >
               Product
-            </a>
+            </Link>
             <a
               href="#demo"
               className="rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[#9ea2ba] transition-all hover:bg-[#7b9fff]/[0.14] hover:text-[#f0ebe3]"
@@ -500,12 +500,12 @@ export function CinematicLanding() {
                 </SheetHeader>
 
                 <div className="flex flex-col gap-3 px-5 py-5">
-                  <a
-                    href="#how"
+                  <Link
+                    href="/simulation"
                     className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-4 text-sm font-medium text-[#c2c5d8] transition-all hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-[#f0ebe3]"
                   >
                     Product
-                  </a>
+                  </Link>
                   <a
                     href="#demo"
                     className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-4 text-sm font-medium text-[#c2c5d8] transition-all hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-[#f0ebe3]"
@@ -661,7 +661,7 @@ export function CinematicLanding() {
                 <span className="absolute inset-0 bg-gradient-to-r from-[#ff6ac7] via-[#f04fb8] to-[#b86ef7] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </Button>
             </Link>
-            <a href="#demo" className="w-full sm:w-auto">
+            <Link href="/simulation" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="ghost"
@@ -669,7 +669,7 @@ export function CinematicLanding() {
               >
                 See how it works
               </Button>
-            </a>
+            </Link>
           </motion.div>
         </motion.div>
 
