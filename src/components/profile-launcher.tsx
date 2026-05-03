@@ -12,6 +12,7 @@ const HIDDEN_ROUTES = [
   "/auth",
   "/onboarding",
   "/soul-snapshot",
+  "/simulation",
   "/compare",
   "/faq",
   "/how-it-works",

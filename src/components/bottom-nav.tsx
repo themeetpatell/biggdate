@@ -103,7 +103,8 @@ export function BottomNav() {
     pathname === "/contact" ||
     pathname === "/auth" ||
     pathname === "/onboarding" ||
-    pathname === "/soul-snapshot"
+    pathname === "/soul-snapshot" ||
+    pathname === "/simulation"
   ) {
     return null;
   }

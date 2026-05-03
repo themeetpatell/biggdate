@@ -81,7 +81,8 @@ export function MaahiChat() {
     pathname === "/contact" ||
     pathname === "/auth" ||
     pathname === "/onboarding" ||
-    pathname === "/companion"
+    pathname === "/companion" ||
+    pathname === "/simulation"
   ) {
     return null;
   }
