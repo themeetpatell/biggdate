@@ -81,6 +81,13 @@ function renderProfileBlock(profile: Profile): string {
     .join(", ");
   if (headline) lines.push(`- ${headline}`);
 
+  push(lines, "Birthday", profile.birthday);
+  push(lines, "Zodiac", profile.zodiac);
+  push(lines, "Gender", profile.gender);
+  push(lines, "Orientation", profile.orientation);
+  push(lines, "Job title", profile.jobTitle ?? null);
+  push(lines, "Education", profile.education ?? null);
+  push(lines, "Religion", profile.religion ?? null);
   push(lines, "Attachment", profile.attachment);
   push(lines, "Emotional availability", profile.emotionalAvailability);
   push(lines, "Love language (gives)", joinList(profile.loveLanguageGive) || profile.loveLanguage);
