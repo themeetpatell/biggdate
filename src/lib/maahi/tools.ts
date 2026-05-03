@@ -38,7 +38,7 @@ function makeAllTools(userId: string): ToolSet {
   return {
     viewMyProfile: tool({
       description:
-        "Read the user's relationship profile — attachment, love languages, values, growth areas, dating intent, dealbreakers. Use this when they ask anything about themselves, or when their answer is anchored in who they are.",
+        "Read the user's full profile — personal details (name, age, birthday, city, gender, profession), relationship profile (attachment, love languages, values, growth areas, dating intent, dealbreakers), and lifestyle fields. Use this when they ask anything about themselves.",
       inputSchema: z.object({}),
       execute: async () => {
         const p = await getProfileByUserId(userId);
@@ -47,7 +47,14 @@ function makeAllTools(userId: string): ToolSet {
           available: true,
           name: p.name,
           age: p.age,
+          birthday: p.birthday,
+          zodiac: p.zodiac,
           city: p.city,
+          gender: p.gender,
+          orientation: p.orientation,
+          jobTitle: p.jobTitle ?? null,
+          education: p.education ?? null,
+          religion: p.religion ?? null,
           attachment: p.attachment,
           loveLanguageGives: p.loveLanguageGive ?? [],
           loveLanguageNeeds: p.loveLanguageReceive ?? [],
@@ -61,6 +68,13 @@ function makeAllTools(userId: string): ToolSet {
           conflictStyle: p.conflictStyle,
           offers: p.offers ?? [],
           needs: p.needs ?? [],
+          drinking: p.drinking,
+          smoking: p.smoking,
+          exercise: p.exercise,
+          wantsKids: p.wantsKids,
+          hasKids: p.hasKids,
+          relationshipTimeline: p.relationshipTimeline ?? null,
+          emotionalAvailability: p.emotionalAvailability ?? null,
         };
       },
     }),

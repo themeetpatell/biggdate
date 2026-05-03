@@ -510,71 +510,6 @@ export default function TodayPage() {
           </p>
         </div>
 
-        {/* Today snapshot */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 10,
-            marginBottom: 14,
-          }}
-        >
-          {[
-            {
-              label: "Pending Soul Knocks",
-              value: pendingSoulKnocks,
-              tone: "rgba(233,30,140,0.3)",
-              text: "#ff7ab8",
-            },
-            {
-              label: "Unread Replies",
-              value: unreadReplies,
-              tone: "rgba(79,255,176,0.24)",
-              text: "#4FFFB0",
-            },
-            {
-              label: "Profile Health",
-              value: `${profileHealth}%`,
-              tone: "rgba(180,140,255,0.22)",
-              text: "#B48CFF",
-            },
-          ].map((item) => (
-            <div
-              key={item.label}
-              style={{
-                borderRadius: 14,
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.03)",
-                padding: "12px 10px",
-              }}
-            >
-              <p
-                style={{
-                  margin: "0 0 8px",
-                  fontSize: 10,
-                  color: "rgba(255,255,255,0.38)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.09em",
-                  lineHeight: 1.3,
-                }}
-              >
-                {item.label}
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 20,
-                  fontWeight: 700,
-                  color: item.text,
-                  textShadow: `0 0 18px ${item.tone}`,
-                }}
-              >
-                {item.value}
-              </p>
-            </div>
-          ))}
-        </div>
-
         {/* Next best action */}
         <div
           style={{
@@ -1123,57 +1058,59 @@ export default function TodayPage() {
           </div>
         )}
 
-        {/* Profile progress */}
-        <div
-          style={{
-            borderRadius: 18,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.02)",
-            padding: "16px 18px",
-            marginBottom: 14,
-          }}
-        >
-          <p
+        {/* Profile progress — only shown when there's something left to complete */}
+        {profileHealth < 100 && (
+          <div
             style={{
-              margin: "0 0 6px",
-              fontSize: 10,
-              color: "rgba(255,255,255,0.38)",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
+              borderRadius: 18,
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.02)",
+              padding: "16px 18px",
+              marginBottom: 14,
             }}
           >
-            Profile Progress
-          </p>
-          <p style={{ margin: "0 0 12px", fontSize: 14, color: "rgba(255,255,255,0.75)" }}>
-            Health score {profileHealth}%
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
-            {profileHealthTasks.slice(0, 3).map((task) => (
-              <div key={task.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 13 }}>{task.done ? "✓" : "○"}</span>
-                <span style={{ fontSize: 13, color: task.done ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.82)" }}>
-                  {task.label}
-                </span>
-              </div>
-            ))}
+            <p
+              style={{
+                margin: "0 0 6px",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.38)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+            >
+              Profile Progress
+            </p>
+            <p style={{ margin: "0 0 12px", fontSize: 14, color: "rgba(255,255,255,0.75)" }}>
+              Health score {profileHealth}%
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+              {profileHealthTasks.slice(0, 3).map((task) => (
+                <div key={task.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 13 }}>{task.done ? "✓" : "○"}</span>
+                  <span style={{ fontSize: 13, color: task.done ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.82)" }}>
+                    {task.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => router.push("/profile")}
+              style={{
+                width: "100%",
+                padding: "11px 0",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#0A0A0F",
+                background: "linear-gradient(135deg, #f5c842, #e8927c)",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Complete profile
+            </button>
           </div>
-          <button
-            onClick={() => router.push("/profile")}
-            style={{
-              width: "100%",
-              padding: "11px 0",
-              borderRadius: 999,
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#0A0A0F",
-              background: "linear-gradient(135deg, #f5c842, #e8927c)",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            Complete profile
-          </button>
-        </div>
+        )}
 
         {/* Maahi shortcut */}
         <div
