@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/", "/auth", "/about", "/contact"];
+const PUBLIC_PATHS = [
+  "/", "/auth", "/about", "/contact",
+  "/simulation", "/how-it-works", "/faq", "/glossary",
+  "/terms", "/privacy", "/vs", "/compare",
+];
 
 function isPublicPath(pathname: string): boolean {
   if (pathname === "/") return true;
