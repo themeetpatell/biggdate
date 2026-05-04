@@ -26,6 +26,8 @@ type AuthResponse = {
   error?: string;
   message?: string;
   status?: "authenticated" | "pending_confirmation";
+  userId?: string | null;
+  hasProfile?: boolean;
 };
 
 function iso2ToFlag(iso2: string) {
@@ -357,11 +359,9 @@ function AuthPageInner() {
       }
 
       const meRes = await fetch("/api/auth/me", { cache: "no-store" });
-      const me = await readAuthResponse(meRes) as AuthResponse & {
-        hasProfile?: boolean;
-      };
+      const me = await readAuthResponse(meRes);
 
-      if (!meRes.ok) {
+      if (!meRes.ok || !me.userId) {
         setError("Your session was created, but we could not load your account.");
         setSessionLoadFailed(true);
         return;
@@ -776,7 +776,8 @@ function AuthPageInner() {
                             try {
                               const res = await fetch("/api/auth/me", { cache: "no-store" });
                               if (res.ok) {
-                                const me = (await res.json()) as { hasProfile?: boolean };
+                                const me = (await res.json()) as AuthResponse;
+                                if (!me.userId) return;
                                 setSessionLoadFailed(false);
                                 setError("");
                                 await refresh();

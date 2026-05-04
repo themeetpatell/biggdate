@@ -202,14 +202,35 @@ export interface SessionMemory {
   lastEmotionalState: string;
   // Relationship OS core
   relationshipCore: Partial<{
-    relationshipStage: "healing" | "exploring" | "dating" | "confused" | "attached" | "committed";
+    relationshipStage:
+      | "healing"
+      | "exploring"
+      | "interested"
+      | "anxious"
+      | "dating"
+      | "confused"
+      | "attached"
+      | "conflicted"
+      | "exiting"
+      | "rebuilding"
+      | "committed";
     mainBlock:
       | "trust"
       | "fear of rejection"
       | "poor selection"
       | "low self-worth"
       | "emotional unavailability";
-    nextBestAction: "pause" | "message" | "reflect" | "clarify" | "meet" | "exit";
+    nextBestAction:
+      | "pause"
+      | "message"
+      | "reflect"
+      | "clarify"
+      | "meet"
+      | "repair"
+      | "boundary"
+      | "wait"
+      | "ask"
+      | "exit";
     partnerLifeGoal: "casual companionship" | "serious relationship" | "marriage" | "life-building partner";
     progressScore: number;
   }>;
@@ -246,6 +267,24 @@ export interface SessionMemory {
       improved: string[];
       repeated: string[];
       handledBetterThisTime: string[];
+    };
+    loveState: {
+      emotionalNeedNow: string;
+      openLoops: string[];
+      recentWins: string[];
+      currentRisk: string;
+      nextTenderAction: string;
+    };
+    maahiLearning: {
+      whatComfortsThem: string[];
+      whatMakesThemDefensive: string[];
+      toneTheyRespondTo: string[];
+      adviceTheyIgnored: string[];
+      adviceTheyActedOn: string[];
+      phrasesThatLanded: string[];
+      phrasesToAvoid: string[];
+      responsePatternsThatWork: string[];
+      responsePatternsToAvoid: string[];
     };
   }>;
   conversationCount: number;

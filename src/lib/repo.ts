@@ -485,6 +485,62 @@ export async function upsertSessionMemory(userId: string, sessionKey: string, pa
         24,
       ),
     },
+    loveState: {
+      emotionalNeedNow:
+        patchOs?.loveState?.emotionalNeedNow || existingOs?.loveState?.emotionalNeedNow || "",
+      openLoops: mergeArr(existingOs?.loveState?.openLoops || [], patchOs?.loveState?.openLoops || [], 16),
+      recentWins: mergeArr(existingOs?.loveState?.recentWins || [], patchOs?.loveState?.recentWins || [], 16),
+      currentRisk: patchOs?.loveState?.currentRisk || existingOs?.loveState?.currentRisk || "",
+      nextTenderAction:
+        patchOs?.loveState?.nextTenderAction || existingOs?.loveState?.nextTenderAction || "",
+    },
+    maahiLearning: {
+      whatComfortsThem: mergeArr(
+        existingOs?.maahiLearning?.whatComfortsThem || [],
+        patchOs?.maahiLearning?.whatComfortsThem || [],
+        16,
+      ),
+      whatMakesThemDefensive: mergeArr(
+        existingOs?.maahiLearning?.whatMakesThemDefensive || [],
+        patchOs?.maahiLearning?.whatMakesThemDefensive || [],
+        16,
+      ),
+      toneTheyRespondTo: mergeArr(
+        existingOs?.maahiLearning?.toneTheyRespondTo || [],
+        patchOs?.maahiLearning?.toneTheyRespondTo || [],
+        16,
+      ),
+      adviceTheyIgnored: mergeArr(
+        existingOs?.maahiLearning?.adviceTheyIgnored || [],
+        patchOs?.maahiLearning?.adviceTheyIgnored || [],
+        16,
+      ),
+      adviceTheyActedOn: mergeArr(
+        existingOs?.maahiLearning?.adviceTheyActedOn || [],
+        patchOs?.maahiLearning?.adviceTheyActedOn || [],
+        16,
+      ),
+      phrasesThatLanded: mergeArr(
+        existingOs?.maahiLearning?.phrasesThatLanded || [],
+        patchOs?.maahiLearning?.phrasesThatLanded || [],
+        16,
+      ),
+      phrasesToAvoid: mergeArr(
+        existingOs?.maahiLearning?.phrasesToAvoid || [],
+        patchOs?.maahiLearning?.phrasesToAvoid || [],
+        16,
+      ),
+      responsePatternsThatWork: mergeArr(
+        existingOs?.maahiLearning?.responsePatternsThatWork || [],
+        patchOs?.maahiLearning?.responsePatternsThatWork || [],
+        16,
+      ),
+      responsePatternsToAvoid: mergeArr(
+        existingOs?.maahiLearning?.responsePatternsToAvoid || [],
+        patchOs?.maahiLearning?.responsePatternsToAvoid || [],
+        16,
+      ),
+    },
   };
 
   const merged: SessionMemory = {

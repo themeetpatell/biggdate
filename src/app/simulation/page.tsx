@@ -5,8 +5,8 @@ import { MarketingSocialRail } from "@/components/marketing-social-rail";
 import { SimulationLanding } from "@/components/simulation-landing";
 
 export const metadata: Metadata = {
-  title: "The BiggDate Story — See How It Works",
-  description: "An end-to-end cinematic walkthrough of how BiggDate finds your person — from soul profile to life preview.",
+  title: "The BiggDate Story — A Love You Haven't Lived Yet",
+  description: "Somewhere out there, she's looking too. Watch the story of how BiggDate finds the one who's been waiting for you — chapter by chapter.",
 };
 
 export default function SimulationPage() {

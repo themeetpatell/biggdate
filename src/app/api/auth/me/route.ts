@@ -7,8 +7,15 @@ export async function GET() {
   const session = await getSessionFromCookies();
   if (!session) {
     return NextResponse.json(
-      { error: "Not authenticated" },
-      { status: 401, headers: { "Cache-Control": "no-store" } }
+      {
+        authenticated: false,
+        userId: null,
+        email: null,
+        phoneCountryIso2: null,
+        hasProfile: false,
+        profile: null,
+      },
+      { headers: { "Cache-Control": "no-store" } }
     );
   }
 
@@ -19,6 +26,7 @@ export async function GET() {
 
   return NextResponse.json(
     {
+      authenticated: true,
       userId: session.userId,
       email: session.email,
       phoneCountryIso2,

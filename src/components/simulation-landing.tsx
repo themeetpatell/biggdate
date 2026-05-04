@@ -9,6 +9,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { audio } from "@/lib/cinematic-audio";
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
@@ -29,14 +30,14 @@ const TINTS = [
 ];
 
 const CHAPTERS = [
-  { num: "01", label: "Prologue",   title: "Three months in",          color: "#e2b159" },
-  { num: "02", label: "Chapter I",  title: "Why none of it worked",    color: "#ff6b6b" },
-  { num: "03", label: "Chapter II", title: "Meet Maahi",               color: "#a78bfa" },
-  { num: "04", label: "Chapter III", title: "The version no app saw",  color: "#d4688a" },
-  { num: "05", label: "Chapter IV", title: "She's been looking too",   color: "#ff8cb8" },
-  { num: "06", label: "Chapter V",  title: "One real opener",          color: "#f59e0b" },
-  { num: "07", label: "Chapter VI", title: "Six months in",            color: "#4FFFB0" },
-  { num: "08", label: "Epilogue",   title: "Yours is the next one",    color: "#ff8cb8" },
+  { num: "01", label: "Prologue",   title: "A heart, still searching",   color: "#e2b159" },
+  { num: "02", label: "Chapter I",  title: "A thousand faces. None of them stayed.", color: "#ff6b6b" },
+  { num: "03", label: "Chapter II", title: "Then — she walks in",        color: "#a78bfa" },
+  { num: "04", label: "Chapter III", title: "The soul no swipe ever saw", color: "#d4688a" },
+  { num: "05", label: "Chapter IV", title: "She's been waiting for you", color: "#ff8cb8" },
+  { num: "06", label: "Chapter V",  title: "The first word that meant something", color: "#f59e0b" },
+  { num: "07", label: "Chapter VI", title: "The life you didn't dare imagine", color: "#4FFFB0" },
+  { num: "08", label: "Epilogue",   title: "Your love begins here",      color: "#ff8cb8" },
 ];
 
 // Approx fixed marketing header height — keeps prologue content out from under it.
@@ -52,10 +53,12 @@ function useSceneFade(ref: RefObject<HTMLElement | null>) {
     target: ref,
     offset: ["start end", "end start"],
   });
-  const opacity = useTransform(scrollYProgress, [0, 0.16, 0.84, 1], [0, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  // Slight scale "push in" as the section travels — Ken-Burns camera creep.
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.96, 1, 1.04]);
+  // Tighter cross-dissolve overlap so adjacent scenes feel like cinematic cuts.
+  const opacity = useTransform(scrollYProgress, [0, 0.22, 0.78, 1], [0, 1, 1, 0]);
+  // Stronger parallax — content rises through the frame as you scroll.
+  const y = useTransform(scrollYProgress, [0, 1], [110, -110]);
+  // Wider Ken-Burns push-in — feels like a camera dolly through the scene.
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 1.07]);
   return { opacity, y, scale, scrollYProgress };
 }
 
@@ -250,20 +253,32 @@ function SceneSection({
   children,
   paddingTop = 0,
   flashColor,
+  cue,
 }: {
   ref: RefObject<HTMLElement | null>;
   children: ReactNode;
   paddingTop?: number;
   flashColor?: string;
+  cue?: Parameters<typeof audio.play>[0];
 }) {
   const inView = useInView(ref, { once: true, amount: 0.4 });
+
+  // Camera-shake + sound on chapter entry
+  useEffect(() => {
+    if (!inView || !cue) return;
+    audio.play(cue);
+  }, [inView, cue]);
+
   return (
-    <section
+    <motion.section
       ref={ref as RefObject<HTMLElement>}
+      animate={inView ? { x: [0, -2, 3, -1, 0] } : undefined}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       style={{
         position: "relative",
-        minHeight: "100vh",
-        paddingTop,
+        minHeight: "min(640px, 68vh)",
+        paddingTop: paddingTop + 32,
+        paddingBottom: 32,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -271,8 +286,28 @@ function SceneSection({
       }}
     >
       <ChapterFlash trigger={inView && !!flashColor} color={flashColor} />
+      {/* Light streak wipe — sweeps across the section as it enters */}
+      {inView && (
+        <motion.div
+          aria-hidden
+          initial={{ x: "-110%", opacity: 0 }}
+          animate={{ x: "110%", opacity: [0, 0.7, 0] }}
+          transition={{ duration: 1.1, ease: "easeOut" }}
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            width: "40%",
+            background:
+              "linear-gradient(110deg, transparent 0%, rgba(255,225,172,0.10) 45%, rgba(255,255,255,0.18) 50%, rgba(255,225,172,0.10) 55%, transparent 100%)",
+            mixBlendMode: "screen",
+            pointerEvents: "none",
+            zIndex: 8,
+          }}
+        />
+      )}
       {children}
-    </section>
+    </motion.section>
   );
 }
 
@@ -317,7 +352,7 @@ function ScenePrologue() {
   const c = CHAPTERS[0];
 
   return (
-    <SceneSection ref={ref} paddingTop={HEADER_OFFSET} flashColor="#e2b15922">
+    <SceneSection ref={ref} paddingTop={HEADER_OFFSET} flashColor="#e2b15922" cue="chapter">
       {/* Decorative rain — denser, depth-layered */}
       <motion.div
         aria-hidden
@@ -382,14 +417,14 @@ function ScenePrologue() {
           transition={{ duration: 1.4, ease: EASE }}
           style={{ fontSize: 11, textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: 56, fontWeight: 500 }}
         >
-          BiggDate presents
+          A BiggDate love story
         </motion.div>
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, marginBottom: 56 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 28, marginBottom: 48 }}>
           {[
-            { val: 3_200_000_000, label: "swipes today",       big: false, color: "rgba(255,255,255,0.55)" },
-            { val: 847,           label: "matches this year",  big: false, color: "rgba(255,255,255,0.55)" },
-            { val: 0,             label: "of them stayed",     big: true,  color: "#ff5555" },
+            { val: 3_200_000_000, label: "hearts thrown into the void today", big: false, color: "rgba(255,255,255,0.55)" },
+            { val: 847,           label: "yeses you whispered this year",    big: false, color: "rgba(255,255,255,0.55)" },
+            { val: 0,             label: "stayed.",                          big: true,  color: "#ff5555" },
           ].map(({ val, label, big, color }, i) => (
             <motion.div
               key={label}
@@ -402,12 +437,12 @@ function ScenePrologue() {
               {big && (
                 <motion.span
                   aria-hidden
-                  animate={{ scale: [1, 1.18, 1], opacity: [0.4, 0, 0.4] }}
+                  animate={{ scale: [1, 1.12, 1], opacity: [0.35, 0, 0.35] }}
                   transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
                   style={{
-                    position: "absolute", left: -18, top: -10, right: -18, bottom: -10,
-                    borderRadius: 20,
-                    boxShadow: `0 0 60px ${color}, inset 0 0 30px ${color}33`,
+                    position: "absolute", left: -10, top: 4, right: -10, bottom: 4,
+                    borderRadius: 999,
+                    boxShadow: `0 0 24px ${color}55, inset 0 0 12px ${color}22`,
                     pointerEvents: "none",
                   }}
                 />
@@ -436,9 +471,9 @@ function ScenePrologue() {
         </div>
 
         <h1 style={{ fontSize: "clamp(40px, 6.4vw, 84px)", fontWeight: 900, color: "#fff", lineHeight: 1.05, margin: 0, maxWidth: 700, letterSpacing: "-0.035em", perspective: 800 }}>
-          {kineticWords("There has to be", 1.45, 0.06)}
+          {kineticWords("Somewhere out there,", 1.45, 0.06)}
           <br />
-          {kineticWords("a better way.", 1.85, 0.07, { color: "#d4688a", textShadow: "0 0 30px rgba(212,104,138,0.6)" })}
+          {kineticWords("she's looking too.", 1.85, 0.07, { color: "#d4688a", textShadow: "0 0 30px rgba(212,104,138,0.6)" })}
         </h1>
       </motion.div>
     </SceneSection>
@@ -448,9 +483,9 @@ function ScenePrologue() {
 // ── Scene 1: The Problem ────────────────────────────────────────────────────
 
 const GHOST_CARDS = [
-  { name: "Aariv, 28 · VC Analyst",   when: "14 months ago", outcome: "👻  Ghosted after 3 messages" },
-  { name: "Ananya, 31 · Founder",     when: "9 months ago",  outcome: "🔴  Never responded" },
-  { name: "Riya, 27 · Product Lead",  when: "6 weeks ago",   outcome: "❌  Unmatched before coffee" },
+  { name: "Aariv, 28 · VC Analyst",   when: "14 months ago", outcome: "👻  Vanished after three good nights" },
+  { name: "Ananya, 31 · Founder",     when: "9 months ago",  outcome: "🔴  Read at 11:42. Never wrote back." },
+  { name: "Riya, 27 · Product Lead",  when: "6 weeks ago",   outcome: "❌  Walked away the morning of coffee" },
 ];
 
 function SceneProblem() {
@@ -459,7 +494,7 @@ function SceneProblem() {
   const c = CHAPTERS[1];
 
   return (
-    <SceneSection ref={ref} flashColor="#ff444433">
+    <SceneSection ref={ref} flashColor="#ff444433" cue="heartbeat">
       <motion.div
         style={{
           opacity, y, scale,
@@ -475,10 +510,10 @@ function SceneProblem() {
         <ChapterStamp {...c} />
 
         <h2 style={{ fontSize: "clamp(30px, 4.8vw, 64px)", fontWeight: 900, color: "#fff", textAlign: "center", lineHeight: 1.1, margin: "0 0 44px", maxWidth: 580, letterSpacing: "-0.028em", perspective: 800 }}>
-          {kineticWords("The apps weren’t built", 0.1, 0.05)}
+          {kineticWords("These apps were never made", 0.1, 0.05)}
           <br />
-          {kineticWords("for people", 0.4, 0.05)}{" "}
-          {kineticWords("like you.", 0.6, 0.07, { color: "#ff6b6b", textShadow: "0 0 28px rgba(255,107,107,0.55)" })}
+          {kineticWords("for hearts", 0.4, 0.05)}{" "}
+          {kineticWords("like yours.", 0.6, 0.07, { color: "#ff6b6b", textShadow: "0 0 28px rgba(255,107,107,0.55)" })}
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 480 }}>
@@ -525,7 +560,7 @@ function SceneProblem() {
           transition={{ delay: 1.3, duration: 0.7 }}
           style={{ marginTop: 36, fontSize: 15, color: "rgba(255,255,255,0.34)", fontStyle: "italic", textAlign: "center" }}
         >
-          You deserve better than a stranger and a gamble.
+          You weren&apos;t made for chance. You were made for someone.
         </motion.p>
       </motion.div>
     </SceneSection>
@@ -535,12 +570,12 @@ function SceneProblem() {
 // ── Scene 2: Enter Maahi ────────────────────────────────────────────────────
 
 const CHAT_LINES = [
-  { from: "maahi", text: "Hi. I'm Maahi." },
-  { from: "maahi", text: "I'm not here to match you." },
-  { from: "maahi", text: "I'm here to understand you." },
-  { from: "maahi", text: "What does your ideal Sunday morning look like?" },
-  { from: "user",  text: "Slow. Coffee. Maybe a run. No phone till noon." },
-  { from: "maahi", text: "That tells me more than 400 right swipes ever could." },
+  { from: "maahi", text: "I'm Maahi." },
+  { from: "maahi", text: "I'm not here to find you a match." },
+  { from: "maahi", text: "I'm here to understand the heart no one's bothered to read." },
+  { from: "maahi", text: "Tell me — what does your Sunday morning feel like?" },
+  { from: "user",  text: "Slow. Coffee that goes cold. A run, maybe. No phone till noon." },
+  { from: "maahi", text: "That tells me more about you than a thousand swipes ever will." },
 ];
 const CHAT_MS = [320, 1050, 1720, 2520, 3480, 4520];
 
@@ -558,7 +593,7 @@ function SceneMaahi() {
   }, [inView]);
 
   return (
-    <SceneSection ref={ref} flashColor="#a78bfa44">
+    <SceneSection ref={ref} flashColor="#a78bfa44" cue="swell">
       <motion.div
         style={{
           opacity, y, scale,
@@ -624,7 +659,7 @@ function SceneMaahi() {
           transition={{ delay: 0.5 }}
           style={{ fontSize: 10, color: "rgba(212,104,138,0.65)", marginBottom: 32, letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 700 }}
         >
-          Maahi · AI Guide
+          Maahi · Your soul&apos;s confidante
         </motion.p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 440 }}>
@@ -667,14 +702,14 @@ function SceneMaahi() {
 // ── Scene 3: Soul Profile ───────────────────────────────────────────────────
 
 const SOUL_TAGS = [
-  { label: "Securely Attached",  color: "#4FFFB0" },
-  { label: "Earns Trust Slowly", color: "#d4688a" },
-  { label: "Values Depth",       color: "#7c3aed" },
-  { label: "Quality Time",       color: "#f59e0b" },
-  { label: "Reflective Comms",   color: "#3b82f6" },
-  { label: "Partnership Intent", color: "#ec4899" },
-  { label: "Growth Focused",     color: "#6ee7b7" },
-  { label: "Ready to Commit",    color: "#fbbf24" },
+  { label: "Loves Without Walls",   color: "#4FFFB0" },
+  { label: "Earns Trust Slowly",    color: "#d4688a" },
+  { label: "Built for Depth",       color: "#7c3aed" },
+  { label: "Stays Through Storms",  color: "#f59e0b" },
+  { label: "Listens Before Loving", color: "#3b82f6" },
+  { label: "Wants a Forever",       color: "#ec4899" },
+  { label: "Grows With Their Person", color: "#6ee7b7" },
+  { label: "Ready to Belong",       color: "#fbbf24" },
 ];
 
 function SceneSoulProfile() {
@@ -704,7 +739,7 @@ function SceneSoulProfile() {
   const CIRC = 2 * Math.PI * R;
 
   return (
-    <SceneSection ref={ref} flashColor="#7c3aed33">
+    <SceneSection ref={ref} flashColor="#7c3aed33" cue="spark">
       <motion.div
         style={{
           opacity, y, scale,
@@ -779,7 +814,7 @@ function SceneSoulProfile() {
             >
               {Math.round(pct * 100)}%
             </motion.p>
-            <p style={{ margin: "2px 0 0", fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.16em", fontWeight: 700 }}>soul match</p>
+            <p style={{ margin: "2px 0 0", fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.16em", fontWeight: 700 }}>your soul, mapped</p>
           </div>
 
           <ParticleBurst trigger={inView} count={26} color="#d4688a" size={2.5} spread={170} duration={1.8} />
@@ -812,9 +847,9 @@ function SceneSoulProfile() {
 // ── Scene 4: The Match ──────────────────────────────────────────────────────
 
 const SIGNALS = [
-  { label: "Values",        text: "Both prioritize depth over breadth",        color: "#4FFFB0" },
-  { label: "Communication", text: "Both need processing time before reacting", color: "#d4688a" },
-  { label: "Life Direction","text": "Both building something that lasts",       color: "#f59e0b" },
+  { label: "Heart",   text: "Both of you choose depth where the world chose noise",      color: "#4FFFB0" },
+  { label: "Voice",   text: "Both of you pause before you speak — and mean every word",  color: "#d4688a" },
+  { label: "Path",    text: "Both of you are building a life worth coming home to",      color: "#f59e0b" },
 ];
 
 function SceneMatch() {
@@ -839,7 +874,7 @@ function SceneMatch() {
   }, [revealed]);
 
   return (
-    <SceneSection ref={ref} flashColor="#ff8cb844">
+    <SceneSection ref={ref} flashColor="#ff8cb844" cue="chapter">
       <motion.div
         style={{
           opacity, y, scale,
@@ -900,18 +935,18 @@ function SceneMatch() {
                   boxShadow: "0 0 40px rgba(255,140,184,0.3)",
                 }}
               >🔒</motion.div>
-              <p style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#fff" }}>Soul Match #1</p>
+              <p style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#fff" }}>The first one who fits</p>
               <div style={{
                 padding: "5px 16px", borderRadius: 999,
                 background: "rgba(79,255,176,0.08)", border: "1px solid rgba(79,255,176,0.24)",
                 fontSize: 12, color: "#4FFFB0", fontWeight: 700, letterSpacing: "0.06em",
-              }}>87% harmony</div>
+              }}>87% in tune</div>
               <motion.p
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 1.6, repeat: Infinity }}
                 style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)", textAlign: "center", lineHeight: 1.5, letterSpacing: "0.04em" }}
               >
-                Maahi is revealing your match…
+                Maahi is bringing her into the light…
               </motion.p>
             </div>
           ) : (
@@ -963,7 +998,7 @@ function SceneMatch() {
                   paddingLeft: 14, borderLeft: "2px solid rgba(255,140,184,0.4)",
                 }}
               >
-                &ldquo;She earns trust slowly and builds deep — and your complexity doesn&apos;t scare her one bit.&rdquo;
+                &ldquo;She loves slow. She builds deep. And the parts of you the world called &lsquo;too much&rsquo; — she&apos;ll quietly call home.&rdquo;
               </motion.p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
@@ -1008,12 +1043,12 @@ function SceneSoulKnock() {
   useEffect(() => {
     if (!inView) return;
     const t1 = setTimeout(() => setPhase("sending"), 1500);
-    const t2 = setTimeout(() => setPhase("sent"),    3100);
+    const t2 = setTimeout(() => { setPhase("sent"); audio.play("sent"); }, 3100);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [inView]);
 
   return (
-    <SceneSection ref={ref} flashColor="#f59e0b44">
+    <SceneSection ref={ref} flashColor="#f59e0b44" cue="knock">
       <motion.div
         style={{
           opacity, y, scale,
@@ -1029,9 +1064,9 @@ function SceneSoulKnock() {
         <ChapterStamp {...c} />
 
         <h2 style={{ fontSize: "clamp(28px, 4.4vw, 52px)", fontWeight: 900, color: "#fff", textAlign: "center", lineHeight: 1.15, margin: "0 0 40px", maxWidth: 560, letterSpacing: "-0.028em", perspective: 800 }}>
-          {kineticWords("One intentional message.", 0.1, 0.05)}
+          {kineticWords("One word, written from the soul.", 0.1, 0.05)}
           <br />
-          {kineticWords("Not 47 “hey”s.", 0.55, 0.05, { color: "rgba(255,255,255,0.32)" })}
+          {kineticWords("Worth a thousand “hey”s.", 0.55, 0.05, { color: "rgba(255,255,255,0.32)" })}
         </h2>
 
         <motion.div
@@ -1049,7 +1084,7 @@ function SceneSoulKnock() {
           }}
         >
           <p style={{ margin: "0 0 10px", fontSize: 10, color: "rgba(245,158,11,0.55)", textTransform: "uppercase", letterSpacing: "0.18em", fontWeight: 700 }}>
-            Your intention for Arya
+A note for Arya — from the realest part of you
           </p>
           <div style={{
             borderRadius: 12, border: "1px solid rgba(255,255,255,0.09)",
@@ -1058,7 +1093,7 @@ function SceneSoulKnock() {
             fontSize: 13.5, color: "rgba(255,255,255,0.78)", lineHeight: 1.6,
           }}>
             <TypewriterText
-              text="I'm curious about what you're building. Most people work to escape. I think you work to arrive somewhere."
+              text="I read what you wrote, slowly. Most people run from something. I think you're running toward someone — and I'd like to know who she is, in your own words."
               delay={550}
               start={inView}
             />
@@ -1076,7 +1111,7 @@ function SceneSoulKnock() {
             transition={{ duration: phase === "sending" ? 0.8 : 0.6, repeat: phase === "sending" ? Infinity : 0 }}
             style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 800, color: "#0A0A0F", letterSpacing: "0.04em" }}
           >
-            {phase === "idle" ? "Send Soul Knock ✦" : phase === "sending" ? "Sending…" : "✓ Soul Knock Sent"}
+            {phase === "idle" ? "Knock on her soul ✦" : phase === "sending" ? "Crossing the distance…" : "✓ She's heard you"}
           </motion.button>
 
           {phase === "sending" && (
@@ -1107,10 +1142,10 @@ function SceneSoulKnock() {
 // ── Scene 6: Life Preview ───────────────────────────────────────────────────
 
 const MILESTONES = [
-  { week: "Week 2",  icon: "☕", text: "First coffee. She was exactly like her profile. Better, actually." },
-  { week: "Month 2", icon: "🌆", text: "She met your best friend last Thursday. They already follow each other." },
-  { week: "Month 4", icon: "✈️", text: "You changed a travel plan. Not because you had to. Because you wanted to." },
-  { week: "Month 6", icon: "🏠", text: "You're looking at apartments together. That's new for you." },
+  { week: "Week 2",  icon: "☕", text: "First coffee. Three hours felt like ten minutes. You walked home the long way, smiling at nothing." },
+  { week: "Month 2", icon: "🌆", text: "She met your best friend last Thursday. They've been texting since. He says you sound different on the phone now." },
+  { week: "Month 4", icon: "✈️", text: "You moved a flight. Not for work. For her. And it didn't even feel like a sacrifice." },
+  { week: "Month 6", icon: "🏠", text: "You're standing in an empty apartment, picturing where her books would go. You — who never wanted this. You want this." },
 ];
 
 function SceneLifePreview() {
@@ -1127,7 +1162,7 @@ function SceneLifePreview() {
   }, [inView]);
 
   return (
-    <SceneSection ref={ref} flashColor="#4FFFB033">
+    <SceneSection ref={ref} flashColor="#4FFFB033" cue="swell">
       <motion.div
         style={{
           opacity, y, scale,
@@ -1143,9 +1178,9 @@ function SceneLifePreview() {
         <ChapterStamp {...c} />
 
         <h2 style={{ fontSize: "clamp(26px, 4vw, 48px)", fontWeight: 900, color: "#fff", textAlign: "center", lineHeight: 1.18, margin: "0 0 40px", maxWidth: 540, letterSpacing: "-0.025em", perspective: 800 }}>
-          {kineticWords("See where it goes", 0.1, 0.05)}
+          {kineticWords("See the love", 0.1, 0.05)}
           <br />
-          {kineticWords("before you go there.", 0.5, 0.05, { color: "#4FFFB0", textShadow: "0 0 28px rgba(79,255,176,0.5)" })}
+          {kineticWords("before you live it.", 0.5, 0.05, { color: "#4FFFB0", textShadow: "0 0 28px rgba(79,255,176,0.5)" })}
         </h2>
 
         <div style={{ position: "relative", width: "100%", maxWidth: 480 }}>
@@ -1218,7 +1253,7 @@ function SceneEpilogue() {
   const c = CHAPTERS[7];
 
   return (
-    <SceneSection ref={ref} flashColor="#ff8cb855">
+    <SceneSection ref={ref} flashColor="#ff8cb855" cue="epilogue">
       {/* Love glow */}
       <motion.div
         aria-hidden
@@ -1288,7 +1323,7 @@ function SceneEpilogue() {
           opacity, y, scale,
           position: "relative",
           width: "100%",
-          maxWidth: 760,
+          maxWidth: 960,
           padding: "0 24px",
           textAlign: "center",
           display: "flex",
@@ -1305,10 +1340,10 @@ function SceneEpilogue() {
           transition={{ duration: 1.4 }}
           style={{ fontSize: 11, color: "rgba(255,255,255,0.32)", textTransform: "uppercase", marginBottom: 44, fontWeight: 600 }}
         >
-          ✦ The End — And The Beginning
+          ✦ Where Every Forever Begins
         </motion.p>
 
-        <h1 style={{ fontSize: "clamp(36px, 6.4vw, 84px)", fontWeight: 900, color: "#fff", lineHeight: 1.04, margin: "0 0 28px", maxWidth: 760, letterSpacing: "-0.04em", perspective: 800 }}>
+        <h1 style={{ fontSize: "clamp(28px, 4.6vw, 60px)", fontWeight: 900, color: "#fff", lineHeight: 1.08, margin: "0 0 28px", maxWidth: 920, letterSpacing: "-0.035em", perspective: 800 }}>
           {kineticWords("Every great love story", 0.2, 0.06)}
           <br />
           <motion.span
@@ -1337,7 +1372,7 @@ function SceneEpilogue() {
                 backgroundClip: "text",
               } as CSSProperties}
             >
-              had a first conversation.
+              began with a single, honest hello.
             </motion.span>
           </motion.span>
         </h1>
@@ -1349,7 +1384,7 @@ function SceneEpilogue() {
           transition={{ duration: 0.85, delay: 1.6, ease: EASE }}
           style={{ fontSize: "clamp(17px, 2.5vw, 24px)", color: "rgba(255,255,255,0.5)", margin: "0 0 64px", maxWidth: 360, fontWeight: 400 }}
         >
-          Yours is waiting.
+Yours is one step away.
         </motion.p>
 
         <motion.div
@@ -1375,7 +1410,7 @@ function SceneEpilogue() {
           <motion.button
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => router.push("/onboarding")}
+            onClick={() => router.push("/auth")}
             style={{
               position: "relative",
               padding: "18px 56px", borderRadius: 999,
@@ -1386,11 +1421,11 @@ function SceneEpilogue() {
               letterSpacing: "0.02em",
             }}
           >
-            Start your profile — it&apos;s free →
+Begin your story — it&apos;s free →
           </motion.button>
 
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.28)", margin: 0, letterSpacing: "0.02em" }}>
-            Private beta · 500+ verified professionals already inside
+Private beta · 500+ souls already inside, looking for theirs
           </p>
         </motion.div>
       </motion.div>

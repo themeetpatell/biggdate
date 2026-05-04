@@ -75,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="dark" style={{ position: "relative" }} suppressHydrationWarning>
       <head>
         {/* JSON-LD: Organization, SoftwareApplication, WebSite — for AEO/GEO discovery */}
         <script
@@ -108,7 +108,10 @@ export default function RootLayout({
           })(window,document,"clarity","script","wk9ecuiovr");
         `}</Script>
       </head>
-      <body className="antialiased bg-[var(--bd-bg)] text-[var(--bd-text)] min-h-screen pb-nav">
+      <body
+        className="antialiased bg-[var(--bd-bg)] text-[var(--bd-text)] min-h-screen pb-nav"
+        style={{ position: "relative" }}
+      >
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
