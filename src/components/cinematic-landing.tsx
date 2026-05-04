@@ -482,7 +482,7 @@ export function CinematicLanding() {
                 <span className="absolute inset-0 bg-gradient-to-r from-[#ff6ac7] via-[#f04fb8] to-[#b86ef7] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </Button>
             </Link>
-            <Link href="/simulation" className="w-full sm:w-auto">
+            <Link href="/" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="ghost"

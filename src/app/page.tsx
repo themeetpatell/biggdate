@@ -1,21 +1,29 @@
-import { Nunito } from "next/font/google";
-import { CinematicLanding } from "@/components/cinematic-landing";
-
-const nunito = Nunito({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-serif",
-});
+import type { Metadata } from "next";
+import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingHeader } from "@/components/marketing-header";
+import { MarketingSocialRail } from "@/components/marketing-social-rail";
+import { SimulationLanding } from "@/components/simulation-landing";
 
 export default function LandingPage() {
-  // The cinematic landing is a dark-by-design experience (neon orbs,
-  // gradient hero, deep gradients). We scope-lock it to dark so theme
-  // toggles elsewhere on the site don't break its look. Every other
-  // marketing surface (about, contact, compare, glossary, questions, vs,
-  // faq, how-it-works, auth) themes correctly.
   return (
-    <div className={`dark ${nunito.variable}`} style={{ colorScheme: "dark" }}>
-      <CinematicLanding />
-    </div>
+    <main
+      className="relative min-h-screen overflow-x-hidden"
+      style={{
+        background: "#060605",
+        color: "var(--bd-text)",
+      }}
+    >
+      <MarketingHeader activePage="home" />
+
+      <SimulationLanding />
+
+      <MarketingFooter />
+      <MarketingSocialRail />
+    </main>
   );
 }
+
+export const metadata: Metadata = {
+  title: "The BiggDate Story — A Love You Haven't Lived Yet",
+  description: "Somewhere out there, she's looking too. Watch the story of how BiggDate finds the one who's been waiting for you — chapter by chapter.",
+};
