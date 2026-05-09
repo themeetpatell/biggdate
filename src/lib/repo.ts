@@ -1,4 +1,4 @@
-import { sql } from "./db";
+import { sql, transaction } from "./db";
 import { randomUUID } from "node:crypto";
 import type {
   Profile,
@@ -95,7 +95,19 @@ export async function getProfileByUserId(userId: string): Promise<Profile | null
 }
 
 export async function upsertProfile(userId: string, profile: Partial<Profile>) {
-  const existing = await sql`SELECT id FROM profiles WHERE user_id = ${userId}`;
+  // Ensure the row exists before updating. Using INSERT ON CONFLICT DO NOTHING
+  // followed by UPDATE is atomic-safe: concurrent requests for the same new user
+  // both race to INSERT; one wins, the other is a no-op, then both UPDATE safely.
+  const id = createId("prof");
+  await sql`
+    INSERT INTO profiles (id, user_id, name, city, photos, attachment, attachment_score, readiness_score,
+      dealbreakers, growth_areas, strengths, core_values, languages, interests, pets, offers, needs,
+      attraction_preferences, turn_ons, turn_offs, love_language_give, love_language_receive, prompts)
+    VALUES (${id}, ${userId}, ${profile.name || ""}, ${profile.city || ""}, ${"[]"}, ${"Secure"},
+      ${50}, ${50}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"},
+      ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"}, ${"[]"})
+    ON CONFLICT (user_id) DO NOTHING
+  `;
 
   const serializeArray = (value: string[] | undefined) =>
     value === undefined ? null : JSON.stringify(value);
@@ -117,10 +129,10 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
   const loveLanguageGive = serializeArray(profile.loveLanguageGive);
   const loveLanguageReceive = serializeArray(profile.loveLanguageReceive);
 
-  if (existing.length) {
-    await sql`
-      UPDATE profiles SET
-        name = COALESCE(${profile.name ?? null}, name),
+  // Row is guaranteed to exist after the INSERT ON CONFLICT DO NOTHING above.
+  await sql`
+    UPDATE profiles SET
+      name = COALESCE(${profile.name ?? null}, name),
         age = COALESCE(${profile.age ?? null}, age),
         birthday = COALESCE(${profile.birthday ?? null}, birthday),
         zodiac = COALESCE(${profile.zodiac ?? null}, zodiac),
@@ -194,61 +206,11 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         love_language_receive = COALESCE(${loveLanguageReceive}, love_language_receive),
         linkedin_url = COALESCE(${profile.linkedinUrl ?? null}, linkedin_url),
         website_url = COALESCE(${profile.websiteUrl ?? null}, website_url),
+        relationship_status = COALESCE(${profile.relationshipStatus ?? null}, relationship_status),
+        partner_id = COALESCE(${profile.partnerId ?? null}, partner_id),
         updated_at = NOW()
       WHERE user_id = ${userId}
-    `;
-  } else {
-    const id = createId("prof");
-    await sql`
-      INSERT INTO profiles (
-        id, user_id, name, age, birthday, zodiac, city, gender, orientation,
-        pronouns, hometown, job_title, company, education, height, religion, politics, ethnicity,
-        partner_gender, intent, relationship_style, has_kids, wants_kids, love_language, drinking, smoking, exercise,
-        sleep_schedule, social_battery, diet, weekend_style, travel_style, cleanliness,
-        languages, interests, pets,
-        dealbreakers, partner_age_min, partner_age_max, attachment, attachment_score, readiness_score,
-        growth_areas, strengths, core_values, summary, coaching_focus, photos, prompts,
-        profile_visibility, show_age, show_city, show_work, show_education,
-        conflict_style, family_expectations, life_architecture, offers, needs,
-        attraction_preferences, turn_ons, turn_offs,
-        relationship_timeline, dating_stage, long_distance_open, emotional_availability,
-        residency_status, relocation_open, work_intensity,
-        family_involvement, cultural_alignment, marriage_type,
-        love_language_give, love_language_receive, linkedin_url, website_url
-      ) VALUES (
-        ${id}, ${userId}, ${profile.name || ""},
-        ${profile.age ?? null}, ${profile.birthday ?? null},
-        ${profile.zodiac ?? null}, ${profile.city || ""},
-        ${profile.gender ?? null}, ${profile.orientation ?? null},
-        ${profile.pronouns ?? null}, ${profile.hometown ?? null}, ${profile.jobTitle ?? null},
-        ${profile.company ?? null}, ${profile.education ?? null}, ${profile.height ?? null},
-        ${profile.religion ?? null}, ${profile.politics ?? null}, ${profile.ethnicity ?? null},
-        ${profile.partnerGender ?? null}, ${profile.intent ?? null}, ${profile.relationshipStyle ?? null},
-        ${profile.hasKids ?? null}, ${profile.wantsKids ?? null},
-        ${profile.loveLanguage ?? null}, ${profile.drinking ?? null},
-        ${profile.smoking ?? null}, ${profile.exercise ?? null},
-        ${profile.sleepSchedule ?? null}, ${profile.socialBattery ?? null}, ${profile.diet ?? null},
-        ${profile.weekendStyle ?? null}, ${profile.travelStyle ?? null}, ${profile.cleanliness ?? null},
-        ${languages ?? "[]"}, ${interests ?? "[]"}, ${pets ?? "[]"},
-        ${dealbreakers ?? "[]"}, ${profile.partnerAgeMin ?? null}, ${profile.partnerAgeMax ?? null},
-        ${profile.attachment || "Secure"}, ${profile.attachmentScore ?? 50},
-        ${profile.readinessScore ?? 50},
-        ${growthAreas ?? "[]"}, ${strengths ?? "[]"}, ${coreValues ?? "[]"},
-        ${profile.summary || ""}, ${profile.coachingFocus || ""}, ${photos ?? "[]"}, ${prompts ?? "[]"},
-        ${profile.profileVisibility ?? "visible"}, ${profile.showAge ?? true},
-        ${profile.showCity ?? true}, ${profile.showWork ?? true}, ${profile.showEducation ?? true},
-        ${profile.conflictStyle || ""}, ${profile.familyExpectations || ""},
-        ${profile.lifeArchitecture || ""}, ${offers ?? "[]"}, ${needs ?? "[]"},
-        ${attractionPreferences ?? "[]"}, ${turnOns ?? "[]"}, ${turnOffs ?? "[]"},
-        ${profile.relationshipTimeline ?? null}, ${profile.datingStage ?? null},
-        ${profile.longDistanceOpen ?? null}, ${profile.emotionalAvailability ?? null},
-        ${profile.residencyStatus ?? null}, ${profile.relocationOpen ?? null}, ${profile.workIntensity ?? null},
-        ${profile.familyInvolvement ?? null}, ${profile.culturalAlignment ?? null}, ${profile.marriageType ?? null},
-        ${loveLanguageGive ?? "[]"}, ${loveLanguageReceive ?? "[]"},
-        ${profile.linkedinUrl || ""}, ${profile.websiteUrl || ""}
-      )
-    `;
-  }
+  `;
 
   await syncAutoVerificationStatus(userId);
 }
@@ -330,21 +292,25 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     linkedinUrl: (row.linkedin_url as string) || null,
     websiteUrl: (row.website_url as string) || null,
     isVerified: Boolean(row.is_verified),
+    relationshipStatus: (row.relationship_status as Profile["relationshipStatus"]) || null,
+    partnerId: (row.partner_id as string) || null,
   };
 }
 
 // ─── Matches ───
 
 export async function saveMatchesForUser(userId: string, matches: Match[]) {
-  await sql`DELETE FROM matches WHERE user_id = ${userId}`;
-  for (const m of matches) {
-    const matchedUserId = m.matchedUserId ?? null;
-    const photosUnlocked = m.photosUnlocked ?? false;
-    await sql`
-      INSERT INTO matches (id, user_id, match_data, matched_user_id, photos_unlocked)
-      VALUES (${m.id || createId("match")}, ${userId}, ${JSON.stringify(m)}, ${matchedUserId}, ${photosUnlocked})
-    `;
-  }
+  await transaction(async (q) => {
+    await q`DELETE FROM matches WHERE user_id = ${userId}`;
+    for (const m of matches) {
+      const matchedUserId = m.matchedUserId ?? null;
+      const photosUnlocked = m.photosUnlocked ?? false;
+      await q`
+        INSERT INTO matches (id, user_id, match_data, matched_user_id, photos_unlocked)
+        VALUES (${m.id || createId("match")}, ${userId}, ${JSON.stringify(m)}, ${matchedUserId}, ${photosUnlocked})
+      `;
+    }
+  });
 }
 
 export async function getMatchesForUser(userId: string): Promise<Match[]> {
@@ -1141,6 +1107,7 @@ export async function getThreadsForUser(userId: string): Promise<Thread[]> {
       CASE WHEN t.user_a_id = ${userId} THEN pb.name ELSE pa.name END AS other_name,
       CASE WHEN t.user_a_id = ${userId} THEN pb.photos ELSE pa.photos END AS other_photos,
       m.body AS last_message,
+      m.kind AS last_message_kind,
       m.created_at AS last_message_at,
       (
         SELECT COUNT(*)::int FROM messages
@@ -1150,7 +1117,7 @@ export async function getThreadsForUser(userId: string): Promise<Thread[]> {
     JOIN profiles pa ON pa.user_id = t.user_a_id
     JOIN profiles pb ON pb.user_id = t.user_b_id
     LEFT JOIN LATERAL (
-      SELECT body, created_at FROM messages
+      SELECT body, kind, created_at FROM messages
       WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1
     ) m ON true
     WHERE t.user_a_id = ${userId} OR t.user_b_id = ${userId}
@@ -1166,7 +1133,10 @@ export async function getThreadsForUser(userId: string): Promise<Thread[]> {
       createdAt: row.created_at as string,
       otherUserName: row.other_name as string,
       otherUserPhoto: otherPhotos[0] ?? undefined,
-      lastMessage: row.last_message as string | undefined,
+      lastMessage:
+        row.last_message_kind === "voice"
+          ? "Voice note"
+          : (row.last_message as string | undefined),
       lastMessageAt: row.last_message_at as string | undefined,
       unreadCount: (row.unread_count as number) ?? 0,
     };
@@ -1200,28 +1170,70 @@ export async function getThreadById(threadId: string, userId: string): Promise<T
 
 // ─── Messages ───
 
+type CreateMessageInput =
+  | { kind: "text"; body: string }
+  | {
+      kind: "voice";
+      audioUrl: string;
+      audioDurationSec?: number | null;
+      audioMimeType?: string | null;
+    };
+
+function mapMessageRow(row: Record<string, unknown>): Message {
+  return {
+    id: row.id as string,
+    threadId: row.thread_id as string,
+    senderId: row.sender_id as string,
+    kind: (row.kind as "text" | "voice" | null) ?? "text",
+    body: (row.body as string | null) ?? null,
+    audioUrl: (row.audio_url as string | null) ?? null,
+    audioDurationSec: (row.audio_duration_sec as number | null) ?? null,
+    audioMimeType: (row.audio_mime_type as string | null) ?? null,
+    createdAt: row.created_at as string,
+    readAt: (row.read_at as string | null) ?? null,
+  };
+}
+
 export async function getMessages(threadId: string): Promise<Message[]> {
   const rows = await sql`
     SELECT * FROM messages WHERE thread_id = ${threadId} ORDER BY created_at ASC
   `;
-  return (rows as Record<string, unknown>[]).map((row) => ({
-    id: row.id as string,
-    threadId: row.thread_id as string,
-    senderId: row.sender_id as string,
-    body: row.body as string,
-    createdAt: row.created_at as string,
-    readAt: (row.read_at as string) || null,
-  }));
+  return (rows as Record<string, unknown>[]).map(mapMessageRow);
 }
 
-export async function createMessage(threadId: string, senderId: string, body: string): Promise<Message> {
-  const rows = await sql`
-    INSERT INTO messages (thread_id, sender_id, body)
-    VALUES (${threadId}, ${senderId}, ${body})
-    RETURNING id, created_at
-  `;
-  const row = rows[0] as { id: string; created_at: string };
-  return { id: row.id, threadId, senderId, body, createdAt: row.created_at, readAt: null };
+export async function createMessage(
+  threadId: string,
+  senderId: string,
+  input: CreateMessageInput,
+): Promise<Message> {
+  const rows =
+    input.kind === "voice"
+      ? await sql`
+          INSERT INTO messages (
+            thread_id,
+            sender_id,
+            kind,
+            audio_url,
+            audio_duration_sec,
+            audio_mime_type
+          )
+          VALUES (
+            ${threadId},
+            ${senderId},
+            'voice',
+            ${input.audioUrl},
+            ${input.audioDurationSec ?? null},
+            ${input.audioMimeType ?? null}
+          )
+          RETURNING *
+        `
+      : await sql`
+          INSERT INTO messages (thread_id, sender_id, kind, body)
+          VALUES (${threadId}, ${senderId}, 'text', ${input.body})
+          RETURNING *
+        `;
+
+  return mapMessageRow(rows[0] as Record<string, unknown>);
 }
 
 export async function markMessagesRead(threadId: string, readerId: string) {
@@ -1249,11 +1261,77 @@ export async function unlockPhotosForBothUsers(introId: string) {
   `;
 }
 
+// Atomically record a Soul Knock answer and, if both sides have now answered,
+// create the thread and unlock photos — all in one transaction so concurrent
+// responses can never produce a half-created state.
+export async function processSoulKnockResponse(
+  introId: string,
+  userId: string,
+  response: string,
+  side: "sender" | "receiver",
+): Promise<{ mutual: boolean; thread: Thread | null }> {
+  return transaction(async (q) => {
+    await q`
+      INSERT INTO soul_knock_responses (intro_id, user_id, response)
+      VALUES (${introId}, ${userId}, ${response})
+      ON CONFLICT (intro_id, user_id) DO UPDATE SET response = EXCLUDED.response
+    `;
+
+    if (side === "sender") {
+      await q`UPDATE intros SET sender_answered = true WHERE id = ${introId}`;
+    } else {
+      await q`UPDATE intros SET receiver_answered = true WHERE id = ${introId}`;
+    }
+
+    const introRows = await q`
+      SELECT sender_answered, receiver_answered, user_id, matched_user_id
+      FROM intros WHERE id = ${introId}
+    `;
+    if (!introRows.length) return { mutual: false, thread: null };
+    const introRow = introRows[0] as Record<string, unknown>;
+    const mutual = Boolean(introRow.sender_answered) && Boolean(introRow.receiver_answered);
+    if (!mutual) return { mutual: false, thread: null };
+
+    const userAId = introRow.user_id as string;
+    const userBId = introRow.matched_user_id as string;
+
+    await q`
+      INSERT INTO threads (user_a_id, user_b_id, intro_id)
+      VALUES (${userAId}, ${userBId}, ${introId})
+      ON CONFLICT (intro_id) DO NOTHING
+    `;
+
+    const threadRows = await q`SELECT * FROM threads WHERE intro_id = ${introId}`;
+    const tRow = threadRows[0] as Record<string, unknown>;
+    const thread: Thread = {
+      id: tRow.id as string,
+      userAId: tRow.user_a_id as string,
+      userBId: tRow.user_b_id as string,
+      introId: tRow.intro_id as string,
+      createdAt: tRow.created_at as string,
+    };
+
+    await q`
+      UPDATE matches
+      SET photos_unlocked = true
+      WHERE id IN (
+        SELECT m.id FROM matches m
+        JOIN intros i ON i.match_id = m.id
+        WHERE i.id = ${introId}
+          AND (m.user_id = i.user_id OR m.user_id = i.matched_user_id)
+      )
+    `;
+
+    return { mutual: true, thread };
+  });
+}
+
 // ─── Usage Counters / Plan Gate ───
 
 const PLAN_LIMITS: Record<string, Record<string, number>> = {
   soul_knock:     { free: 3,  premium: 15, pro: Infinity },
   maahi_session:  { free: 3,  premium: 15, pro: Infinity },
+  maahi_turn:     { free: 12, premium: 100, pro: Infinity },
   life_preview:   { free: 0,  premium: 2,  pro: Infinity },
   daily_matches:  { free: 5,  premium: 20, pro: Infinity },
 };
@@ -1261,7 +1339,7 @@ const PLAN_LIMITS: Record<string, Record<string, number>> = {
 // Period start for each action: daily | weekly | monthly
 function periodStart(action: GatedAction): string {
   const now = new Date();
-  if (action === "maahi_session") {
+  if (action === "maahi_session" || action === "maahi_turn") {
     // start of ISO week (Monday)
     const day = now.getDay(); // 0=Sun
     const diff = (day + 6) % 7;
@@ -1298,6 +1376,46 @@ export async function incrementUsage(userId: string, action: GatedAction) {
     ON CONFLICT (user_id, action, period_start)
     DO UPDATE SET count = usage_counters.count + 1
   `;
+}
+
+// Atomically check the plan gate AND increment the counter in one DB round-trip.
+// If the limit has been reached the counter is NOT incremented and allowed=false
+// is returned — eliminating the TOCTOU race between requirePlan + incrementUsage.
+// Use this everywhere a gate check is immediately followed by an increment.
+export async function requirePlanAtomic(userId: string, action: GatedAction): Promise<PlanGateResult> {
+  const planRow = await getUserPlan(userId);
+  const plan = (planRow?.status === "active" || planRow?.status === "trialing")
+    ? (planRow.plan ?? "free")
+    : "free";
+
+  const limit = PLAN_LIMITS[action]?.[plan] ?? 0;
+  if (limit === Infinity) return { allowed: true, limit: -1, used: 0, plan };
+  if (limit === 0) return { allowed: false, limit: 0, used: 0, plan };
+
+  const ps = periodStart(action);
+  // Insert or conditionally increment — RETURNING only fires when a row is
+  // written, so zero rows ⟺ the limit was already reached.
+  const rows = await sql`
+    INSERT INTO usage_counters (user_id, action, count, period_start)
+    SELECT ${userId}, ${action}, 1, ${ps}
+    WHERE 1 <= ${limit}
+    ON CONFLICT (user_id, action, period_start)
+    DO UPDATE SET count = usage_counters.count + 1
+      WHERE usage_counters.count < ${limit}
+    RETURNING count
+  `;
+
+  if (rows.length > 0) {
+    const count = (rows[0] as { count: number }).count;
+    return { allowed: true, limit, used: count, plan };
+  }
+
+  const existing = await sql`
+    SELECT count FROM usage_counters
+    WHERE user_id = ${userId} AND action = ${action} AND period_start = ${ps}
+  `;
+  const used = existing.length ? (existing[0] as { count: number }).count : limit;
+  return { allowed: false, limit, used, plan };
 }
 
 export async function getUsageCounter(userId: string, action: GatedAction): Promise<UsageCounter | null> {
@@ -1365,8 +1483,9 @@ function safeParseJson<T>(str: string | null | undefined, fallback: T): T {
 
 // Per-thread anonymous handle: stable within one post's thread, unlinkable across threads.
 // hash(scopeId + userId) → "Anon-X##" where X is a letter and ## a number.
-const ANON_SECRET = process.env.PULSE_ANON_SECRET ?? "biggdate-pulse-anon-v1";
+const ANON_SECRET = process.env.PULSE_ANON_SECRET;
 function anonHandle(scopeId: string, userId: string): string {
+  if (!ANON_SECRET) throw new Error("PULSE_ANON_SECRET env var is not set");
   const h = createHash("sha256").update(`${ANON_SECRET}|${scopeId}|${userId}`).digest();
   const letter = String.fromCharCode(65 + (h[0] % 26));
   const num = ((h[1] << 8) | h[2]) % 100;
@@ -1560,20 +1679,24 @@ export async function createPulsePost({
 }
 
 export async function togglePulseReaction(postId: string, userId: string): Promise<boolean> {
-  const existing = await sql`
-    SELECT id FROM pulse_reactions WHERE post_id = ${postId} AND user_id = ${userId}
-  `;
-  if (existing.length) {
-    await sql`DELETE FROM pulse_reactions WHERE post_id = ${postId} AND user_id = ${userId}`;
-    await sql`
-      UPDATE pulse_posts SET resonate_count = GREATEST(resonate_count - 1, 0) WHERE id = ${postId}
+  return transaction(async (q) => {
+    // Atomic toggle: try insert first, delete if conflict (already reacted)
+    const id = createId("pr");
+    const inserted = await q`
+      INSERT INTO pulse_reactions (id, post_id, user_id, created_at)
+      VALUES (${id}, ${postId}, ${userId}, NOW())
+      ON CONFLICT (post_id, user_id) DO NOTHING
+      RETURNING id
     `;
+    if (inserted.length > 0) {
+      await q`UPDATE pulse_posts SET resonate_count = resonate_count + 1 WHERE id = ${postId}`;
+      return true;
+    }
+    // Already reacted — remove it
+    await q`DELETE FROM pulse_reactions WHERE post_id = ${postId} AND user_id = ${userId}`;
+    await q`UPDATE pulse_posts SET resonate_count = GREATEST(resonate_count - 1, 0) WHERE id = ${postId}`;
     return false;
-  }
-  const id = createId("pr");
-  await sql`INSERT INTO pulse_reactions (id, post_id, user_id, created_at) VALUES (${id}, ${postId}, ${userId}, NOW())`;
-  await sql`UPDATE pulse_posts SET resonate_count = resonate_count + 1 WHERE id = ${postId}`;
-  return true;
+  });
 }
 
 export async function getPulseReplies(postId: string) {
@@ -1635,26 +1758,33 @@ export async function createPulseReply({
   isVerified: boolean;
 }) {
   const id = createId("prely");
-  await sql`
-    INSERT INTO pulse_replies (id, post_id, user_id, content, is_verified, created_at)
-    VALUES (${id}, ${postId}, ${userId}, ${content}, ${isVerified}, NOW())
-  `;
-  await sql`UPDATE pulse_posts SET reply_count = reply_count + 1 WHERE id = ${postId}`;
+  await transaction(async (q) => {
+    await q`
+      INSERT INTO pulse_replies (id, post_id, user_id, content, is_verified, created_at)
+      VALUES (${id}, ${postId}, ${userId}, ${content}, ${isVerified}, NOW())
+    `;
+    await q`UPDATE pulse_posts SET reply_count = reply_count + 1 WHERE id = ${postId}`;
+  });
   return id;
 }
 
 export async function flagPulsePost(postId: string, userId: string, reason: string) {
   const id = createId("pf");
+  // Atomic: only increment flag_count when the INSERT actually wrote a row
+  // (i.e. this user hasn't already flagged this post).
   await sql`
-    INSERT INTO pulse_flags (id, post_id, user_id, reason, created_at)
-    VALUES (${id}, ${postId}, ${userId}, ${reason}, NOW())
-    ON CONFLICT (post_id, user_id) DO NOTHING
-  `;
-  await sql`
+    WITH ins AS (
+      INSERT INTO pulse_flags (id, post_id, user_id, reason, created_at)
+      VALUES (${id}, ${postId}, ${userId}, ${reason}, NOW())
+      ON CONFLICT (post_id, user_id) DO NOTHING
+      RETURNING id
+    )
     UPDATE pulse_posts
-    SET flag_count = flag_count + 1,
-        is_hidden  = CASE WHEN flag_count + 1 >= 3 THEN true ELSE is_hidden END
+    SET flag_count = flag_count + (SELECT COUNT(*) FROM ins),
+        is_hidden  = CASE WHEN flag_count + (SELECT COUNT(*) FROM ins) >= 3
+                         THEN true ELSE is_hidden END
     WHERE id = ${postId}
+      AND (SELECT COUNT(*) FROM ins) > 0
   `;
 }
 

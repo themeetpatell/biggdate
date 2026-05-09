@@ -15,7 +15,7 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip API routes (they handle auth themselves) and static assets
@@ -32,7 +32,8 @@ export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) {
-    return NextResponse.next();
+    const loginUrl = new URL("/auth", request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
   let response = NextResponse.next({ request });

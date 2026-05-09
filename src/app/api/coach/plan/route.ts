@@ -5,13 +5,13 @@ import { coachingPlanPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
 
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
-  // Use DB profile, fall back to body
-  const body = await req.json();
-  const profile = await getProfileByUserId(auth.userId) || body.profile;
+  const profile = await getProfileByUserId(auth.userId);
   if (!profile) {
     return NextResponse.json({ error: "No profile" }, { status: 400 });
   }

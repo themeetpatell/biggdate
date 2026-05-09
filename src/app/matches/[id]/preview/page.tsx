@@ -213,12 +213,20 @@ function AlreadySent({
   onWithdraw,
   onModify,
   onViewConnect,
+  modifyDraft,
+  onModifyDraftChange,
+  onModifySubmit,
+  modifying,
 }: {
   match: Match;
   intro: ExistingIntro;
   onWithdraw: () => Promise<void>;
-  onModify: () => Promise<void>;
+  onModify: () => void;
   onViewConnect: () => void;
+  modifyDraft: string | null;
+  onModifyDraftChange: (v: string) => void;
+  onModifySubmit: () => Promise<void>;
+  modifying: boolean;
 }) {
   const sentAt = intro.createdAt
     ? new Date(intro.createdAt).toLocaleDateString(undefined, {
@@ -328,40 +336,83 @@ function AlreadySent({
 
         {/* Withdraw + Modify */}
         {!isAnswered && (
-          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <button
-              onClick={() => void onWithdraw()}
-              style={{
-                flex: 1,
-                padding: "12px 0",
-                borderRadius: 12,
-                fontSize: 13,
-                fontWeight: 600,
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.04)",
-                color: "rgba(255,255,255,0.7)",
-                cursor: "pointer",
-              }}
-            >
-              Withdraw
-            </button>
-            <button
-              onClick={() => void onModify()}
-              style={{
-                flex: 1,
-                padding: "12px 0",
-                borderRadius: 12,
-                fontSize: 13,
-                fontWeight: 600,
-                border: "1px solid rgba(212,104,138,0.28)",
-                background: "rgba(212,104,138,0.1)",
-                color: "#f58bc2",
-                cursor: "pointer",
-              }}
-            >
-              Modify
-            </button>
-          </div>
+          <>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <button
+                onClick={() => void onWithdraw()}
+                style={{
+                  flex: 1,
+                  padding: "12px 0",
+                  borderRadius: 12,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.7)",
+                  cursor: "pointer",
+                }}
+              >
+                Withdraw
+              </button>
+              <button
+                onClick={modifyDraft == null ? onModify : () => onModifyDraftChange("")}
+                style={{
+                  flex: 1,
+                  padding: "12px 0",
+                  borderRadius: 12,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  border: "1px solid rgba(212,104,138,0.28)",
+                  background: "rgba(212,104,138,0.1)",
+                  color: "#f58bc2",
+                  cursor: "pointer",
+                }}
+              >
+                {modifyDraft == null ? "Modify" : "Cancel"}
+              </button>
+            </div>
+            {modifyDraft != null && (
+              <div style={{ marginBottom: 12 }}>
+                <textarea
+                  value={modifyDraft}
+                  onChange={(e) => onModifyDraftChange(e.target.value)}
+                  maxLength={280}
+                  rows={3}
+                  placeholder="Edit your Soul Knock question…"
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(212,104,138,0.3)",
+                    borderRadius: 12,
+                    padding: "12px 14px",
+                    fontSize: 14,
+                    color: "#fff",
+                    resize: "none",
+                    outline: "none",
+                  }}
+                />
+                <button
+                  onClick={() => void onModifySubmit()}
+                  disabled={modifying || !modifyDraft.trim()}
+                  style={{
+                    width: "100%",
+                    marginTop: 8,
+                    padding: "12px 0",
+                    borderRadius: 12,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    border: "none",
+                    background: modifyDraft.trim() ? "#f58bc2" : "rgba(245,139,194,0.3)",
+                    color: modifyDraft.trim() ? "#1a0d10" : "rgba(255,255,255,0.3)",
+                    cursor: modifyDraft.trim() && !modifying ? "pointer" : "default",
+                  }}
+                >
+                  {modifying ? "Saving…" : "Save"}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         <button
@@ -602,6 +653,7 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
   const [upgradeContext, setUpgradeContext] = useState<string | undefined>();
   const [withdrawing, setWithdrawing] = useState(false);
   const [modifying, setModifying] = useState(false);
+  const [modifyDraft, setModifyDraft] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -700,14 +752,14 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
     setWithdrawing(false);
   }, [existingIntro, withdrawing]);
 
-  const handleModify = useCallback(async () => {
-    if (!existingIntro || modifying) return;
-    const currentQuestion = existingIntro.soulKnockQuestion ?? "";
-    const draft = typeof window !== "undefined"
-      ? window.prompt("Modify your Soul Knock", currentQuestion)
-      : null;
-    if (draft == null) return;
-    const soulKnockQuestion = draft.trim().slice(0, 280);
+  const handleModifyOpen = useCallback(() => {
+    if (!existingIntro) return;
+    setModifyDraft(existingIntro.soulKnockQuestion ?? "");
+  }, [existingIntro]);
+
+  const handleModifySubmit = useCallback(async () => {
+    if (!existingIntro || modifying || modifyDraft == null) return;
+    const soulKnockQuestion = modifyDraft.trim().slice(0, 280);
     if (!soulKnockQuestion) return;
 
     setModifying(true);
@@ -720,6 +772,7 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
 
       if (res.status === 403) {
         openUpgrade("modify_soul_knock");
+        setModifyDraft(null);
         return;
       }
 
@@ -728,13 +781,14 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
           if (!prev) return prev;
           return { ...prev, soulKnockQuestion };
         });
+        setModifyDraft(null);
       }
     } catch {
       // best-effort
     } finally {
       setModifying(false);
     }
-  }, [existingIntro, modifying, openUpgrade]);
+  }, [existingIntro, modifying, modifyDraft, openUpgrade]);
 
   const handlePass = useCallback(async () => {
     if (!match) return;
@@ -833,8 +887,12 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
               match={match}
               intro={existingIntro}
               onWithdraw={handleWithdraw}
-              onModify={handleModify}
+              onModify={handleModifyOpen}
               onViewConnect={() => router.push("/matches")}
+              modifyDraft={modifyDraft}
+              onModifyDraftChange={setModifyDraft}
+              onModifySubmit={handleModifySubmit}
+              modifying={modifying}
             />
           ) : (
             <SoulKnock

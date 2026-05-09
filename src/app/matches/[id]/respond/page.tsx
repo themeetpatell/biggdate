@@ -52,20 +52,29 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
       .catch(() => { setPageLoading(false); router.push("/matches"); });
   }, [id, profile, authLoading, router]);
 
+  const [submitError, setSubmitError] = useState("");
+
   const handleSubmit = async () => {
     if (!response.trim() || !introId) return;
     setSubmitting(true);
+    setSubmitError("");
     try {
       const res = await fetch("/api/intros/respond", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ introId, response: response.trim() }),
       });
-      const data = await res.json();
+      const data = await res.json() as Record<string, unknown>;
+      if (!res.ok) {
+        setSubmitError(typeof data.error === "string" ? data.error : "Something went wrong. Please try again.");
+        return;
+      }
       trackMatchRespond(id, "accept");
-      setMutual(data.mutual);
-      setThreadId(data.thread?.id ?? null);
+      setMutual(Boolean(data.mutual));
+      setThreadId(typeof data.thread === "object" && data.thread !== null ? (data.thread as { id?: string }).id ?? null : null);
       setDone(true);
+    } catch {
+      setSubmitError("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -196,6 +205,12 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
         >
           {submitting ? "Sending…" : "Send My Answer"}
         </button>
+
+        {submitError && (
+          <p style={{ fontSize: 13, color: "#f87171", textAlign: "center", margin: "12px 0 0" }}>
+            {submitError}
+          </p>
+        )}
 
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", textAlign: "center", margin: "16px 0 0", lineHeight: 1.5 }}>
           Once you both answer, your chat opens and photos unlock.

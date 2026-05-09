@@ -29,8 +29,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { type, priceId } = await request.json() as { type: "subscription" | "payment"; priceId: string };
-  if (!priceId || typeof priceId !== "string") {
+  const body = await request.json() as { type?: unknown; priceId?: unknown };
+  const type = body.type;
+  const priceId = typeof body.priceId === "string" ? body.priceId.trim() : "";
+  if (!priceId) {
+    return NextResponse.json({ error: "Invalid priceId" }, { status: 400 });
+  }
+
+  // Only allow price IDs that are explicitly configured for this app — prevents
+  // a client from passing an arbitrary (e.g. $0) price from the same Stripe account.
+  const allowedPriceIds = [
+    process.env.STRIPE_PRICE_ID_PREMIUM,
+    process.env.STRIPE_PRICE_ID_PRO,
+    process.env.STRIPE_PRICE_ID_PREMIUM_MONTHLY,
+    process.env.STRIPE_PRICE_ID_PRO_MONTHLY,
+  ].filter(Boolean) as string[];
+  if (allowedPriceIds.length > 0 && !allowedPriceIds.includes(priceId)) {
     return NextResponse.json({ error: "Invalid priceId" }, { status: 400 });
   }
   const origin = request.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

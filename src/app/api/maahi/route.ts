@@ -3,6 +3,8 @@ import { getSessionFromCookies } from "@/lib/auth";
 import { runMaahiTurn } from "@/lib/maahi/engine";
 import type { MaahiScene } from "@/lib/maahi/scenes";
 
+export const maxDuration = 60;
+
 const MAX_ANON_MESSAGES_PER_SESSION = 20;
 
 /**

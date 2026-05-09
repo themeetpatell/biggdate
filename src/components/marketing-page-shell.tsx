@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Nunito } from "next/font/google";
+import { motion } from "framer-motion";
 import { MarketingFooter } from "@/components/marketing-footer";
 import {
   MarketingHeader,
@@ -31,78 +32,100 @@ export function MarketingPageShell({
       <main
         className="relative min-h-screen overflow-x-hidden pt-24 sm:pt-24"
         style={{
-          background: "var(--bd-bg)",
+          background: "#060605",
           color: "var(--bd-text)",
         }}
       >
         <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-          <div
-            className="absolute -left-72 -top-48 h-[700px] w-[700px] rounded-full opacity-70 blur-[80px]"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.7, scale: 1 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            className="absolute -left-72 -top-48 h-[700px] w-[700px] rounded-full blur-[90px]"
             style={{
-              background:
-                "radial-gradient(circle, var(--bd-pink-glow), transparent 70%)",
+              background: "radial-gradient(circle, var(--bd-pink-glow), transparent 70%)",
             }}
           />
-          <div
-            className="absolute -right-52 top-[24%] h-[620px] w-[620px] rounded-full opacity-60 blur-[80px]"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.6, scale: 1 }}
+            transition={{ duration: 3, delay: 0.5, ease: "easeOut" }}
+            className="absolute -right-52 top-[24%] h-[620px] w-[620px] rounded-full blur-[90px]"
             style={{
-              background:
-                "radial-gradient(circle, var(--bd-blue-glow), transparent 70%)",
+              background: "radial-gradient(circle, var(--bd-blue-glow), transparent 70%)",
             }}
           />
-          <div
-            className="absolute bottom-0 left-[35%] h-[420px] w-[420px] rounded-full opacity-50 blur-[80px]"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.5, scale: 1 }}
+            transition={{ duration: 3, delay: 1, ease: "easeOut" }}
+            className="absolute bottom-0 left-[35%] h-[420px] w-[420px] rounded-full blur-[90px]"
             style={{
-              background:
-                "radial-gradient(circle, var(--bd-accent-glow), transparent 70%)",
+              background: "radial-gradient(circle, var(--bd-accent-glow), transparent 70%)",
             }}
           />
         </div>
 
         <div
-          className="pointer-events-none fixed inset-0 z-[1] opacity-[0.04]"
+          className="pointer-events-none fixed inset-0 z-[1] opacity-[0.03]"
           aria-hidden
           style={{
-            backgroundImage:
-              "radial-gradient(var(--bd-text-faint) 1px, transparent 1px)",
-            backgroundSize: "3px 3px",
+            backgroundImage: "radial-gradient(var(--bd-text-faint) 1px, transparent 1px)",
+            backgroundSize: "4px 4px",
           }}
         />
 
         <MarketingHeader activePage={activePage} />
 
         <section className="relative z-10 px-6 pb-10 pt-4 sm:pb-16 sm:pt-24">
-          <div
-            className="mx-auto flex max-w-5xl flex-col items-center rounded-[32px] p-8 text-center backdrop-blur-xl sm:p-12"
+          <motion.div
+            initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="mx-auto flex max-w-5xl flex-col items-center rounded-[32px] p-8 text-center backdrop-blur-2xl sm:p-12 relative overflow-hidden"
             style={{
-              background: "var(--bd-glass-bg)",
-              border: "1px solid var(--bd-border)",
-              boxShadow: "0 36px 100px rgba(0,0,0,0.18)",
+              background: "rgba(20, 24, 40, 0.35)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 36px 100px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.02)",
             }}
           >
-            <span
-              className="inline-flex rounded-full px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.3em]"
+            <motion.div 
+              className="absolute inset-0 z-0 opacity-30 mix-blend-overlay pointer-events-none"
               style={{
-                background: "var(--bd-accent-soft)",
-                border: "1px solid var(--bd-border-glow)",
+                backgroundImage: "url('/noise.png')",
+                backgroundSize: "100px",
+              }}
+            />
+            <span
+              className="relative z-10 inline-flex rounded-full px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.3em]"
+              style={{
+                background: "rgba(229,39,224,0.08)",
+                border: "1px solid rgba(229,39,224,0.25)",
                 color: "var(--bd-pink)",
               }}
             >
               {eyebrow}
             </span>
-            <h1 className="mt-6 max-w-4xl font-display text-4xl font-bold tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+            <h1 className="relative z-10 mt-8 max-w-4xl font-display text-4xl font-bold tracking-[-0.03em] sm:text-5xl lg:text-6xl !leading-[1.15]" style={{ textShadow: "0 0 40px rgba(255,255,255,0.1)" }}>
               {title}
             </h1>
             <p
-              className="mt-5 max-w-2xl text-base leading-relaxed sm:text-lg"
-              style={{ color: "var(--bd-text-muted)" }}
+              className="relative z-10 mt-6 max-w-2xl text-base leading-relaxed sm:text-lg"
+              style={{ color: "rgba(255,255,255,0.6)" }}
             >
               {description}
             </p>
-          </div>
+          </motion.div>
         </section>
 
-        <div className="relative z-10">{children}</div>
+        <motion.div 
+          className="relative z-10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {children}
+        </motion.div>
 
         <MarketingFooter />
         <MarketingSocialRail />

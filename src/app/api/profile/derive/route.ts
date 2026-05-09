@@ -13,6 +13,8 @@ import {
   getAccountHandleByUserId,
 } from "@/lib/repo";
 
+export const maxDuration = 60;
+
 type Phase = "basic" | "psychological";
 
 function extractFirstJson(text: string): string {

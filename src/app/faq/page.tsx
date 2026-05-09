@@ -16,6 +16,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
+  keywords: ["BiggDate FAQ", "AI dating app questions", "Maahi AI profiler", "soul profile dating", "dating app faq"],
   alternates: { canonical: `${APP_URL}/faq` },
   openGraph: {
     title: TITLE,
@@ -108,7 +109,11 @@ const FAQ: FaqQA[] = [
   },
 ];
 
+import { MarketingPageShell } from "@/components/marketing-page-shell";
+import { motion } from "framer-motion";
+
 export default function FAQPage() {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
   const breadcrumb = breadcrumbSchema([
     { name: "Home", url: APP_URL },
     { name: "FAQ", url: `${APP_URL}/faq` },
@@ -125,44 +130,61 @@ export default function FAQPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumb) }}
       />
-      <main
-        className="mx-auto max-w-3xl px-6 py-16 text-[15px] leading-[1.75]"
-        style={{ color: "var(--bd-text)" }}
+      <MarketingPageShell
+        eyebrow="FAQ"
+        title="Frequently asked questions."
+        description="How BiggDate works, what makes it different, and how Maahi builds your Soul Profile."
+        activePage="faq"
       >
-        <header className="mb-12">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--bd-accent)" }}>
-            FAQ
-          </p>
-          <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
-            Frequently asked questions
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm" style={{ color: "var(--bd-text-faint)" }}>
-            How BiggDate works, what makes it different, and how Maahi builds your Soul Profile.
-          </p>
-        </header>
+        <div className="mx-auto max-w-3xl px-6 pb-20">
+          <div className="space-y-6">
+            {FAQ.map((qa, i) => (
+              <motion.div 
+                key={qa.question}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: (i % 5) * 0.1, ease: "easeOut" }}
+                className="rounded-2xl p-6 relative overflow-hidden group"
+                style={{
+                  background: "linear-gradient(145deg, rgba(30, 36, 56, 0.4), rgba(15, 18, 30, 0.6))",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+                  backdropFilter: "blur(20px)",
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: "linear-gradient(45deg, transparent, rgba(229,39,224,0.03), transparent)",
+                  }}
+                />
+                <h2 className="text-lg font-medium relative z-10" style={{ color: "var(--bd-text)" }}>{qa.question}</h2>
+                <p className="mt-3 text-[15px] leading-relaxed relative z-10" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  {qa.answer}
+                </p>
+              </motion.div>
+            ))}
+          </div>
 
-        <div className="space-y-8">
-          {FAQ.map((qa) => (
-            <section key={qa.question}>
-              <h2 className="text-lg font-medium">{qa.question}</h2>
-              <p className="mt-2" style={{ color: "var(--bd-text-muted)" }}>
-                {qa.answer}
-              </p>
-            </section>
-          ))}
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-16 text-center text-sm" 
+            style={{ color: "var(--bd-text-faint)" }}
+          >
+            Still have a question? Email{" "}
+            <a href="mailto:hello@biggdate.app" className="underline hover:text-white transition-colors">
+              hello@biggdate.app
+            </a>
+            . See also: <a href="/compare" className="underline hover:text-white transition-colors">how BiggDate compares</a>,{" "}
+            <a href="/how-it-works" className="underline hover:text-white transition-colors">how it works</a>,{" "}
+            <a href="/privacy" className="underline hover:text-white transition-colors">Privacy</a>,{" "}
+            <a href="/terms" className="underline hover:text-white transition-colors">Terms</a>.
+          </motion.p>
         </div>
-
-        <p className="mt-16 text-sm" style={{ color: "var(--bd-text-faint)" }}>
-          Still have a question? Email{" "}
-          <a href="mailto:hello@biggdate.app" className="underline">
-            hello@biggdate.app
-          </a>
-          . See also: <a href="/compare" className="underline">how BiggDate compares</a>,{" "}
-          <a href="/how-it-works" className="underline">how it works</a>,{" "}
-          <a href="/privacy" className="underline">Privacy</a>,{" "}
-          <a href="/terms" className="underline">Terms</a>.
-        </p>
-      </main>
+      </MarketingPageShell>
     </>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
+import { subscribeToUserMessages } from "@/lib/realtime";
 import type { Thread } from "@/lib/types";
 
 function timeAgo(iso: string) {
@@ -18,20 +19,27 @@ function timeAgo(iso: string) {
 
 export default function MessagesPage() {
   const router = useRouter();
-  const { profile, loading: authLoading } = useAuth();
+  const { profile, userId, loading: authLoading } = useAuth();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!profile) { router.push("/onboarding"); return; }
-
+  const fetchThreads = useCallback((initial = false) => {
     fetch("/api/messages")
       .then((r) => r.json())
       .then((d) => setThreads(d.threads ?? []))
       .catch(() => {})
-      .finally(() => setPageLoading(false));
-  }, [profile, authLoading, router]);
+      .finally(() => { if (initial) setPageLoading(false); });
+  }, []);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!profile || !userId) { router.push("/onboarding"); return; }
+
+    fetchThreads(true);
+
+    const unsubscribe = subscribeToUserMessages(userId, () => fetchThreads(false));
+    return () => unsubscribe();
+  }, [profile, userId, authLoading, router, fetchThreads]);
 
   if (authLoading || !profile) return <LoadingScreen message="Loading conversations…" />;
 

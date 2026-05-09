@@ -15,6 +15,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
+  keywords: ["BiggDate vs Bumble", "BiggDate vs Hinge", "dating app comparison", "Tinder alternative", "Hinge alternative"],
   alternates: { canonical: `${APP_URL}/compare` },
   openGraph: {
     title: TITLE,
@@ -152,7 +153,11 @@ const COMPARE_FAQ = [
   },
 ];
 
+import { MarketingPageShell } from "@/components/marketing-page-shell";
+import { motion } from "framer-motion";
+
 export default function ComparePage() {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
   const breadcrumb = breadcrumbSchema([
     { name: "Home", url: APP_URL },
     { name: "Compare", url: `${APP_URL}/compare` },
@@ -169,104 +174,129 @@ export default function ComparePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumb) }}
       />
-      <main
-        className="mx-auto max-w-5xl px-6 py-16 text-[15px] leading-[1.75]"
-        style={{ color: "var(--bd-text)" }}
+      <MarketingPageShell
+        eyebrow="Comparison"
+        title="BiggDate vs Bumble vs Tinder vs Hinge vs Boo."
+        description="An honest, dimension-by-dimension comparison of the major dating apps. Updated 2026-05-01."
+        activePage="compare"
       >
-        <header className="mb-12">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--bd-accent)" }}>
-            Comparison
-          </p>
-          <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
-            BiggDate vs Bumble vs Tinder vs Hinge vs Boo
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm" style={{ color: "var(--bd-text-faint)" }}>
-            An honest, dimension-by-dimension comparison of the major dating apps. Updated 2026-05-01.
-          </p>
-        </header>
-
-        {/* Comparison table */}
-        <div
-          className="overflow-x-auto rounded-2xl border"
-          style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(20,24,40,0.4)" }}
-        >
-          <table className="w-full min-w-[760px] text-left text-[13px]">
-            <thead>
-              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                <th className="px-4 py-3 font-semibold" style={{ color: "var(--bd-text-faint)" }}>
-                  Dimension
-                </th>
-                <th className="px-4 py-3 font-semibold" style={{ color: "var(--bd-accent)" }}>BiggDate</th>
-                <th className="px-4 py-3 font-semibold">Bumble</th>
-                <th className="px-4 py-3 font-semibold">Tinder</th>
-                <th className="px-4 py-3 font-semibold">Hinge</th>
-                <th className="px-4 py-3 font-semibold">Boo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ROWS.map((row) => (
-                <tr key={row.dimension} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: "var(--bd-text-muted)" }}>
-                    {row.dimension}
-                  </td>
-                  <td className="px-4 py-3" style={{ color: "var(--bd-text)" }}>{row.biggdate}</td>
-                  <td className="px-4 py-3" style={{ color: "var(--bd-text-muted)" }}>{row.bumble}</td>
-                  <td className="px-4 py-3" style={{ color: "var(--bd-text-muted)" }}>{row.tinder}</td>
-                  <td className="px-4 py-3" style={{ color: "var(--bd-text-muted)" }}>{row.hinge}</td>
-                  <td className="px-4 py-3" style={{ color: "var(--bd-text-muted)" }}>{row.boo}</td>
+        <div className="mx-auto max-w-5xl px-6 pb-20">
+          {/* Comparison table */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="overflow-x-auto rounded-[24px] border relative"
+            style={{ 
+              borderColor: "rgba(255,255,255,0.08)", 
+              background: "linear-gradient(145deg, rgba(30, 36, 56, 0.4), rgba(15, 18, 30, 0.6))",
+              backdropFilter: "blur(20px)",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.2)"
+            }}
+          >
+            <table className="w-full min-w-[760px] text-left text-[14px]">
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <th className="px-6 py-5 font-semibold" style={{ color: "var(--bd-text-faint)" }}>
+                    Dimension
+                  </th>
+                  <th className="px-6 py-5 font-semibold text-[15px]" style={{ color: "var(--bd-accent)" }}>BiggDate</th>
+                  <th className="px-6 py-5 font-semibold">Bumble</th>
+                  <th className="px-6 py-5 font-semibold">Tinder</th>
+                  <th className="px-6 py-5 font-semibold">Hinge</th>
+                  <th className="px-6 py-5 font-semibold">Boo</th>
                 </tr>
+              </thead>
+              <tbody>
+                {ROWS.map((row) => (
+                  <tr key={row.dimension} className="group hover:bg-white/5 transition-colors" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <td className="px-6 py-4 font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
+                      {row.dimension}
+                    </td>
+                    <td className="px-6 py-4 font-medium" style={{ color: "var(--bd-text)" }}>{row.biggdate}</td>
+                    <td className="px-6 py-4" style={{ color: "rgba(255,255,255,0.5)" }}>{row.bumble}</td>
+                    <td className="px-6 py-4" style={{ color: "rgba(255,255,255,0.5)" }}>{row.tinder}</td>
+                    <td className="px-6 py-4" style={{ color: "rgba(255,255,255,0.5)" }}>{row.hinge}</td>
+                    <td className="px-6 py-4" style={{ color: "rgba(255,255,255,0.5)" }}>{row.boo}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </motion.div>
+
+          {/* Verdict per app */}
+          <section className="mt-20 grid gap-6 sm:grid-cols-2">
+            <Verdict title="Choose BiggDate if…" bullets={[
+              "You want a relationship, not a feed",
+              "You're in India or value India-first context",
+              "You're a founder, professional, or builder who wants depth",
+              "You're tired of swipe culture and willing to invest 20 minutes up front",
+              "You want an AI companion that remembers your patterns over time",
+            ]} accent />
+            <Verdict title="Choose Hinge if…" bullets={[
+              "You're in the US/UK and want a familiar feed model",
+              "You like the prompt-first profile format",
+              "Marriage-track is important but you don't want a 20-min conversation",
+            ]} />
+            <Verdict title="Choose Bumble if…" bullets={[
+              "You prefer women-make-the-first-move dynamics",
+              "You want both dating and platonic networking in one app",
+              "You're comfortable with a high-volume feed",
+            ]} />
+            <Verdict title="Choose Tinder if…" bullets={[
+              "You want maximum volume and casual energy",
+              "You're traveling and want quick connections",
+              "You're not specifically looking for a long-term relationship right now",
+            ]} />
+          </section>
+
+          {/* FAQ */}
+          <motion.section 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="mt-24"
+          >
+            <h2 className="text-3xl font-light tracking-tight text-center mb-12">Comparison questions</h2>
+            <div className="space-y-6 max-w-3xl mx-auto">
+              {COMPARE_FAQ.map((qa, i) => (
+                <motion.div 
+                  key={qa.question}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="rounded-2xl p-6 relative overflow-hidden group"
+                  style={{
+                    background: "linear-gradient(145deg, rgba(30, 36, 56, 0.4), rgba(15, 18, 30, 0.6))",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    backdropFilter: "blur(20px)",
+                  }}
+                >
+                  <h3 className="text-lg font-medium">{qa.question}</h3>
+                  <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+                    {qa.answer}
+                  </p>
+                </motion.div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </motion.section>
+
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-16 text-center text-sm" 
+            style={{ color: "var(--bd-text-faint)" }}
+          >
+            See also: <a href="/how-it-works" className="underline hover:text-white transition-colors">how BiggDate works</a>,{" "}
+            <a href="/faq" className="underline hover:text-white transition-colors">FAQ</a>,{" "}
+            <a href="/about" className="underline hover:text-white transition-colors">about</a>.
+          </motion.p>
         </div>
-
-        {/* Verdict per app */}
-        <section className="mt-16 grid gap-6 sm:grid-cols-2">
-          <Verdict title="Choose BiggDate if…" bullets={[
-            "You want a relationship, not a feed",
-            "You're in India or value India-first context",
-            "You're a founder, professional, or builder who wants depth",
-            "You're tired of swipe culture and willing to invest 20 minutes up front",
-            "You want an AI companion that remembers your patterns over time",
-          ]} accent />
-          <Verdict title="Choose Hinge if…" bullets={[
-            "You're in the US/UK and want a familiar feed model",
-            "You like the prompt-first profile format",
-            "Marriage-track is important but you don't want a 20-min conversation",
-          ]} />
-          <Verdict title="Choose Bumble if…" bullets={[
-            "You prefer women-make-the-first-move dynamics",
-            "You want both dating and platonic networking in one app",
-            "You're comfortable with a high-volume feed",
-          ]} />
-          <Verdict title="Choose Tinder if…" bullets={[
-            "You want maximum volume and casual energy",
-            "You're traveling and want quick connections",
-            "You're not specifically looking for a long-term relationship right now",
-          ]} />
-        </section>
-
-        {/* FAQ */}
-        <section className="mt-20">
-          <h2 className="text-2xl font-light tracking-tight">Comparison questions</h2>
-          <div className="mt-8 space-y-8">
-            {COMPARE_FAQ.map((qa) => (
-              <div key={qa.question}>
-                <h3 className="text-lg font-medium">{qa.question}</h3>
-                <p className="mt-2" style={{ color: "var(--bd-text-muted)" }}>
-                  {qa.answer}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <p className="mt-16 text-sm" style={{ color: "var(--bd-text-faint)" }}>
-          See also: <a href="/how-it-works" className="underline">how BiggDate works</a>,{" "}
-          <a href="/faq" className="underline">FAQ</a>,{" "}
-          <a href="/about" className="underline">about</a>.
-        </p>
-      </main>
+      </MarketingPageShell>
     </>
   );
 }

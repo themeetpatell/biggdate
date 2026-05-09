@@ -107,11 +107,13 @@ function emailHtml(heading: string, body: string, ctaLabel: string, ctaUrl: stri
 }
 
 export async function POST(req: Request) {
-  // Only callable server-side (no CORS, no auth token needed — it's internal)
-  // Validate it's coming from our own origin
-  const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
-  if (origin && !origin.includes(host ?? "")) {
+  // Internal-only: requires a shared secret header set by server-side callers.
+  // This prevents unauthenticated callers from spamming platform emails.
+  const internalSecret = process.env.INTERNAL_API_SECRET;
+  if (!internalSecret) {
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 503 });
+  }
+  if (req.headers.get("x-internal-secret") !== internalSecret) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

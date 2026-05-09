@@ -3,11 +3,24 @@ import Link from "next/link";
 import { ArrowRight, Mail, MessageCircleMore, Users } from "lucide-react";
 import { MARKETING_SOCIAL_LINKS } from "@/components/marketing-social-links";
 import { MarketingPageShell } from "@/components/marketing-page-shell";
+import { motion } from "framer-motion";
+
+import { breadcrumbSchema, jsonLdString } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
-  title: "Contact BiggDate",
+  title: "Contact BiggDate | Beta Access & Partnerships",
   description:
-    "Reach the BiggDate team for beta access, product questions, partnerships, or general feedback.",
+    "Reach the BiggDate team for beta access, product questions, partnerships, or general feedback about our AI dating app.",
+  keywords: ["contact biggdate", "dating app beta access", "biggdate partnerships", "dating app support"],
+  alternates: {
+    canonical: "https://biggdate.app/contact",
+  },
+  openGraph: {
+    title: "Contact BiggDate | Beta Access & Partnerships",
+    description: "Reach the BiggDate team for beta access, product questions, partnerships, or general feedback.",
+    url: "https://biggdate.app/contact",
+    type: "website",
+  },
 };
 
 const CONTACT_LANES = [
@@ -35,27 +48,45 @@ const CONTACT_LANES = [
 ];
 
 const cardSurface: React.CSSProperties = {
-  background: "var(--bd-glass-bg)",
-  border: "1px solid var(--bd-border)",
-  boxShadow: "0 24px 70px rgba(0,0,0,0.14)",
+  background: "linear-gradient(145deg, rgba(30, 36, 56, 0.4), rgba(15, 18, 30, 0.6))",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  boxShadow: "0 36px 100px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.02)",
+  backdropFilter: "blur(20px)",
 };
 
 export default function ContactPage() {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
+  const breadcrumb = breadcrumbSchema([
+    { name: "Home", url: APP_URL },
+    { name: "Contact", url: `${APP_URL}/contact` },
+  ]);
+
   return (
-    <MarketingPageShell
-      eyebrow="Contact BiggDate"
-      title={
-        <>
-          Reach the team without
-          <span className="block bg-gradient-to-r from-[#8fd4a4] via-[#7b9fff] to-[#d4688a] bg-clip-text text-transparent">
-            the corporate maze.
-          </span>
-        </>
-      }
-      description="If you want to talk product, beta access, partnerships, or what modern dating apps keep getting wrong, this is the page."
-      activePage="contact"
-    >
-      <section className="mx-auto max-w-5xl px-6 pb-12 sm:pb-20">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumb) }}
+      />
+      <MarketingPageShell
+        eyebrow="Contact BiggDate"
+        title={
+          <>
+            Reach the team without
+            <span className="block bg-gradient-to-r from-[#8fd4a4] via-[#7b9fff] to-[#d4688a] bg-clip-text text-transparent">
+              the corporate maze.
+            </span>
+          </>
+        }
+        description="If you want to talk product, beta access, partnerships, or what modern dating apps keep getting wrong, this is the page."
+        activePage="contact"
+      >
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-5xl px-6 pb-12 sm:pb-20"
+      >
         <div className="space-y-4">
           {CONTACT_LANES.map((lane, index) => {
             const Icon = lane.icon;
@@ -121,9 +152,15 @@ export default function ContactPage() {
             );
           })}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mx-auto grid max-w-5xl items-stretch gap-8 px-6 pb-14 lg:grid-cols-[1.02fr_0.98fr]">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto grid max-w-5xl items-stretch gap-8 px-6 pb-14 lg:grid-cols-[1.02fr_0.98fr]"
+      >
         <div
           className="relative flex h-full flex-col overflow-hidden rounded-[34px] p-8 sm:p-10"
           style={cardSurface}
@@ -285,9 +322,15 @@ export default function ContactPage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-16 sm:pb-24">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-5xl px-6 pb-16 sm:pb-24"
+      >
         <div
           className="flex flex-col gap-6 rounded-[30px] p-8 sm:flex-row sm:items-end sm:justify-between sm:p-10"
           style={cardSurface}
@@ -333,5 +376,6 @@ export default function ContactPage() {
         </div>
       </section>
     </MarketingPageShell>
+    </>
   );
 }

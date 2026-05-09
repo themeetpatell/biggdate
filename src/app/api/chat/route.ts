@@ -12,6 +12,8 @@ import {
   memoryExtractionPrompt,
 } from "@/lib/prompts";
 
+export const maxDuration = 60;
+
 function getMessageText(m: UIMessage): string {
   return (
     m.parts

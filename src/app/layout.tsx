@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { AuthProvider } from "@/components/auth-provider";
 import { MaahiChat } from "@/components/maahi-chat";
 import { ProfileLauncher } from "@/components/profile-launcher";
+import { PushSubscriber } from "@/components/push-subscriber";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
   organizationSchema,
@@ -131,6 +132,7 @@ export default function RootLayout({
           <TooltipProvider>
             <AuthProvider>
               {children}
+              <PushSubscriber />
               <ProfileLauncher />
               <BottomNav />
               <MaahiChat />

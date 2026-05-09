@@ -15,6 +15,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
+  keywords: ["how BiggDate works", "AI dating process", "soul knock", "maahi onboarding", "dating app algorithm"],
   alternates: { canonical: `${APP_URL}/how-it-works` },
   openGraph: {
     title: TITLE,
@@ -55,7 +56,11 @@ const STEPS = [
   },
 ];
 
+import { MarketingPageShell } from "@/components/marketing-page-shell";
+import { motion } from "framer-motion";
+
 export default function HowItWorksPage() {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
   const breadcrumb = breadcrumbSchema([
     { name: "Home", url: APP_URL },
     { name: "How it works", url: `${APP_URL}/how-it-works` },
@@ -78,51 +83,67 @@ export default function HowItWorksPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumb) }}
       />
-      <main
-        className="mx-auto max-w-3xl px-6 py-16 text-[15px] leading-[1.75]"
-        style={{ color: "var(--bd-text)" }}
+      <MarketingPageShell
+        eyebrow="How it works"
+        title="From signup to first date — in seven steps."
+        description="BiggDate is intentionally slow at the front and fast in the middle. Twenty minutes once, then a few well-chosen people per day."
+        activePage="how-it-works"
       >
-        <header className="mb-12">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--bd-accent)" }}>
-            How it works
-          </p>
-          <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
-            From signup to first date — in seven steps
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm" style={{ color: "var(--bd-text-faint)" }}>
-            BiggDate is intentionally slow at the front and fast in the middle. Twenty minutes once, then a few well-chosen people per day.
-          </p>
-        </header>
-
-        <ol className="space-y-8">
-          {STEPS.map((step, i) => (
-            <li key={step.name} className="flex gap-5">
-              <div
-                className="flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+        <div className="mx-auto max-w-3xl px-6 pb-20">
+          <ol className="space-y-6">
+            {STEPS.map((step, i) => (
+              <motion.li 
+                key={step.name} 
+                className="flex gap-6 rounded-2xl p-6 relative overflow-hidden"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" }}
                 style={{
-                  background: "rgba(229,39,224,0.12)",
-                  border: "1px solid rgba(229,39,224,0.3)",
-                  color: "var(--bd-accent)",
+                  background: "linear-gradient(145deg, rgba(30, 36, 56, 0.4), rgba(15, 18, 30, 0.6))",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  boxShadow: "0 24px 70px rgba(0,0,0,0.14)",
+                  backdropFilter: "blur(20px)",
                 }}
               >
-                {i + 1}
-              </div>
-              <div>
-                <h2 className="text-lg font-medium">{step.name}</h2>
-                <p className="mt-2" style={{ color: "var(--bd-text-muted)" }}>
-                  {step.text}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
+                <div
+                  className="flex size-10 shrink-0 items-center justify-center rounded-xl text-sm font-semibold relative z-10"
+                  style={{
+                    background: "rgba(229,39,224,0.15)",
+                    border: "1px solid rgba(229,39,224,0.4)",
+                    color: "var(--bd-accent)",
+                    boxShadow: "0 0 20px rgba(229,39,224,0.2)",
+                  }}
+                >
+                  {i + 1}
+                </div>
+                <div className="relative z-10 pt-1">
+                  <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--bd-text)" }}>{step.name}</h2>
+                  <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+                    {step.text}
+                  </p>
+                </div>
+                <div 
+                  className="absolute left-0 top-0 w-2 h-full opacity-50"
+                  style={{ background: "linear-gradient(to bottom, var(--bd-pink), var(--bd-blue))" }}
+                />
+              </motion.li>
+            ))}
+          </ol>
 
-        <p className="mt-16 text-sm" style={{ color: "var(--bd-text-faint)" }}>
-          See also: <a href="/compare" className="underline">how BiggDate compares to other apps</a>,{" "}
-          <a href="/faq" className="underline">FAQ</a>,{" "}
-          <a href="/about" className="underline">about</a>.
-        </p>
-      </main>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-16 text-center text-sm" 
+            style={{ color: "var(--bd-text-faint)" }}
+          >
+            See also: <a href="/compare" className="underline hover:text-white transition-colors">how BiggDate compares to other apps</a>,{" "}
+            <a href="/faq" className="underline hover:text-white transition-colors">FAQ</a>,{" "}
+            <a href="/about" className="underline hover:text-white transition-colors">about</a>.
+          </motion.p>
+        </div>
+      </MarketingPageShell>
     </>
   );
 }

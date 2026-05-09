@@ -54,6 +54,26 @@ export async function sql(strings: TemplateStringsArray, ...values: unknown[]) {
   return result.rows as SqlRow[];
 }
 
+export async function transaction<T>(fn: (query: typeof sql) => Promise<T>): Promise<T> {
+  const client = await getPool().connect();
+  const clientSql = async (strings: TemplateStringsArray, ...values: unknown[]) => {
+    const { text, values: params } = compileQuery(strings, values);
+    const result = await client.query(text, params);
+    return result.rows as SqlRow[];
+  };
+  try {
+    await client.query("BEGIN");
+    const result = await fn(clientSql as typeof sql);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export function hasDatabaseConfig() {
   return Boolean(getDatabaseUrl());
 }

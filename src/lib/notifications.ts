@@ -32,9 +32,13 @@ export async function sendNotification(payload: NotificationEvent): Promise<void
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (host ? `${protocol}://${host}` : "");
     if (!baseUrl) return;
 
+    const secret = process.env.INTERNAL_API_SECRET;
     await fetch(`${baseUrl}/api/notifications/email`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(secret ? { "x-internal-secret": secret } : {}),
+      },
       body: JSON.stringify(payload),
     });
   } catch {

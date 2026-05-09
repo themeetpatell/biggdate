@@ -6,6 +6,8 @@ import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
 import type { Match } from "@/lib/types";
 
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;

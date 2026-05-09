@@ -82,6 +82,9 @@ export interface Profile {
   linkedinUrl?: string | null;
   websiteUrl?: string | null;
   isVerified?: boolean;
+  // L6 BiggDate: Commitment Tracking
+  relationshipStatus?: "single" | "dating" | "seeing_someone" | "exclusive" | "engaged" | "married" | null;
+  partnerId?: string | null;
 }
 
 // L2 BiggDate v2.0: narrative + compatibility signals, no zodiac/score
@@ -130,7 +133,11 @@ export interface Message {
   id: string;
   threadId: string;
   senderId: string;
-  body: string;
+  kind: "text" | "voice";
+  body: string | null;
+  audioUrl?: string | null;
+  audioDurationSec?: number | null;
+  audioMimeType?: string | null;
   createdAt: string;
   readAt: string | null;
 }
@@ -145,7 +152,7 @@ export interface SoulKnockResponse {
 }
 
 // Usage counter
-export type GatedAction = "soul_knock" | "maahi_session" | "life_preview" | "daily_matches";
+export type GatedAction = "soul_knock" | "maahi_session" | "maahi_turn" | "life_preview" | "daily_matches";
 
 export interface UsageCounter {
   userId: string;

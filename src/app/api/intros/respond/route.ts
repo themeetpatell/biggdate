@@ -2,12 +2,10 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/require-auth";
 import {
   getIntroById,
-  saveSoulKnockResponse,
-  markIntroAnswered,
-  createThread,
-  unlockPhotosForBothUsers,
+  processSoulKnockResponse,
   getProfileByUserId,
 } from "@/lib/repo";
+import { sendPushToUser } from "@/lib/push";
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
@@ -35,22 +33,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authorized for this intro" }, { status: 403 });
   }
 
-  // Save the response
-  await saveSoulKnockResponse(introId, auth.userId, response);
-  await markIntroAnswered(introId, isSender ? "sender" : "receiver");
-
-  // Re-fetch intro to check if mutual
-  const updatedIntro = await getIntroById(introId);
-  const mutual = updatedIntro?.senderAnswered && updatedIntro?.receiverAnswered;
-
-  let thread = null;
+  const { mutual, thread } = await processSoulKnockResponse(
+    introId,
+    auth.userId,
+    response,
+    isSender ? "sender" : "receiver",
+  );
 
   if (mutual && intro.userId && intro.matchedUserId) {
-    // Create thread (idempotent — ON CONFLICT DO NOTHING)
-    thread = await createThread(intro.userId, intro.matchedUserId, introId);
-
-    // Unlock photos for both sides
-    await unlockPhotosForBothUsers(introId);
 
     // Notify both users
     const [senderProfile, receiverProfile] = await Promise.all([
@@ -68,7 +58,7 @@ export async function POST(req: Request) {
             event: "mutual_match",
             toUserId: intro.userId,
             otherName: receiverProfile.name,
-            threadId: thread.id,
+            threadId: thread?.id,
           }),
         }).catch(() => {});
 
@@ -79,8 +69,20 @@ export async function POST(req: Request) {
             event: "mutual_match",
             toUserId: intro.matchedUserId,
             otherName: senderProfile.name,
-            threadId: thread.id,
+            threadId: thread?.id,
           }),
+        }).catch(() => {});
+
+        sendPushToUser(intro.userId, {
+          title: `You and ${receiverProfile.name} are connected`,
+          body: "Your chat is now open.",
+          url: thread?.id ? `/messages/${thread.id}` : "/dashboard",
+        }).catch(() => {});
+
+        sendPushToUser(intro.matchedUserId, {
+          title: `You and ${senderProfile.name} are connected`,
+          body: "Your chat is now open.",
+          url: thread?.id ? `/messages/${thread.id}` : "/dashboard",
         }).catch(() => {});
       }
     }
@@ -99,6 +101,12 @@ export async function POST(req: Request) {
           toUserId: otherUserId,
           responderName: myProfile.name,
         }),
+      }).catch(() => {});
+
+      sendPushToUser(otherUserId, {
+        title: `${myProfile.name} answered your question`,
+        body: "Answer their question too to unlock the chat.",
+        url: "/dashboard",
       }).catch(() => {});
     }
   }

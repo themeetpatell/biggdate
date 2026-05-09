@@ -10,6 +10,7 @@ export default function VerifyPage() {
   const { userId } = useAuth();
   const [status, setStatus] = useState<{ isVerified: boolean; hasLinkedin: boolean; hasSelfie: boolean } | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -22,6 +23,7 @@ export default function VerifyPage() {
   const handleSelfie = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setSelfieFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => setSelfiePreview(ev.target?.result as string);
     reader.readAsDataURL(file);
@@ -40,17 +42,26 @@ export default function VerifyPage() {
         });
         if (!r.ok) { setMessage("Invalid LinkedIn URL"); return; }
       }
-      if (selfiePreview) {
+      if (selfieFile) {
+        // Upload the file to Supabase Storage via the photo upload route,
+        // then save the returned URL to the verification record.
+        const form = new FormData();
+        form.append("photo", selfieFile);
+        const uploadRes = await fetch("/api/profile/upload-photo", { method: "POST", body: form });
+        if (!uploadRes.ok) { setMessage("Selfie upload failed"); return; }
+        const { photoUrl } = await uploadRes.json() as { photoUrl?: string };
+        if (!photoUrl) { setMessage("Selfie upload failed"); return; }
+
         const r = await fetch("/api/verification/selfie", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ selfieUrl: selfiePreview }),
+          body: JSON.stringify({ selfieUrl: photoUrl }),
         });
         if (!r.ok) { setMessage("Selfie upload failed"); return; }
       }
       setMessage("Submitted! Your badge appears automatically once your profile is complete and LinkedIn is added.");
       setStatus((prev) => prev
-        ? { ...prev, hasLinkedin: Boolean(linkedinUrl || prev.hasLinkedin), hasSelfie: Boolean(selfiePreview || prev.hasSelfie) }
+        ? { ...prev, hasLinkedin: Boolean(linkedinUrl || prev.hasLinkedin), hasSelfie: Boolean(selfieFile || prev.hasSelfie) }
         : prev
       );
     } finally {

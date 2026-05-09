@@ -11,11 +11,13 @@ import {
   setCachedMatches,
   getRealUserCandidates,
   markUserSeen,
-  requirePlan,
-  incrementUsage,
+  requirePlanAtomic,
 } from "@/lib/repo";
 import { sendNotification } from "@/lib/notifications";
+import { sendPushToUser } from "@/lib/push";
 import type { Match } from "@/lib/types";
+
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
@@ -28,26 +30,23 @@ export async function POST(req: Request) {
     const cached = await getCachedMatches(auth.userId, today);
     if (cached && cached.length > 0) return NextResponse.json({ matches: cached });
 
-    // Feature gate: daily matches
-    const gate = await requirePlan(auth.userId, "daily_matches");
+    // Feature gate: daily matches (atomic check + increment)
+    const gate = await requirePlanAtomic(auth.userId, "daily_matches");
     if (!gate.allowed) {
       return NextResponse.json({ error: "Daily match limit reached", gate }, { status: 403 });
     }
 
-    const profile = await getProfileByUserId(auth.userId);
-    let userProfile = profile;
+    const userProfile = await getProfileByUserId(auth.userId);
 
     if (!userProfile) {
-      // Allow profile from request body during onboarding
-      const body = await req.json().catch(() => ({}));
-      if (!body.profile) {
-        return NextResponse.json({ error: "No profile found" }, { status: 400 });
-      }
-      userProfile = body.profile;
+      return NextResponse.json(
+        { error: "Complete your profile before generating matches" },
+        { status: 400 }
+      );
     }
 
     // Find real user candidates
-    const candidates = await getRealUserCandidates(auth.userId, userProfile!);
+    const candidates = await getRealUserCandidates(auth.userId, userProfile);
 
     if (candidates.length === 0) {
       return NextResponse.json({ matches: [], poolEmpty: true });
@@ -57,7 +56,7 @@ export async function POST(req: Request) {
     try {
       const result = await generateText({
         model: getModel(),
-        prompt: realUserMatchPrompt(userProfile!, candidates),
+        prompt: realUserMatchPrompt(userProfile, candidates),
       });
       aiText = result.text || "";
     } catch (err) {
@@ -113,13 +112,12 @@ export async function POST(req: Request) {
       }),
     ) as Match[];
 
-    // Record seen matches and increment usage
-    await Promise.all([
-      ...withIds
+    // Record seen matches (usage already incremented atomically via requirePlanAtomic)
+    await Promise.all(
+      withIds
         .filter((m) => m.matchedUserId)
         .map((m) => markUserSeen(auth.userId, m.matchedUserId!)),
-      incrementUsage(auth.userId, "daily_matches"),
-    ]);
+    );
 
     // Save to DB and cache for today
     await saveMatchesForUser(auth.userId, withIds);
@@ -130,6 +128,11 @@ export async function POST(req: Request) {
     if (withIds.length > 0) {
       after(async () => {
         await sendNotification({ event: "match_ready", toUserId: auth.userId });
+        await sendPushToUser(auth.userId, {
+          title: "Your matches are waiting",
+          body: "Maahi found people worth meeting today.",
+          url: "/dashboard",
+        });
       });
     }
 

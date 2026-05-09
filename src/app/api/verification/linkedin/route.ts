@@ -7,8 +7,20 @@ export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
-  const { linkedinUrl } = await req.json();
-  if (!linkedinUrl || !String(linkedinUrl).includes("linkedin.com")) {
+  let body: { linkedinUrl?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+  const linkedinUrl = typeof body.linkedinUrl === "string" ? body.linkedinUrl.trim() : "";
+  let parsedLinkedin: URL;
+  try {
+    parsedLinkedin = new URL(linkedinUrl);
+  } catch {
+    return NextResponse.json({ error: "Invalid LinkedIn URL" }, { status: 400 });
+  }
+  if (parsedLinkedin.hostname !== "www.linkedin.com" && parsedLinkedin.hostname !== "linkedin.com") {
     return NextResponse.json({ error: "Invalid LinkedIn URL" }, { status: 400 });
   }
 

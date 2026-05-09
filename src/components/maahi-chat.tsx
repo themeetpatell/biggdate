@@ -3,8 +3,8 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import { usePathname } from "next/navigation";
-import { ArrowUp, X, Sparkles } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowUp, X, Sparkles, Lock } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { splitAssistantBubbles } from "@/components/chat-message";
 
@@ -22,6 +22,7 @@ const AUTH_STARTERS = [
 
 export function MaahiChat() {
   const pathname = usePathname();
+  const router = useRouter();
   const { userId, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -29,8 +30,16 @@ export function MaahiChat() {
 
   const [input, setInput] = useState("");
   // Stable transport — recreating on every render breaks the connection
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/maahi" }), []);
-  const { messages, sendMessage, status } = useChat({ transport });
+  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/companion/chat" }), []);
+  const { messages, sendMessage, status, error } = useChat({ 
+    transport,
+    onError: (err) => {
+      if (err.message.includes("limit reached")) {
+        console.log("[Analytics] maahi_quota_exhausted");
+        fetchQuota(); // Refresh quota to reflect the hard limit
+      }
+    }
+  });
 
   const isAuthed = Boolean(userId);
   const starters = isAuthed ? AUTH_STARTERS : ANON_STARTERS;
@@ -40,6 +49,33 @@ export function MaahiChat() {
     : "Your relationship guide. Ask me anything about how this works or what makes us different.";
 
   const isStreaming = status === "streaming" || status === "submitted";
+
+  // Quota state
+  const [quota, setQuota] = useState<{ allowed: boolean; limit: number; used: number; plan: string } | null>(null);
+
+  const fetchQuota = useCallback(async () => {
+    if (!isAuthed) return;
+    try {
+      const res = await fetch("/api/companion/quota");
+      if (res.ok) {
+        setQuota(await res.json());
+      }
+    } catch { /* ignore */ }
+  }, [isAuthed]);
+
+  useEffect(() => {
+    if (open && isAuthed && !quota) {
+      console.log("[Analytics] maahi_opened_free_user");
+      fetchQuota();
+    }
+  }, [open, isAuthed, quota, fetchQuota]);
+
+  // Re-fetch quota after a message is sent
+  useEffect(() => {
+    if (status === "ready" && messages.length > 0 && messages[messages.length - 1].role === "assistant") {
+      fetchQuota();
+    }
+  }, [status, messages, fetchQuota]);
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -54,12 +90,23 @@ export function MaahiChat() {
   const handleSend = useCallback(() => {
     const text = input.trim();
     if (!text || isStreaming) return;
+    
+    // Check local quota before sending if we know they are out
+    if (quota && !quota.allowed) {
+       console.log("[Analytics] maahi_quota_exhausted");
+       return;
+    }
+
+    if (messages.length === 0) {
+      console.log("[Analytics] maahi_first_message_sent");
+    }
+
     sendMessage({ text });
     setInput("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [input, isStreaming, sendMessage]);
+  }, [input, isStreaming, sendMessage, quota, messages.length]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -88,6 +135,13 @@ export function MaahiChat() {
     return null;
   }
 
+  const limitReached = quota && !quota.allowed;
+  const isNearLimit = quota && quota.limit > 0 && quota.used >= quota.limit - 3 && !limitReached;
+  
+  if (isNearLimit && open) {
+    console.log("[Analytics] maahi_warning_shown");
+  }
+
   return (
     <>
       {/* Chat panel — pinned to the right edge of the centered content frame */}
@@ -109,7 +163,7 @@ export function MaahiChat() {
         >
           {/* Panel header */}
           <div
-            className="flex items-center justify-between px-4 py-3"
+            className="flex items-center justify-between px-4 py-3 shrink-0"
             style={{
               borderBottom: "1px solid var(--bd-border)",
               background: "var(--bd-surface)",
@@ -129,16 +183,26 @@ export function MaahiChat() {
                 </span>
               </div>
             </div>
-            <button
-              onClick={() => setOpen(false)}
-              className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--bd-surface-hover)]"
-            >
-              <X className="size-4" style={{ color: "var(--bd-text-muted)" }} />
-            </button>
+            <div className="flex items-center gap-3">
+              {quota && quota.limit > 0 && (
+                <div className="text-[10px] font-medium tracking-wide">
+                  <span style={{ color: isNearLimit || limitReached ? "#ef8cab" : "var(--bd-text-muted)" }}>
+                    {quota.limit - quota.used} / {quota.limit}
+                  </span>
+                  <span className="ml-1 opacity-50 uppercase">Free Left</span>
+                </div>
+              )}
+              <button
+                onClick={() => setOpen(false)}
+                className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--bd-surface-hover)]"
+              >
+                <X className="size-4" style={{ color: "var(--bd-text-muted)" }} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
             {messages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <div
@@ -156,7 +220,8 @@ export function MaahiChat() {
                     <button
                       key={q}
                       onClick={() => sendMessage({ text: q })}
-                      className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors hover:bg-[var(--bd-surface-hover)]"
+                      disabled={limitReached}
+                      className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors hover:bg-[var(--bd-surface-hover)] disabled:opacity-50"
                       style={{
                         background: "var(--bd-surface)",
                         border: "1px solid var(--bd-border)",
@@ -215,38 +280,62 @@ export function MaahiChat() {
 
           {/* Input */}
           <div className="flex-shrink-0 px-3 pb-3 pt-1">
-            <div
-              className="flex items-end gap-1.5 rounded-xl p-1.5"
-              style={{
-                background: "var(--bd-surface)",
-                border: "1px solid var(--bd-border)",
-              }}
-            >
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={handleTextareaInput}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask Maahi..."
-                rows={1}
-                className="flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-[13px] text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus:outline-none"
-                style={{ maxHeight: "120px" }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isStreaming}
-                className="flex size-7 flex-shrink-0 items-center justify-center rounded-lg transition-all disabled:opacity-30"
+            {limitReached ? (
+              <div className="rounded-xl border border-[#d4688a]/20 bg-[#d4688a]/5 p-4 text-center">
+                <Lock className="mx-auto mb-2 size-5 text-[#ef8cab] opacity-80" />
+                <p className="mb-3 text-[13px] font-medium text-[#ef8cab]">You've reached your free limit</p>
+                <p className="mb-4 text-[11px] text-[#ef8cab]/70">Upgrade to BiggDate Premium for unlimited deep-dive sessions with Maahi.</p>
+                <button
+                  onClick={() => {
+                    console.log("[Analytics] maahi_upgrade_clicked");
+                    router.push("/settings/billing");
+                  }}
+                  className="w-full rounded-lg bg-[#d4688a]/15 py-2 text-xs font-semibold text-[#ef8cab] transition hover:bg-[#d4688a]/25"
+                >
+                  Upgrade to Premium
+                </button>
+              </div>
+            ) : (
+              <div
+                className="flex flex-col gap-1.5 rounded-xl p-1.5"
                 style={{
-                  background:
-                    input.trim() && !isStreaming ? "var(--bd-accent)" : "rgba(255,255,255,0.06)",
+                  background: "var(--bd-surface)",
+                  border: isNearLimit ? "1px solid rgba(239, 140, 171, 0.4)" : "1px solid var(--bd-border)",
                 }}
               >
-                <ArrowUp
-                  className="size-3.5"
-                  style={{ color: input.trim() && !isStreaming ? "#000" : "var(--bd-text-faint)" }}
-                />
-              </button>
-            </div>
+                {isNearLimit && (
+                  <p className="px-2 pt-1 text-[10px] font-medium text-[#ef8cab]">
+                    Only {quota.limit - quota.used} messages left this week
+                  </p>
+                )}
+                <div className="flex items-end gap-1.5">
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={handleTextareaInput}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask Maahi..."
+                    rows={1}
+                    className="flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-[13px] text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus:outline-none"
+                    style={{ maxHeight: "120px" }}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim() || isStreaming}
+                    className="flex size-7 flex-shrink-0 items-center justify-center rounded-lg transition-all disabled:opacity-30"
+                    style={{
+                      background:
+                        input.trim() && !isStreaming ? "var(--bd-accent)" : "rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <ArrowUp
+                      className="size-3.5"
+                      style={{ color: input.trim() && !isStreaming ? "#000" : "var(--bd-text-faint)" }}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           </div>
           </div>

@@ -140,6 +140,38 @@ function VisibilitySelector({
   );
 }
 
+function CommitmentSelector({
+  value,
+  onChange,
+}: {
+  value: "single" | "dating" | "seeing_someone" | "exclusive" | "engaged" | "married";
+  onChange: (v: "single" | "dating" | "seeing_someone" | "exclusive" | "engaged" | "married") => void;
+}) {
+  const opts: { key: "single" | "dating" | "seeing_someone" | "exclusive" | "engaged" | "married"; label: string }[] = [
+    { key: "single", label: "Single" },
+    { key: "dating", label: "Dating" },
+    { key: "seeing_someone", label: "Seeing Someone" },
+    { key: "exclusive", label: "Exclusive" },
+  ];
+  return (
+    <div className="flex flex-wrap gap-1 rounded-xl bg-white/[0.06] p-1 mt-2.5">
+      {opts.map((opt) => (
+        <button
+          key={opt.key}
+          type="button"
+          onClick={() => onChange(opt.key)}
+          className={[
+            "flex-1 rounded-lg py-1.5 text-[11px] font-semibold transition-colors text-center whitespace-nowrap px-1",
+            value === opt.key ? "bg-[#d4688a]/20 text-[#ef8cab]" : "text-white/35 hover:text-white/55",
+          ].join(" ")}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /* ─── Main ─── */
 
 export function SettingsDrawer({
@@ -164,6 +196,11 @@ export function SettingsDrawer({
     profile?.profileVisibility ?? "visible"
   );
   const [savingVisibility, setSavingVisibility] = useState(false);
+  const [relationshipStatus, setRelationshipStatus] = useState<"single" | "dating" | "seeing_someone" | "exclusive" | "engaged" | "married">(
+    profile?.relationshipStatus ?? "single"
+  );
+  const [savingCommitment, setSavingCommitment] = useState(false);
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
@@ -183,7 +220,8 @@ export function SettingsDrawer({
 
   useEffect(() => {
     setVisibility(profile?.profileVisibility ?? "visible");
-  }, [profile?.profileVisibility]);
+    setRelationshipStatus(profile?.relationshipStatus ?? "single");
+  }, [profile?.profileVisibility, profile?.relationshipStatus]);
 
   const setNotif = useCallback((key: keyof NotificationSettings, v: boolean) => {
     setNotifications((prev) => {
@@ -205,6 +243,21 @@ export function SettingsDrawer({
       await refresh();
     } finally {
       setSavingVisibility(false);
+    }
+  }, [refresh]);
+
+  const saveCommitment = useCallback(async (next: "single" | "dating" | "seeing_someone" | "exclusive" | "engaged" | "married") => {
+    setRelationshipStatus(next);
+    setSavingCommitment(true);
+    try {
+      await fetch("/api/commitment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: next }),
+      });
+      await refresh();
+    } finally {
+      setSavingCommitment(false);
     }
   }, [refresh]);
 
@@ -309,7 +362,7 @@ export function SettingsDrawer({
           {/* Discovery */}
           <Label>Discovery</Label>
           <Card>
-            <div className="px-4 py-3">
+            <div className="px-4 py-3 border-b border-white/[0.06]">
               <div className="flex items-start gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.08]">
                   <Eye className="h-3.5 w-3.5 text-white/50" />
@@ -320,6 +373,20 @@ export function SettingsDrawer({
                     {savingVisibility ? "Saving…" : "Control who can discover you"}
                   </p>
                   <VisibilitySelector value={visibility} onChange={saveVisibility} />
+                </div>
+              </div>
+            </div>
+            <div className="px-4 py-3">
+              <div className="flex items-start gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.08]">
+                  <Heart className="h-3.5 w-3.5 text-white/50" />
+                </span>
+                <div className="flex-1">
+                  <p className="text-[13px] font-medium text-white/80 leading-5">Relationship Status</p>
+                  <p className="text-[11px] text-white/35 mt-0.5">
+                    {savingCommitment ? "Saving…" : "Entering a relationship pauses discovery."}
+                  </p>
+                  <CommitmentSelector value={relationshipStatus} onChange={saveCommitment} />
                 </div>
               </div>
             </div>

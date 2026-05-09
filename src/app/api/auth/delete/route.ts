@@ -18,11 +18,14 @@ export async function DELETE() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  await clearSessionCookie();
   const { error } = await adminClient.auth.admin.deleteUser(session.userId);
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Account deletion failed. Please contact support." },
+      { status: 500 }
+    );
   }
+  await clearSessionCookie();
 
   return NextResponse.json({ success: true });
 }

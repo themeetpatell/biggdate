@@ -9,11 +9,24 @@ import {
 } from "lucide-react";
 import { MarketingPageShell } from "@/components/marketing-page-shell";
 import { FounderAvatar } from "@/components/founder-avatar";
+import { motion } from "framer-motion";
+
+import { breadcrumbSchema, jsonLdString } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
-  title: "About BiggDate",
+  title: "About BiggDate | The App for Busy Professionals",
   description:
-    "Learn why BiggDate exists and how we think about building a dating product for busy, intentional people.",
+    "Learn why BiggDate exists and how our founding team builds an intentional dating product for busy, thoughtful people like founders and operators.",
+  keywords: ["about biggdate", "dating app founders", "intentional dating", "dating app for professionals"],
+  alternates: {
+    canonical: "https://biggdate.app/about",
+  },
+  openGraph: {
+    title: "About BiggDate | The App for Busy Professionals",
+    description: "Learn why BiggDate exists and how we think about building a dating product for busy, intentional people.",
+    url: "https://biggdate.app/about",
+    type: "website",
+  },
 };
 
 const PRINCIPLES = [
@@ -79,27 +92,45 @@ const FOUNDERS: {
 ];
 
 const cardSurface: React.CSSProperties = {
-  background: "var(--bd-glass-bg)",
-  border: "1px solid var(--bd-border)",
-  boxShadow: "0 24px 70px rgba(0,0,0,0.14)",
+  background: "linear-gradient(145deg, rgba(30, 36, 56, 0.4), rgba(15, 18, 30, 0.6))",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  boxShadow: "0 36px 100px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.02)",
+  backdropFilter: "blur(20px)",
 };
 
 export default function AboutPage() {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://biggdate.app";
+  const breadcrumb = breadcrumbSchema([
+    { name: "Home", url: APP_URL },
+    { name: "About", url: `${APP_URL}/about` },
+  ]);
+
   return (
-    <MarketingPageShell
-      eyebrow="About BiggDate"
-      title={
-        <>
-          Dating built for people
-          <span className="block bg-gradient-to-r from-[#ff1493] via-[#d4688a] to-[#7b9fff] bg-clip-text text-transparent">
-            with real lives.
-          </span>
-        </>
-      }
-      description="BiggDate exists because modern dating keeps asking busy, thoughtful people to waste time proving the basics. We think the product should do more of that work upfront."
-      activePage="about"
-    >
-      <section className="mx-auto grid max-w-5xl items-stretch gap-8 px-6 pb-14 lg:grid-cols-[1.12fr_0.88fr]">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumb) }}
+      />
+      <MarketingPageShell
+        eyebrow="About BiggDate"
+        title={
+          <>
+            Dating built for people
+            <span className="block bg-gradient-to-r from-[#ff1493] via-[#d4688a] to-[#7b9fff] bg-clip-text text-transparent">
+              with real lives.
+            </span>
+          </>
+        }
+        description="BiggDate exists because modern dating keeps asking busy, thoughtful people to waste time proving the basics. We think the product should do more of that work upfront."
+        activePage="about"
+      >
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto grid max-w-5xl items-stretch gap-8 px-6 pb-14 lg:grid-cols-[1.12fr_0.88fr]"
+      >
         <div
           className="relative overflow-hidden rounded-[36px] p-8 sm:p-10"
           style={cardSurface}
@@ -185,9 +216,15 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-14">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-5xl px-6 pb-14"
+      >
         <div className="mb-8">
           <span
             className="text-[11px] font-semibold uppercase tracking-[0.3em]"
@@ -257,9 +294,15 @@ export default function AboutPage() {
             );
           })}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-14">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-5xl px-6 pb-14"
+      >
         <div className="mb-8">
           <span
             className="text-[11px] font-semibold uppercase tracking-[0.3em]"
@@ -324,9 +367,15 @@ export default function AboutPage() {
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-16 sm:pb-24">
+      <motion.section 
+        initial={{ opacity: 0, scale: 0.95, filter: "blur(5px)" }}
+        whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-5xl px-6 pb-16 sm:pb-24"
+      >
         <div
           className="flex flex-col gap-6 rounded-[30px] p-8 sm:flex-row sm:items-end sm:justify-between sm:p-10"
           style={cardSurface}
@@ -371,7 +420,8 @@ export default function AboutPage() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
     </MarketingPageShell>
+    </>
   );
 }

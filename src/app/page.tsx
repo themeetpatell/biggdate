@@ -24,6 +24,16 @@ export default function LandingPage() {
 }
 
 export const metadata: Metadata = {
-  title: "The BiggDate Story — A Love You Haven't Lived Yet",
-  description: "Somewhere out there, she's looking too. Watch the story of how BiggDate finds the one who's been waiting for you — chapter by chapter.",
+  title: "BiggDate | AI Dating App for Intentional Adults",
+  description: "BiggDate is the AI-led dating app that finds the one who's been waiting for you. Get curated daily matches based on your psychological Soul Profile built by Maahi.",
+  keywords: ["AI dating app", "intentional dating", "matchmaking", "relationship app", "soul profile"],
+  alternates: {
+    canonical: "https://biggdate.app",
+  },
+  openGraph: {
+    title: "BiggDate | AI Dating App for Intentional Adults",
+    description: "BiggDate is the AI-led dating app that finds the one who's been waiting for you. Get curated daily matches based on your psychological Soul Profile.",
+    url: "https://biggdate.app",
+    type: "website",
+  },
 };

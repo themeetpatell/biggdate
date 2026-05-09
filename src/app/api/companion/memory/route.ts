@@ -8,6 +8,8 @@ import {
 } from "@/lib/maahi/memory";
 import type { SessionMemory } from "@/lib/types";
 
+export const maxDuration = 60;
+
 /**
  * Manual memory write endpoint — called from /companion every 3 AI
  * responses to fold the latest exchange into the long-term Relationship
@@ -19,7 +21,13 @@ export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  let body: { messages?: UIMessage[] };
+  try {
+    body = await req.json();
+  } catch {
+    return new Response("ok");
+  }
+  const messages = body.messages ?? [];
 
   const transcript = buildTranscript(messages);
   if (!transcript) return new Response("ok");

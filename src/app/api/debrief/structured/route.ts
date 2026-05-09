@@ -5,6 +5,8 @@ import { debriefReflectionInsightPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, createDebriefReflection } from "@/lib/repo";
 
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;

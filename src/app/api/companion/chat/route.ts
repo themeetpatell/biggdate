@@ -1,22 +1,31 @@
 import type { UIMessage } from "ai";
 import { requireAuth } from "@/lib/require-auth";
-import { requirePlan, incrementUsage } from "@/lib/repo";
+import { requirePlanAtomic } from "@/lib/repo";
 import { runMaahiTurn } from "@/lib/maahi/engine";
 import type { MaahiSceneContext } from "@/lib/maahi/scenes";
+
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
-  const gate = await requirePlan(auth.userId, "maahi_session");
+  const gate = await requirePlanAtomic(auth.userId, "maahi_turn");
   if (!gate.allowed) {
-    return new Response(JSON.stringify({ error: "Weekly Maahi session limit reached", gate }), {
+    return new Response(JSON.stringify({ 
+      error: "Weekly Maahi message limit reached", 
+      code: "quota_exhausted",
+      gate: {
+        plan: gate.plan,
+        used: gate.used,
+        limit: gate.limit,
+      },
+      upgradeUrl: "/settings/billing"
+    }), {
       status: 403,
       headers: { "Content-Type": "application/json" },
     });
   }
-
-  await incrementUsage(auth.userId, "maahi_session");
 
   const { messages, context }: { messages: UIMessage[]; context?: MaahiSceneContext } =
     await req.json();

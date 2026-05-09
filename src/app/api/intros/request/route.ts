@@ -3,12 +3,12 @@ import { requireAuth } from "@/lib/require-auth";
 import {
   createIntro,
   getIntroByUserAndMatchedUser,
-  requirePlan,
-  incrementUsage,
+  requirePlanAtomic,
   updateIntroForSoulKnock,
   getProfileByUserId,
 } from "@/lib/repo";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { sendPushToUser } from "@/lib/push";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -21,8 +21,8 @@ export async function POST(req: Request) {
   const rl = await checkRateLimit("intros:request", auth.userId, { limit: 10, windowSec: 3600 });
   if (!rl.allowed) return rateLimitResponse(rl);
 
-  // Feature gate: soul knock limit
-  const gate = await requirePlan(auth.userId, "soul_knock");
+  // Feature gate: soul knock limit (atomic check + increment)
+  const gate = await requirePlanAtomic(auth.userId, "soul_knock");
   if (!gate.allowed) {
     return NextResponse.json({ error: "Soul Knock limit reached", gate }, { status: 403 });
   }
@@ -62,12 +62,10 @@ export async function POST(req: Request) {
     await updateIntroForSoulKnock(intro.id, matchedUserId, soulKnockQuestion);
   }
 
-  await incrementUsage(auth.userId, "soul_knock");
-
   // Fetch sender name for notification
   const senderProfile = await getProfileByUserId(auth.userId);
 
-  // Fire-and-forget email notification to receiver
+  // Fire-and-forget notifications to receiver
   if (matchedUserId && senderProfile) {
     fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/email`, {
       method: "POST",
@@ -78,6 +76,12 @@ export async function POST(req: Request) {
         senderName: senderProfile.name,
         question: soulKnockQuestion,
       }),
+    }).catch(() => {});
+
+    sendPushToUser(matchedUserId, {
+      title: `${senderProfile.name} sent you a Soul Knock`,
+      body: soulKnockQuestion ?? "Answer their question to open the conversation.",
+      url: "/dashboard",
     }).catch(() => {});
   }
 

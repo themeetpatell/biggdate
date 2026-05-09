@@ -28,6 +28,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "photoUrl is required" }, { status: 400 });
   }
 
+  // Reject URLs that don't point to our own Supabase Storage bucket — prevents
+  // SSRF where a client tricks the server into fetching an arbitrary URL via
+  // the Sightengine proxy.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabaseUrl) {
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(photoUrl);
+    } catch {
+      return NextResponse.json({ error: "Invalid photoUrl" }, { status: 400 });
+    }
+    const allowedHost = new URL(supabaseUrl).hostname;
+    if (parsedUrl.hostname !== allowedHost) {
+      return NextResponse.json({ error: "photoUrl must be a Supabase Storage URL" }, { status: 400 });
+    }
+  }
+
   const result = await moderatePhoto(photoUrl);
 
   try {
