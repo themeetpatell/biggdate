@@ -135,8 +135,8 @@ export function MaahiChat() {
     return null;
   }
 
-  const limitReached = quota && !quota.allowed;
-  const isNearLimit = quota && quota.limit > 0 && quota.used >= quota.limit - 3 && !limitReached;
+  const limitReached = Boolean(quota && !quota.allowed);
+  const isNearLimit = Boolean(quota && quota.limit > 0 && quota.used >= quota.limit - 3 && !limitReached);
   
   if (isNearLimit && open) {
     console.log("[Analytics] maahi_warning_shown");
@@ -303,7 +303,7 @@ export function MaahiChat() {
                   border: isNearLimit ? "1px solid rgba(239, 140, 171, 0.4)" : "1px solid var(--bd-border)",
                 }}
               >
-                {isNearLimit && (
+                {isNearLimit && quota && (
                   <p className="px-2 pt-1 text-[10px] font-medium text-[#ef8cab]">
                     Only {quota.limit - quota.used} messages left this week
                   </p>

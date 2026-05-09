@@ -374,7 +374,7 @@ export default function ContactPage() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
     </MarketingPageShell>
     </>
   );

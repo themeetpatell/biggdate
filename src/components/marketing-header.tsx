@@ -16,7 +16,11 @@ export type MarketingHeaderActivePage =
   | "home"
   | "simulation"
   | "about"
-  | "contact";
+  | "contact"
+  | "compare"
+  | "faq"
+  | "glossary"
+  | "how-it-works";
 
 const NAV_LINKS: { href: string; label: string; key: MarketingHeaderActivePage }[] = [
   { href: "/", label: "Home", key: "home" },
