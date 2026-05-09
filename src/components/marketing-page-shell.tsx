@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { Nunito } from "next/font/google";
 import { motion } from "framer-motion";

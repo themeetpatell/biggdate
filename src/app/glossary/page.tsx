@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+"use client";
 import Link from "next/link";
 import { GLOSSARY_ENTRIES } from "@/content/glossary";
 import {
@@ -13,18 +13,7 @@ const TITLE = "BiggDate Glossary · Soul Profile, Maahi, Attachment Style, and m
 const DESCRIPTION =
   "Plain-language definitions of every concept BiggDate uses — Soul Profile, Soul Knock, Maahi, attachment style, conflict style, love languages, date debrief, Pulse Feed, Pink Tick verification, and more.";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  keywords: ["BiggDate glossary", "dating app terms", "Soul Profile", "Soul Knock", "Maahi AI"],
-  alternates: { canonical: `${APP_URL}/glossary` },
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: `${APP_URL}/glossary`,
-    type: "website",
-  },
-};
+
 
 const definedTermSetSchema = {
   "@context": "https://schema.org",
