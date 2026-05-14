@@ -9,6 +9,8 @@ import {
 } from "@/lib/repo";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendPushToUser } from "@/lib/push";
+import { sendNotification } from "@/lib/notifications";
+import { log } from "@/lib/log";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -67,22 +69,22 @@ export async function POST(req: Request) {
 
   // Fire-and-forget notifications to receiver
   if (matchedUserId && senderProfile) {
-    fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event: "soul_knock_received",
-        toUserId: matchedUserId,
-        senderName: senderProfile.name,
-        question: soulKnockQuestion,
-      }),
-    }).catch(() => {});
+    sendNotification({
+      event: "soul_knock_received",
+      toUserId: matchedUserId,
+      senderName: senderProfile.name,
+      question: soulKnockQuestion ?? "",
+    }).catch((err) => {
+      log.error("soul_knock_received notification failed", err, { toUserId: matchedUserId });
+    });
 
     sendPushToUser(matchedUserId, {
       title: `${senderProfile.name} sent you a Soul Knock`,
       body: soulKnockQuestion ?? "Answer their question to open the conversation.",
       url: "/dashboard",
-    }).catch(() => {});
+    }).catch((err) => {
+      log.error("push failed (intros:request)", err, { toUserId: matchedUserId });
+    });
   }
 
   return NextResponse.json(intro);

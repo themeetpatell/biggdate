@@ -1,26 +1,18 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/require-auth";
+import { requireAdmin } from "@/lib/require-admin";
 import { getFlaggedPhotos, resolvePhotoModeration } from "@/lib/repo";
 
-const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",").filter(Boolean);
-
 export async function GET() {
-  const auth = await requireAuth();
+  const auth = await requireAdmin("photo-moderation:list");
   if (auth.error) return auth.error;
-  if (!ADMIN_USER_IDS.includes(auth.userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   const entries = await getFlaggedPhotos();
   return NextResponse.json({ entries });
 }
 
 export async function POST(req: Request) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin("photo-moderation:resolve");
   if (auth.error) return auth.error;
-  if (!ADMIN_USER_IDS.includes(auth.userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   let body: { id?: string; status?: "safe" | "rejected" };
   try {

@@ -39,6 +39,10 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 
+# Seed SQL files contain hardcoded test passwords — never commit
+/scripts/seed-auth-users.sql
+/scripts/seed-auth-fix-names.sql
+
 # vercel
 .vercel
 

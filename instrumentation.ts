@@ -20,6 +20,9 @@ const PROD_REQUIRED = [
   "SIGHTENGINE_SECRET",
   "SENTRY_DSN",
   "ADMIN_USER_IDS",
+  "INTERNAL_API_SECRET",
+  "VAPID_PUBLIC_KEY",
+  "VAPID_PRIVATE_KEY",
 ] as const;
 
 function reportEnvHealth() {

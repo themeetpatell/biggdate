@@ -3,12 +3,17 @@ import { getModel } from "@/lib/ai";
 import { coachSystemPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
+import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
+
+  const ip = clientIp(req);
+  const rl = await checkRateLimit("coach:chat", auth.userId, { limit: 30, windowSec: 3600 });
+  if (!rl.allowed) return rateLimitResponse(rl);
 
   let body: { messages?: UIMessage[] };
   try {

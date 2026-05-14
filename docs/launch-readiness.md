@@ -35,6 +35,29 @@
 - Supabase migrations need a documented apply owner.
 - Incident runbook and rollback process need owner assignment.
 
+## Migration Rollback Runbook
+
+Apply migrations with `supabase db push` or via the Supabase dashboard SQL editor. Run rollbacks in reverse order inside a transaction. Rollback owner: CTO/founding engineer. Always verify on staging first.
+
+**202605140002 — intros.id uuid + FK**
+```sql
+BEGIN;
+ALTER TABLE soul_knock_responses DROP CONSTRAINT IF EXISTS fk_soul_knock_responses_intro_id;
+ALTER TABLE intros ALTER COLUMN id TYPE text USING id::text;
+COMMIT;
+```
+Before rolling back, verify no orphaned rows: `SELECT COUNT(*) FROM soul_knock_responses skr LEFT JOIN intros i ON skr.intro_id::text = i.id WHERE i.id IS NULL`
+
+**202605140001 — voice-notes storage RLS**
+```sql
+DELETE FROM storage.policies WHERE bucket_id = 'voice-notes' AND name IN ('Users upload own voice notes', 'Users delete own voice notes');
+```
+
+**202605090001 — dashboard_checkins RLS**
+```sql
+DROP POLICY IF EXISTS "Users manage own checkins" ON dashboard_checkins;
+```
+
 ## Compliance And Security Gaps
 
 - Privacy policy and terms must cover actual data flows: Supabase auth/profile/photos/messages, AI provider processing, Stripe billing, Resend email, Upstash rate limiting, Sentry/Vercel Analytics, Sightengine photo moderation, admin review, deletion/export, and India DPDP context.

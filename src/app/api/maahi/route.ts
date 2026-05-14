@@ -2,22 +2,10 @@ import type { UIMessage } from "ai";
 import { getSessionFromCookies } from "@/lib/auth";
 import { runMaahiTurn } from "@/lib/maahi/engine";
 import type { MaahiScene } from "@/lib/maahi/scenes";
+import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
-const MAX_ANON_MESSAGES_PER_SESSION = 20;
-
-/**
- * Floating-widget Maahi.
- *
- * Adapts based on the request's auth state:
- *  - Anonymous (landing pages): "landing" scene, no profile, no memory,
- *    no tools, capped at 20 messages to keep the surface honest.
- *  - Authenticated (auth'd pages where the widget overlays): "general"
- *    scene, full profile + Relationship OS memory + read tools so she
- *    can actually answer "what's my attachment style?" or "tell me
- *    about my latest match" with real data.
- */
 export async function POST(req: Request) {
   let body: { messages: UIMessage[] };
   try {
@@ -35,11 +23,22 @@ export async function POST(req: Request) {
   const userId = session?.userId ?? null;
   const scene: MaahiScene = userId ? "general" : "landing";
 
-  if (!userId && messages.length > MAX_ANON_MESSAGES_PER_SESSION) {
-    return Response.json(
-      { error: "Message limit reached. Sign up to continue chatting with Maahi." },
-      { status: 429 },
-    );
+  if (!userId) {
+    // Anonymous users: server-side IP-based rate limit (20 requests/day).
+    // Keyed on IP so the client cannot reset it by clearing message history.
+    const ip = clientIp(req);
+    const anonRl = await checkRateLimit("maahi:anon", ip, { limit: 20, windowSec: 86400 });
+    if (!anonRl.allowed) {
+      return Response.json(
+        { error: "Message limit reached. Sign up to continue chatting with Maahi." },
+        { status: 429 },
+      );
+    }
+  } else {
+    // Authenticated users: 120 messages/hour (the plan quota system provides the
+    // weekly ceiling; this prevents per-minute bursts from hammering the AI API).
+    const authedRl = await checkRateLimit("maahi:authed", userId, { limit: 120, windowSec: 3600 });
+    if (!authedRl.allowed) return rateLimitResponse(authedRl);
   }
 
   return runMaahiTurn({

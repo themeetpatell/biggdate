@@ -8,7 +8,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 // post-launch if/when we move off inline-heavy patterns.
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms",
+  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), bluetooth=(), display-capture=(), usb=()" },
           { key: "Content-Security-Policy", value: csp },
           // 2 years, includeSubDomains, preload-eligible
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },

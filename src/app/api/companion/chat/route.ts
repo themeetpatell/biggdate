@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 import { requireAuth } from "@/lib/require-auth";
 import { requirePlanAtomic } from "@/lib/repo";
+import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 import { runMaahiTurn } from "@/lib/maahi/engine";
 import type { MaahiSceneContext } from "@/lib/maahi/scenes";
 
@@ -9,6 +10,10 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
+
+  const ip = clientIp(req);
+  const rl = await checkRateLimit("companion:chat", auth.userId, { limit: 60, windowSec: 3600 });
+  if (!rl.allowed) return rateLimitResponse(rl);
 
   const gate = await requirePlanAtomic(auth.userId, "maahi_turn");
   if (!gate.allowed) {

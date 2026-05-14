@@ -8,6 +8,7 @@ import { MaahiChat } from "@/components/maahi-chat";
 import { ProfileLauncher } from "@/components/profile-launcher";
 import { PushSubscriber } from "@/components/push-subscriber";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AnalyticsScripts } from "@/components/analytics-scripts";
 import {
   organizationSchema,
   softwareApplicationSchema,
@@ -100,14 +101,7 @@ export default function RootLayout({
           })(window,document,'script','dataLayer','GTM-57R8WX5N');
         `}</Script>
         {/* Google Analytics is loaded via GTM (tag: GA4 - G-GSPNZ2N4CL) */}
-        {/* Microsoft Clarity */}
-        <Script id="clarity" strategy="afterInteractive">{`
-          (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window,document,"clarity","script","wk9ecuiovr");
-        `}</Script>
+        {/* Microsoft Clarity loads conditionally via AnalyticsScripts after user consent */}
       </head>
       <body
         className="antialiased bg-[var(--bd-bg)] text-[var(--bd-text)] min-h-screen pb-nav"
@@ -138,6 +132,7 @@ export default function RootLayout({
               <MaahiChat />
             </AuthProvider>
           </TooltipProvider>
+          <AnalyticsScripts />
         </ThemeProvider>
         <Analytics />
       </body>

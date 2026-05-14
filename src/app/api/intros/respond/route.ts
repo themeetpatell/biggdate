@@ -6,6 +6,8 @@ import {
   getProfileByUserId,
 } from "@/lib/repo";
 import { sendPushToUser } from "@/lib/push";
+import { sendNotification } from "@/lib/notifications";
+import { log } from "@/lib/log";
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
@@ -48,66 +50,62 @@ export async function POST(req: Request) {
       getProfileByUserId(intro.matchedUserId),
     ]);
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-    if (baseUrl) {
-      if (senderProfile && receiverProfile) {
-        fetch(`${baseUrl}/api/notifications/email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: "mutual_match",
-            toUserId: intro.userId,
-            otherName: receiverProfile.name,
-            threadId: thread?.id,
-          }),
-        }).catch(() => {});
+    if (senderProfile && receiverProfile) {
+      sendNotification({
+        event: "mutual_match",
+        toUserId: intro.userId,
+        otherName: receiverProfile.name,
+        threadId: thread?.id ?? "",
+      }).catch((err) => {
+        log.error("notification failed", err, { event: "mutual_match", toUserId: intro.userId });
+      });
 
-        fetch(`${baseUrl}/api/notifications/email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: "mutual_match",
-            toUserId: intro.matchedUserId,
-            otherName: senderProfile.name,
-            threadId: thread?.id,
-          }),
-        }).catch(() => {});
+      sendNotification({
+        event: "mutual_match",
+        toUserId: intro.matchedUserId,
+        otherName: senderProfile.name,
+        threadId: thread?.id ?? "",
+      }).catch((err) => {
+        log.error("notification failed", err, { event: "mutual_match", toUserId: intro.matchedUserId });
+      });
 
-        sendPushToUser(intro.userId, {
-          title: `You and ${receiverProfile.name} are connected`,
-          body: "Your chat is now open.",
-          url: thread?.id ? `/messages/${thread.id}` : "/dashboard",
-        }).catch(() => {});
+      sendPushToUser(intro.userId, {
+        title: `You and ${receiverProfile.name} are connected`,
+        body: "Your chat is now open.",
+        url: thread?.id ? `/messages/${thread.id}` : "/dashboard",
+      }).catch((err) => {
+        log.error("push failed", err, { toUserId: intro.userId });
+      });
 
-        sendPushToUser(intro.matchedUserId, {
-          title: `You and ${senderProfile.name} are connected`,
-          body: "Your chat is now open.",
-          url: thread?.id ? `/messages/${thread.id}` : "/dashboard",
-        }).catch(() => {});
-      }
+      sendPushToUser(intro.matchedUserId, {
+        title: `You and ${senderProfile.name} are connected`,
+        body: "Your chat is now open.",
+        url: thread?.id ? `/messages/${thread.id}` : "/dashboard",
+      }).catch((err) => {
+        log.error("push failed", err, { toUserId: intro.matchedUserId });
+      });
     }
   } else if (!mutual) {
     // Notify the other person that this user answered
     const otherUserId = isSender ? intro.matchedUserId : intro.userId;
     const myProfile = await getProfileByUserId(auth.userId);
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-    if (otherUserId && myProfile && baseUrl) {
-      fetch(`${baseUrl}/api/notifications/email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event: "soul_knock_answered",
-          toUserId: otherUserId,
-          responderName: myProfile.name,
-        }),
-      }).catch(() => {});
+    if (otherUserId && myProfile) {
+      sendNotification({
+        event: "soul_knock_answered",
+        toUserId: otherUserId,
+        responderName: myProfile.name,
+      }).catch((err) => {
+        log.error("notification failed", err, { event: "soul_knock_answered", toUserId: otherUserId });
+      });
 
       sendPushToUser(otherUserId, {
         title: `${myProfile.name} answered your question`,
         body: "Answer their question too to unlock the chat.",
         url: "/dashboard",
-      }).catch(() => {});
+      }).catch((err) => {
+        log.error("push failed", err, { toUserId: otherUserId });
+      });
     }
   }
 

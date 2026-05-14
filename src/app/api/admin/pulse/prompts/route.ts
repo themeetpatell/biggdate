@@ -1,25 +1,17 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/require-auth";
+import { requireAdmin } from "@/lib/require-admin";
 import { getAllPulsePrompts, createPulsePrompt } from "@/lib/repo";
 
-const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",").filter(Boolean);
-
 export async function GET() {
-  const auth = await requireAuth();
+  const auth = await requireAdmin("pulse:prompts:list");
   if (auth.error) return auth.error;
-  if (!ADMIN_USER_IDS.includes(auth.userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
   const prompts = await getAllPulsePrompts();
   return NextResponse.json({ prompts });
 }
 
 export async function POST(req: Request) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin("pulse:prompts:create");
   if (auth.error) return auth.error;
-  if (!ADMIN_USER_IDS.includes(auth.userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
   const body = (await req.json().catch(() => ({}))) as { content?: unknown };
   const content = typeof body.content === "string" ? body.content.trim() : "";
   if (content.length < 10) {

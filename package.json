@@ -11,6 +11,7 @@
     "repo:check": "node scripts/check-repo-structure.mjs",
     "docs:check": "node scripts/check-docs.mjs",
     "check": "npm run lint && npm run typecheck && npm run repo:check && npm run docs:check",
+    "test:e2e": "playwright test",
     "ci": "npm run check && npm run build",
     "seed": "npx tsx --env-file=.env.local scripts/seed-profiles.ts",
     "seed:reset": "npx tsx --env-file=.env.local scripts/seed-profiles.ts --reset"
@@ -52,6 +53,7 @@
     "web-push": "^3.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",

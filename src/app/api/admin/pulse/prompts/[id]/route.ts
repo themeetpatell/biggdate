@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/require-auth";
+import { requireAdmin } from "@/lib/require-admin";
 import { setPulsePromptActive, deletePulsePrompt } from "@/lib/repo";
-
-const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",").filter(Boolean);
 
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin("pulse:prompts:set-active");
   if (auth.error) return auth.error;
-  if (!ADMIN_USER_IDS.includes(auth.userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
   const { id } = await params;
   const body = (await req.json().catch(() => ({}))) as { isActive?: unknown };
   if (typeof body.isActive !== "boolean") {
@@ -26,11 +21,8 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin("pulse:prompts:delete");
   if (auth.error) return auth.error;
-  if (!ADMIN_USER_IDS.includes(auth.userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
   const { id } = await params;
   await deletePulsePrompt(id);
   return NextResponse.json({ ok: true });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/require-auth";
-import { moderatePhoto } from "@/lib/photo-moderation";
+import { moderatePhotoBuffer } from "@/lib/photo-moderation";
 import { recordPhotoModeration } from "@/lib/repo";
 import { log } from "@/lib/log";
 
@@ -68,6 +68,23 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
+    // Moderate before upload — no unsafe photo ever touches public storage
+    const moderationResult = await moderatePhotoBuffer(buffer, file.type);
+    if (moderationResult.verdict !== "safe") {
+      await recordPhotoModeration({
+        userId: auth.userId,
+        photoUrl: "(pre-upload, rejected before storage)",
+        status: "flagged",
+        provider: moderationResult.provider ?? undefined,
+        scores: moderationResult.scores ?? undefined,
+        reason: moderationResult.reason ?? undefined,
+      });
+      return NextResponse.json({
+        error: "Photo flagged for review",
+        reason: moderationResult.reason,
+      }, { status: 400 });
+    }
+
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from("photos")
@@ -88,28 +105,15 @@ export async function POST(request: NextRequest) {
 
     const photoUrl = urlData.publicUrl;
 
-    // Moderate the photo
-    const moderationResult = await moderatePhoto(photoUrl);
-    const moderationStatus = moderationResult.verdict === "safe" ? "safe" : "flagged";
-
-    // Record moderation result
+    // Record safe moderation result
     await recordPhotoModeration({
       userId: auth.userId,
       photoUrl,
-      status: moderationStatus,
+      status: "safe",
       provider: moderationResult.provider ?? undefined,
       scores: moderationResult.scores ?? undefined,
-      reason: moderationResult.reason ?? undefined,
+      reason: undefined,
     });
-
-    if (moderationResult.verdict !== "safe") {
-      // Delete the photo if it's not safe
-      await supabase.storage.from("photos").remove([fileName]);
-      return NextResponse.json({
-        error: "Photo flagged for review",
-        reason: moderationResult.reason
-      }, { status: 400 });
-    }
 
     return NextResponse.json({
       photoUrl,

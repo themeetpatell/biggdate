@@ -110,3 +110,70 @@ export async function moderatePhoto(photoUrl: string): Promise<ModerationResult>
     return { verdict: "safe", reason: null, scores: null, provider: null };
   }
 }
+
+export async function moderatePhotoBuffer(
+  buffer: Uint8Array,
+  mimeType: string,
+): Promise<ModerationResult> {
+  const user = process.env.SIGHTENGINE_USER;
+  const secret = process.env.SIGHTENGINE_SECRET;
+
+  if (!user || !secret) {
+    log.warn("photo moderation skipped — SIGHTENGINE_USER/SECRET not configured");
+    return { verdict: "safe", reason: null, scores: null, provider: null };
+  }
+
+  try {
+    const form = new FormData();
+    form.append("media", new Blob([buffer.buffer as ArrayBuffer], { type: mimeType }), "photo");
+    form.append("models", "nudity-2.1,weapon,violence,offensive,minor");
+    form.append("api_user", user);
+    form.append("api_secret", secret);
+
+    const res = await fetch("https://api.sightengine.com/1.0/check.json", {
+      method: "POST",
+      body: form,
+    });
+    const data = (await res.json()) as SightengineResponse;
+
+    if (!res.ok || data.status !== "success") {
+      const message = data.error?.message || `HTTP ${res.status}`;
+      log.warn("sightengine binary call failed — failing open", { error: message });
+      return { verdict: "safe", reason: null, scores: null, provider: null };
+    }
+
+    const scores = {
+      sexual_activity: data.nudity?.sexual_activity ?? 0,
+      sexual_display: data.nudity?.sexual_display ?? 0,
+      erotica: data.nudity?.erotica ?? 0,
+      nudity_raw: data.nudity?.raw ?? 0,
+      nudity_partial: data.nudity?.partial ?? 0,
+      firearm: data.weapon?.classes?.firearm ?? 0,
+      knife: data.weapon?.classes?.knife ?? 0,
+      violence: data.violence?.prob ?? 0,
+      minor:
+        data.minor?.prob ??
+        Math.max(0, ...(data.faces?.map((f) => f.minor?.prob ?? 0) ?? [])),
+    };
+
+    const reasons: string[] = [];
+    if (scores.sexual_activity >= NUDITY_THRESHOLD) reasons.push("sexual content");
+    if (scores.sexual_display >= NUDITY_THRESHOLD) reasons.push("explicit nudity");
+    if (scores.nudity_raw >= NUDITY_THRESHOLD) reasons.push("raw nudity");
+    if (scores.firearm >= WEAPON_THRESHOLD) reasons.push("firearm");
+    if (scores.knife >= WEAPON_THRESHOLD) reasons.push("knife");
+    if (scores.violence >= VIOLENCE_THRESHOLD) reasons.push("violence");
+    if (scores.minor >= MINOR_THRESHOLD) reasons.push("possible minor");
+
+    if (reasons.length > 0) {
+      return { verdict: "flagged", reason: reasons.join(", "), scores, provider: "sightengine" };
+    }
+
+    return { verdict: "safe", reason: null, scores, provider: "sightengine" };
+  } catch (err) {
+    log.warn("sightengine binary threw — failing open", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return { verdict: "safe", reason: null, scores: null, provider: null };
+  }
+}

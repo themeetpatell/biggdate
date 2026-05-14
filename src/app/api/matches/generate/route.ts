@@ -3,7 +3,9 @@ import { after } from "next/server";
 import { generateText } from "ai";
 import { getModel } from "@/lib/ai";
 import { realUserMatchPrompt } from "@/lib/prompts";
+import { log } from "@/lib/log";
 import { requireAuth } from "@/lib/require-auth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import {
   getProfileByUserId,
   saveMatchesForUser,
@@ -24,6 +26,9 @@ export async function POST(req: Request) {
   if (auth.error) return auth.error;
 
   try {
+    const rl = await checkRateLimit("matches:generate", auth.userId, { limit: 10, windowSec: 86400 });
+    if (!rl.allowed) return rateLimitResponse(rl);
+
     const today = new Date().toISOString().slice(0, 10);
 
     // Return cached matches if available for today
@@ -60,7 +65,7 @@ export async function POST(req: Request) {
       });
       aiText = result.text || "";
     } catch (err) {
-      console.error("[matches/generate] AI call failed:", err);
+      log.error("[matches/generate] AI call failed", err);
       return NextResponse.json({ error: "AI unavailable, try again" }, { status: 503 });
     }
 
@@ -79,12 +84,7 @@ export async function POST(req: Request) {
       // Soft-fail: log the cause but return an empty list so the dashboard renders.
       // The user sees "no matches yet" instead of a hard error toast.
       const reason = err instanceof Error ? err.message : "parse error";
-      console.error(
-        "[matches/generate] JSON parse failed:",
-        reason,
-        "\nraw start:",
-        raw.slice(0, 400),
-      );
+      log.error("[matches/generate] JSON parse failed", undefined, { reason, rawStart: raw.slice(0, 400) });
       return NextResponse.json({ matches: [], parseError: true });
     }
 
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
     // Surface the underlying cause in logs so future 500s are diagnosable
     // instead of opaque. Keeps the existing 401/403/503/200-with-parseError
     // branches above untouched via early returns.
-    console.error("[matches/generate] unhandled error:", err);
+    log.error("[matches/generate] unhandled error", err);
     return NextResponse.json({ error: "Failed to generate matches" }, { status: 500 });
   }
 }
