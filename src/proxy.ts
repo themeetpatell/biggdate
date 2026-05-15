@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isPulseEnabled } from "@/lib/feature-flags";
 
 const PUBLIC_PATHS = [
   "/", "/auth", "/about", "/contact",
@@ -12,6 +13,15 @@ const PUBLIC_PATHS = [
   "/monitoring",
 ];
 
+function isPulsePath(pathname: string): boolean {
+  return (
+    pathname.startsWith("/api/pulse/") ||
+    pathname.startsWith("/api/admin/pulse/") ||
+    pathname === "/api/pulse" ||
+    pathname === "/api/admin/pulse"
+  );
+}
+
 function isPublicPath(pathname: string): boolean {
   if (pathname === "/") return true;
   return PUBLIC_PATHS.some(
@@ -21,6 +31,16 @@ function isPublicPath(pathname: string): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Feature gate: Pulse is disabled by default. Centralized so we don't have
+  // to thread the check through 11 individual route handlers. Page hierarchies
+  // are gated by their own layout.tsx via notFound().
+  if (isPulsePath(pathname) && !isPulseEnabled()) {
+    return NextResponse.json(
+      { error: "Pulse is not available." },
+      { status: 503 },
+    );
+  }
 
   // Skip API routes (they handle auth themselves) and static assets
   if (pathname.startsWith("/api/") || pathname.startsWith("/_next/") || pathname.includes(".")) {

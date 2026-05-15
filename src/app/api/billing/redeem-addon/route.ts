@@ -20,12 +20,13 @@ interface AddonSpec {
   label: string;
 }
 
+// Server-side source of truth for add-on grants. Only add-ons that are
+// actually enforced anywhere in the product belong here — selling vapor is
+// the fastest way to lose the trust we charge a premium for.
 const ADDON_CATALOG: Record<string, AddonSpec> = {
   profile_boost:   { kind: "one_time",     defaultUses: 5,    defaultDays: null, label: "Profile Boost"     },
   life_preview:    { kind: "one_time",     defaultUses: 5,    defaultDays: null, label: "Life Preview"      },
   life_preview_3:  { kind: "one_time",     defaultUses: 15,   defaultDays: null, label: "3× Life Previews" },
-  super_like:      { kind: "one_time",     defaultUses: 5,    defaultDays: null, label: "Super Like"        },
-  profile_review:  { kind: "one_time",     defaultUses: 5,    defaultDays: null, label: "Profile Review"    },
   spotlight:       { kind: "one_time",     defaultUses: 5,    defaultDays: null, label: "Spotlight 24hr"    },
   read_receipts:   { kind: "subscription", defaultUses: null, defaultDays: 90,   label: "Read Receipts"     },
   incognito:       { kind: "subscription", defaultUses: null, defaultDays: 90,   label: "Incognito Mode"    },

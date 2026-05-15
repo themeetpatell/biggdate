@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
+import { isPulseEnabled } from "@/lib/feature-flags";
 import type { Match } from "@/lib/types";
 
 type IntroSnapshot = {
@@ -12,8 +13,6 @@ type IntroSnapshot = {
   senderAnswered: boolean;
   receiverAnswered: boolean;
 };
-
-type CheckinMood = "drained" | "neutral" | "open" | "energized";
 
 // ── Sealed match card ────────────────────────────────────────────────────────
 
@@ -237,8 +236,6 @@ export default function TodayPage() {
   const [showAllMatches, setShowAllMatches] = useState(false);
   const [intros, setIntros] = useState<IntroSnapshot[]>([]);
   const [unreadReplies, setUnreadReplies] = useState(0);
-  const [checkinMood, setCheckinMood] = useState<CheckinMood | null>(null);
-  const [isSavingCheckin, setIsSavingCheckin] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -259,11 +256,13 @@ export default function TodayPage() {
       .catch(() => {})
       .finally(() => setMatchLoading(false));
 
-    // Fetch today's Pulse prompt
-    fetch("/api/pulse/prompts/today")
-      .then((r) => r.json())
-      .then((d) => { if (d.prompt) setPulsePrompt(d.prompt.content); })
-      .catch(() => {});
+    // Fetch today's Pulse prompt (skipped when Pulse is disabled)
+    if (isPulseEnabled()) {
+      fetch("/api/pulse/prompts/today")
+        .then((r) => r.json())
+        .then((d) => { if (d.prompt) setPulsePrompt(d.prompt.content); })
+        .catch(() => {});
+    }
 
     // Fetch daily intention from Maahi
     fetch("/api/companion/daily", {
@@ -302,39 +301,11 @@ export default function TodayPage() {
         setUnreadReplies(unreadTotal);
       })
       .catch(() => {});
-
-    // Fetch today's emotional check-in
-    fetch("/api/dashboard/checkin")
-      .then((r) => r.json())
-      .then((d) => {
-        const mood = d?.checkin?.mood;
-        if (mood === "drained" || mood === "neutral" || mood === "open" || mood === "energized") {
-          setCheckinMood(mood);
-        }
-      })
-      .catch(() => {});
   }, [profile, loading, router]);
 
   const handleIntention = useCallback((match: Match) => {
     router.push(`/matches/${match.id}/preview`);
   }, [router]);
-
-  const handleCheckinMood = useCallback(async (mood: CheckinMood) => {
-    setCheckinMood(mood);
-    setIsSavingCheckin(true);
-    try {
-      const res = await fetch("/api/dashboard/checkin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mood }),
-      });
-      if (!res.ok) throw new Error("save_failed");
-    } catch {
-      // Keep optimistic state on the dashboard so the experience stays instant.
-    } finally {
-      setIsSavingCheckin(false);
-    }
-  }, []);
 
   if (loading || !profile) return <LoadingScreen message="Setting up your dashboard…" />;
 
@@ -391,36 +362,7 @@ export default function TodayPage() {
           href: "/matches",
         };
 
-  const nextAction = checkinMood === "drained"
-    && answeredSoulKnocks === 0
-    && unreadReplies === 0
-    ? {
-      title: "Take 2 calm minutes with Maahi",
-      subtitle: "Reset your energy first, then reconnect from a better place.",
-      cta: "Do a gentle check-in",
-      href: "/companion",
-    }
-    : checkinMood === "energized"
-      && answeredSoulKnocks === 0
-      && unreadReplies === 0
-      && matches.length > 0
-      ? {
-        title: "You’re in a high-signal state",
-        subtitle: "Use it now. Send one intentional Soul Knock while your clarity is strong.",
-        cta: "Open today’s matches",
-        href: "/matches",
-      }
-      : baseNextAction;
-
-  const moodLine = checkinMood === "drained"
-    ? "You checked in as drained. Keep today soft."
-    : checkinMood === "neutral"
-      ? "You checked in as neutral. Small progress counts today."
-      : checkinMood === "open"
-        ? "You checked in as open. Great day for a sincere message."
-        : checkinMood === "energized"
-          ? "You checked in as energized. Make one bold move."
-          : null;
+  const nextAction = baseNextAction;
 
   const matchOfTheDay = matches[
     revealedIndex !== null ? revealedIndex : (matches.length > 0 ? matches.length - 1 : 0)
@@ -975,61 +917,6 @@ export default function TodayPage() {
             </button>
           </div>
         )}
-
-        {/* Emotional check-in */}
-        <div
-          style={{
-            borderRadius: 18,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.02)",
-            padding: "16px 16px 14px",
-            marginBottom: 12,
-          }}
-        >
-          <p style={{ margin: "0 0 6px", fontSize: 11, color: "rgba(255,255,255,0.46)", textTransform: "uppercase", letterSpacing: "0.09em" }}>
-            30s Emotional Check-in
-          </p>
-          <p style={{ margin: "0 0 10px", fontSize: 14, color: "rgba(255,255,255,0.78)" }}>
-            How are you showing up today?
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-            {[
-              { value: "drained", label: "Drained" },
-              { value: "neutral", label: "Neutral" },
-              { value: "open", label: "Open" },
-              { value: "energized", label: "Energized" },
-            ].map((option) => {
-              const active = checkinMood === option.value;
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => handleCheckinMood(option.value as CheckinMood)}
-                  disabled={isSavingCheckin}
-                  style={{
-                    padding: "10px 0",
-                    borderRadius: 999,
-                    border: active ? "1px solid rgba(212,104,138,0.55)" : "1px solid rgba(255,255,255,0.13)",
-                    background: active ? "rgba(212,104,138,0.22)" : "transparent",
-                    color: active ? "#fff" : "rgba(255,255,255,0.72)",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: isSavingCheckin ? "default" : "pointer",
-                    opacity: isSavingCheckin ? 0.9 : 1,
-                  }}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {moodLine && (
-            <p style={{ margin: "10px 2px 0", fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
-              {moodLine}
-            </p>
-          )}
-        </div>
 
         {/* Pulse prompt widget */}
         {pulsePrompt && (

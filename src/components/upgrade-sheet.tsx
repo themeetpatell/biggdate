@@ -107,10 +107,8 @@ const ADDONS: AddOnDef[] = [
   { addonId: "profile_boost",  name: "Profile Boost",      desc: "Rise to top for 1 hour",       price: "$4.99",    envKey: "NEXT_PUBLIC_STRIPE_PRICE_BOOST",          type: "payment"      },
   { addonId: "life_preview",   name: "Life Preview",       desc: "One preview with a match",     price: "$2.99",    envKey: "NEXT_PUBLIC_STRIPE_PRICE_LIFE_PREVIEW",   type: "payment"      },
   { addonId: "life_preview_3", name: "3× Life Previews",   desc: "Best value bundle",            price: "$5.99",    envKey: "NEXT_PUBLIC_STRIPE_PRICE_LIFE_PREVIEW_3", type: "payment"      },
-  { addonId: "super_like",     name: "Super Like",         desc: "Stand out to one match",       price: "$1.99",    envKey: "NEXT_PUBLIC_STRIPE_PRICE_SUPER_LIKE",     type: "payment"      },
   { addonId: "read_receipts",  name: "Read Receipts",      desc: "See when intros are read",     price: "$3.99/mo", envKey: "NEXT_PUBLIC_STRIPE_PRICE_READ_RECEIPTS",  type: "subscription" },
   { addonId: "incognito",      name: "Incognito Mode",     desc: "Browse without appearing",     price: "$4.99/mo", envKey: "NEXT_PUBLIC_STRIPE_PRICE_INCOGNITO",      type: "subscription" },
-  { addonId: "profile_review", name: "Profile Review",     desc: "Maahi audits + rewrites you",  price: "$6.99",    envKey: "NEXT_PUBLIC_STRIPE_PRICE_PROFILE_REVIEW", type: "payment"      },
   { addonId: "spotlight",      name: "Spotlight 24hr",     desc: "Featured placement all day",   price: "$7.99",    envKey: "NEXT_PUBLIC_STRIPE_PRICE_SPOTLIGHT",      type: "payment"      },
 ];
 
@@ -122,10 +120,8 @@ const ENV_MAP: Record<string, string | undefined> = {
   NEXT_PUBLIC_STRIPE_PRICE_BOOST:             process.env.NEXT_PUBLIC_STRIPE_PRICE_BOOST,
   NEXT_PUBLIC_STRIPE_PRICE_LIFE_PREVIEW:      process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFE_PREVIEW,
   NEXT_PUBLIC_STRIPE_PRICE_LIFE_PREVIEW_3:    process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFE_PREVIEW_3,
-  NEXT_PUBLIC_STRIPE_PRICE_SUPER_LIKE:        process.env.NEXT_PUBLIC_STRIPE_PRICE_SUPER_LIKE,
   NEXT_PUBLIC_STRIPE_PRICE_READ_RECEIPTS:     process.env.NEXT_PUBLIC_STRIPE_PRICE_READ_RECEIPTS,
   NEXT_PUBLIC_STRIPE_PRICE_INCOGNITO:         process.env.NEXT_PUBLIC_STRIPE_PRICE_INCOGNITO,
-  NEXT_PUBLIC_STRIPE_PRICE_PROFILE_REVIEW:    process.env.NEXT_PUBLIC_STRIPE_PRICE_PROFILE_REVIEW,
   NEXT_PUBLIC_STRIPE_PRICE_SPOTLIGHT:         process.env.NEXT_PUBLIC_STRIPE_PRICE_SPOTLIGHT,
 };
 
