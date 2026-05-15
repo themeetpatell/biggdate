@@ -8,6 +8,7 @@ import {
 import { sendPushToUser } from "@/lib/push";
 import { sendNotification } from "@/lib/notifications";
 import { log } from "@/lib/log";
+import { track, trackFirst } from "@/lib/analytics";
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
@@ -43,6 +44,23 @@ export async function POST(req: Request) {
   );
 
   if (mutual && intro.userId && intro.matchedUserId) {
+    // Funnel events — emitted for both sides so first_thread_unlocked is
+    // accurate per-user regardless of who answered last.
+    await track({
+      name: "thread_unlocked",
+      userId: auth.userId,
+      properties: { threadId: thread?.id ?? null, introId },
+    });
+    await trackFirst({
+      name: "first_thread_unlocked",
+      userId: intro.userId,
+      properties: { threadId: thread?.id ?? null },
+    });
+    await trackFirst({
+      name: "first_thread_unlocked",
+      userId: intro.matchedUserId,
+      properties: { threadId: thread?.id ?? null },
+    });
 
     // Notify both users
     const [senderProfile, receiverProfile] = await Promise.all([

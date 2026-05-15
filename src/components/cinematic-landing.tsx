@@ -32,6 +32,7 @@ import { LifePreviewTimeline } from "@/components/life-preview-timeline";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { MarketingHeader } from "@/components/marketing-header";
 import { MarketingSocialRail } from "@/components/marketing-social-rail";
+import { isPulseEnabled } from "@/lib/feature-flags";
 
 /* ── constants ── */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -1068,71 +1069,75 @@ export function CinematicLanding() {
       <SectionTransition tone="cool" />
 
       {/* ══════════════════════════════════════════════
-          Pulse Teaser
+          Pulse Teaser — only rendered when the Pulse feature is enabled.
+          Promoting a darked feature would be a claim the product can't
+          honor at signup.
       ══════════════════════════════════════════════ */}
-      <motion.section
-        className="relative z-10 mx-auto max-w-lg px-6 py-12 sm:py-20"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, ease: EASE }}
-      >
-        <p className="text-center text-xs font-bold uppercase tracking-[0.1em] text-[#e91e8c] mb-3">
-          Pulse · from the community
-        </p>
-        <h2 className="text-center font-display text-2xl font-bold tracking-tight sm:text-3xl mb-2">
-          What builders are really saying about dating
-        </h2>
-        <p className="text-center text-sm text-[#a8aabe] mb-8">Anonymous. Verified builders only.</p>
+      {isPulseEnabled() && (
+        <motion.section
+          className="relative z-10 mx-auto max-w-lg px-6 py-12 sm:py-20"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: EASE }}
+        >
+          <p className="text-center text-xs font-bold uppercase tracking-[0.1em] text-[#e91e8c] mb-3">
+            Pulse · from the community
+          </p>
+          <h2 className="text-center font-display text-2xl font-bold tracking-tight sm:text-3xl mb-2">
+            What builders are really saying about dating
+          </h2>
+          <p className="text-center text-sm text-[#a8aabe] mb-8">Anonymous. Verified builders only.</p>
 
-        <div className="relative">
-          {[
-            "Haven't been on a date in 4 months. Fundraising does that.",
-            "My green flag: someone who doesn't need constant reassurance during a rough sprint week.",
-            "Cancelled plans 3 times this month because of work. She hasn't left. That's something.",
-          ].map((text, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 mb-3"
-              style={{ filter: i > 0 ? "blur(3px)" : "none", userSelect: "none" }}
-            >
-              <p className="text-sm leading-relaxed text-white/75">
-                {i === 0 ? text : "·".repeat(text.length)}
-              </p>
-              <div className="flex items-center gap-1.5 mt-3">
-                <span
-                  className="inline-flex items-center justify-center rounded-full"
+          <div className="relative">
+            {[
+              "Haven't been on a date in 4 months. Fundraising does that.",
+              "My green flag: someone who doesn't need constant reassurance during a rough sprint week.",
+              "Cancelled plans 3 times this month because of work. She hasn't left. That's something.",
+            ].map((text, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 mb-3"
+                style={{ filter: i > 0 ? "blur(3px)" : "none", userSelect: "none" }}
+              >
+                <p className="text-sm leading-relaxed text-white/75">
+                  {i === 0 ? text : "·".repeat(text.length)}
+                </p>
+                <div className="flex items-center gap-1.5 mt-3">
+                  <span
+                    className="inline-flex items-center justify-center rounded-full"
+                    style={{
+                      width: 14, height: 14,
+                      background: "linear-gradient(135deg, #e91e8c, #ff6ec7)",
+                    }}
+                  >
+                    <svg width="7" height="7" viewBox="0 0 10 10" fill="none">
+                      <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span className="text-xs text-white/30">Verified Builder</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Blur overlay + CTA */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 flex items-end justify-center pb-3"
+              style={{ background: "linear-gradient(to bottom, transparent, #050508)" }}>
+              <Link href="/auth">
+                <button
+                  className="px-6 py-3 rounded-full text-sm font-bold text-white"
                   style={{
-                    width: 14, height: 14,
                     background: "linear-gradient(135deg, #e91e8c, #ff6ec7)",
+                    boxShadow: "0 4px 20px rgba(233,30,140,0.35)",
                   }}
                 >
-                  <svg width="7" height="7" viewBox="0 0 10 10" fill="none">
-                    <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="text-xs text-white/30">Verified Builder</span>
-              </div>
+                  Join to read →
+                </button>
+              </Link>
             </div>
-          ))}
-
-          {/* Blur overlay + CTA */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 flex items-end justify-center pb-3"
-            style={{ background: "linear-gradient(to bottom, transparent, #050508)" }}>
-            <Link href="/auth">
-              <button
-                className="px-6 py-3 rounded-full text-sm font-bold text-white"
-                style={{
-                  background: "linear-gradient(135deg, #e91e8c, #ff6ec7)",
-                  boxShadow: "0 4px 20px rgba(233,30,140,0.35)",
-                }}
-              >
-                Join to read →
-              </button>
-            </Link>
           </div>
-        </div>
-      </motion.section>
+        </motion.section>
+      )}
 
       {/* ══════════════════════════════════════════════
           CTA

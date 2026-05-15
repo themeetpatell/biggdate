@@ -10,6 +10,8 @@ import {
   requirePlanAtomic,
   getMatchForUser,
 } from "@/lib/repo";
+import { logAiCall } from "@/lib/ai-costs";
+import { track } from "@/lib/analytics";
 
 export const maxDuration = 60;
 
@@ -57,9 +59,16 @@ export async function POST(req: Request) {
   const cached = await getLifePreview(auth.userId, match.id);
   if (cached) return NextResponse.json(cached);
 
+  const aiStart = Date.now();
   const result = await generateText({
     model: getModel(),
     prompt: lifePreviewPrompt(profile, match),
+  });
+  await logAiCall({
+    route: "life-preview",
+    userId: auth.userId,
+    usage: result.usage,
+    durationMs: Date.now() - aiStart,
   });
 
   const raw = (result.text || "")
@@ -73,6 +82,12 @@ export async function POST(req: Request) {
 
     await saveLifePreview(auth.userId, match.id, preview);
     // Usage already incremented atomically via requirePlanAtomic
+
+    await track({
+      name: "life_preview_generated",
+      userId: auth.userId,
+      properties: { matchId: match.id },
+    });
 
     return NextResponse.json(preview);
   } catch {

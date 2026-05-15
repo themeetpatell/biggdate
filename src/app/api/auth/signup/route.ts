@@ -6,6 +6,7 @@ import {
   normalizeCountryIso2,
 } from "@/lib/location-data";
 import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
+import { track } from "@/lib/analytics";
 
 export async function POST(req: Request) {
   // 3 signups per IP per hour blocks the most common abuse vector — burst
@@ -141,6 +142,17 @@ export async function POST(req: Request) {
       { status: 409 }
     );
   }
+
+  // Funnel event. Emit before returning so the analytics row lands even if
+  // the client navigates away during the response.
+  await track({
+    name: "signup",
+    userId: data.user.id,
+    properties: {
+      phoneCountry: normalizedPhoneCountryIso2 ?? null,
+      requiresConfirmation: !data.session,
+    },
+  });
 
   if (!data.session) {
     return NextResponse.json(

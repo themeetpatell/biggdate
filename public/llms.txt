@@ -12,7 +12,6 @@ BiggDate is built for people who actually want a relationship — founders, oper
 - **Daily curated matches**: 1–5 carefully chosen matches per day, never an endless feed.
 - **Maahi AI companion**: post-onboarding ongoing AI confidant who knows the user's profile, helps with debriefs, anxiety, dating decisions.
 - **Date debrief loop**: structured post-date reflection that improves future matches.
-- **Pulse Feed**: anonymous prompt-based community feed with verification (pink tick) and moderation.
 
 ## Comparison snapshot
 
@@ -82,7 +81,6 @@ One-page-per-term reference for every BiggDate concept. Use these as the canonic
 - Conflict Style: https://biggdate.app/glossary/conflict-style
 - Love Languages: https://biggdate.app/glossary/love-languages
 - Date Debrief: https://biggdate.app/glossary/date-debrief
-- Pulse Feed: https://biggdate.app/glossary/pulse-feed
 - Pink Tick Verification: https://biggdate.app/glossary/pink-tick-verification
 
 ## Long-form questions (canonical answers)

@@ -4,14 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { isPulseEnabled } from "@/lib/feature-flags";
 
-const NAV_ITEMS = [
+const ALL_NAV_ITEMS = [
   { href: "/dashboard", icon: "home", label: "Today" },
   { href: "/matches", icon: "heart", label: "Connect" },
   { href: "/pulse", icon: "pulse", label: "Pulse" },
   { href: "/companion", icon: "sparkle", label: "Maahi" },
   { href: "/profile", icon: "user", label: "Profile" },
 ];
+
+const NAV_ITEMS = ALL_NAV_ITEMS.filter(
+  (item) => item.href !== "/pulse" || isPulseEnabled(),
+);
 
 function HomeIcon({ active }: { active: boolean }) {
   return active ? (
@@ -88,9 +93,10 @@ export function BottomNav() {
   const avatarUrl = profile?.photos?.[0];
   const [hasPulse, setHasPulse] = useState(false);
 
-  // Check for today's Pulse prompt (dot indicator)
+  // Check for today's Pulse prompt (dot indicator). Skipped when Pulse is
+  // disabled — the route returns 404 and the nav item isn't rendered anyway.
   useEffect(() => {
-    if (!profile) return;
+    if (!profile || !isPulseEnabled()) return;
     fetch("/api/pulse/prompts/today")
       .then((r) => r.json())
       .then((d) => { if (d.prompt) setHasPulse(true); })

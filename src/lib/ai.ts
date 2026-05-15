@@ -34,23 +34,7 @@ export function getModel(): LanguageModel {
     return openai(process.env.OPENAI_MODEL || "gpt-4.1");
   }
 
-  if (provider === "ollama-cloud") {
-    const ollama = createOpenAI({
-      apiKey: requireKey("ollama-cloud", "OLLAMA_API_KEY"),
-      baseURL: `${(process.env.OLLAMA_CLOUD_HOST || "https://ollama.com").replace(/\/$/, "")}/v1`,
-    });
-    return ollama(process.env.OLLAMA_CLOUD_MODEL || "gpt-oss:120b");
-  }
-
-  if (provider === "ollama") {
-    const ollama = createOpenAI({
-      apiKey: process.env.OLLAMA_API_KEY || "ollama-local",
-      baseURL: process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1",
-    });
-    return ollama(process.env.OLLAMA_MODEL || "llama3.1:8b");
-  }
-
   throw new Error(
-    `Unknown AI_PROVIDER "${provider}". Expected one of: gemini, openai, ollama-cloud, ollama.`,
+    `Unknown AI_PROVIDER "${provider}". Expected one of: gemini, openai.`,
   );
 }

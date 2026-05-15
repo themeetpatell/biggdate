@@ -8,6 +8,7 @@ import {
 } from "@/lib/repo";
 import { log } from "@/lib/log";
 import { getStripe, getStripeWebhookSecret, isStripeWebhookConfigured } from "@/lib/stripe";
+import { track, trackFirst } from "@/lib/analytics";
 
 // Stripe's newer API versions reorganized subscription period fields.
 // We access them safely via dynamic lookup to avoid SDK version drift.
@@ -42,6 +43,26 @@ async function handleSubscription(stripe: Stripe, subscription: Stripe.Subscript
     currentPeriodEnd: getSubscriptionPeriodEnd(subscription),
     trialEndsAt,
   });
+
+  // Funnel event. checkout_completed fires for every subscription state
+  // change, but first_paid only the first time a user lands in active/
+  // trialing. The cohort dashboard uses first_paid for conversion math.
+  if (status === "active" || status === "trialing") {
+    await track({
+      name: "checkout_completed",
+      userId: existing.userId,
+      properties: {
+        plan: "premium",
+        status,
+        stripeSubscriptionId: subscription.id,
+      },
+    });
+    await trackFirst({
+      name: "first_paid",
+      userId: existing.userId,
+      properties: { plan: "premium", status },
+    });
+  }
 }
 
 export async function POST(request: Request) {

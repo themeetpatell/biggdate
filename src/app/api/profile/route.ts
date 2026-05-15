@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, upsertProfile } from "@/lib/repo";
+import { isUnderageBirthday, UNDERAGE_ERROR } from "@/lib/age";
 import type { Profile, ProfilePrompt } from "@/lib/types";
 
 function compactStrings(value: unknown, max = 12) {
@@ -144,6 +145,11 @@ export async function PATCH(req: Request) {
 
   const body = (await req.json()) as Partial<Profile>;
   const patch = normalizePatch(body);
+
+  // Age gate — a profile edit can't lower the user below 18.
+  if (isUnderageBirthday(patch.birthday)) {
+    return NextResponse.json({ error: UNDERAGE_ERROR }, { status: 403 });
+  }
 
   await upsertProfile(auth.userId, patch);
   const profile = await getProfileByUserId(auth.userId);

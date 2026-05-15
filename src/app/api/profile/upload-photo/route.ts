@@ -71,18 +71,24 @@ export async function POST(request: NextRequest) {
     // Moderate before upload — no unsafe photo ever touches public storage
     const moderationResult = await moderatePhotoBuffer(buffer, file.type);
     if (moderationResult.verdict !== "safe") {
+      const unavailable = moderationResult.reason === "moderation_unavailable";
       await recordPhotoModeration({
         userId: auth.userId,
         photoUrl: "(pre-upload, rejected before storage)",
-        status: "flagged",
+        status: unavailable ? "pending" : "flagged",
         provider: moderationResult.provider ?? undefined,
         scores: moderationResult.scores ?? undefined,
         reason: moderationResult.reason ?? undefined,
       });
-      return NextResponse.json({
-        error: "Photo flagged for review",
-        reason: moderationResult.reason,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: unavailable
+            ? "We can't verify photos right now. Try again in a few minutes."
+            : "Photo flagged for review",
+          reason: moderationResult.reason,
+        },
+        { status: unavailable ? 503 : 400 },
+      );
     }
 
     // Upload to Supabase Storage

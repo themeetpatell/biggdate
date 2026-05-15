@@ -6,6 +6,8 @@ export async function GET() {
     db: "skip",
     redis: "skip",
     stripe: "skip",
+    supabase_auth: "skip",
+    ai: "skip",
   };
 
   // Database (direct pg connection)
@@ -48,14 +50,61 @@ export async function GET() {
     }
   }
 
-  const allOk = Object.values(checks).every((s) => s !== "fail");
+  // Supabase Auth reachability — distinct from DB, since auth.users lives
+  // behind GoTrue, not the pg connection we already probed.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (supabaseUrl && anonKey) {
+    try {
+      const res = await fetch(`${supabaseUrl.replace(/\/$/, "")}/auth/v1/health`, {
+        headers: { apikey: anonKey },
+        signal: AbortSignal.timeout(3000),
+      });
+      checks.supabase_auth = res.ok ? "ok" : "fail";
+    } catch {
+      checks.supabase_auth = "fail";
+    }
+  }
+
+  // AI provider reachability. We don't burn a generation — just confirm the
+  // key is present and the host answers. Fail-quiet on outage so the deploy
+  // gate stays green when only AI is degraded; degraded status is exposed
+  // in the response body for ops to triage.
+  const aiProvider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
+  if (aiProvider === "gemini" && process.env.GEMINI_API_KEY) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`,
+        { signal: AbortSignal.timeout(3000) },
+      );
+      checks.ai = res.ok ? "ok" : "fail";
+    } catch {
+      checks.ai = "fail";
+    }
+  } else if (aiProvider === "openai" && process.env.OPENAI_API_KEY) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/models", {
+        headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+        signal: AbortSignal.timeout(3000),
+      });
+      checks.ai = res.ok ? "ok" : "fail";
+    } catch {
+      checks.ai = "fail";
+    }
+  }
+
+  // Critical services for deploy-gate purposes: db, supabase_auth. AI/Stripe/
+  // Redis failing is degraded-but-serving; DB or auth failing is hard down.
+  const criticalDown = checks.db === "fail" || checks.supabase_auth === "fail";
+  const anyDown = Object.values(checks).some((s) => s === "fail");
+  const status = criticalDown ? "down" : anyDown ? "degraded" : "ok";
 
   return NextResponse.json(
     {
-      status: allOk ? "ok" : "degraded",
+      status,
       checks,
       timestamp: new Date().toISOString(),
     },
-    { status: allOk ? 200 : 503 },
+    { status: criticalDown ? 503 : 200 },
   );
 }

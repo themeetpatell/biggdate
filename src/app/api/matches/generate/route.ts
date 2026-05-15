@@ -19,6 +19,8 @@ import {
 } from "@/lib/repo";
 import { sendNotification } from "@/lib/notifications";
 import { sendPushToUser } from "@/lib/push";
+import { logAiCall } from "@/lib/ai-costs";
+import { trackFirst, track } from "@/lib/analytics";
 import type { Match } from "@/lib/types";
 
 export const maxDuration = 60;
@@ -70,14 +72,27 @@ export async function POST(req: Request) {
     }
 
     let aiText: string;
+    const aiStart = Date.now();
     try {
       const result = await generateText({
         model: getModel(),
         prompt: realUserMatchPrompt(userProfile, candidates),
       });
       aiText = result.text || "";
+      await logAiCall({
+        route: "matches/generate",
+        userId: auth.userId,
+        usage: result.usage,
+        durationMs: Date.now() - aiStart,
+      });
     } catch (err) {
       log.error("[matches/generate] AI call failed", err);
+      await logAiCall({
+        route: "matches/generate",
+        userId: auth.userId,
+        durationMs: Date.now() - aiStart,
+        error: err instanceof Error ? err.message : "unknown",
+      });
       await decrementUsage(auth.userId, "daily_matches");
       return NextResponse.json({ error: "AI unavailable, try again" }, { status: 503 });
     }
@@ -136,6 +151,22 @@ export async function POST(req: Request) {
     // Save to DB and cache for today
     await saveMatchesForUser(auth.userId, withIds);
     await setCachedMatches(auth.userId, today, withIds);
+
+    // Funnel events. match_generated fires per cohort-day cycle; first_
+    // match_viewed gates the dashboard funnel — emitted only when there's
+    // at least one real match to surface.
+    if (withIds.length > 0) {
+      await track({
+        name: "match_generated",
+        userId: auth.userId,
+        properties: { count: withIds.length },
+      });
+      await trackFirst({
+        name: "first_match_viewed",
+        userId: auth.userId,
+        properties: { count: withIds.length },
+      });
+    }
 
     // Fire match_ready email after the response — non-blocking, best-effort.
     // Only fires when there's at least one fresh match to surface.

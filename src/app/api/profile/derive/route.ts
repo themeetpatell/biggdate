@@ -12,6 +12,9 @@ import {
   getProfileByUserId,
   getAccountHandleByUserId,
 } from "@/lib/repo";
+import { trackFirst } from "@/lib/analytics";
+import { logAiCall } from "@/lib/ai-costs";
+import { isUnderageBirthday, UNDERAGE_ERROR } from "@/lib/age";
 
 export const maxDuration = 60;
 
@@ -61,14 +64,27 @@ export async function POST(req: Request) {
       : profileDerivePsychologicalPrompt(transcript, fullName);
 
   let modelText: string;
+  const aiStart = Date.now();
   try {
     const result = await generateText({
       model: getModel(),
       prompt,
     });
     modelText = result.text || "";
+    await logAiCall({
+      route: `profile/derive:${phase}`,
+      userId: auth.userId,
+      usage: result.usage,
+      durationMs: Date.now() - aiStart,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown model error";
+    await logAiCall({
+      route: `profile/derive:${phase}`,
+      userId: auth.userId,
+      durationMs: Date.now() - aiStart,
+      error: message,
+    });
     return NextResponse.json(
       { error: `Model call failed: ${message}` },
       { status: 502 },
@@ -85,6 +101,11 @@ export async function POST(req: Request) {
 
   // Phase-specific normalization
   if (phase === "basic") {
+    // Hard age gate — the real enforcement, not the signup checkbox. A
+    // derived birthday implying age < 18 is rejected before it's persisted.
+    if (isUnderageBirthday(typeof derived.birthday === "string" ? derived.birthday : null)) {
+      return NextResponse.json({ error: UNDERAGE_ERROR }, { status: 403 });
+    }
     if (derived.birthday && !derived.zodiac) {
       derived.zodiac = getZodiacFromBirthday(derived.birthday as string);
     }
@@ -122,6 +143,12 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+
+  // Onboarding milestone — emitted at most once per user per phase.
+  await trackFirst({
+    name: phase === "basic" ? "onboarding_phase1_complete" : "onboarding_phase2_complete",
+    userId: auth.userId,
+  });
 
   return NextResponse.json(fullProfile);
 }

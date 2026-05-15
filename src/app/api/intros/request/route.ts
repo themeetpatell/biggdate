@@ -11,6 +11,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendPushToUser } from "@/lib/push";
 import { sendNotification } from "@/lib/notifications";
 import { log } from "@/lib/log";
+import { track, trackFirst } from "@/lib/analytics";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -86,6 +87,19 @@ export async function POST(req: Request) {
       log.error("push failed (intros:request)", err, { toUserId: matchedUserId });
     });
   }
+
+  // Funnel events — emit the first-time milestone separately so the cohort
+  // dashboard can compute "% of signups who sent their first Soul Knock."
+  await track({
+    name: "soul_knock_sent",
+    userId: auth.userId,
+    properties: { matchId, recipientUserId: matchedUserId ?? null },
+  });
+  await trackFirst({
+    name: "first_soul_knock_sent",
+    userId: auth.userId,
+    properties: { matchId },
+  });
 
   return NextResponse.json(intro);
 }

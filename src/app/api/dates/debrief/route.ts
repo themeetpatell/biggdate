@@ -3,6 +3,7 @@ import { generateText } from "ai";
 import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, createDebrief } from "@/lib/repo";
+import { logAiCall } from "@/lib/ai-costs";
 
 export const maxDuration = 60;
 
@@ -16,11 +17,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No profile" }, { status: 400 });
   }
 
+  const aiStart = Date.now();
   const result = await generateText({
     model: getModel(),
     prompt: `You are a relationship coach doing a post-date debrief. ${profile.name} (${profile.attachment} attachment, ${profile.loveLanguage} love language) just had a date with ${matchName}. Their feedback: "${feedback}"
 
 Provide: 1) A warm acknowledgment 2) What this reveals about their patterns 3) One specific growth insight 4) Whether to pursue or pass, with reasoning. Keep it concise (3-4 paragraphs).`,
+  });
+  await logAiCall({
+    route: "dates/debrief",
+    userId: auth.userId,
+    usage: result.usage,
+    durationMs: Date.now() - aiStart,
   });
 
   await createDebrief(auth.userId, matchId, matchName, feedback, result.text || "");

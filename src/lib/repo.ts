@@ -1142,54 +1142,6 @@ export async function createThread(userAId: string, userBId: string, introId: st
   };
 }
 
-// ─── Dashboard Check-in ───
-
-export type DashboardCheckinMood = "drained" | "neutral" | "open" | "energized";
-
-export async function getTodayDashboardCheckin(userId: string): Promise<{
-  mood: DashboardCheckinMood;
-  note: string | null;
-  createdAt: string;
-  checkinDate: string;
-} | null> {
-  const rows = await sql`
-    SELECT mood, note, created_at, checkin_date
-    FROM dashboard_checkins
-    WHERE user_id = ${userId}
-      AND checkin_date = CURRENT_DATE
-    LIMIT 1
-  `;
-  if (!rows.length) return null;
-
-  const row = rows[0] as Record<string, unknown>;
-  return {
-    mood: row.mood as DashboardCheckinMood,
-    note: (row.note as string) ?? null,
-    createdAt: String(row.created_at ?? ""),
-    checkinDate: String(row.checkin_date ?? ""),
-  };
-}
-
-export async function upsertTodayDashboardCheckin(userId: string, mood: DashboardCheckinMood, note?: string | null) {
-  const rows = await sql`
-    INSERT INTO dashboard_checkins (user_id, checkin_date, mood, note)
-    VALUES (${userId}, CURRENT_DATE, ${mood}, ${note ?? null})
-    ON CONFLICT (user_id, checkin_date) DO UPDATE SET
-      mood = EXCLUDED.mood,
-      note = EXCLUDED.note,
-      updated_at = NOW()
-    RETURNING mood, note, created_at, checkin_date
-  `;
-
-  const row = rows[0] as Record<string, unknown>;
-  return {
-    mood: row.mood as DashboardCheckinMood,
-    note: (row.note as string) ?? null,
-    createdAt: String(row.created_at ?? ""),
-    checkinDate: String(row.checkin_date ?? ""),
-  };
-}
-
 export async function getThreadsForUser(userId: string): Promise<Thread[]> {
   const rows = await sql`
     SELECT

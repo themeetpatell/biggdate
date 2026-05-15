@@ -29,5 +29,9 @@ export async function POST(req: Request) {
   await blockUser(auth.userId, blockedId);
   await invalidateMatchCache(auth.userId);
 
-  return NextResponse.json({ success: true });
+  // Signal to the client that any cached match list is stale and should be
+  // refetched immediately — the next /api/matches/generate call will produce
+  // a fresh set without the blocked user. Without this hint, the dashboard
+  // would keep its in-memory match list until the next mount.
+  return NextResponse.json({ success: true, matchesInvalidated: true });
 }
