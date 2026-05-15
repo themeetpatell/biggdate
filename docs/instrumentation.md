@@ -99,25 +99,42 @@ The pattern is identical for any remaining surface; copy from these.
 
 ### AI cost log
 
-| Route | Site |
-|---|---|
-| `profile/derive:basic` / `psychological` | `src/app/api/profile/derive/route.ts` |
-| `matches/generate` | `src/app/api/matches/generate/route.ts` |
-| `life-preview` | `src/app/api/life-preview/route.ts` |
-| `companion/daily` | `src/app/api/companion/daily/route.ts` |
+Every AI surface is wired. Streaming routes log via the `onFinish`
+callback (usage resolves only when the stream completes); non-streaming
+routes log inline after `generateText`.
 
-### Unwired surfaces (copy the pattern when you next touch them)
+| Route key | Site | Kind |
+|---|---|---|
+| `profile/derive:basic` / `:psychological` | `src/app/api/profile/derive/route.ts` | generateText |
+| `matches/generate` | `src/app/api/matches/generate/route.ts` | generateText |
+| `matches/briefing` | `src/app/api/matches/briefing/route.ts` | generateText |
+| `life-preview` | `src/app/api/life-preview/route.ts` | generateText |
+| `companion/daily` | `src/app/api/companion/daily/route.ts` | generateText |
+| `companion/memory` | `src/app/api/companion/memory/route.ts` | generateText |
+| `coach/plan` | `src/app/api/coach/plan/route.ts` | generateText |
+| `coach/chat` | `src/app/api/coach/chat/route.ts` | streamText (onFinish) |
+| `chat:onboarding:<phase>` | `src/app/api/chat/route.ts` | streamText (onFinish) |
+| `chat:memory-extraction` | `src/app/api/chat/route.ts` | generateText (in `after()`) |
+| `intros/icebreakers` | `src/app/api/intros/icebreakers/route.ts` | generateText |
+| `debrief/structured` | `src/app/api/debrief/structured/route.ts` | generateText |
+| `dates/concierge` | `src/app/api/dates/concierge/route.ts` | generateText |
+| `dates/debrief` | `src/app/api/dates/debrief/route.ts` | generateText |
+| `growth/reflect` | `src/app/api/growth/reflect/route.ts` | generateText |
 
-- `src/app/api/companion/memory/route.ts`
-- `src/app/api/coach/plan/route.ts`
-- `src/app/api/coach/chat/route.ts`
-- `src/app/api/chat/route.ts` (Maahi main chat)
-- `src/app/api/intros/icebreakers/route.ts`
-- `src/app/api/debrief/structured/route.ts`
-- `src/app/api/dates/concierge/route.ts`
-- `src/app/api/dates/debrief/route.ts`
-- `src/app/api/growth/reflect/route.ts`
-- `src/app/api/matches/briefing/route.ts`
+### Logging a streamText call
+
+```ts
+const aiStart = Date.now();
+const result = streamText({
+  model: getModel(),
+  system,
+  messages,
+  onFinish: ({ usage }) => {
+    void logAiCall({ route: "coach/chat", userId, usage, durationMs: Date.now() - aiStart });
+  },
+});
+return result.toUIMessageStreamResponse();
+```
 
 ## Pricing table
 

@@ -4,6 +4,7 @@ import { getModel } from "@/lib/ai";
 import { dateConciergePrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
+import { logAiCall } from "@/lib/ai-costs";
 import type { Match } from "@/lib/types";
 
 export const maxDuration = 60;
@@ -16,9 +17,16 @@ export async function POST(req: Request) {
   const profile = await getProfileByUserId(auth.userId);
   if (!profile || !match) return NextResponse.json({ error: "Missing data" }, { status: 400 });
 
+  const aiStart = Date.now();
   const result = await generateText({
     model: getModel(),
     prompt: dateConciergePrompt(profile, match),
+  });
+  await logAiCall({
+    route: "dates/concierge",
+    userId: auth.userId,
+    usage: result.usage,
+    durationMs: Date.now() - aiStart,
   });
 
   const raw = (result.text || "").replace(/```json?\n?/g, "").replace(/```/g, "").trim();

@@ -4,6 +4,7 @@ import { getModel } from "@/lib/ai";
 import { debriefReflectionInsightPrompt } from "@/lib/prompts";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId, createDebriefReflection } from "@/lib/repo";
+import { logAiCall } from "@/lib/ai-costs";
 
 export const maxDuration = 60;
 
@@ -19,9 +20,16 @@ export async function POST(req: Request) {
   const profile = await getProfileByUserId(auth.userId);
   if (!profile) return NextResponse.json({ error: "No profile" }, { status: 400 });
 
+  const aiStart = Date.now();
   const result = await generateText({
     model: getModel(),
     prompt: debriefReflectionInsightPrompt(profile, matchName, { chemistry, surprise, decision }),
+  });
+  await logAiCall({
+    route: "debrief/structured",
+    userId: auth.userId,
+    usage: result.usage,
+    durationMs: Date.now() - aiStart,
   });
 
   const raw = (result.text || "").replace(/```json?\n?/g, "").replace(/```/g, "").trim();

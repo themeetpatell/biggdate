@@ -6,6 +6,7 @@ import {
   getMaahiMemory,
   writeMaahiMemoryPatch,
 } from "@/lib/maahi/memory";
+import { logAiCall } from "@/lib/ai-costs";
 import type { SessionMemory } from "@/lib/types";
 
 export const maxDuration = 60;
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
 
   const existing = await getMaahiMemory(auth.userId);
 
-  const extracted = await safeExtract(transcript, existing);
+  const extracted = await safeExtract(transcript, existing, auth.userId);
   const lastUserText = extractLastUserText(messages);
   const lastEmotionalState = lastUserText ? detectTone(lastUserText) || undefined : undefined;
 
@@ -69,18 +70,32 @@ export async function POST(req: Request) {
 async function safeExtract(
   transcript: string,
   existing: SessionMemory | null,
+  userId: string,
 ): Promise<Record<string, unknown> | null> {
+  const aiStart = Date.now();
   try {
     const res = await generateText({
       model: getModel(),
       prompt: maahiMemoryExtractionPrompt(transcript, existing),
+    });
+    await logAiCall({
+      route: "companion/memory",
+      userId,
+      usage: res.usage,
+      durationMs: Date.now() - aiStart,
     });
     const cleaned = res.text.replace(/```(?:json)?\n?/g, "").replace(/```/g, "").trim();
     const parsed = JSON.parse(cleaned);
     if (!isObject(parsed)) return null;
     if (parsed.shouldSave === false) return null;
     return parsed;
-  } catch {
+  } catch (err) {
+    await logAiCall({
+      route: "companion/memory",
+      userId,
+      durationMs: Date.now() - aiStart,
+      error: err instanceof Error ? err.message : "unknown",
+    });
     return null;
   }
 }

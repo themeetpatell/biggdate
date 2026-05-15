@@ -3,6 +3,7 @@ import { generateText } from "ai";
 import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
 import { getProfileByUserId } from "@/lib/repo";
+import { logAiCall } from "@/lib/ai-costs";
 
 export const maxDuration = 60;
 
@@ -16,6 +17,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing profile or reflection" }, { status: 400 });
   }
 
+  const aiStart = Date.now();
   const result = await generateText({
     model: getModel(),
     prompt: `You are a growth coach for ${profile.name} (${profile.attachment} attachment, readiness ${profile.readinessScore}/100).
@@ -29,6 +31,12 @@ Return STRICT JSON only:
   "growthNote": "What they should focus on next",
   "encouragement": "A warm, specific encouragement"
 }`,
+  });
+  await logAiCall({
+    route: "growth/reflect",
+    userId: auth.userId,
+    usage: result.usage,
+    durationMs: Date.now() - aiStart,
   });
 
   const raw = (result.text || "").replace(/```json?\n?/g, "").replace(/```/g, "").trim();

@@ -3,6 +3,7 @@ import { streamText, generateText, convertToModelMessages, UIMessage } from "ai"
 import { getModel } from "@/lib/ai";
 import { requireAuth } from "@/lib/require-auth";
 import { getSessionMemoryDb, upsertSessionMemory, getAccountHandleByUserId } from "@/lib/repo";
+import { logAiCall } from "@/lib/ai-costs";
 import {
   onboardingBasicPrompt,
   onboardingPsychologicalPrompt,
@@ -133,12 +134,21 @@ export async function POST(req: Request) {
 
   const modelMessages = await convertToModelMessages(messages);
 
+  const aiStart = Date.now();
   const result = streamText({
     model: getModel(),
     system,
     messages: modelMessages,
     maxOutputTokens: 500,
     temperature: 0.5,
+    onFinish: ({ usage }) => {
+      void logAiCall({
+        route: `chat:onboarding:${phase}`,
+        userId: auth.userId,
+        usage,
+        durationMs: Date.now() - aiStart,
+      });
+    },
   });
 
   // Background memory extraction — only meaningful in psych phase
@@ -148,10 +158,17 @@ export async function POST(req: Request) {
       .join("\n");
 
     after(async () => {
+      const memStart = Date.now();
       try {
         const memResult = await generateText({
           model: getModel(),
           prompt: memoryExtractionPrompt(transcript),
+        });
+        await logAiCall({
+          route: "chat:memory-extraction",
+          userId: auth.userId,
+          usage: memResult.usage,
+          durationMs: Date.now() - memStart,
         });
         const raw = memResult.text || "";
         const jsonStr = raw.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
