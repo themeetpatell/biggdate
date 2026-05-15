@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, ExternalLink, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { UpgradeCelebrationModal } from "@/components/upgrade-celebration-modal";
 
 type BillingMode = "early_access" | "stripe";
 
@@ -41,6 +42,7 @@ export function BillingPage({ mode, whatsappNumber }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
 
   const loadStatus = useCallback(async () => {
     try {
@@ -75,12 +77,13 @@ export function BillingPage({ mode, whatsappNumber }: Props) {
         return;
       }
       setCode("");
-      setSuccess(
-        body.alreadyActive
-          ? "You're already on Premium. Nothing to do."
-          : "Welcome to Premium. Refresh anywhere in the app to see your new perks.",
-      );
       await loadStatus();
+      if (body.alreadyActive) {
+        setSuccess("You're already on Premium. Nothing to do.");
+      } else {
+        setSuccess(null);
+        setCelebrationOpen(true);
+      }
     } catch {
       setError("Network error. Check your connection and try again.");
     } finally {
@@ -95,6 +98,7 @@ export function BillingPage({ mode, whatsappNumber }: Props) {
   const wa = whatsappLink(whatsappNumber, message);
 
   return (
+    <>
     <main className="mx-auto max-w-xl px-4 py-10 sm:py-14">
       <header className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--bd-text)]">
@@ -217,5 +221,11 @@ export function BillingPage({ mode, whatsappNumber }: Props) {
         </section>
       )}
     </main>
+    <UpgradeCelebrationModal
+      open={celebrationOpen}
+      onOpenChange={setCelebrationOpen}
+      kind="premium"
+    />
+    </>
   );
 }

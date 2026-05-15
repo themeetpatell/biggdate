@@ -21,3 +21,13 @@ create table if not exists user_addons (
 create index if not exists user_addons_user_id_idx on user_addons (user_id);
 create index if not exists user_addons_user_status_idx on user_addons (user_id, status);
 create index if not exists user_addons_user_addon_idx on user_addons (user_id, addon_id);
+
+-- Defense in depth: server uses service role (bypasses RLS) for writes;
+-- the policy below lets authenticated clients read only their own addons
+-- if they ever query directly via the supabase-js client.
+alter table user_addons enable row level security;
+
+drop policy if exists "user_addons_select_own" on user_addons;
+create policy "user_addons_select_own" on user_addons
+  for select
+  using (user_id = auth.uid()::text);
