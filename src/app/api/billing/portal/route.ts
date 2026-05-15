@@ -5,6 +5,12 @@ import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { log } from "@/lib/log";
 
 export async function POST(request: Request) {
+  if (process.env.BILLING_MODE === "early_access") {
+    return NextResponse.json(
+      { error: "Stripe billing portal is disabled during early access." },
+      { status: 503 },
+    );
+  }
   if (!isStripeConfigured()) {
     log.error("billing/portal called but STRIPE_SECRET_KEY is not set");
     return NextResponse.json({ error: "Billing is not configured" }, { status: 503 });

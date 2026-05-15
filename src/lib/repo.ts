@@ -1446,6 +1446,17 @@ export async function incrementUsage(userId: string, action: GatedAction) {
   `;
 }
 
+// Refund a previously-incremented counter (e.g. when downstream work fails
+// after requirePlanAtomic burned a quota slot). Never decrements below zero.
+export async function decrementUsage(userId: string, action: GatedAction) {
+  const ps = periodStart(action);
+  await sql`
+    UPDATE usage_counters
+    SET count = GREATEST(count - 1, 0)
+    WHERE user_id = ${userId} AND action = ${action} AND period_start = ${ps}
+  `;
+}
+
 // Atomically check the plan gate AND increment the counter in one DB round-trip.
 // If the limit has been reached the counter is NOT incremented and allowed=false
 // is returned — eliminating the TOCTOU race between requirePlan + incrementUsage.

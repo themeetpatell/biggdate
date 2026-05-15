@@ -27,11 +27,10 @@ interface Props {
 }
 
 const PREMIUM_FEATURES: FeatureItem[] = [
-  { label: "Maahi sessions",      hint: "15 deep coaching sessions a week", href: "/maahi" },
-  { label: "See who liked you",   hint: "No more guessing",                  href: "/likes" },
-  { label: "Life Preview",        hint: "2 vivid future-self previews/mo",   href: "/matches" },
-  { label: "Profile Boost",       hint: "Rise to the top once a week",       href: "/profile" },
-  { label: "Undo last swipe",     hint: "Change your mind",                  href: "/matches" },
+  { label: "Maahi sessions",    hint: "15 deep coaching sessions a week", href: "/companion" },
+  { label: "See who liked you", hint: "No more guessing",                 href: "/dashboard" },
+  { label: "Life Preview",      hint: "2 vivid future-self previews/mo",  href: "/matches"   },
+  { label: "Profile Boost",     hint: "Rise to the top once a week",      href: "/profile"   },
 ];
 
 const SPARKLE_POSITIONS: Array<{ top: string; left: string; delay: string; size: string }> = [

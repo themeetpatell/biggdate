@@ -13,7 +13,9 @@ import {
   setCachedMatches,
   getRealUserCandidates,
   markUserSeen,
+  requirePlan,
   requirePlanAtomic,
+  decrementUsage,
 } from "@/lib/repo";
 import { sendNotification } from "@/lib/notifications";
 import { sendPushToUser } from "@/lib/push";
@@ -31,11 +33,19 @@ export async function POST(req: Request) {
 
     const today = new Date().toISOString().slice(0, 10);
 
-    // Return cached matches if available for today
+    // Return cached matches if available for today — but re-slice to the
+    // current plan's cap so a user who downgrades after caching doesn't keep
+    // a premium-sized result for the rest of the day. requirePlan is
+    // read-only so we don't double-burn the counter.
     const cached = await getCachedMatches(auth.userId, today);
-    if (cached && cached.length > 0) return NextResponse.json({ matches: cached });
+    if (cached && cached.length > 0) {
+      const planCheck = await requirePlan(auth.userId, "daily_matches");
+      const cap = planCheck.limit === -1 ? cached.length : Math.min(cached.length, planCheck.limit);
+      return NextResponse.json({ matches: cached.slice(0, cap) });
+    }
 
-    // Feature gate: daily matches (atomic check + increment)
+    // Feature gate: daily matches (atomic check + increment).
+    // If AI/parse fails downstream we refund this slot via decrementUsage.
     const gate = await requirePlanAtomic(auth.userId, "daily_matches");
     if (!gate.allowed) {
       return NextResponse.json({ error: "Daily match limit reached", gate }, { status: 403 });
@@ -44,6 +54,7 @@ export async function POST(req: Request) {
     const userProfile = await getProfileByUserId(auth.userId);
 
     if (!userProfile) {
+      await decrementUsage(auth.userId, "daily_matches");
       return NextResponse.json(
         { error: "Complete your profile before generating matches" },
         { status: 400 }
@@ -54,6 +65,7 @@ export async function POST(req: Request) {
     const candidates = await getRealUserCandidates(auth.userId, userProfile);
 
     if (candidates.length === 0) {
+      await decrementUsage(auth.userId, "daily_matches");
       return NextResponse.json({ matches: [], poolEmpty: true });
     }
 
@@ -66,6 +78,7 @@ export async function POST(req: Request) {
       aiText = result.text || "";
     } catch (err) {
       log.error("[matches/generate] AI call failed", err);
+      await decrementUsage(auth.userId, "daily_matches");
       return NextResponse.json({ error: "AI unavailable, try again" }, { status: 503 });
     }
 
@@ -85,6 +98,7 @@ export async function POST(req: Request) {
       // The user sees "no matches yet" instead of a hard error toast.
       const reason = err instanceof Error ? err.message : "parse error";
       log.error("[matches/generate] JSON parse failed", undefined, { reason, rawStart: raw.slice(0, 400) });
+      await decrementUsage(auth.userId, "daily_matches");
       return NextResponse.json({ matches: [], parseError: true });
     }
 

@@ -95,15 +95,12 @@ const PLANS: PlanDef[] = [
 ];
 
 const FEATURE_ROWS: FeatureRow[] = [
-  { label: "Daily matches",     free: "5",     premium: "20",    pro: "∞"    },
-  { label: "Intro requests",    free: "3",     premium: "15",    pro: "∞"    },
-  { label: "Maahi sessions",    free: "3/wk",  premium: "15/wk", pro: "∞"    },
-  { label: "Life Preview",      free: "—",     premium: "2/mo",  pro: "∞"    },
-  { label: "Profile Boost",     free: "—",     premium: "1/wk",  pro: "3/wk" },
-  { label: "See who liked you", free: "—",     premium: "✓",     pro: "✓"    },
-  { label: "Priority matching", free: "—",     premium: "—",     pro: "✓"    },
-  { label: "Undo last swipe",   free: "—",     premium: "✓",     pro: "✓"    },
-  { label: "Incognito browse",  free: "—",     premium: "—",     pro: "✓"    },
+  { label: "Daily matches",     free: "5",      premium: "20",     pro: "∞"    },
+  { label: "Intro requests",    free: "3/day",  premium: "15/day", pro: "∞"    },
+  { label: "Maahi sessions",    free: "3/wk",   premium: "15/wk",  pro: "∞"    },
+  { label: "Life Preview",      free: "—",      premium: "2/mo",   pro: "∞"    },
+  { label: "Profile Boost",     free: "—",      premium: "1/wk",   pro: "3/wk" },
+  { label: "See who liked you", free: "—",      premium: "✓",      pro: "✓"    },
 ];
 
 const ADDONS: AddOnDef[] = [

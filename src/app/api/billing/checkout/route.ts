@@ -19,6 +19,12 @@ async function getOrCreateCustomer(userId: string, email: string | null): Promis
 }
 
 export async function POST(request: Request) {
+  if (process.env.BILLING_MODE === "early_access") {
+    return NextResponse.json(
+      { error: "Stripe checkout is disabled during early access." },
+      { status: 503 },
+    );
+  }
   if (!isStripeConfigured()) {
     log.error("billing/checkout called but STRIPE_SECRET_KEY is not set");
     return NextResponse.json({ error: "Billing is not configured" }, { status: 503 });
