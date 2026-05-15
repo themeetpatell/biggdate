@@ -47,11 +47,15 @@ export async function POST(req: Request) {
 
   const result = await moderatePhoto(photoUrl);
 
+  const unavailable = result.reason === "moderation_unavailable";
+
   try {
     await recordPhotoModeration({
       userId: auth.userId,
       photoUrl,
-      status: result.verdict,
+      // Outage uploads enter `pending` so the admin queue can re-review them
+      // when Sightengine recovers; genuine flags stay `flagged`.
+      status: unavailable ? "pending" : result.verdict,
       provider: result.provider ?? undefined,
       scores: result.scores ?? undefined,
       reason: result.reason ?? undefined,
@@ -65,6 +69,16 @@ export async function POST(req: Request) {
   }
 
   if (result.verdict === "flagged") {
+    if (unavailable) {
+      return NextResponse.json(
+        {
+          verdict: "flagged",
+          reason: "moderation_unavailable",
+          message: "We can't verify photos right now. Try again in a few minutes.",
+        },
+        { status: 503 },
+      );
+    }
     return NextResponse.json(
       {
         verdict: "flagged",

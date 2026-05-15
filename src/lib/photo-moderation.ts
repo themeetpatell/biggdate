@@ -24,6 +24,17 @@ const VIOLENCE_THRESHOLD = 0.6;
 const WEAPON_THRESHOLD = 0.6;
 const MINOR_THRESHOLD = 0.5;
 
+// Fail-closed verdict for Sightengine outages. Returned as `flagged` so the
+// existing upload handler short-circuits on `verdict !== "safe"`. The reason
+// string ("moderation_unavailable") is distinguishable in the photo_moderation
+// audit log, letting ops re-review these uploads when the provider recovers.
+const MODERATION_UNAVAILABLE: ModerationResult = {
+  verdict: "flagged",
+  reason: "moderation_unavailable",
+  scores: null,
+  provider: null,
+};
+
 interface SightengineResponse {
   status?: string;
   error?: { message?: string };
@@ -63,8 +74,8 @@ export async function moderatePhoto(photoUrl: string): Promise<ModerationResult>
 
     if (!res.ok || data.status !== "success") {
       const message = data.error?.message || `HTTP ${res.status}`;
-      log.warn("sightengine call failed — failing open", { error: message, photoUrl });
-      return { verdict: "safe", reason: null, scores: null, provider: null };
+      log.warn("sightengine call failed — failing closed", { error: message, photoUrl });
+      return MODERATION_UNAVAILABLE;
     }
 
     const scores = {
@@ -101,13 +112,14 @@ export async function moderatePhoto(photoUrl: string): Promise<ModerationResult>
 
     return { verdict: "safe", reason: null, scores, provider: "sightengine" };
   } catch (err) {
-    // Fail open — a moderation outage should not block legitimate uploads.
-    // The flagged_users table + reporting flow catches what slipped through.
-    log.warn("sightengine threw — failing open", {
+    // Fail closed — when we cannot moderate, we cannot let unverified content
+    // into storage. Users see a transient "try again" error; ops can clear the
+    // queue once the provider recovers.
+    log.warn("sightengine threw — failing closed", {
       error: err instanceof Error ? err.message : String(err),
       photoUrl,
     });
-    return { verdict: "safe", reason: null, scores: null, provider: null };
+    return MODERATION_UNAVAILABLE;
   }
 }
 
@@ -138,8 +150,8 @@ export async function moderatePhotoBuffer(
 
     if (!res.ok || data.status !== "success") {
       const message = data.error?.message || `HTTP ${res.status}`;
-      log.warn("sightengine binary call failed — failing open", { error: message });
-      return { verdict: "safe", reason: null, scores: null, provider: null };
+      log.warn("sightengine binary call failed — failing closed", { error: message });
+      return MODERATION_UNAVAILABLE;
     }
 
     const scores = {
@@ -171,9 +183,9 @@ export async function moderatePhotoBuffer(
 
     return { verdict: "safe", reason: null, scores, provider: "sightengine" };
   } catch (err) {
-    log.warn("sightengine binary threw — failing open", {
+    log.warn("sightengine binary threw — failing closed", {
       error: err instanceof Error ? err.message : String(err),
     });
-    return { verdict: "safe", reason: null, scores: null, provider: null };
+    return MODERATION_UNAVAILABLE;
   }
 }
