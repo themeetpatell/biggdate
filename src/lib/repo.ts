@@ -886,6 +886,21 @@ function rowToAddon(row: Record<string, unknown>): UserAddon {
   };
 }
 
+// Cheap boolean check for a specific addon. Used at feature-gate points
+// instead of pulling the full row set.
+export async function hasActiveAddon(userId: string, addonId: string): Promise<boolean> {
+  const rows = await sql`
+    SELECT 1 FROM user_addons
+    WHERE user_id = ${userId}
+      AND addon_id = ${addonId}
+      AND status = 'active'
+      AND (expires_at IS NULL OR expires_at > NOW())
+      AND (uses_remaining IS NULL OR uses_remaining > 0)
+    LIMIT 1
+  `;
+  return rows.length > 0;
+}
+
 export async function getActiveAddons(userId: string): Promise<UserAddon[]> {
   const rows = await sql`
     SELECT * FROM user_addons
@@ -992,6 +1007,13 @@ export async function getRealUserCandidates(
       AND (${partnerGender}::text IS NULL OR p.gender = ${partnerGender})
       AND (${ageMin}::int IS NULL OR p.age >= ${ageMin})
       AND (${ageMax}::int IS NULL OR p.age <= ${ageMax})
+      AND NOT EXISTS (
+        SELECT 1 FROM user_addons ua
+        WHERE ua.user_id = p.user_id
+          AND ua.addon_id = 'incognito'
+          AND ua.status = 'active'
+          AND (ua.expires_at IS NULL OR ua.expires_at > NOW())
+      )
     ORDER BY p.created_at DESC
     LIMIT 10
   `;

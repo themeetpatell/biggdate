@@ -390,6 +390,20 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                         {msg.body}
                       </p>
                     )}
+                    {isMine && msg.readAt && (
+                      <div
+                        style={{
+                          marginTop: 4,
+                          textAlign: "right",
+                          fontSize: 10,
+                          color: "rgba(255,255,255,0.7)",
+                          letterSpacing: "0.04em",
+                        }}
+                        aria-label="Read"
+                      >
+                        ✓✓ Read
+                      </div>
+                    )}
                   </div>
                 </div>
               );

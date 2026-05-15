@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/require-auth";
-import { getThreadById, getMessages, createMessage, markMessagesRead } from "@/lib/repo";
+import { getThreadById, getMessages, createMessage, markMessagesRead, hasActiveAddon } from "@/lib/repo";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const MAX_MESSAGE_LEN = 4000;
@@ -62,12 +62,24 @@ export async function GET(
     return NextResponse.json({ error: "Thread not found" }, { status: 404 });
   }
 
-  const [messages] = await Promise.all([
+  const [messages, hasReadReceipts] = await Promise.all([
     getMessages(threadId),
+    hasActiveAddon(auth.userId, "read_receipts"),
     markMessagesRead(threadId, auth.userId),
   ]);
 
-  return NextResponse.json({ thread, messages });
+  // Read Receipts add-on gating: viewer only sees readAt on their OWN sent
+  // messages when they have an active read_receipts entitlement. For incoming
+  // messages we keep readAt as null since the viewer already knows when they
+  // read those.
+  const gated = messages.map((m) => {
+    if (m.senderId === auth.userId) {
+      return { ...m, readAt: hasReadReceipts ? m.readAt : null };
+    }
+    return { ...m, readAt: null };
+  });
+
+  return NextResponse.json({ thread, messages: gated, hasReadReceipts });
 }
 
 export async function POST(
