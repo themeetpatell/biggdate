@@ -855,6 +855,74 @@ export async function getUserPlanByStripeCustomer(stripeCustomerId: string): Pro
   };
 }
 
+// ─── User Add-ons ───
+
+export type AddonStatus = "active" | "consumed" | "expired";
+export type AddonSource = "coupon" | "stripe" | "promo";
+
+export interface UserAddon {
+  id: string;
+  userId: string;
+  addonId: string;
+  status: AddonStatus;
+  source: AddonSource;
+  redeemedCode: string | null;
+  usesRemaining: number | null;
+  grantedAt: string;
+  expiresAt: string | null;
+}
+
+function rowToAddon(row: Record<string, unknown>): UserAddon {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    addonId: row.addon_id as string,
+    status: (row.status as AddonStatus) ?? "active",
+    source: (row.source as AddonSource) ?? "coupon",
+    redeemedCode: (row.redeemed_code as string) ?? null,
+    usesRemaining: (row.uses_remaining as number | null) ?? null,
+    grantedAt: (row.granted_at as string) ?? "",
+    expiresAt: (row.expires_at as string) ?? null,
+  };
+}
+
+export async function getActiveAddons(userId: string): Promise<UserAddon[]> {
+  const rows = await sql`
+    SELECT * FROM user_addons
+    WHERE user_id = ${userId}
+      AND status = 'active'
+      AND (expires_at IS NULL OR expires_at > NOW())
+      AND (uses_remaining IS NULL OR uses_remaining > 0)
+    ORDER BY granted_at DESC
+  `;
+  return (rows as Array<Record<string, unknown>>).map(rowToAddon);
+}
+
+export async function grantAddon(
+  userId: string,
+  params: {
+    addonId: string;
+    source: AddonSource;
+    redeemedCode?: string | null;
+    usesRemaining?: number | null;
+    expiresAt?: string | null;
+  },
+): Promise<UserAddon> {
+  const id = createId("addon");
+  const rows = await sql`
+    INSERT INTO user_addons (
+      id, user_id, addon_id, status, source, redeemed_code, uses_remaining, granted_at, expires_at
+    )
+    VALUES (
+      ${id}, ${userId}, ${params.addonId}, 'active', ${params.source},
+      ${params.redeemedCode ?? null}, ${params.usesRemaining ?? null},
+      NOW(), ${params.expiresAt ?? null}
+    )
+    RETURNING *
+  `;
+  return rowToAddon(rows[0] as Record<string, unknown>);
+}
+
 // ─── Seen Matches ───
 
 export async function markUserSeen(userId: string, matchedUserId: string) {

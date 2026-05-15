@@ -6,6 +6,10 @@ const PUBLIC_PATHS = [
   "/", "/auth", "/about", "/contact",
   "/simulation", "/how-it-works", "/faq", "/glossary",
   "/terms", "/privacy", "/vs", "/compare", "/onboarding",
+  // Sentry tunnel route (configured via tunnelRoute in next.config.ts). Must
+  // be reachable by anonymous browsers so client-side error reports aren't
+  // redirected into /auth and silently dropped.
+  "/monitoring",
 ];
 
 function isPublicPath(pathname: string): boolean {

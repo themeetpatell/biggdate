@@ -30,7 +30,8 @@ export default function PrivacyPage() {
           <li><strong>Account data</strong> — email, full name, username, password (hashed).</li>
           <li><strong>Profile data</strong> — birthday, location, gender, photos, and the answers you give Maahi during onboarding.</li>
           <li><strong>Behavioral data</strong> — pages visited, matches sent, messages sent, dates logged.</li>
-          <li><strong>Payment data</strong> — handled by Stripe; we never see your card number.</li>
+          <li><strong>Payment data</strong> — none at the moment. BiggDate is in early access and Premium is unlocked by redeeming a coupon code we send over WhatsApp; we do not collect or store any payment details. When paid plans launch, payments will be processed by Stripe and we will never see your card number.</li>
+          <li><strong>WhatsApp contact</strong> — if you message our WhatsApp number to request an access code, that conversation lives in WhatsApp under their privacy policy. We do not copy WhatsApp message content into our own servers; we only record that an access code was issued so we can revoke it later if needed.</li>
           <li><strong>Device data</strong> — IP address, browser, basic device info, used for fraud prevention.</li>
         </ul>
       </Section>
@@ -48,7 +49,7 @@ export default function PrivacyPage() {
       <Section title="4. Who we share it with">
         <ul className="list-disc space-y-2 pl-6">
           <li><strong>Other users</strong> — visible profile fields are shown to people you match with.</li>
-          <li><strong>Infrastructure providers</strong> — Supabase (database), Vercel (hosting), Stripe (payments), Resend (email), Google (AI).</li>
+          <li><strong>Infrastructure providers</strong> — Supabase (database), Vercel (hosting), Resend (email), Google (AI), Sightengine (photo moderation), Upstash (rate limiting), Sentry (error monitoring). Stripe will be added when paid plans launch.</li>
           <li><strong>Law enforcement</strong> — only when legally compelled.</li>
           <li>We do <strong>not</strong> sell your data to advertisers or data brokers.</li>
         </ul>

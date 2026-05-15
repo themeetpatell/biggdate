@@ -63,11 +63,11 @@ export const QUESTIONS: QuestionEntry[] = [
     question: "Is BiggDate free to use?",
     category: "Pricing & plans",
     shortAnswer:
-      "BiggDate has a free tier that includes the full Maahi onboarding, Soul Profile, and a limited number of curated matches per week. Paid plans unlock daily matches, more Soul Knocks, and full access to Maahi as an ongoing companion.",
+      "Right now BiggDate is in early access and Premium is completely free for invited users. We hand out access codes over WhatsApp — message us on +91 98243 41414 and we'll send you one.",
     longAnswer: [
-      "The free tier of BiggDate is genuinely usable — you complete the full 20-minute Maahi onboarding, receive your Soul Profile, and get a limited number of curated matches per week. This is intentional: we want the people who'd benefit from BiggDate to experience the actual product before deciding to pay.",
-      "Paid plans add: daily curated matches (vs weekly on free), more Soul Knocks per month, full ongoing access to Maahi as a companion (free is rate-limited), and Pulse Feed posting privileges. Pricing is in INR for India and the local currency in other markets.",
-      "BiggDate is subscription-only and never ad-driven. We do not sell data, do not run programmatic ads, and do not have engagement-bait mechanics. The business model is aligned with you finding a relationship and leaving — not with you scrolling forever.",
+      "BiggDate is in early access. While we're still building, Premium access is free for people we invite — you get the full Maahi onboarding, Soul Profile, daily curated matches, and ongoing access to Maahi as a companion at no cost.",
+      "To get access, message us on WhatsApp at +91 98243 41414 and ask for an access code. Redeem it at the in-app membership screen and Premium unlocks instantly.",
+      "Paid plans are coming after early access wraps up. We will not run ads, sell data, or use engagement-bait mechanics — the business model is aligned with you finding a relationship and leaving.",
     ],
     relatedSlugs: ["biggdate-pricing", "what-is-biggdate"],
     seeAlso: [{ label: "About BiggDate", href: "/about" }],
@@ -77,12 +77,11 @@ export const QUESTIONS: QuestionEntry[] = [
     question: "How much does BiggDate cost?",
     category: "Pricing & plans",
     shortAnswer:
-      "BiggDate offers a free tier and paid subscriptions in INR for India. Paid plans typically run between ₹499 and ₹1,999 per month depending on the tier, with discounts for quarterly and annual billing.",
+      "BiggDate is free during early access. We hand out access codes via WhatsApp (+91 98243 41414). Paid plans launch later — the structure will be a small number of subscription tiers in INR for India, with no ads and no à-la-carte paywalls.",
     longAnswer: [
-      "BiggDate uses a tiered subscription model. The free tier includes Maahi onboarding, your Soul Profile, and a limited number of curated matches per week. Paid plans unlock daily matches, more Soul Knocks, and unlimited Maahi access.",
-      "Pricing in India runs roughly ₹499 to ₹1,999 per month depending on tier, with quarterly and annual options at a meaningful discount. International pricing uses local currency and is comparable on a purchasing-power basis.",
-      "We do not run flash sales, urgency timers, or 'see who liked you' paywalls. Soul Knocks are the only contact mechanic and are not sold individually as boosts.",
-      "Final published pricing lives at /pricing on biggdate.app and may change. The structure (free tier + a small number of paid tiers, no ads, no à-la-carte unlocks) is the durable part.",
+      "While we're in early access, BiggDate is free for anyone who has an access code. To get one, message us on WhatsApp at +91 98243 41414 — we send codes personally so we can keep early-access membership intentional.",
+      "Once we launch paid plans, BiggDate will use a tiered subscription model in INR for India and local currency elsewhere. Expect a small number of tiers (not a long menu of unlocks), and the working price band we'll start from is roughly ₹499 to ₹1,999 per month with quarterly/annual discounts. Final published pricing will appear at /pricing on biggdate.app when paid launches.",
+      "We do not run flash sales, urgency timers, or 'see who liked you' paywalls. Soul Knocks remain the only contact mechanic and will not be sold individually as boosts.",
     ],
     relatedSlugs: ["is-biggdate-free", "what-is-biggdate"],
     seeAlso: [{ label: "About BiggDate", href: "/about" }],
