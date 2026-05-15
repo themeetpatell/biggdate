@@ -35,6 +35,7 @@ export type AnalyticsEventName =
   // change — properties carries the context. Add to this union as you add
   // emit sites so we have a discoverable list.
   | "soul_knock_sent"
+  | "soul_knock_scored"
   | "thread_unlocked"
   | "maahi_session_started"
   | "life_preview_generated"

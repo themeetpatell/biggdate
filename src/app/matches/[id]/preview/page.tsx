@@ -452,8 +452,50 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
   const [selected, setSelected] = useState<number | null>(null);
   const [custom, setCustom] = useState("");
   const [showCustom, setShowCustom] = useState(false);
+  const [scoring, setScoring] = useState(false);
+  // Set when a custom question scored weak under an enforcing experiment.
+  // While set, the send button becomes an explicit "send anyway".
+  const [softBlock, setSoftBlock] = useState<{ coaching: string } | null>(null);
 
   const activeQuestion = showCustom ? custom.trim() : selected !== null ? suggestions[selected] : null;
+
+  async function handleSend() {
+    if (!activeQuestion || sending || scoring) return;
+
+    // Maahi's own suggestions are pre-vetted — send directly. Only custom
+    // questions go through quality scoring.
+    if (!showCustom) {
+      onSend(activeQuestion);
+      return;
+    }
+
+    // Second click after a soft-block: the user chose to send anyway.
+    if (softBlock) {
+      onSend(activeQuestion);
+      return;
+    }
+
+    setScoring(true);
+    try {
+      const res = await fetch("/api/intros/score-question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: activeQuestion, matchId: match.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.enforce && data.verdict === "weak") {
+        // Soft-block — surface coaching; the next click sends anyway.
+        setSoftBlock({ coaching: data.coaching || "Try asking something more specific." });
+        return;
+      }
+      onSend(activeQuestion);
+    } catch {
+      // Scoring outage must never block a user from connecting.
+      onSend(activeQuestion);
+    } finally {
+      setScoring(false);
+    }
+  }
 
   if (sent) {
     return (
@@ -524,7 +566,7 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
             <div>
               <textarea
                 value={custom}
-                onChange={e => setCustom(e.target.value)}
+                onChange={e => { setCustom(e.target.value); setSoftBlock(null); }}
                 placeholder="Ask something that matters..."
                 maxLength={140}
                 rows={2}
@@ -538,19 +580,29 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
           )}
         </div>
 
+        {/* Soft-block coaching — shown when a custom question scored weak */}
+        {softBlock && (
+          <div style={{ marginBottom: 10, padding: "11px 13px", borderRadius: 12, border: "1px solid rgba(232,146,124,0.35)", background: "rgba(232,146,124,0.08)" }}>
+            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5, color: "rgba(255,255,255,0.7)" }}>
+              <span style={{ color: "#e8927c", fontWeight: 700 }}>Make it land. </span>
+              {softBlock.coaching}
+            </p>
+          </div>
+        )}
+
         {/* Send button */}
         <button
-          onClick={() => activeQuestion && onSend(activeQuestion)}
-          disabled={!activeQuestion || sending}
+          onClick={handleSend}
+          disabled={!activeQuestion || sending || scoring}
           style={{
             width: "100%", padding: "15px 0", borderRadius: 14, fontSize: 15, fontWeight: 700,
-            border: "none", cursor: activeQuestion ? "pointer" : "default",
+            border: "none", cursor: activeQuestion && !scoring ? "pointer" : "default",
             background: activeQuestion ? "linear-gradient(135deg, #e8927c, #d4688a)" : "rgba(255,255,255,0.06)",
             color: activeQuestion ? "#fff" : "rgba(255,255,255,0.2)",
             transition: "all 0.2s ease",
             letterSpacing: "0.01em",
           }}>
-          {sending ? "Sending..." : "Send Soul Knock ✦"}
+          {sending ? "Sending..." : scoring ? "Checking…" : softBlock ? "Send anyway ✦" : "Send Soul Knock ✦"}
         </button>
 
         {/* Not this chapter */}

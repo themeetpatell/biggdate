@@ -91,6 +91,7 @@ The pattern is identical for any remaining surface; copy from these.
 | `first_soul_knock_sent` | `src/app/api/intros/request/route.ts` | first |
 | `thread_unlocked` | `src/app/api/intros/respond/route.ts` | every |
 | `first_thread_unlocked` | `src/app/api/intros/respond/route.ts` | first (both users) |
+| `soul_knock_scored` | `src/app/api/intros/score-question/route.ts` | every |
 | `match_generated` | `src/app/api/matches/generate/route.ts` | every |
 | `first_match_viewed` | `src/app/api/matches/generate/route.ts` | first |
 | `life_preview_generated` | `src/app/api/life-preview/route.ts` | every |
@@ -116,6 +117,7 @@ routes log inline after `generateText`.
 | `chat:onboarding:<phase>` | `src/app/api/chat/route.ts` | streamText (onFinish) |
 | `chat:memory-extraction` | `src/app/api/chat/route.ts` | generateText (in `after()`) |
 | `intros/icebreakers` | `src/app/api/intros/icebreakers/route.ts` | generateText |
+| `intros/score-question` | `src/app/api/intros/score-question/route.ts` | generateText |
 | `debrief/structured` | `src/app/api/debrief/structured/route.ts` | generateText |
 | `dates/concierge` | `src/app/api/dates/concierge/route.ts` | generateText |
 | `dates/debrief` | `src/app/api/dates/debrief/route.ts` | generateText |
