@@ -19,7 +19,7 @@ const SLAM = [0.2, 1, 0.2, 1] as const;
 // Ambient tints crossfade as you scroll — color-grading the whole page
 // like a movie trailer. Each entry is the room light for that chapter.
 const TINTS = [
-  "rgba(224, 171, 77, 0.20)",   // 0  prologue       — amber dusk
+  "rgba(180, 140, 255, 0.20)",  // 0  prologue       — violet dusk
   "rgba(255, 70, 70, 0.16)",    // 1  problem        — red distress
   "rgba(124, 58, 237, 0.18)",   // 2  maahi          — violet awakening
   "rgba(212, 104, 138, 0.18)",  // 3  soul profile   — rose
@@ -32,9 +32,9 @@ const TINTS = [
 const CHAPTERS = [
   { num: "01", label: "Prologue",   title: "A heart, still searching",   color: "#e2b159" },
   { num: "02", label: "Chapter I",  title: "A thousand faces. None of them stayed.", color: "#ff6b6b" },
-  { num: "03", label: "Chapter II", title: "Then — she walks in",        color: "#a78bfa" },
+  { num: "03", label: "Chapter II", title: "Then — they walk in",        color: "#a78bfa" },
   { num: "04", label: "Chapter III", title: "The soul no swipe ever saw", color: "#d4688a" },
-  { num: "05", label: "Chapter IV", title: "She's been waiting for you", color: "#ff8cb8" },
+  { num: "05", label: "Chapter IV", title: "They've been waiting for you", color: "#ff8cb8" },
   { num: "06", label: "Chapter V",  title: "The first word that meant something", color: "#f59e0b" },
   { num: "07", label: "Chapter VI", title: "The life you didn't dare imagine", color: "#4FFFB0" },
   { num: "08", label: "Epilogue",   title: "Your love begins here",      color: "#ff8cb8" },
@@ -286,26 +286,6 @@ function SceneSection({
       }}
     >
       <ChapterFlash trigger={inView && !!flashColor} color={flashColor} />
-      {/* Light streak wipe — sweeps across the section as it enters */}
-      {inView && (
-        <motion.div
-          aria-hidden
-          initial={{ x: "-110%", opacity: 0 }}
-          animate={{ x: "110%", opacity: [0, 0.7, 0] }}
-          transition={{ duration: 1.1, ease: "easeOut" }}
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            width: "40%",
-            background:
-              "linear-gradient(110deg, transparent 0%, rgba(255,225,172,0.10) 45%, rgba(255,255,255,0.18) 50%, rgba(255,225,172,0.10) 55%, transparent 100%)",
-            mixBlendMode: "screen",
-            pointerEvents: "none",
-            zIndex: 8,
-          }}
-        />
-      )}
       {children}
     </motion.section>
   );
@@ -473,7 +453,13 @@ function ScenePrologue() {
         <h1 style={{ fontSize: "clamp(40px, 6.4vw, 84px)", fontWeight: 900, color: "#fff", lineHeight: 1.05, margin: 0, maxWidth: 700, letterSpacing: "-0.035em", perspective: 800 }}>
           {kineticWords("Somewhere out there,", 1.45, 0.06)}
           <br />
-          {kineticWords("she's looking too.", 1.85, 0.07, { color: "#d4688a", textShadow: "0 0 30px rgba(212,104,138,0.6)" })}
+          {kineticWords("they're looking too.", 1.85, 0.07, {
+            background: "linear-gradient(135deg, #ff8cb8 0%, #d4688a 50%, #7c3aed 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            color: "transparent",
+          })}
         </h1>
       </motion.div>
     </SceneSection>
@@ -946,7 +932,7 @@ function SceneMatch() {
                 transition={{ duration: 1.6, repeat: Infinity }}
                 style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)", textAlign: "center", lineHeight: 1.5, letterSpacing: "0.04em" }}
               >
-                Maahi is bringing her into the light…
+                Maahi is bringing them into the light…
               </motion.p>
             </div>
           ) : (
@@ -998,7 +984,7 @@ function SceneMatch() {
                   paddingLeft: 14, borderLeft: "2px solid rgba(255,140,184,0.4)",
                 }}
               >
-                &ldquo;She loves slow. She builds deep. And the parts of you the world called &lsquo;too much&rsquo; — she&apos;ll quietly call home.&rdquo;
+                &ldquo;They love slow. They build deep. And the parts of you the world called &lsquo;too much&rsquo; — they&apos;ll quietly call home.&rdquo;
               </motion.p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
@@ -1093,7 +1079,7 @@ A note for Arya — from the realest part of you
             fontSize: 13.5, color: "rgba(255,255,255,0.78)", lineHeight: 1.6,
           }}>
             <TypewriterText
-              text="I read what you wrote, slowly. Most people run from something. I think you're running toward someone — and I'd like to know who she is, in your own words."
+              text="I read what you wrote, slowly. Most people run from something. I think you're running toward someone — and I'd like to know who they are, in your own words."
               delay={550}
               start={inView}
             />
@@ -1111,7 +1097,7 @@ A note for Arya — from the realest part of you
             transition={{ duration: phase === "sending" ? 0.8 : 0.6, repeat: phase === "sending" ? Infinity : 0 }}
             style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 800, color: "#0A0A0F", letterSpacing: "0.04em" }}
           >
-            {phase === "idle" ? "Knock on her soul ✦" : phase === "sending" ? "Crossing the distance…" : "✓ She's heard you"}
+            {phase === "idle" ? "Knock on their soul ✦" : phase === "sending" ? "Crossing the distance…" : "✓ They've heard you"}
           </motion.button>
 
           {phase === "sending" && (
@@ -1143,9 +1129,9 @@ A note for Arya — from the realest part of you
 
 const MILESTONES = [
   { week: "Week 2",  icon: "☕", text: "First coffee. Three hours felt like ten minutes. You walked home the long way, smiling at nothing." },
-  { week: "Month 2", icon: "🌆", text: "She met your best friend last Thursday. They've been texting since. He says you sound different on the phone now." },
-  { week: "Month 4", icon: "✈️", text: "You moved a flight. Not for work. For her. And it didn't even feel like a sacrifice." },
-  { week: "Month 6", icon: "🏠", text: "You're standing in an empty apartment, picturing where her books would go. You — who never wanted this. You want this." },
+  { week: "Month 2", icon: "🌆", text: "They met your best friend last Thursday. The two of them have been texting since. Your friend says you sound different on the phone now." },
+  { week: "Month 4", icon: "✈️", text: "You moved a flight. Not for work. For them. And it didn't even feel like a sacrifice." },
+  { week: "Month 6", icon: "🏠", text: "You're standing in an empty apartment, picturing where their books would go. You — who never wanted this. You want this." },
 ];
 
 function SceneLifePreview() {
@@ -1497,7 +1483,7 @@ function CinematicBackdrop({ scrollYProgress }: { scrollYProgress: MotionValue<n
       <div
         style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, #0a0807 0%, #14110b 50%, #050403 100%)",
+          background: "linear-gradient(180deg, #060814 0%, #100a22 50%, #03020a 100%)",
         }}
       />
 
@@ -1514,10 +1500,10 @@ function CinematicBackdrop({ scrollYProgress }: { scrollYProgress: MotionValue<n
               width: s.size,
               height: s.size,
               borderRadius: "50%",
-              background: "rgba(255,225,172,0.55)",
+              background: "rgba(220,210,255,0.6)",
               animationDelay: `${s.delay}s`,
               animationDuration: `${s.dur}s`,
-              boxShadow: s.size > 1.4 ? "0 0 6px rgba(255,225,172,0.4)" : "none",
+              boxShadow: s.size > 1.4 ? "0 0 6px rgba(255,180,220,0.5)" : "none",
             }}
           />
         ))}
@@ -1538,8 +1524,8 @@ function CinematicBackdrop({ scrollYProgress }: { scrollYProgress: MotionValue<n
               width: p.size,
               height: p.size,
               borderRadius: "50%",
-              background: "rgba(255,225,172,0.3)",
-              boxShadow: "0 0 4px rgba(255,225,172,0.4)",
+              background: "rgba(220,200,255,0.35)",
+              boxShadow: "0 0 4px rgba(255,170,210,0.4)",
               filter: p.size > 2 ? "blur(0.5px)" : "none",
             }}
           />
@@ -1571,7 +1557,7 @@ function CinematicBackdrop({ scrollYProgress }: { scrollYProgress: MotionValue<n
               width: i % 2 === 0 ? 1.5 : 0.8,
               transform: `translateX(-50%) rotate(${i * 30}deg)`,
               transformOrigin: "50% 50%",
-              background: `linear-gradient(to bottom, transparent 0%, rgba(255,225,172,${0.04 + (i % 3) * 0.02}) 45%, rgba(255,225,172,${0.02 + (i % 3) * 0.01}) 55%, transparent 100%)`,
+              background: `linear-gradient(to bottom, transparent 0%, rgba(255,160,210,${0.04 + (i % 3) * 0.02}) 45%, rgba(160,160,255,${0.02 + (i % 3) * 0.01}) 55%, transparent 100%)`,
               filter: "blur(1.5px)",
             }}
           />
@@ -1583,7 +1569,7 @@ function CinematicBackdrop({ scrollYProgress }: { scrollYProgress: MotionValue<n
         style={{
           position: "absolute", inset: 0,
           background:
-            "radial-gradient(circle at 50% 0%, rgba(255, 199, 102, 0.12) 0%, transparent 36%), radial-gradient(circle at 50% 100%, rgba(66, 39, 21, 0.30) 0%, transparent 50%)",
+            "radial-gradient(circle at 50% 0%, rgba(255, 140, 200, 0.14) 0%, transparent 36%), radial-gradient(circle at 50% 100%, rgba(60, 40, 110, 0.35) 0%, transparent 50%)",
         }}
       />
 
@@ -1646,8 +1632,8 @@ function CinematicBackdrop({ scrollYProgress }: { scrollYProgress: MotionValue<n
             transform: `rotate(${deg}deg)`,
           }}
         >
-          <div style={{ position: "absolute", top: 0, left: 0, width: 14, height: 1.5, background: "rgba(255,225,172,0.32)" }} />
-          <div style={{ position: "absolute", top: 0, left: 0, width: 1.5, height: 14, background: "rgba(255,225,172,0.32)" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, width: 14, height: 1.5, background: "rgba(220,200,255,0.32)" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, width: 1.5, height: 14, background: "rgba(220,200,255,0.32)" }} />
         </div>
       ))}
     </div>

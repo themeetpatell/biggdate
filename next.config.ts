@@ -6,9 +6,19 @@ import { withSentryConfig } from "@sentry/nextjs";
 // unsafe-inline for scripts/styles since Next.js + Tailwind inline at runtime.
 // This is a defense-in-depth header, not a primary control. Tighten with nonces
 // post-launch if/when we move off inline-heavy patterns.
+// `'unsafe-eval'` is required by React/Next dev tooling (HMR, callstack
+// reconstruction) and is only added in non-production builds.
+const isDev = process.env.NODE_ENV !== "production";
+const scriptSrc = [
+  "script-src 'self' 'unsafe-inline'",
+  isDev ? "'unsafe-eval'" : "",
+  "https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms",
+]
+  .filter(Boolean)
+  .join(" ");
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms",
+  scriptSrc,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",

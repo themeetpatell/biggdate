@@ -138,7 +138,7 @@ const ROASTS: {
     tint: "#ff7a59",
     title: "The Swipe Treadmill",
     roast:
-      "10,000 swipes for one date with a man who explained Web3 over tap water. The app called that momentum.",
+      "10,000 swipes for one date with someone who explained Web3 over tap water. The app called that momentum.",
     layout: "md:col-span-3 lg:col-span-3",
   },
   {
@@ -1093,7 +1093,7 @@ export function CinematicLanding() {
             {[
               "Haven't been on a date in 4 months. Fundraising does that.",
               "My green flag: someone who doesn't need constant reassurance during a rough sprint week.",
-              "Cancelled plans 3 times this month because of work. She hasn't left. That's something.",
+              "Cancelled plans 3 times this month because of work. They haven't left. That's something.",
             ].map((text, i) => (
               <div
                 key={i}
