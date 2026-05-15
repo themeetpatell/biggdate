@@ -44,10 +44,10 @@ export function ProfileLauncher() {
   const shouldRender = Boolean(userId) && !isHidden;
 
   useEffect(() => {
-    if (!shouldRender) {
-      setUnreadCount(0);
-      return;
-    }
+    // When hidden, the component returns null and the badge state is unobservable.
+    // Skip the fetch loop entirely; the next render with shouldRender=true will
+    // remount this effect and load a fresh count.
+    if (!shouldRender) return;
     const load = () => {
       fetch("/api/messages")
         .then((r) => r.json())

@@ -25,6 +25,10 @@ export default defineConfig({
         timeout: 60_000,
         env: {
           PORT: "3100",
+          // The instrumentation hook fails fast on missing prod env vars to
+          // catch misconfigured Vercel deploys. The E2E harness intentionally
+          // runs without prod secrets, so opt out of that check here only.
+          ALLOW_MISSING_ENV: "1",
         },
       },
   projects: [

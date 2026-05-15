@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, status, partnerId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Commitment API Error:", error);
     return NextResponse.json(
       { error: "Internal server error" },

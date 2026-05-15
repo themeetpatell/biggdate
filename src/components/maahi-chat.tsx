@@ -283,7 +283,7 @@ export function MaahiChat() {
             {limitReached ? (
               <div className="rounded-xl border border-[#d4688a]/20 bg-[#d4688a]/5 p-4 text-center">
                 <Lock className="mx-auto mb-2 size-5 text-[#ef8cab] opacity-80" />
-                <p className="mb-3 text-[13px] font-medium text-[#ef8cab]">You've reached your free limit</p>
+                <p className="mb-3 text-[13px] font-medium text-[#ef8cab]">You&apos;ve reached your free limit</p>
                 <p className="mb-4 text-[11px] text-[#ef8cab]/70">Upgrade to BiggDate Premium for unlimited deep-dive sessions with Maahi.</p>
                 <button
                   onClick={() => {

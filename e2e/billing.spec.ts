@@ -8,9 +8,10 @@ test.describe("Billing flow", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/auth");
-    await page.getByPlaceholder(/username or email/i).fill(process.env.E2E_TEST_EMAIL!);
+    await page.getByRole("button", { name: /log in instead/i }).click();
+    await page.getByPlaceholder(/username or/i).fill(process.env.E2E_TEST_EMAIL!);
     await page.getByPlaceholder(/password/i).fill(process.env.E2E_TEST_PASSWORD!);
-    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.getByRole("button", { name: "Log In", exact: true }).click();
     await page.waitForURL(/\/(dashboard|onboarding)/, { timeout: 10000 });
   });
 

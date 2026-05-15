@@ -7,17 +7,23 @@ const TEST_EMAIL = process.env.E2E_TEST_EMAIL || "e2e@test.biggdate.app";
 const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || "TestPass123!";
 
 test.describe("Auth flow", () => {
+  // /auth defaults to signup mode (see useState<AuthMode>("signup") in
+  // src/app/auth/page.tsx). Tests that need the login form switch via the
+  // "Log in instead" link rendered in signup-mode copy.
+
   test("login page renders correctly", async ({ page }) => {
     await page.goto("/auth");
     await expect(page).toHaveTitle(/BiggDate/);
-    await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
+    await page.getByRole("button", { name: /log in instead/i }).click();
+    await expect(page.getByRole("button", { name: "Log In", exact: true })).toBeVisible();
   });
 
   test("shows error on wrong credentials", async ({ page }) => {
     await page.goto("/auth");
-    await page.getByPlaceholder(/username or email/i).fill("nobody@nowhere.com");
+    await page.getByRole("button", { name: /log in instead/i }).click();
+    await page.getByPlaceholder(/username or/i).fill("nobody@nowhere.com");
     await page.getByPlaceholder(/password/i).fill("wrongpassword");
-    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.getByRole("button", { name: "Log In", exact: true }).click();
     await expect(page).toHaveURL(/\/auth/);
   });
 
@@ -46,9 +52,10 @@ test.describe("Auth flow", () => {
   test("authenticated login redirects to dashboard or onboarding", async ({ page }) => {
     test.skip(!process.env.E2E_TEST_EMAIL, "E2E_TEST_EMAIL not set — skipping credential test");
     await page.goto("/auth");
-    await page.getByPlaceholder(/username or email/i).fill(TEST_EMAIL);
+    await page.getByRole("button", { name: /log in instead/i }).click();
+    await page.getByPlaceholder(/username or/i).fill(TEST_EMAIL);
     await page.getByPlaceholder(/password/i).fill(TEST_PASSWORD);
-    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.getByRole("button", { name: "Log In", exact: true }).click();
     await page.waitForURL(/\/(dashboard|onboarding)/, { timeout: 10000 });
   });
 });

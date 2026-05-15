@@ -1,6 +1,22 @@
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "./supabase-browser";
 
-let supabase = typeof window !== "undefined" ? createSupabaseBrowserClient() : null;
+const supabase = typeof window !== "undefined" ? createSupabaseBrowserClient() : null;
+
+type MessageRow = {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  kind?: "text" | "voice";
+  body?: string | null;
+  audio_url?: string | null;
+  audio_duration_sec?: number | null;
+  audio_mime_type?: string | null;
+  created_at: string;
+  read_at?: string | null;
+};
+
+type MessageInsertPayload = RealtimePostgresInsertPayload<MessageRow>;
 
 /**
  * Subscribe to real-time inserts on the `messages` table for the current user.
@@ -10,7 +26,7 @@ let supabase = typeof window !== "undefined" ? createSupabaseBrowserClient() : n
  */
 export function subscribeToUserMessages(
   _userId: string,
-  onMessage: (payload: any) => void
+  onMessage: (payload: MessageInsertPayload) => void
 ) {
   if (!supabase) return () => {};
 
@@ -35,7 +51,7 @@ export function subscribeToUserMessages(
  */
 export function subscribeToThreadMessages(
   threadId: string,
-  onMessage: (payload: any) => void
+  onMessage: (payload: MessageInsertPayload) => void
 ) {
   if (!supabase) return () => {};
 

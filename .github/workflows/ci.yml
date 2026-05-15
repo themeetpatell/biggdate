@@ -31,10 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: verify
-    # Runs against a pre-deployed URL. Set PLAYWRIGHT_BASE_URL as a GitHub
-    # Actions variable (not secret) to enable. Skipped until configured so CI
-    # stays green during initial setup.
-    if: vars.PLAYWRIGHT_BASE_URL != ''
+    # Always runs. If PLAYWRIGHT_BASE_URL is set (e.g. a Vercel preview URL),
+    # Playwright hits that. Otherwise it builds locally and Playwright's
+    # webServer config starts `npm run start -p 3100` for the run. Auth-gated
+    # specs self-skip when E2E_TEST_EMAIL is not provided.
 
     steps:
       - name: Checkout
@@ -51,6 +51,10 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
+
+      - name: Build (when running against a local server)
+        if: vars.PLAYWRIGHT_BASE_URL == ''
+        run: npm run build
 
       - name: Run E2E tests
         run: npm run test:e2e

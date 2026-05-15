@@ -115,11 +115,21 @@ const ENV_MAP: Record<string, string | undefined> = {
 
 /* ── Helpers ── */
 
+// Early-access mode (BILLING_MODE=early_access) sends every upgrade click to
+// the billing page instead of Stripe checkout. Plans/add-ons still render so
+// the sheet keeps working as a marketing surface.
+const BILLING_MODE =
+  process.env.NEXT_PUBLIC_BILLING_MODE === "stripe" ? "stripe" : "early_access";
+
 function getPriceId(envKey: string): string {
   return ENV_MAP[envKey] ?? "";
 }
 
 async function startCheckout(type: "subscription" | "payment", priceId: string) {
+  if (BILLING_MODE === "early_access") {
+    window.location.href = "/settings/billing";
+    return;
+  }
   const res = await fetch("/api/billing/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

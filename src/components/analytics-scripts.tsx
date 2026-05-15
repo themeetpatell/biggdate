@@ -6,14 +6,15 @@ import { useEffect, useState } from "react";
 // Reads the analytics consent flag that the cookie banner sets.
 // Key: "bd_analytics_consent", value: "granted" | "denied"
 export function AnalyticsScripts() {
-  const [consented, setConsented] = useState(false);
+  // Read existing consent during initial render so we don't kick a re-render
+  // from inside an effect. SSR-safe via the `typeof window` guard.
+  const [consented, setConsented] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("bd_analytics_consent") === "granted";
+  });
 
   useEffect(() => {
-    const stored = localStorage.getItem("bd_analytics_consent");
-    if (stored === "granted") {
-      setConsented(true);
-      return;
-    }
+    if (consented) return;
     // Listen for consent granted by the cookie banner
     const handler = (e: StorageEvent) => {
       if (e.key === "bd_analytics_consent" && e.newValue === "granted") {
@@ -22,7 +23,7 @@ export function AnalyticsScripts() {
     };
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
-  }, []);
+  }, [consented]);
 
   if (!consented) return null;
 

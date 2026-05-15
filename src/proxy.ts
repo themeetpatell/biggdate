@@ -15,7 +15,7 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip API routes (they handle auth themselves) and static assets
