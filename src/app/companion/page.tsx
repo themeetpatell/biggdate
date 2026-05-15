@@ -2,11 +2,14 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
-import { ChatMessage } from "@/components/chat-message";
+import { ChatMessage, getMessageText } from "@/components/chat-message";
+import { isSpeechSupported, speak, cancelSpeech } from "@/lib/maahi-voice";
+
+const VOICE_PREF_KEY = "biggdate_maahi_voice";
 
 // ── Conversation starters — no emojis, just honest words ────────────────────
 const STARTERS = [
@@ -60,6 +63,33 @@ function TypingDots() {
   );
 }
 
+// ── Voice toggle icon ────────────────────────────────────────────────────────
+function VoiceIcon({ on, animate }: { on: boolean; animate: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={animate ? { animation: "maahiVoicePulse 1.1s ease-in-out infinite" } : undefined}
+    >
+      <path d="M11 5 6 9H2v6h4l5 4z" />
+      {on ? (
+        <>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+          <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+        </>
+      ) : (
+        <path d="m23 9-6 6M17 9l6 6" />
+      )}
+    </svg>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function MaahiPage() {
   const router = useRouter();
@@ -105,6 +135,60 @@ export default function MaahiPage() {
       }).catch(() => {});
     }
   }, [status, messages]);
+
+  // ── Maahi voice (browser text-to-speech) ──────────────────────────────────
+  const voiceSupported = useMemo(() => isSpeechSupported(), []);
+  // Lazy initializer reads the saved preference. Safe against SSR (window
+  // guard) and against hydration mismatch — the voice toggle only renders
+  // inside the header, which isn't present until messages exist.
+  const [voiceOn, setVoiceOn] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem(VOICE_PREF_KEY) === "on",
+  );
+  const [speaking, setSpeaking] = useState(false);
+  // Tracks the last assistant message we've handled, so toggling voice on
+  // mid-conversation never replays the backlog.
+  const lastSpokenIdRef = useRef<string | null>(null);
+  const voiceInitializedRef = useRef(false);
+
+  // On first render with messages present, mark the latest assistant message
+  // as already-handled so existing history is never spoken aloud.
+  useEffect(() => {
+    if (voiceInitializedRef.current || messages.length === 0) return;
+    voiceInitializedRef.current = true;
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    if (lastAssistant) lastSpokenIdRef.current = lastAssistant.id;
+  }, [messages]);
+
+  // Speak each newly completed Maahi reply. Runs only when the stream has
+  // settled (status "ready") so we voice the final text, not partial tokens.
+  useEffect(() => {
+    if (status !== "ready") return;
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistant || lastAssistant.id === lastSpokenIdRef.current) return;
+    // Advance the frontier regardless of voiceOn, so enabling voice later
+    // doesn't trigger a stale message.
+    lastSpokenIdRef.current = lastAssistant.id;
+    if (!voiceOn) return;
+    speak(getMessageText(lastAssistant), {
+      onStart: () => setSpeaking(true),
+      onEnd: () => setSpeaking(false),
+    });
+  }, [status, messages, voiceOn]);
+
+  // Stop speech on unmount.
+  useEffect(() => () => cancelSpeech(), []);
+
+  const toggleVoice = useCallback(() => {
+    setVoiceOn((prev) => {
+      const next = !prev;
+      localStorage.setItem(VOICE_PREF_KEY, next ? "on" : "off");
+      if (!next) {
+        cancelSpeech();
+        setSpeaking(false);
+      }
+      return next;
+    });
+  }, []);
 
   const handleSend = () => {
     const text = input.trim();
@@ -213,6 +297,32 @@ export default function MaahiPage() {
               <div style={{ marginLeft: 2 }}>
                 <TypingDots />
               </div>
+            )}
+            {voiceSupported && (
+              <button
+                onClick={toggleVoice}
+                aria-label={voiceOn ? "Turn off Maahi's voice" : "Turn on Maahi's voice"}
+                aria-pressed={voiceOn}
+                title={voiceOn ? "Maahi's voice is on" : "Maahi's voice is off"}
+                style={{
+                  marginLeft: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  cursor: "pointer",
+                  border: `1px solid ${voiceOn ? "rgba(212,104,138,0.4)" : "rgba(255,255,255,0.1)"}`,
+                  background: voiceOn ? "rgba(212,104,138,0.14)" : "transparent",
+                  color: voiceOn ? "#e9a6bd" : "rgba(255,255,255,0.4)",
+                  transition: "all 0.18s ease",
+                }}
+              >
+                <VoiceIcon on={voiceOn} animate={speaking} />
+                <span style={{ fontSize: 11, fontWeight: 600 }}>
+                  {voiceOn ? "Voice on" : "Voice"}
+                </span>
+              </button>
             )}
           </div>
         </div>
@@ -507,6 +617,10 @@ export default function MaahiPage() {
         }
         @keyframes maahiSpin {
           to { transform: rotate(360deg); }
+        }
+        @keyframes maahiVoicePulse {
+          0%, 100% { opacity: 0.55; }
+          50%      { opacity: 1; }
         }
       `}</style>
     </div>

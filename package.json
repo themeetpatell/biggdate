@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "ci": "npm run check && npm run build",
     "seed": "npx tsx --env-file=.env.local scripts/seed-profiles.ts",
-    "seed:reset": "npx tsx --env-file=.env.local scripts/seed-profiles.ts --reset"
+    "seed:reset": "npx tsx --env-file=.env.local scripts/seed-profiles.ts --reset",
+    "sitemap:submit": "node scripts/submit-sitemap.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.61",
