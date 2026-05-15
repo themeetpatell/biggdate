@@ -12,6 +12,8 @@ import {
   getProfileByUserId,
   getAccountHandleByUserId,
 } from "@/lib/repo";
+import { trackFirst } from "@/lib/analytics";
+import { logAiCall } from "@/lib/ai-costs";
 
 export const maxDuration = 60;
 
@@ -61,14 +63,27 @@ export async function POST(req: Request) {
       : profileDerivePsychologicalPrompt(transcript, fullName);
 
   let modelText: string;
+  const aiStart = Date.now();
   try {
     const result = await generateText({
       model: getModel(),
       prompt,
     });
     modelText = result.text || "";
+    await logAiCall({
+      route: `profile/derive:${phase}`,
+      userId: auth.userId,
+      usage: result.usage,
+      durationMs: Date.now() - aiStart,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown model error";
+    await logAiCall({
+      route: `profile/derive:${phase}`,
+      userId: auth.userId,
+      durationMs: Date.now() - aiStart,
+      error: message,
+    });
     return NextResponse.json(
       { error: `Model call failed: ${message}` },
       { status: 502 },
@@ -122,6 +137,12 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+
+  // Onboarding milestone — emitted at most once per user per phase.
+  await trackFirst({
+    name: phase === "basic" ? "onboarding_phase1_complete" : "onboarding_phase2_complete",
+    userId: auth.userId,
+  });
 
   return NextResponse.json(fullProfile);
 }
