@@ -2421,7 +2421,13 @@ export default function ProfilePage() {
       });
 
       if (!response.ok) {
-        throw new Error("Could not save profile changes");
+        // Surface the server's message for actionable errors (e.g. the
+        // age gate's 403) instead of a generic failure.
+        const data = await response.json().catch(() => null);
+        throw new Error(
+          (data && typeof data.error === "string" && data.error) ||
+            "Could not save profile changes",
+        );
       }
 
       await refresh();

@@ -11,7 +11,7 @@ const APP_URL =
 
 const TITLE = "BiggDate Glossary · Soul Profile, Maahi, Attachment Style, and more";
 const DESCRIPTION =
-  "Plain-language definitions of every concept BiggDate uses — Soul Profile, Soul Knock, Maahi, attachment style, conflict style, love languages, date debrief, Pulse Feed, Pink Tick verification, and more.";
+  "Plain-language definitions of every concept BiggDate uses — Soul Profile, Soul Knock, Maahi, attachment style, conflict style, love languages, date debrief, Pink Tick verification, and more.";
 
 
 

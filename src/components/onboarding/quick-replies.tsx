@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ACT_COLORS, type Act } from "./ambient-layer";
 import { AgeRangeSlider } from "@/components/ui/age-range-slider";
 import { DateOfBirth } from "@/components/ui/date-of-birth";
+import { MIN_AGE } from "@/lib/age";
 
 /** Extract single-select chips from "[CHIPS: A | B | C]" suffix */
 export function parseChips(text: string): string[] {
@@ -230,7 +231,7 @@ export function QuickReplies({
           }}
         />
         <div className="flex gap-2">
-          {birthday && (
+          {birthday && birthdayAge !== null && birthdayAge >= MIN_AGE && (
             <motion.button
               onClick={() => onDatePick(birthday, birthdayAge, birthdayZodiac)}
               whileTap={{ scale: 0.95 }}

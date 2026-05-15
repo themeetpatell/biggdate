@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronRight, Mail, Lock, Eye, Shield, Trash2,
-  ExternalLink, X, Heart, MessageCircle, CalendarDays, Sparkles,
+  ExternalLink, X, Heart, MessageCircle, CalendarDays, Sparkles, Download,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/components/auth-provider";
@@ -205,6 +205,8 @@ export function SettingsDrawer({
   const [deleting, setDeleting] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -290,6 +292,32 @@ export function SettingsDrawer({
     onOpenChange(false);
     onUpgrade?.();
   }, [onOpenChange, onUpgrade]);
+
+  const handleExportData = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportError(null);
+    try {
+      const res = await fetch("/api/auth/export");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error((data && data.error) || "Export failed");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `biggdate-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  }, [exporting]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -410,6 +438,12 @@ export function SettingsDrawer({
               icon={ExternalLink}
               label="Terms of service"
               onClick={() => window.open("https://biggdate.com/terms", "_blank")}
+            />
+            <Row
+              icon={Download}
+              label={exporting ? "Preparing your data…" : "Download my data"}
+              sublabel={exportError ?? "Export everything BiggDate holds for you"}
+              onClick={exporting ? undefined : handleExportData}
             />
           </Card>
 
