@@ -23,6 +23,45 @@ function createId(prefix: string) {
   return `${prefix}_${randomUUID()}`;
 }
 
+// Canonical gender values mirror GENDER_OPTIONS in lib/profile-options.ts.
+// Two writers feed these columns (the chips UI and the AI profile-derive route),
+// so values arrive in lowercase, plural, or odd casing. Normalize at every write
+// AND every read-filter so a stray "woman" can't quietly destroy a user's match pool.
+const GENDER_CANON: Record<string, string> = {
+  man: "Man",
+  men: "Man",
+  male: "Man",
+  woman: "Woman",
+  women: "Woman",
+  female: "Woman",
+  "non-binary": "Non-binary",
+  "non binary": "Non-binary",
+  "non-binary people": "Non-binary",
+  nonbinary: "Non-binary",
+  genderqueer: "Genderqueer",
+  genderfluid: "Genderfluid",
+  "trans man": "Trans man",
+  "trans woman": "Trans woman",
+  agender: "Agender",
+};
+
+function normalizeGender(value: string | null | undefined): string | null {
+  if (value == null) return null;
+  const key = value.trim().toLowerCase();
+  if (!key) return null;
+  return GENDER_CANON[key] ?? value.trim();
+}
+
+// "Everyone" / "Open to all" / "All" mean "no gender filter" — return null so the
+// SQL filter degrades to "any gender". Otherwise normalize like a regular gender.
+function normalizePartnerGender(value: string | null | undefined): string | null {
+  if (value == null) return null;
+  const key = value.trim().toLowerCase();
+  if (!key) return null;
+  if (key === "everyone" || key === "open to all" || key === "all") return null;
+  return GENDER_CANON[key] ?? value.trim();
+}
+
 // ─── Account Handles ───
 
 export async function getAccountHandleByUserId(userId: string) {
@@ -137,7 +176,7 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         birthday = COALESCE(${profile.birthday ?? null}, birthday),
         zodiac = COALESCE(${profile.zodiac ?? null}, zodiac),
         city = COALESCE(${profile.city ?? null}, city),
-        gender = COALESCE(${profile.gender ?? null}, gender),
+        gender = COALESCE(${normalizeGender(profile.gender)}, gender),
         orientation = COALESCE(${profile.orientation ?? null}, orientation),
         pronouns = COALESCE(${profile.pronouns ?? null}, pronouns),
         hometown = COALESCE(${profile.hometown ?? null}, hometown),
@@ -148,7 +187,7 @@ export async function upsertProfile(userId: string, profile: Partial<Profile>) {
         religion = COALESCE(${profile.religion ?? null}, religion),
         politics = COALESCE(${profile.politics ?? null}, politics),
         ethnicity = COALESCE(${profile.ethnicity ?? null}, ethnicity),
-        partner_gender = COALESCE(${profile.partnerGender ?? null}, partner_gender),
+        partner_gender = COALESCE(${normalizePartnerGender(profile.partnerGender)}, partner_gender),
         intent = COALESCE(${profile.intent ?? null}, intent),
         relationship_style = COALESCE(${profile.relationshipStyle ?? null}, relationship_style),
         has_kids = COALESCE(${profile.hasKids ?? null}, has_kids),
@@ -662,11 +701,16 @@ export async function getIntroByUserAndMatchedUser(userId: string, matchedUserId
 }
 
 export async function getIntrosForUser(userId: string) {
+  // matched_user_id IS NOT NULL filters out orphan intros from older AI
+  // hallucinations (pre-validator era) where the AI invented a name like
+  // "Zara" with no real user behind it. Those intros can never resolve, so
+  // we hide them from the "Pending on their side" list.
   const rows = await sql`
     SELECT * FROM (
       SELECT DISTINCT ON (COALESCE(matched_user_id::text, match_id)) *
       FROM intros
       WHERE user_id = ${userId}
+        AND matched_user_id IS NOT NULL
       ORDER BY COALESCE(matched_user_id::text, match_id), created_at DESC
     ) deduped
     ORDER BY created_at DESC
@@ -990,12 +1034,17 @@ export async function getRealUserCandidates(
   const blockedIds = await getBlockedUserIds(userId);
   const excludeIds = Array.from(new Set([userId, ...seenIds, ...blockedIds]));
 
-  // Build query with hard filters
-  const partnerGender = userProfile.partnerGender ?? null;
+  // Build query with hard filters.
+  // partnerGender is normalized here so that legacy lowercase values, plurals,
+  // and "Everyone" (-> null = no filter) all behave correctly even before the
+  // upsert-side normalization fully bakes the DB.
+  const partnerGender = normalizePartnerGender(userProfile.partnerGender);
   const ageMin = userProfile.partnerAgeMin ?? null;
   const ageMax = userProfile.partnerAgeMax ?? null;
 
-  // We fetch up to 10 candidates and let the AI pick from them
+  // We fetch up to 10 candidates and let the AI pick from them.
+  // LOWER() on both sides is belt-and-suspenders: even if a row escapes the
+  // upsert-side normalizer (race, direct SQL, etc.), case won't kill the match.
   const rows = await sql`
     SELECT p.*, ah.email
     FROM profiles p
@@ -1004,7 +1053,7 @@ export async function getRealUserCandidates(
       AND p.profile_visibility = 'visible'
       AND ah.email NOT LIKE ${"%@seed.biggdate.app"}
       AND ah.email NOT LIKE ${"%+seed@%"}
-      AND (${partnerGender}::text IS NULL OR p.gender = ${partnerGender})
+      AND (${partnerGender}::text IS NULL OR LOWER(p.gender) = LOWER(${partnerGender}))
       AND (${ageMin}::int IS NULL OR p.age >= ${ageMin})
       AND (${ageMax}::int IS NULL OR p.age <= ${ageMax})
       AND NOT EXISTS (
