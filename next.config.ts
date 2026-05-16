@@ -12,7 +12,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const scriptSrc = [
   "script-src 'self' 'unsafe-inline'",
   isDev ? "'unsafe-eval'" : "",
-  "https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms",
+  "https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net",
 ]
   .filter(Boolean)
   .join(" ");
@@ -22,7 +22,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com https://www.clarity.ms https://*.clarity.ms",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com https://www.clarity.ms https://*.clarity.ms https://www.facebook.com https://connect.facebook.net",
   "frame-src https://js.stripe.com https://hooks.stripe.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",

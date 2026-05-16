@@ -13,6 +13,7 @@
 declare global {
   interface Window {
     dataLayer: Record<string, unknown>[];
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -22,10 +23,19 @@ export function gtmEvent(payload: Record<string, unknown>): void {
   window.dataLayer.push(payload);
 }
 
+// Meta Pixel passthrough. Base pixel is loaded in src/app/layout.tsx.
+// No-op when fbq isn't on window (SSR, ad-blocked, or before script loads).
+function fbqEvent(event: string, params?: Record<string, unknown>): void {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+  if (params) window.fbq("track", event, params);
+  else window.fbq("track", event);
+}
+
 // ─── Auth ──────────────────────────────────────────────────────────────────
 
 export function trackSignUp(method: "email" = "email") {
   gtmEvent({ event: "sign_up", method });
+  fbqEvent("Lead");
 }
 
 export function trackLogin(method: "email" = "email") {
@@ -44,6 +54,7 @@ export function trackOnboardingPhase(phase: "psychological") {
 
 export function trackOnboardingComplete() {
   gtmEvent({ event: "onboarding_complete" });
+  fbqEvent("CompleteRegistration");
 }
 
 // ─── Matches ──────────────────────────────────────────────────────────────
