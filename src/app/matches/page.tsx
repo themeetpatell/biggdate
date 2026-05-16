@@ -473,6 +473,68 @@ export default function ConnectPage() {
               Maahi is surfacing your connections…
             </p>
           </div>
+        ) : matches.length === 0 ? (
+          // Honest empty state — early-stage cohort, no people to surface yet.
+          // No filler, no faux-mystical copy. Just the truth + a useful action.
+          <div
+            style={{
+              padding: "28px 22px",
+              borderRadius: 18,
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "linear-gradient(145deg, rgba(20,16,28,0.95), rgba(14,12,20,0.98))",
+              display: "flex",
+              flexDirection: "column",
+              gap: 14,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 22 }}>🪐</span>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>
+                No matches in your pool today
+              </p>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+              BiggDate is in early access — the pool is small and growing. Two ways to widen it:
+            </p>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7 }}>
+              <li>
+                Refine your{" "}
+                <button
+                  onClick={() => router.push("/profile")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#d4688a",
+                    padding: 0,
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  profile preferences
+                </button>{" "}
+                — wider age range or fewer dealbreakers means more pool.
+              </li>
+              <li>
+                Invite founders &amp; operators who&apos;d use this — every signup widens everyone&apos;s pool.
+              </li>
+            </ul>
+            <button
+              onClick={fetchMatches}
+              style={{
+                marginTop: 4,
+                padding: "11px 0",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#0A0A0F",
+                background: "linear-gradient(135deg, #ff8cb8, #d4688a)",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Check again
+            </button>
+          </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {matches.map((match) => (

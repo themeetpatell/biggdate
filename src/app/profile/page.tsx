@@ -1568,15 +1568,12 @@ function ProfileEditor({
                         <Field as="div" label="Looking for">
                           <MultiSelectChips
                             options={PARTNER_GENDER_OPTIONS}
-                            value={
-                              draft.partnerGender
-                                ? draft.partnerGender.split(", ").filter(Boolean)
-                                : []
-                            }
+                            value={draft.partnerGender ? [draft.partnerGender] : []}
                             onChange={(next) =>
-                              setField("partnerGender", next.join(", ") || null)
+                              setField("partnerGender", next[0] ?? null)
                             }
                             allowCustom={false}
+                            max={1}
                           />
                         </Field>
                         <Field as="div" label="Love language — how I give">

@@ -30,9 +30,13 @@ export const POLITICS_OPTIONS = [
   "Very conservative", "Apolitical", "Prefer not to say",
 ] as const;
 
-export const PARTNER_GENDER_OPTIONS = [
-  "Men", "Women", "Non-binary people", "Everyone",
-] as const;
+// Mirrors GENDER_OPTIONS so the chip value the user picks is the exact
+// canonical value the matcher SQL filters on. The DB CHECK constraint
+// profiles_partner_gender_canonical rejects anything outside this set, and
+// normalizePartnerGender (lib/repo.ts) maps any legacy values to canonical
+// form on write. "Everyone" / "Open to all" is represented as "no selection" —
+// leave the field empty to opt out of gender filtering.
+export const PARTNER_GENDER_OPTIONS = GENDER_OPTIONS;
 
 export const RELATIONSHIP_STYLE_OPTIONS = [
   "Monogamy", "Open to monogamy", "Open relationship",

@@ -67,6 +67,17 @@ export async function POST(req: Request) {
     const candidates = await getRealUserCandidates(auth.userId, userProfile);
 
     if (candidates.length === 0) {
+      // Diagnostic: emit the filter inputs so we can tell WHY the pool is empty
+      // next time. Past failure mode was a silent case-mismatch on gender that
+      // we only caught by hand-querying prod. Don't let it go silent again.
+      log.warn("[matches/generate] empty candidate pool", {
+        userId: auth.userId,
+        gender: userProfile.gender ?? null,
+        partnerGender: userProfile.partnerGender ?? null,
+        partnerAgeMin: userProfile.partnerAgeMin ?? null,
+        partnerAgeMax: userProfile.partnerAgeMax ?? null,
+        city: userProfile.city ?? null,
+      });
       await decrementUsage(auth.userId, "daily_matches");
       return NextResponse.json({ matches: [], poolEmpty: true });
     }
