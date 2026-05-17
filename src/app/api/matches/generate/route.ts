@@ -25,6 +25,12 @@ import type { Match } from "@/lib/types";
 
 export const maxDuration = 60;
 
+// Belt-and-suspenders against AI hallucinations: even if a matchedUserId
+// matches the candidate set by string identity coincidence, reject anything
+// that's not a real UUID before it hits a uuid-typed column.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
@@ -137,12 +143,13 @@ export async function POST(req: Request) {
     const capped = rawMatches.slice(0, cap);
 
     // The AI sometimes hallucinates a matchedUserId that isn't a real candidate.
-    // Drop any match whose matchedUserId isn't in the candidate set — this
-    // protects the uuid-typed seen_matches.matched_user_id INSERT downstream.
+    // Drop any match whose matchedUserId isn't in the candidate set AND a real
+    // UUID — this protects the uuid-typed seen_matches.matched_user_id and
+    // matches.matched_user_id INSERTs downstream from an implicit-cast 500.
     const candidateIds = new Set(candidates.map((c) => c.userId));
     const validated = (capped as Record<string, unknown>[]).filter((m) => {
       const mid = m.matchedUserId;
-      return typeof mid === "string" && candidateIds.has(mid);
+      return typeof mid === "string" && candidateIds.has(mid) && UUID_RE.test(mid);
     });
 
     const withIds = validated.map(
@@ -152,16 +159,35 @@ export async function POST(req: Request) {
       }),
     ) as Match[];
 
-    // Record seen matches (usage already incremented atomically via requirePlanAtomic)
-    await Promise.all(
+    // Record seen matches (usage already incremented atomically via
+    // requirePlanAtomic). Non-critical write — a partial failure here must not
+    // 500 the request, the user got their matches. Log rejections so we keep
+    // visibility on bad rows.
+    const seenResults = await Promise.allSettled(
       withIds
         .filter((m) => m.matchedUserId)
         .map((m) => markUserSeen(auth.userId, m.matchedUserId!)),
     );
+    for (const r of seenResults) {
+      if (r.status === "rejected") {
+        log.warn("[matches/generate] markUserSeen failed", {
+          userId: auth.userId,
+          reason: r.reason instanceof Error ? r.reason.message : String(r.reason),
+        });
+      }
+    }
 
-    // Save to DB and cache for today
+    // Save to DB and cache for today. Cache write is best-effort — a cache
+    // failure must not 500 a successful generation.
     await saveMatchesForUser(auth.userId, withIds);
-    await setCachedMatches(auth.userId, today, withIds);
+    try {
+      await setCachedMatches(auth.userId, today, withIds);
+    } catch (cacheErr) {
+      log.warn("[matches/generate] setCachedMatches failed", {
+        userId: auth.userId,
+        reason: cacheErr instanceof Error ? cacheErr.message : String(cacheErr),
+      });
+    }
 
     // Funnel events. match_generated fires per cohort-day cycle; first_
     // match_viewed gates the dashboard funnel — emitted only when there's

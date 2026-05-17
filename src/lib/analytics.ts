@@ -42,7 +42,12 @@ export type AnalyticsEventName =
   | "match_generated"
   | "addon_redeemed"
   | "checkout_started"
-  | "checkout_completed";
+  | "checkout_completed"
+  // Growth orchestration (cron-driven daily notifications + admin tooling)
+  | "pulse_prompt_pushed"
+  | "match_of_the_day_pushed"
+  | "admin_reactivation_targeted"
+  | "admin_reactivation_delivered";
 
 export type AnalyticsClient = "web" | "ios" | "android" | "server";
 
