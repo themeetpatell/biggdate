@@ -10,5 +10,11 @@ export type {
   ApiErrorResponse,
   BillingAddon,
   BillingStatusResponse,
+  ExerciseLevel,
+  FrequencyLevel,
   MeResponse,
+  Profile,
+  ProfileIntent,
+  ProfilePrompt,
+  ProfileResponse,
 } from "./types";

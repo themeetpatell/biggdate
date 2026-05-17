@@ -4,6 +4,45 @@
  * Keep them in sync when a route's response shape changes.
  */
 
+export type ProfileIntent = "serious" | "casual" | "marriage" | "exploring";
+export type FrequencyLevel = "never" | "social" | "regularly";
+export type ExerciseLevel = "never" | "sometimes" | "often";
+
+export interface ProfilePrompt {
+  question: string;
+  answer: string;
+}
+
+/**
+ * User profile — a focused subset of the backend profile shape covering the
+ * fields the native app currently reads or edits. Extend as screens land.
+ */
+export interface Profile {
+  name: string;
+  age: number | null;
+  birthday: string | null;
+  city: string;
+  gender: string | null;
+  pronouns?: string | null;
+  hometown?: string | null;
+  jobTitle?: string | null;
+  company?: string | null;
+  education?: string | null;
+  height?: string | null;
+  intent: ProfileIntent | null;
+  relationshipStyle?: string | null;
+  summary: string;
+  interests?: string[];
+  languages?: string[];
+  coreValues?: string[];
+  drinking: FrequencyLevel | null;
+  smoking: FrequencyLevel | null;
+  exercise: ExerciseLevel | null;
+  photos: string[];
+  prompts?: ProfilePrompt[];
+  isVerified?: boolean;
+}
+
 /** Response from `GET /api/auth/me`. */
 export interface MeResponse {
   authenticated: boolean;
@@ -11,7 +50,12 @@ export interface MeResponse {
   email: string | null;
   phoneCountryIso2: string | null;
   hasProfile: boolean;
-  profile: unknown | null;
+  profile: Profile | null;
+}
+
+/** Response from `GET /api/profile` and `PATCH /api/profile`. */
+export interface ProfileResponse {
+  profile: Profile | null;
 }
 
 export interface BillingAddon {
