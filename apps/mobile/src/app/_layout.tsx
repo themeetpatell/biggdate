@@ -9,30 +9,50 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
 import { queryClient } from '@/lib/query-client';
+import { useProfileStatus } from '@/lib/use-profile-status';
 
-/** Redirects between the auth and app route groups based on session state. */
+/**
+ * Redirects between the auth, onboarding, and app route groups based on
+ * session state and whether the signed-in user has a profile yet.
+ */
 function useProtectedRoute() {
   const { session, loading } = useAuth();
+  const profileStatus = useProfileStatus();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     if (loading) return;
+
     const inAuthGroup = segments[0] === '(auth)';
-    if (!session && !inAuthGroup) {
-      router.replace('/sign-in');
-    } else if (session && inAuthGroup) {
+    const inOnboarding = segments[0] === 'onboarding';
+
+    if (!session) {
+      if (!inAuthGroup) router.replace('/sign-in');
+      return;
+    }
+
+    // Signed in — wait for the profile check before routing.
+    if (profileStatus.isPending) return;
+
+    const hasProfile = profileStatus.data?.hasProfile ?? false;
+    if (!hasProfile) {
+      if (!inOnboarding) router.replace('/onboarding');
+    } else if (inAuthGroup || inOnboarding) {
       router.replace('/');
     }
-  }, [session, loading, segments, router]);
+  }, [session, loading, profileStatus.isPending, profileStatus.data, segments, router]);
 }
 
 function RootNavigator() {
-  const { loading } = useAuth();
+  const { session, loading } = useAuth();
+  const profileStatus = useProfileStatus();
   const scheme = useColorScheme();
   useProtectedRoute();
 
-  if (loading) {
+  const resolvingProfile = Boolean(session) && profileStatus.isPending;
+
+  if (loading || resolvingProfile) {
     return (
       <View
         style={{
