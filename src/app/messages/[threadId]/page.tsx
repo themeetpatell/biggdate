@@ -38,6 +38,16 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   const [voiceMimeType, setVoiceMimeType] = useState<string | null>(null);
   const [voiceDurationSec, setVoiceDurationSec] = useState<number | null>(null);
   const [composerError, setComposerError] = useState<string | null>(null);
+  // Moderation soft-block. When set, the next send includes acceptModerationWarning=true
+  // so the server lets the message through. Hard verdicts (harassment, self_harm)
+  // surface here too but the server refuses them regardless — `soft: false`
+  // means the UI shows the coaching with no override button.
+  const [moderationBlock, setModerationBlock] = useState<{
+    coaching: string;
+    verdict: string;
+    soft: boolean;
+    text: string;
+  } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -124,9 +134,13 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
     };
   }, [stopActiveStream, voicePreviewUrl]);
 
-  const sendText = async () => {
-    if (!body.trim() || sending) return;
-    const text = body.trim();
+  const sendText = async (opts?: { overrideModeration?: boolean }) => {
+    if (sending) return;
+    // When overriding a soft-block the user already cleared the textarea; pull
+    // the pending text from moderationBlock. Otherwise use the current body.
+    const text = (opts?.overrideModeration ? moderationBlock?.text : body.trim()) || "";
+    if (!text) return;
+
     setBody("");
     setComposerError(null);
 
@@ -149,19 +163,40 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       const res = await fetch(`/api/messages/${threadId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: text }),
+        body: JSON.stringify(
+          opts?.overrideModeration
+            ? { body: text, acceptModerationWarning: true }
+            : { body: text },
+        ),
       });
       if (res.ok) {
         const msg = await res.json();
         trackMessageSent(threadId);
-        setMessages((prev) =>
-          prev.map((m) => (m.id === optimistic.id ? msg : m)),
-        );
-      } else {
-        // Remove optimistic on failure
-        setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
-        setBody(text);
+        setMessages((prev) => prev.map((m) => (m.id === optimistic.id ? msg : m)));
+        setModerationBlock(null);
+        return;
       }
+      // Failure path. Always drop the optimistic message.
+      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+
+      if (res.status === 422) {
+        const data = (await res.json().catch(() => null)) as
+          | { code?: string; coaching?: string; verdict?: string; soft?: boolean }
+          | null;
+        if (data?.code === "moderation_blocked") {
+          setModerationBlock({
+            coaching: data.coaching || "This message was flagged. Try again with different wording.",
+            verdict: data.verdict || "blocked",
+            soft: data.soft === true,
+            text,
+          });
+          // Restore the text into the composer only when we'll let them retry.
+          setBody(text);
+          return;
+        }
+      }
+      // Non-moderation failure — restore the text so they can retry.
+      setBody(text);
     } finally {
       setSending(false);
     }
@@ -532,6 +567,67 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           <p style={{ margin: 0, fontSize: 12, color: "var(--bd-danger)" }}>{composerError}</p>
         ) : null}
 
+        {moderationBlock ? (
+          <div
+            role="alert"
+            style={{
+              padding: "12px 14px",
+              borderRadius: 14,
+              border: "1px solid rgba(251,113,133,0.32)",
+              background: "rgba(251,113,133,0.08)",
+              display: "grid",
+              gap: 8,
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "var(--bd-danger)" }}>
+              {moderationBlock.soft ? "Heads up before you send" : "We can’t send this"}
+            </p>
+            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "rgba(255,255,255,0.78)" }}>
+              {moderationBlock.coaching}
+            </p>
+            <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+              <button
+                type="button"
+                onClick={() => setModerationBlock(null)}
+                style={{
+                  flex: 1,
+                  padding: "9px 12px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.85)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Revise
+              </button>
+              {moderationBlock.soft && (
+                <button
+                  type="button"
+                  onClick={() => void sendText({ overrideModeration: true })}
+                  disabled={sending}
+                  style={{
+                    flex: 1,
+                    padding: "9px 12px",
+                    borderRadius: 10,
+                    border: "none",
+                    background: "var(--bd-danger)",
+                    color: "var(--bd-on-accent)",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: sending ? "default" : "pointer",
+                    opacity: sending ? 0.7 : 1,
+                  }}
+                >
+                  Send anyway
+                </button>
+              )}
+            </div>
+          </div>
+        ) : null}
+
         <div style={{
           display: "flex",
           alignItems: "flex-end",
@@ -588,7 +684,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
             }}
           />
           <button
-            onClick={sendText}
+            onClick={() => void sendText()}
             disabled={!body.trim() || sending || recording || !!voicePreviewUrl}
             style={{
               width: 42, height: 42,

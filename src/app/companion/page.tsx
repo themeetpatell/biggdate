@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
 import { ChatMessage, getMessageText } from "@/components/chat-message";
+import { AIChatFallback } from "@/components/ai-chat-fallback";
 import { isSpeechSupported, speak, cancelSpeech } from "@/lib/maahi-voice";
 
 const VOICE_PREF_KEY = "biggdate_maahi_voice";
@@ -108,8 +109,21 @@ export default function MaahiPage() {
     []
   );
 
-  const { messages, sendMessage, status } = useChat({ transport });
+  const { messages, sendMessage, status, error } = useChat({ transport });
   const isStreaming = status === "streaming" || status === "submitted";
+  // Show the AI-down fallback when the SDK surfaces an error or when status
+  // reports the chat is in an error state. Keep these in one boolean so the
+  // render path stays readable.
+  const chatErrored = status === "error" || Boolean(error);
+
+  // Resend the last user message — used by the AIChatFallback retry button.
+  // If we can't find one (rare race condition), fall back to no-op.
+  const retryLast = useCallback(() => {
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    const text = lastUser ? getMessageText(lastUser).trim() : "";
+    if (!text) return;
+    sendMessage({ text });
+  }, [messages, sendMessage]);
   const hasMessages = messages.length > 0;
   const lastMemoryUpdateRef = useRef(0);
 
@@ -485,6 +499,12 @@ export default function MaahiPage() {
                 {messages.map((message) => (
                   <ChatMessage key={message.id} message={message} />
                 ))}
+                {chatErrored && (
+                  <AIChatFallback
+                    onRetry={retryLast}
+                    hint="Maahi couldn't finish that reply. Your message is safe — tap below to retry."
+                  />
+                )}
               </div>
               <div ref={bottomRef} style={{ height: 1 }} />
             </>

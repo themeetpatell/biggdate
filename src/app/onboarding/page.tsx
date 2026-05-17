@@ -16,6 +16,7 @@ import {
 } from "@/components/onboarding/quick-replies";
 import { SoulSignal } from "@/components/onboarding/soul-signal";
 import { OnboardingMessage, getMessageText } from "@/components/chat-message";
+import { AIChatFallback } from "@/components/ai-chat-fallback";
 import { useAuth } from "@/components/auth-provider";
 import { trackOnboardingStart, trackOnboardingPhase, trackOnboardingComplete } from "@/lib/gtm";
 import type { UIMessage } from "ai";
@@ -188,7 +189,19 @@ export default function OnboardingPage() {
     [],
   );
 
-  const { messages, sendMessage, status } = useChat({ transport });
+  const { messages, sendMessage, status, error } = useChat({ transport });
+  // AI-down banner trigger. status === "error" is the canonical signal;
+  // `error` covers transport-level failures that don't surface a status flip.
+  const chatErrored = status === "error" || Boolean(error);
+
+  // Retry by resending the last user message. Avoids touching internal SDK
+  // state — works regardless of the @ai-sdk/react minor version.
+  const retryLast = useCallback(() => {
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    const text = lastUser ? getMessageText(lastUser).trim() : "";
+    if (!text) return;
+    sendMessage({ text });
+  }, [messages, sendMessage]);
 
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -655,6 +668,14 @@ export default function OnboardingPage() {
                 ))}
 
                 {status === "submitted" && <ThinkingPulse act={act} />}
+
+                {chatErrored && (
+                  <AIChatFallback
+                    onRetry={retryLast}
+                    retryLabel="Retry this step"
+                    hint="Maahi couldn't finish that step. Your earlier answers are saved — tap retry to continue where you left off."
+                  />
+                )}
               </div>
             </motion.div>
           )}

@@ -842,6 +842,62 @@ ${transcript}`;
 // Icebreaker prompts
 // -----------------------------------------------------------------------------
 
+// Outbound DM moderation — soft classifier that runs server-side before a
+// text message lands in the thread. Bumble-style: catches harassment, slurs,
+// explicit unsolicited sexual content, threats, and contact-info baiting that
+// tries to push users off-platform before consent. Mild rudeness or strong
+// language is NOT blocked — this is a safety net, not a politeness filter.
+export function outgoingMessageModerationPrompt(text: string): string {
+  return `You are the safety classifier for outbound dating-app messages.
+
+Classify the message below into exactly ONE verdict:
+- "safe" — normal conversation, including disagreement, mild profanity, flirting, or sharing opinions.
+- "harassment" — slurs, hate speech, dehumanizing language, repeated insults aimed at the recipient, sexual harassment, body-shaming, or threats.
+- "explicit_unsolicited" — sexually explicit content that a stranger would reasonably consider unwanted in a first/second message (graphic sexual descriptions, requests for nudes, unsolicited sexual demands).
+- "contact_bait" — coercive attempts to push the recipient off-platform before consent (e.g. demanding phone number, threatening to leave if no number, sharing untrusted external links).
+- "self_harm" — content advocating self-harm, suicide, or harm to the recipient.
+
+Be conservative. Allow strong feelings, disagreement, breakup talk, sex-positive but consensual conversation, and adult humor. Block only when a thoughtful moderator would protect the recipient.
+
+Message: """${text.slice(0, 2000)}"""
+
+Return STRICT JSON only:
+{
+  "verdict": "safe" | "harassment" | "explicit_unsolicited" | "contact_bait" | "self_harm",
+  "reason": "one short sentence explaining the decision, even when safe",
+  "coaching": "if not safe, a single sentence the sender could read to revise. empty string if safe."
+}`;
+}
+
+// Soul Knock candidates — generated per-match so every preview surface sees
+// questions specific to *this* pairing, not the same 2 curated fallbacks.
+// Output is consumed by `/api/matches/[id]/soul-knock-questions`.
+export function soulKnockCandidatesPrompt(profile: Profile, match: Match): string {
+  return `${profile.name} is opening a Soul Knock to ${match.name}. A Soul Knock is one deep, vulnerable question that the other person answers before any chat opens — it sets the depth of the conversation.
+
+What we know about this pairing:
+- Why they might connect: ${match.narrativeIntro || "intentional dating, deep values"}
+- Shared territory: ${match.compatibilitySignals?.values || "values both find important"}
+- Communication styles: ${match.compatibilitySignals?.communication || "honest dialogue"}
+- The honest tension: ${match.tensionPoint || match.frictionPoint || "different rhythms"}
+
+Generate 3 Soul Knock candidate questions. Each must:
+- Be specific to *these two people* — reference what's actually in the match context above, not generic "what does love mean to you" tropes.
+- Be vulnerable but answerable — a thoughtful adult could answer it in 60-90 seconds.
+- Reveal something the asker actually wants to know about the responder.
+- Be phrased as a question (single sentence, ≤140 chars), no preamble.
+
+Vary the angles:
+1. The first should center on values or how the responder builds depth with people.
+2. The second should center on the tension or growth edge — gentle, not interrogative.
+3. The third should be playful or sideways — a question that surprises but lands.
+
+Return STRICT JSON only:
+{
+  "questions": ["question1", "question2", "question3"]
+}`;
+}
+
 export function icebreakerPrompt(profile: Profile, match: Match): string {
   return `You're crafting the first message ${profile.name} could send to ${match.name}.
 

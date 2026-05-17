@@ -15,14 +15,21 @@ interface ExistingIntro {
   createdAt: string;
 }
 
-// ─── Soul Knock questions (AI suggestion + curated fallbacks) ─────────────────
-function getSoulKnockQuestions(match: Match): string[] {
-  const q1 = match.openingQuestion || "What does it feel like when someone truly sees you?";
-  return [
-    q1,
-    "When you love someone, how do they know? What does it look like from the outside?",
-    "What would end things on date three — and why does that thing matter so much to you?",
-  ];
+// ─── Soul Knock questions ─────────────────────────────────────────────────────
+// Curated last-resort fallbacks. Used only when the AI endpoint is unreachable
+// AND match.openingQuestion is also missing — the Soul Knock surface must
+// never be empty.
+const CURATED_SOUL_KNOCK_FALLBACK: string[] = [
+  "What does it feel like when someone truly sees you?",
+  "When you love someone, how do they know? What does it look like from the outside?",
+  "What would end things on date three — and why does that thing matter so much to you?",
+];
+
+// First paint uses match.openingQuestion (already per-match from the matching
+// engine) + 2 curated so the UI isn't empty while the AI call runs.
+function getInitialSoulKnockQuestions(match: Match): string[] {
+  const q1 = match.openingQuestion?.trim() || CURATED_SOUL_KNOCK_FALLBACK[0];
+  return [q1, CURATED_SOUL_KNOCK_FALLBACK[1], CURATED_SOUL_KNOCK_FALLBACK[2]];
 }
 
 // ─── Shared primitives ────────────────────────────────────────────────────────
@@ -448,11 +455,36 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
   sent: boolean;
   onViewPending: () => void;
 }) {
-  const suggestions = getSoulKnockQuestions(match);
+  const [suggestions, setSuggestions] = useState<string[]>(() => getInitialSoulKnockQuestions(match));
+  const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const [selected, setSelected] = useState<number | null>(null);
   const [custom, setCustom] = useState("");
   const [showCustom, setShowCustom] = useState(false);
   const [scoring, setScoring] = useState(false);
+
+  // Fetch per-match Soul Knock candidates once we know the match. The AI route
+  // returns 3 questions tailored to *this* pairing; we fall back to the curated
+  // set silently on any error so the UI never blocks.
+  useEffect(() => {
+    let cancelled = false;
+    setSuggestionsLoading(true);
+    fetch(`/api/matches/${encodeURIComponent(match.id)}/soul-knock-questions`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { questions?: unknown } | null) => {
+        if (cancelled || !data || !Array.isArray(data.questions)) return;
+        const cleaned = data.questions
+          .filter((q): q is string => typeof q === "string" && q.trim().length > 0)
+          .slice(0, 3);
+        if (cleaned.length === 3) setSuggestions(cleaned);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setSuggestionsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [match.id]);
   // Set when a custom question scored weak under an enforcing experiment.
   // While set, the send button becomes an explicit "send anyway".
   const [softBlock, setSoftBlock] = useState<{ coaching: string } | null>(null);
@@ -532,7 +564,7 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
           <span style={{ fontSize: 14, color: "#d4688a" }}>✦</span>
           <p style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", margin: 0 }}>
-            Maahi suggests
+            Maahi suggests{suggestionsLoading ? " · tuning…" : ""}
           </p>
         </div>
 

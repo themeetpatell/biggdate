@@ -4,6 +4,14 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/require-auth";
 import { getThreadById, getMessages, createMessage, markMessagesRead, hasActiveAddon } from "@/lib/repo";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { moderateOutgoingMessage, shouldBlockSend } from "@/lib/message-moderation";
+
+// Verdicts that can be soft-overridden by the sender with acceptModerationWarning.
+// "harassment" and "self_harm" are hard-blocks regardless of client override —
+// they're never user-recoverable. "explicit_unsolicited" and "contact_bait"
+// are soft so a partner couple can opt-in to explicit messaging or share
+// contact info after the warning lands.
+const SOFT_BLOCK_VERDICTS = new Set(["explicit_unsolicited", "contact_bait"]);
 
 const MAX_MESSAGE_LEN = 4000;
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024;
@@ -153,8 +161,9 @@ export async function POST(
     return NextResponse.json(message);
   }
 
-  const parsed = (await req.json()) as { body?: unknown };
+  const parsed = (await req.json()) as { body?: unknown; acceptModerationWarning?: unknown };
   const raw = typeof parsed.body === "string" ? parsed.body.trim() : "";
+  const acceptWarning = parsed.acceptModerationWarning === true;
   if (!raw) {
     return NextResponse.json({ error: "Message body required" }, { status: 400 });
   }
@@ -163,6 +172,25 @@ export async function POST(
       { error: `Message too long (max ${MAX_MESSAGE_LEN} chars)` },
       { status: 400 },
     );
+  }
+
+  // Outbound moderation. Fail-open on AI errors (handled inside the lib).
+  const moderation = await moderateOutgoingMessage(raw, auth.userId);
+  if (shouldBlockSend(moderation.verdict)) {
+    const isSoft = SOFT_BLOCK_VERDICTS.has(moderation.verdict);
+    if (!isSoft || !acceptWarning) {
+      return NextResponse.json(
+        {
+          error: "This message was flagged by our safety check.",
+          code: "moderation_blocked",
+          verdict: moderation.verdict,
+          coaching: moderation.coaching,
+          soft: isSoft,
+        },
+        { status: 422 },
+      );
+    }
+    // Soft verdicts with explicit user override fall through to createMessage.
   }
 
   const message = await createMessage(threadId, auth.userId, { kind: "text", body: raw });
