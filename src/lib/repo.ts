@@ -1268,20 +1268,41 @@ type CreateMessageInput =
       audioUrl: string;
       audioDurationSec?: number | null;
       audioMimeType?: string | null;
+    }
+  | {
+      kind: "date_proposal";
+      meta: import("./types").DateProposalMeta;
     };
 
 function mapMessageRow(row: Record<string, unknown>): Message {
+  const rawKind = row.kind as string | null;
+  const kind: Message["kind"] =
+    rawKind === "voice" || rawKind === "date_proposal" ? rawKind : "text";
+  // meta is jsonb — node-postgres returns it pre-parsed when the column type
+  // is jsonb. Defensive parse for the rare case it lands as a string.
+  let meta: import("./types").DateProposalMeta | null = null;
+  const rawMeta = row.meta;
+  if (rawMeta && typeof rawMeta === "object") {
+    meta = rawMeta as import("./types").DateProposalMeta;
+  } else if (typeof rawMeta === "string" && rawMeta.length > 0) {
+    try {
+      meta = JSON.parse(rawMeta) as import("./types").DateProposalMeta;
+    } catch {
+      meta = null;
+    }
+  }
   return {
     id: row.id as string,
     threadId: row.thread_id as string,
     senderId: row.sender_id as string,
-    kind: (row.kind as "text" | "voice" | null) ?? "text",
+    kind,
     body: (row.body as string | null) ?? null,
     audioUrl: (row.audio_url as string | null) ?? null,
     audioDurationSec: (row.audio_duration_sec as number | null) ?? null,
     audioMimeType: (row.audio_mime_type as string | null) ?? null,
     createdAt: row.created_at as string,
     readAt: (row.read_at as string | null) ?? null,
+    meta,
   };
 }
 
@@ -1297,33 +1318,72 @@ export async function createMessage(
   senderId: string,
   input: CreateMessageInput,
 ): Promise<Message> {
-  const rows =
-    input.kind === "voice"
-      ? await sql`
-          INSERT INTO messages (
-            thread_id,
-            sender_id,
-            kind,
-            audio_url,
-            audio_duration_sec,
-            audio_mime_type
-          )
-          VALUES (
-            ${threadId},
-            ${senderId},
-            'voice',
-            ${input.audioUrl},
-            ${input.audioDurationSec ?? null},
-            ${input.audioMimeType ?? null}
-          )
-          RETURNING *
-        `
-      : await sql`
-          INSERT INTO messages (thread_id, sender_id, kind, body)
-          VALUES (${threadId}, ${senderId}, 'text', ${input.body})
-          RETURNING *
-        `;
+  let rows;
+  if (input.kind === "voice") {
+    rows = await sql`
+      INSERT INTO messages (
+        thread_id, sender_id, kind,
+        audio_url, audio_duration_sec, audio_mime_type
+      )
+      VALUES (
+        ${threadId}, ${senderId}, 'voice',
+        ${input.audioUrl},
+        ${input.audioDurationSec ?? null},
+        ${input.audioMimeType ?? null}
+      )
+      RETURNING *
+    `;
+  } else if (input.kind === "date_proposal") {
+    rows = await sql`
+      INSERT INTO messages (thread_id, sender_id, kind, meta)
+      VALUES (${threadId}, ${senderId}, 'date_proposal', ${JSON.stringify(input.meta)}::jsonb)
+      RETURNING *
+    `;
+  } else {
+    rows = await sql`
+      INSERT INTO messages (thread_id, sender_id, kind, body)
+      VALUES (${threadId}, ${senderId}, 'text', ${input.body})
+      RETURNING *
+    `;
+  }
+  return mapMessageRow(rows[0] as Record<string, unknown>);
+}
 
+// Flip a date proposal's status (accept / decline / withdraw). Returns the
+// updated message or null when the row is missing OR not a date_proposal.
+// IDOR is the caller's responsibility — verify the responder owns the thread
+// before calling.
+export async function updateDateProposalStatus(
+  messageId: string,
+  threadId: string,
+  newStatus: "accepted" | "declined" | "withdrawn",
+  respondedBy: string,
+): Promise<Message | null> {
+  const rows = await sql`
+    UPDATE messages
+    SET meta = jsonb_set(
+      jsonb_set(
+        jsonb_set(
+          COALESCE(meta, '{}'::jsonb),
+          ARRAY['status']::text[],
+          to_jsonb(${newStatus}::text),
+          true
+        ),
+        ARRAY['respondedBy']::text[],
+        to_jsonb(${respondedBy}::text),
+        true
+      ),
+      ARRAY['respondedAt']::text[],
+      to_jsonb((now() at time zone 'utc')::text),
+      true
+    )
+    WHERE id = ${messageId}
+      AND thread_id = ${threadId}
+      AND kind = 'date_proposal'
+      AND COALESCE(meta->>'status', 'pending') = 'pending'
+    RETURNING *
+  `;
+  if (!rows.length) return null;
   return mapMessageRow(rows[0] as Record<string, unknown>);
 }
 

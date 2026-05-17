@@ -129,14 +129,30 @@ export interface Thread {
   unreadCount?: number;
 }
 
+// In-app date proposal payload — stored in messages.meta when kind='date_proposal'.
+// Status starts at "pending" when the proposer sends. The responder flips
+// it to "accepted" or "declined". "withdrawn" is the proposer cancelling
+// before a response. App-layer validators bound venue ≤200 chars,
+// notes ≤500 chars, proposedAt within the next 90 days.
+export interface DateProposalMeta {
+  proposedAt: string;     // ISO 8601 timestamptz
+  venue: string;
+  notes?: string | null;
+  status: "pending" | "accepted" | "declined" | "withdrawn";
+  respondedBy?: string | null;
+  respondedAt?: string | null;
+}
+
 export interface Message {
   id: string;
   threadId: string;
   senderId: string;
-  kind: "text" | "voice";
+  kind: "text" | "voice" | "date_proposal";
   body: string | null;
   audioUrl?: string | null;
   audioDurationSec?: number | null;
+  // Structured payload — populated for kind='date_proposal'.
+  meta?: DateProposalMeta | null;
   audioMimeType?: string | null;
   createdAt: string;
   readAt: string | null;

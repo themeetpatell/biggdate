@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
+import { DateProposalCard } from "@/components/date-proposal-card";
 import { trackMessageSent } from "@/lib/gtm";
 import { subscribeToThreadMessages } from "@/lib/realtime";
 import type { Thread, Message } from "@/lib/types";
@@ -12,6 +13,19 @@ import type { Thread, Message } from "@/lib/types";
 // pocket-dialed mic never produces a 20-minute upload and so abuse vectors
 // (long, hostile rants) have a structural ceiling. Matches Hinge's cap.
 const MAX_VOICE_DURATION_SEC = 60;
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
+  background: "rgba(0,0,0,0.25)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: 10,
+  padding: "9px 12px",
+  fontSize: 14,
+  color: "#fff",
+  outline: "none",
+  fontFamily: "inherit",
+};
 
 function formatDuration(totalSec: number | null | undefined) {
   if (!totalSec || totalSec < 1) return "0:00";
@@ -48,6 +62,13 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
     soft: boolean;
     text: string;
   } | null>(null);
+  // Date proposal composer — inline form above the chat textarea.
+  const [proposalOpen, setProposalOpen] = useState(false);
+  const [proposalDate, setProposalDate] = useState("");
+  const [proposalVenue, setProposalVenue] = useState("");
+  const [proposalNotes, setProposalNotes] = useState("");
+  const [proposalSending, setProposalSending] = useState(false);
+  const [proposalError, setProposalError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -201,6 +222,52 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       setSending(false);
     }
   };
+
+  const sendDateProposal = useCallback(async () => {
+    if (proposalSending) return;
+    setProposalError(null);
+    const venue = proposalVenue.trim();
+    const notes = proposalNotes.trim();
+    if (!proposalDate) {
+      setProposalError("Pick a date and time.");
+      return;
+    }
+    if (!venue) {
+      setProposalError("Where are you proposing to meet?");
+      return;
+    }
+    const dt = new Date(proposalDate);
+    if (Number.isNaN(dt.getTime()) || dt.getTime() < Date.now() - 5 * 60_000) {
+      setProposalError("Date must be in the future.");
+      return;
+    }
+    setProposalSending(true);
+    try {
+      const res = await fetch(`/api/messages/${threadId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "date_proposal",
+          meta: { proposedAt: dt.toISOString(), venue, notes: notes || null },
+        }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        setProposalError(data?.error || "Couldn't send proposal.");
+        return;
+      }
+      const msg = (await res.json()) as Message;
+      setMessages((prev) => [...prev, msg]);
+      setProposalOpen(false);
+      setProposalDate("");
+      setProposalVenue("");
+      setProposalNotes("");
+    } catch {
+      setProposalError("Network error. Try again.");
+    } finally {
+      setProposalSending(false);
+    }
+  }, [proposalDate, proposalNotes, proposalSending, proposalVenue, threadId]);
 
   const sendVoiceNote = useCallback(async () => {
     if (!voiceBlob || !voicePreviewUrl || sending) return;
@@ -406,6 +473,34 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           <>
             {messages.map((msg) => {
               const isMine = myId ? msg.senderId === myId : msg.senderId === "me";
+
+              // Date-proposal cards render full-width-ish and don't use the
+              // chat bubble chrome — they're structured action surfaces, not
+              // body copy.
+              if (msg.kind === "date_proposal") {
+                return (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: isMine ? "flex-end" : "flex-start",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div style={{ maxWidth: "90%" }}>
+                      <DateProposalCard
+                        message={msg}
+                        threadId={threadId}
+                        isMine={isMine}
+                        onStatusChange={(updated) =>
+                          setMessages((prev) => prev.map((m) => (m.id === updated.id ? updated : m)))
+                        }
+                      />
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div key={msg.id} style={{ display: "flex", justifyContent: isMine ? "flex-end" : "flex-start", marginBottom: 8 }}>
                   <div style={{
@@ -628,11 +723,120 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           </div>
         ) : null}
 
+        {proposalOpen ? (
+          <div
+            style={{
+              padding: "12px 14px",
+              borderRadius: 14,
+              border: "1px solid rgba(168,85,247,0.28)",
+              background: "rgba(168,85,247,0.06)",
+              display: "grid",
+              gap: 8,
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "var(--bd-violet)" }}>
+              Suggest a date
+            </p>
+            <input
+              type="datetime-local"
+              value={proposalDate}
+              onChange={(e) => setProposalDate(e.target.value)}
+              style={inputStyle}
+              aria-label="When"
+            />
+            <input
+              type="text"
+              value={proposalVenue}
+              onChange={(e) => setProposalVenue(e.target.value)}
+              placeholder="Where? (cafe, restaurant, neighborhood)"
+              maxLength={200}
+              style={inputStyle}
+              aria-label="Where"
+            />
+            <textarea
+              value={proposalNotes}
+              onChange={(e) => setProposalNotes(e.target.value)}
+              placeholder="Notes (optional)"
+              maxLength={500}
+              rows={2}
+              style={{ ...inputStyle, resize: "none" }}
+              aria-label="Notes"
+            />
+            {proposalError ? (
+              <p style={{ margin: 0, fontSize: 12, color: "var(--bd-danger)" }}>{proposalError}</p>
+            ) : null}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setProposalOpen(false);
+                  setProposalError(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "9px 12px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.85)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void sendDateProposal()}
+                disabled={proposalSending}
+                style={{
+                  flex: 1,
+                  padding: "9px 12px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: "var(--bd-violet)",
+                  color: "var(--bd-on-accent)",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: proposalSending ? "default" : "pointer",
+                  opacity: proposalSending ? 0.7 : 1,
+                }}
+              >
+                {proposalSending ? "Sending…" : "Send proposal"}
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         <div style={{
           display: "flex",
           alignItems: "flex-end",
           gap: 10,
         }}>
+          <button
+            type="button"
+            onClick={() => setProposalOpen((o) => !o)}
+            disabled={sending || recording || !!voicePreviewUrl}
+            title="Suggest a date"
+            aria-label="Suggest a date"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: "50%",
+              background: proposalOpen ? "var(--bd-violet)" : "rgba(255,255,255,0.08)",
+              color: proposalOpen ? "var(--bd-on-accent)" : "rgba(255,255,255,0.78)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              cursor: sending || recording || !!voicePreviewUrl ? "default" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              fontSize: 18,
+            }}
+          >
+            📅
+          </button>
           <button
             onClick={recording ? stopRecording : startRecording}
             disabled={!recordingSupported || sending || !!voicePreviewUrl}

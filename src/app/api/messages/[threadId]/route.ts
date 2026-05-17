@@ -161,7 +161,53 @@ export async function POST(
     return NextResponse.json(message);
   }
 
-  const parsed = (await req.json()) as { body?: unknown; acceptModerationWarning?: unknown };
+  const parsed = (await req.json()) as {
+    body?: unknown;
+    acceptModerationWarning?: unknown;
+    kind?: unknown;
+    meta?: unknown;
+  };
+
+  // Date proposal branch — structured payload, no body, no moderation. The
+  // recipient sees it as a card with Accept / Decline.
+  if (parsed.kind === "date_proposal") {
+    const metaIn = (parsed.meta ?? {}) as Record<string, unknown>;
+    const proposedAtRaw = typeof metaIn.proposedAt === "string" ? metaIn.proposedAt.trim() : "";
+    const venue = typeof metaIn.venue === "string" ? metaIn.venue.trim() : "";
+    const notes = typeof metaIn.notes === "string" ? metaIn.notes.trim() : "";
+    if (!proposedAtRaw) {
+      return NextResponse.json({ error: "proposedAt is required" }, { status: 400 });
+    }
+    if (!venue) {
+      return NextResponse.json({ error: "venue is required" }, { status: 400 });
+    }
+    if (venue.length > 200 || notes.length > 500) {
+      return NextResponse.json({ error: "venue or notes too long" }, { status: 400 });
+    }
+    const proposedAt = new Date(proposedAtRaw);
+    if (Number.isNaN(proposedAt.getTime())) {
+      return NextResponse.json({ error: "proposedAt is not a valid date" }, { status: 400 });
+    }
+    const now = Date.now();
+    if (proposedAt.getTime() < now - 5 * 60 * 1000) {
+      return NextResponse.json({ error: "proposedAt is in the past" }, { status: 400 });
+    }
+    if (proposedAt.getTime() > now + 90 * 24 * 60 * 60 * 1000) {
+      return NextResponse.json({ error: "proposedAt is more than 90 days out" }, { status: 400 });
+    }
+
+    const message = await createMessage(threadId, auth.userId, {
+      kind: "date_proposal",
+      meta: {
+        proposedAt: proposedAt.toISOString(),
+        venue,
+        notes: notes || null,
+        status: "pending",
+      },
+    });
+    return NextResponse.json(message);
+  }
+
   const raw = typeof parsed.body === "string" ? parsed.body.trim() : "";
   const acceptWarning = parsed.acceptModerationWarning === true;
   if (!raw) {
