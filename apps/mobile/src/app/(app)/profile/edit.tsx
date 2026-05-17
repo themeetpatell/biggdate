@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PhotoEditor } from '@/components/photo-editor';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ function ProfileEditForm({ profile }: { profile: Profile }) {
   const router = useRouter();
   const updateProfile = useUpdateProfile();
 
+  const [photos, setPhotos] = useState<string[]>(profile.photos ?? []);
   const [name, setName] = useState(profile.name ?? '');
   const [city, setCity] = useState(profile.city ?? '');
   const [jobTitle, setJobTitle] = useState(profile.jobTitle ?? '');
@@ -63,6 +65,7 @@ function ProfileEditForm({ profile }: { profile: Profile }) {
         education: education.trim() || null,
         height: height.trim() || null,
         summary: summary.trim(),
+        photos,
         interests: interests
           .split(',')
           .map((entry) => entry.trim())
@@ -86,6 +89,8 @@ function ProfileEditForm({ profile }: { profile: Profile }) {
             <ThemedText type="title">Edit profile</ThemedText>
 
             <View style={styles.form}>
+              <PhotoEditor photos={photos} onChange={setPhotos} />
+
               <TextField label="Name" value={name} onChangeText={setName} placeholder="Your name" />
               <TextField label="City" value={city} onChangeText={setCity} placeholder="e.g. Dubai" />
               <TextField
