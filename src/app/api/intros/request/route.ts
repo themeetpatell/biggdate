@@ -12,6 +12,7 @@ import { sendPushToUser } from "@/lib/push";
 import { sendNotification } from "@/lib/notifications";
 import { log } from "@/lib/log";
 import { track, trackFirst } from "@/lib/analytics";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -99,6 +100,11 @@ export async function POST(req: Request) {
     name: "first_soul_knock_sent",
     userId: auth.userId,
     properties: { matchId },
+  });
+  getPostHogClient().capture({
+    distinctId: auth.userId,
+    event: "soul_knock_sent",
+    properties: { match_id: matchId, recipient_user_id: matchedUserId ?? null },
   });
 
   return NextResponse.json(intro);

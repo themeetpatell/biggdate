@@ -3,6 +3,7 @@ import { getSessionFromCookies } from "@/lib/auth";
 import { getUserPlan, upsertUserPlan } from "@/lib/repo";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { log } from "@/lib/log";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 async function getOrCreateCustomer(userId: string, email: string | null): Promise<string> {
   const existing = await getUserPlan(userId);
@@ -67,6 +68,11 @@ export async function POST(request: Request) {
       success_url: `${origin}/profile?upgraded=1`,
       cancel_url: `${origin}/profile`,
     });
+    getPostHogClient().capture({
+      distinctId: session.userId,
+      event: "checkout_initiated",
+      properties: { type: "subscription", price_id: priceId },
+    });
     return NextResponse.json({ url: checkoutSession.url });
   }
 
@@ -77,6 +83,11 @@ export async function POST(request: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/profile?purchased=1`,
       cancel_url: `${origin}/profile`,
+    });
+    getPostHogClient().capture({
+      distinctId: session.userId,
+      event: "checkout_initiated",
+      properties: { type: "payment", price_id: priceId },
     });
     return NextResponse.json({ url: checkoutSession.url });
   }

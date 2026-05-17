@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import posthog from "posthog-js";
 import type { Profile } from "@/lib/types";
 
 interface AuthState {
@@ -89,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
+    posthog.capture("user_logged_out");
+    posthog.reset();
     setUserId(null);
     setProfile(null);
     router.push("/");
@@ -111,6 +114,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, [loadAuthState]);
+
+  // Identify authenticated user in PostHog
+  useEffect(() => {
+    if (loading) return;
+    if (userId) {
+      posthog.identify(userId, {
+        name: profile?.name ?? undefined,
+        city: profile?.city ?? undefined,
+        intent: profile?.intent ?? undefined,
+        onboarding_complete: Boolean(profile?.summary),
+      });
+    }
+  }, [userId, loading, profile]);
 
   // Redirect unauthenticated users
   useEffect(() => {

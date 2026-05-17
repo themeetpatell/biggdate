@@ -19,6 +19,7 @@ import { OnboardingMessage, getMessageText } from "@/components/chat-message";
 import { AIChatFallback } from "@/components/ai-chat-fallback";
 import { useAuth } from "@/components/auth-provider";
 import { trackOnboardingStart, trackOnboardingPhase, trackOnboardingComplete } from "@/lib/gtm";
+import posthog from "posthog-js";
 import type { UIMessage } from "ai";
 
 const BASIC_SPINE_LEN = 8;
@@ -320,6 +321,7 @@ export default function OnboardingPage() {
         if (data?.summary) {
           hydrateProfile(data);
           trackOnboardingComplete();
+          posthog.capture("onboarding_completed");
           router.replace("/soul-snapshot");
           void refresh();
         } else {

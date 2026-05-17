@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import { getAccountHandleByUsername } from "@/lib/repo";
 import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: Request) {
   const rl = await checkRateLimit("auth:login", clientIp(req), {
@@ -68,6 +69,17 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Invalid username/email or password" }, { status: 401 });
   }
+
+  const posthog = getPostHogClient();
+  posthog.identify({
+    distinctId: data.user.id,
+    properties: { email: data.user.email },
+  });
+  posthog.capture({
+    distinctId: data.user.id,
+    event: "user_logged_in",
+    properties: { method: identifier.includes("@") ? "email" : "username" },
+  });
 
   return NextResponse.json({
     id: data.user.id,

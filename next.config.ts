@@ -22,7 +22,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com https://www.clarity.ms https://*.clarity.ms https://www.facebook.com https://connect.facebook.net",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com https://www.clarity.ms https://*.clarity.ms https://www.facebook.com https://connect.facebook.net https://us.i.posthog.com https://us-assets.i.posthog.com",
   "frame-src https://js.stripe.com https://hooks.stripe.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -36,6 +36,24 @@ const nextConfig: NextConfig = {
   // production builds — it's a `next dev`-only widget. Setting false also
   // removes it from local dev. Build/runtime errors still surface.
   devIndicators: false,
+  // Required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/array/:path*",
+        destination: "https://us-assets.i.posthog.com/array/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {

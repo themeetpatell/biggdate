@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import posthog from "posthog-js";
 import type { Match } from "@/lib/types";
 
 interface Venue { name: string; why: string; vibe: string; }
@@ -46,6 +47,7 @@ export default function ConnectPage({ params }: { params: Promise<{ id: string }
 
   const loadVenues = () => {
     if (!match) return;
+    posthog.capture("date_ideas_requested", { match_id: id });
     setVenueVisible(true);
     setLoadingVenues(true);
     fetch("/api/dates/concierge", {
@@ -60,6 +62,7 @@ export default function ConnectPage({ params }: { params: Promise<{ id: string }
 
   const copyIcebreaker = (text: string, i: number) => {
     navigator.clipboard.writeText(text);
+    posthog.capture("icebreaker_copied", { match_id: id, position: i });
     setCopied(i);
     setTimeout(() => setCopied(null), 2000);
   };
