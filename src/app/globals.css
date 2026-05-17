@@ -180,6 +180,16 @@ body {
   --bd-border: rgba(20, 24, 39, 0.1);
   --bd-border-strong: rgba(20, 24, 39, 0.16);
   --bd-border-glow: rgba(192, 38, 211, 0.2);
+  /* Semantic + brand tokens used by messages/matches inline styles. */
+  --bd-on-accent: #ffffff;
+  --bd-success: #10b981;
+  --bd-warning: #d97706;
+  --bd-danger: #dc2626;
+  --bd-danger-soft: rgba(220, 38, 38, 0.18);
+  --bd-lavender: #8b5cf6;
+  --bd-rose-warm: #be185d;
+  --bd-rose-warm-soft: rgba(190, 24, 93, 0.18);
+  --bd-violet: #7c3aed;
 }
 
 .dark {
@@ -214,6 +224,15 @@ body {
   --bd-border: rgba(255, 255, 255, 0.07);
   --bd-border-strong: rgba(255, 255, 255, 0.18);
   --bd-border-glow: rgba(255, 0, 255, 0.28);
+  --bd-on-accent: #ffffff;
+  --bd-success: #4FFFB0;
+  --bd-warning: #F5C842;
+  --bd-danger: #fb7185;
+  --bd-danger-soft: rgba(251, 113, 133, 0.18);
+  --bd-lavender: #B48CFF;
+  --bd-rose-warm: #d4688a;
+  --bd-rose-warm-soft: rgba(212, 104, 138, 0.18);
+  --bd-violet: #a855f7;
 }
 
 /* ─── BiggDate Animations ─── */

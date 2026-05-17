@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, CreditCard } from "lucide-react";
 
+import { ResetConsentButton } from "@/components/settings/reset-consent-button";
+
 export const metadata: Metadata = {
   title: "Settings — BiggDate",
   description: "Manage your BiggDate account.",
@@ -54,6 +56,9 @@ export default function Page() {
               </li>
             );
           })}
+          <li>
+            <ResetConsentButton />
+          </li>
         </ul>
       </nav>
     </main>

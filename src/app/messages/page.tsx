@@ -51,7 +51,7 @@ export default function MessagesPage() {
   if (authLoading || !profile) return <LoadingScreen message="Loading conversations…" />;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0A0A0F", paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bd-bg)", paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))" }}>
       {/* Header */}
       <div style={{ padding: "56px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: 0 }}>Messages</h1>
@@ -76,7 +76,7 @@ export default function MessagesPage() {
             </p>
             <button
               onClick={() => router.push("/matches")}
-              style={{ marginTop: 24, background: "#a855f7", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+              style={{ marginTop: 24, background: "var(--bd-violet)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
             >
               See My Matches
             </button>
@@ -120,7 +120,7 @@ export default function MessagesPage() {
                       width: 18,
                       height: 18,
                       borderRadius: "50%",
-                      background: "#a855f7",
+                      background: "var(--bd-violet)",
                       border: "2px solid #0A0A0F",
                       display: "flex",
                       alignItems: "center",

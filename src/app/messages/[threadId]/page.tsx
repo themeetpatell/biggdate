@@ -323,7 +323,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   if (authLoading || !profile) return <LoadingScreen message="Opening conversation…" />;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100svh", background: "#0A0A0F" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100svh", background: "var(--bd-bg)" }}>
       {/* Header */}
       <div style={{
         display: "flex", alignItems: "center", gap: 12,
@@ -358,7 +358,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px" }}>
         {pageLoading ? (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 60 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid rgba(168,85,247,0.3)", borderTopColor: "#a855f7", animation: "spin 1s linear infinite" }} />
+            <div style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid rgba(168,85,247,0.3)", borderTopColor: "var(--bd-violet)", animation: "spin 1s linear infinite" }} />
           </div>
         ) : messages.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 24px" }}>
@@ -450,7 +450,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
             border: "1px solid rgba(244,114,182,0.28)",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fb7185", boxShadow: "0 0 0 6px rgba(251,113,133,0.18)" }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--bd-danger)", boxShadow: "0 0 0 6px rgba(251,113,133,0.18)" }} />
               <div>
                 <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#fff" }}>Recording voice note</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.64)" }}>
@@ -512,7 +512,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                   style={{
                     border: "none",
                     borderRadius: 999,
-                    background: "#a855f7",
+                    background: "var(--bd-violet)",
                     color: "#fff",
                     padding: "8px 14px",
                     fontSize: 13,
@@ -529,7 +529,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
         ) : null}
 
         {composerError ? (
-          <p style={{ margin: 0, fontSize: 12, color: "#fda4af" }}>{composerError}</p>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--bd-danger)" }}>{composerError}</p>
         ) : null}
 
         <div style={{
@@ -546,7 +546,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               height: 42,
               borderRadius: "50%",
               background: recording
-                ? "#fb7185"
+                ? "var(--bd-danger)"
                 : recordingSupported && !voicePreviewUrl
                   ? "rgba(255,255,255,0.08)"
                   : "rgba(255,255,255,0.04)",
@@ -593,7 +593,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
             style={{
               width: 42, height: 42,
               borderRadius: "50%",
-              background: body.trim() && !recording && !voicePreviewUrl ? "#a855f7" : "rgba(168,85,247,0.2)",
+              background: body.trim() && !recording && !voicePreviewUrl ? "var(--bd-violet)" : "rgba(168,85,247,0.2)",
               border: "none",
               cursor: body.trim() && !recording && !voicePreviewUrl ? "pointer" : "default",
               display: "flex", alignItems: "center", justifyContent: "center",
