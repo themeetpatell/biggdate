@@ -101,6 +101,59 @@ export interface Intro {
   status: IntroStatus;
 }
 
+/** A messaging thread, as returned by `GET /api/messages`. */
+export interface Thread {
+  id: string;
+  userAId: string;
+  userBId: string;
+  introId: string;
+  createdAt: string;
+  otherUserName?: string;
+  otherUserPhoto?: string;
+  lastMessage?: string;
+  lastMessageAt?: string;
+  unreadCount?: number;
+}
+
+export type MessageKind = "text" | "voice" | "date_proposal";
+
+export type DateProposalStatus = "pending" | "accepted" | "declined" | "withdrawn";
+
+export interface DateProposalMeta {
+  proposedAt: string;
+  venue: string;
+  notes?: string | null;
+  status: DateProposalStatus;
+  respondedBy?: string | null;
+  respondedAt?: string | null;
+}
+
+export interface Message {
+  id: string;
+  threadId: string;
+  senderId: string;
+  kind: MessageKind;
+  body: string | null;
+  audioUrl?: string | null;
+  audioDurationSec?: number | null;
+  meta?: DateProposalMeta | null;
+  audioMimeType?: string | null;
+  createdAt: string;
+  readAt: string | null;
+}
+
+/** Response from `GET /api/messages`. */
+export interface ThreadsResponse {
+  threads: Thread[];
+}
+
+/** Response from `GET /api/messages/:threadId`. */
+export interface ThreadDetailResponse {
+  thread: Thread;
+  messages: Message[];
+  hasReadReceipts: boolean;
+}
+
 export interface BillingAddon {
   addonId: string;
   usesRemaining: number | null;
