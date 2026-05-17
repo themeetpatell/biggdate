@@ -2,6 +2,10 @@
   "name": "biggdate-next",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -64,6 +68,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
+    "turbo": "^2.5.0",
     "typescript": "^5"
   }
 }
