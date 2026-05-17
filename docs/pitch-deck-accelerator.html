@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BiggDate — Seed Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+<style>
+  :root{
+    --ink:#07060F;
+    --ink-2:#0E0C1B;
+    --paper:#13101F;
+    --paper-2:#1A1530;
+    --cream:#F4EFE7;
+    --cream-2:#C8C2B5;
+    --muted:#7E7889;
+    --line:rgba(244,239,231,0.10);
+    --line-2:rgba(244,239,231,0.18);
+    --magenta:#FF2BD6;
+    --pink:#FF6FAE;
+    --blue:#2BC8FF;
+    --accent:#FF6FAE;
+    --accent-soft:rgba(255,111,174,0.10);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#000;
+    color:var(--cream);
+    font-family:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    font-feature-settings:"ss01","cv11","tnum";
+  }
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 96px;gap:24px;}
+
+  /* ---------- Slide container ---------- */
+  .deck{display:flex;flex-direction:column;gap:24px;width:100%;max-width:1280px;}
+  .slide{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    background:var(--ink);
+    color:var(--cream);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 1px 0 rgba(255,255,255,.04), 0 40px 80px -30px rgba(255,43,214,.18);
+    padding:72px 80px;
+    display:flex;
+    flex-direction:column;
+  }
+  /* Light slide variant for visual rhythm */
+  .slide.light{background:#F4EFE7;color:#0B0915;}
+  .slide.light .muted{color:#5A5468;}
+  .slide.light .rule{background:rgba(11,9,21,.10);}
+  .slide.light .card{background:#fff;border-color:rgba(11,9,21,.08);box-shadow:0 1px 0 rgba(11,9,21,.04);}
+  .slide.light .card h4{color:#0B0915;}
+  .slide.light .card p{color:#2A2438;}
+  .slide.light .step{border-top-color:rgba(11,9,21,.12);}
+  .slide.light .step .n{color:#9F1239;}
+  .slide.light .toprule, .slide.light .chrome{color:#5A5468;}
+  .slide.light .stat .n{color:#0B0915;}
+  .slide.light .stat .l{color:#5A5468;}
+  .slide.light h1,.slide.light h2,.slide.light h3,.slide.light h4{color:#0B0915;}
+  .slide.light .muted-h{color:#7A7388;}
+  .slide.light .lede{color:#2A2438;}
+  .slide.light .accent-pink{color:#C8195F;}
+
+  /* ---------- Slide chrome ---------- */
+  .chrome{position:absolute;left:80px;right:80px;bottom:36px;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+  .chrome .mark{font-weight:700;letter-spacing:.18em;color:var(--cream-2);}
+  .chrome .num{font-variant-numeric:tabular-nums;}
+  .slide.light .chrome .mark{color:#0B0915;}
+
+  .toprule{position:absolute;top:36px;left:80px;right:80px;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+  .toprule .dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--magenta),var(--blue));display:inline-block;margin-right:12px;vertical-align:middle;box-shadow:0 0 12px rgba(255,43,214,.6);}
+
+  /* ---------- Typography ---------- */
+  h1,h2,h3,h4{color:var(--cream);}
+  h1{font-weight:800;letter-spacing:-.04em;line-height:.95;}
+  h2{font-weight:700;letter-spacing:-.03em;line-height:1.02;}
+  h3{font-weight:600;letter-spacing:-.015em;line-height:1.15;}
+  p{font-weight:400;color:var(--cream-2);}
+
+  .muted{color:var(--muted);}
+  .muted-h{color:rgba(244,239,231,0.50);}
+  .accent-pink{color:var(--pink);}
+  .accent-magenta{color:var(--magenta);}
+  .accent-blue{color:var(--blue);}
+  .gradient-text{
+    background:linear-gradient(120deg,var(--pink) 0%,var(--magenta) 50%,var(--blue) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);}
+  .eyebrow.subtle{color:var(--muted);}
+
+  .display{font-size:108px;letter-spacing:-.05em;}
+  .h1{font-size:72px;}
+  .h2{font-size:54px;}
+  .h3{font-size:34px;}
+  .lede{font-size:22px;font-weight:400;line-height:1.45;color:var(--cream-2);max-width:880px;}
+  .body{font-size:17px;line-height:1.55;color:var(--cream-2);}
+  .small{font-size:13px;color:var(--muted);}
+  .tabular{font-variant-numeric:tabular-nums;}
+
+  .rule{height:1px;background:var(--line);width:100%;}
+  .vrule{width:1px;background:var(--line);}
+
+  /* ---------- Layouts ---------- */
+  .grow{flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;}
+  .row{display:flex;gap:32px;}
+  .col{display:flex;flex-direction:column;gap:16px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:48px;}
+
+  /* ---------- Components ---------- */
+  .card{
+    padding:24px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:linear-gradient(180deg,var(--paper) 0%,var(--ink-2) 100%);
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .card .label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--pink);font-weight:600;}
+  .card h4{font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--cream);}
+  .card p{font-size:14px;line-height:1.5;color:var(--cream-2);}
+
+  .stat{display:flex;flex-direction:column;gap:8px;}
+  .stat .n{font-size:88px;font-weight:800;letter-spacing:-.04em;line-height:.92;color:var(--cream);font-variant-numeric:tabular-nums;}
+  .stat .n.grad{background:linear-gradient(120deg,var(--pink),var(--magenta) 50%,var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stat .l{font-size:13px;color:var(--muted);max-width:260px;line-height:1.45;}
+
+  .step{display:flex;flex-direction:column;gap:12px;padding-top:18px;border-top:1px solid var(--line-2);}
+  .step .n{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--pink);text-transform:uppercase;}
+  .step h4{font-size:22px;font-weight:600;letter-spacing:-.015em;color:var(--cream);}
+  .step p{font-size:14px;color:var(--cream-2);line-height:1.5;}
+
+  ul.bullets{list-style:none;display:flex;flex-direction:column;gap:12px;}
+  ul.bullets li{position:relative;padding-left:24px;font-size:16px;line-height:1.5;color:var(--cream-2);}
+  ul.bullets li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:8px;background:linear-gradient(135deg,var(--magenta),var(--blue));border-radius:50%;}
+
+  /* Comparison table */
+  table.compare{width:100%;border-collapse:collapse;font-size:13px;}
+  table.compare th, table.compare td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--line);}
+  table.compare th{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  table.compare td.cell{font-variant-numeric:tabular-nums;color:var(--cream-2);}
+  table.compare tr.us td{background:linear-gradient(90deg,rgba(255,43,214,.10),rgba(43,200,255,.06));font-weight:600;color:var(--cream);}
+  table.compare tr.us td:first-child{
+    background:linear-gradient(90deg,rgba(255,43,214,.20),rgba(43,200,255,.10));
+    color:#fff;font-weight:700;letter-spacing:-.01em;
+  }
+  table.compare .yes{color:var(--pink);font-weight:700;font-size:16px;}
+  table.compare .no{color:var(--muted);}
+  table.compare .mid{color:var(--cream-2);font-style:italic;}
+
+  /* Stripe / number block */
+  .stripe{display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper);}
+  .stripe > div{flex:1;padding:22px 24px;}
+  .stripe > div + div{border-left:1px solid var(--line);}
+  .stripe .n{font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums;}
+  .stripe .n.grad{background:linear-gradient(120deg,var(--pink),var(--magenta) 60%,var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stripe .l{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4;}
+
+  /* TAM stack */
+  .tam{display:flex;flex-direction:column;gap:8px;}
+  .tam .bar{display:flex;align-items:center;gap:16px;padding:18px 22px;border:1px solid var(--line);border-radius:10px;background:var(--paper);}
+  .tam .bar .amt{font-size:32px;font-weight:800;letter-spacing:-.025em;color:var(--cream);font-variant-numeric:tabular-nums;min-width:140px;}
+  .tam .bar .label{font-size:13px;color:var(--cream-2);flex:1;}
+  .tam .bar.l1 .amt{color:var(--muted);}
+  .tam .bar.l2 .amt{color:var(--cream-2);}
+  .tam .bar.l3{border-color:rgba(255,111,174,.35);}
+  .tam .bar.l3 .amt{color:var(--pink);}
+  .tam .bar.l4{border-color:rgba(255,43,214,.5);background:linear-gradient(90deg,rgba(255,43,214,.10),rgba(43,200,255,.06));}
+  .tam .bar.l4 .amt{background:linear-gradient(120deg,var(--pink),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  /* Footnote */
+  .footnote{position:absolute;left:80px;bottom:62px;font-size:10.5px;letter-spacing:.06em;color:var(--muted);max-width:820px;line-height:1.5;}
+
+  /* Cover */
+  .cover{display:flex;flex-direction:column;justify-content:space-between;height:100%;background:radial-gradient(ellipse at 70% 30%,rgba(255,43,214,.18) 0%,transparent 55%),radial-gradient(ellipse at 20% 80%,rgba(43,200,255,.14) 0%,transparent 60%),var(--ink);}
+  .wordmark{font-size:22px;font-weight:800;letter-spacing:-.025em;color:var(--cream);}
+  .wordmark .b{background:linear-gradient(120deg,var(--pink),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .cover .title{font-size:128px;font-weight:800;letter-spacing:-.05em;line-height:.92;color:var(--cream);max-width:1080px;}
+  .cover .title em{font-style:normal;background:linear-gradient(120deg,var(--pink) 0%,var(--magenta) 50%,var(--blue) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .cover .sub{font-size:22px;line-height:1.4;max-width:760px;color:var(--cream-2);font-weight:400;margin-top:24px;}
+  .cover .meta{display:flex;justify-content:space-between;align-items:flex-end;}
+  .cover .meta .left{display:flex;flex-direction:column;gap:6px;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+  .cover .meta .right{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:right;display:flex;flex-direction:column;gap:6px;}
+
+  /* Loop diagram */
+  .loop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .loop .node{padding:14px 18px;border:1px solid var(--line);border-radius:999px;background:var(--paper);font-size:13px;font-weight:600;letter-spacing:-.005em;color:var(--cream);}
+  .loop .node.accent{border-color:rgba(255,43,214,.5);background:linear-gradient(90deg,rgba(255,43,214,.12),rgba(43,200,255,.08));color:var(--cream);}
+  .loop .arrow{color:var(--muted);font-size:18px;font-weight:300;}
+
+  /* Big spotlight slide */
+  .spotlight{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center;flex:1;}
+  .spotlight .right{display:flex;flex-direction:column;gap:14px;}
+  .spotlight .right .row-item{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--line);}
+  .spotlight .right .row-item:first-child{border-top:0;padding-top:0;}
+  .spotlight .right .num{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--pink);min-width:32px;}
+  .spotlight .right .desc h5{font-size:17px;font-weight:600;color:var(--cream);margin-bottom:4px;}
+  .spotlight .right .desc p{font-size:13.5px;line-height:1.5;color:var(--cream-2);}
+
+  /* Quote */
+  .pullquote{font-size:24px;font-style:italic;line-height:1.45;color:var(--cream-2);max-width:780px;border-left:2px solid var(--pink);padding-left:20px;margin-top:8px;font-weight:300;}
+
+  /* Print */
+  @page{size:1280px 720px;margin:0;}
+  @media print{
+    html,body{background:#000;}
+    body{padding:0;gap:0;}
+    .deck{gap:0;max-width:none;}
+    .slide{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;}
+    .controls{display:none;}
+  }
+
+  /* Floating controls */
+  .controls{position:fixed;right:20px;bottom:20px;display:flex;gap:8px;background:rgba(7,6,15,.92);color:var(--cream);padding:10px 14px;border-radius:999px;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(8px);border:1px solid var(--line);font-weight:500;}
+  .controls button{background:transparent;color:inherit;border:0;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;padding:0 6px;font-weight:500;}
+  .controls .sep{opacity:.4;}
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 01 COVER -->
+  <section class="slide cover">
+    <div class="wordmark">Bigg<span class="b">Date</span></div>
+
+    <div>
+      <div class="eyebrow" style="margin-bottom:28px;">Seed Deck · 2026 · Confidential</div>
+      <h1 class="title">See your future,<br/><em>not just a profile.</em></h1>
+      <p class="sub">BiggDate is the relationship-intelligence platform for people who are emotionally serious — but allergic to performative dating behavior.</p>
+    </div>
+
+    <div class="meta">
+      <div class="left">
+        <span>Prepared for Y Combinator · Sequoia Arc · Techstars</span>
+        <span>Ahmedabad · India-anchored · global English diaspora</span>
+      </div>
+      <div class="right">
+        <span>meet@biggdate.app</span>
+        <span>biggdate.app</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 PROBLEM -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>The Problem</span><span>01</span></div>
+
+    <div class="grow">
+      <h2 class="h1">Dating apps optimized for swipes.<br/><span class="muted-h">The category just admitted defeat.</span></h2>
+
+      <div class="grid-3" style="margin-top:18px;">
+        <div class="stat">
+          <div class="n">−75<span style="font-size:48px;">%</span></div>
+          <div class="l">Match Group market cap from peak — Tinder ARPU collapse</div>
+        </div>
+        <div class="stat">
+          <div class="n">−85<span style="font-size:48px;">%</span></div>
+          <div class="l">Bumble Inc. since IPO — public markets exited the swipe model</div>
+        </div>
+        <div class="stat">
+          <div class="n">&lt;2<span style="font-size:48px;">%</span></div>
+          <div class="l">Median match-to-relationship conversion across the top apps</div>
+        </div>
+      </div>
+
+      <p class="lede" style="margin-top:14px;">The public-market story isn&rsquo;t <span style="color:var(--cream);">&ldquo;dating is dead.&rdquo;</span> It&rsquo;s <span style="color:var(--pink);font-weight:500;">&ldquo;engagement-optimized swipe is dead.&rdquo;</span> The willingness-to-pay segment has moved upstream — and incumbents can&rsquo;t pivot without breaking their P&amp;L.</p>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">02 / 14</span></div>
+  </section>
+
+  <!-- 03 WHY NOW -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>Why Now</span><span>02</span></div>
+
+    <div class="grow">
+      <h2 class="h1">Three shifts converged<br/><span class="muted-h">in the last 18 months.</span></h2>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="step">
+          <div class="n">SHIFT 01 · AI</div>
+          <h4>Cheap enough to think with.</h4>
+          <p>A 30-vector psychological profile, narrative match generation, and Life Preview simulation were technically impossible at unit economics 18 months ago. Gemini 2.5 Flash is <b style="color:var(--pink);">70% cheaper</b> than equivalent quality from a year ago — and sub-cent per call.</p>
+        </div>
+        <div class="step">
+          <div class="n">SHIFT 02 · DEMAND</div>
+          <h4>The serious cohort got loud.</h4>
+          <p>Post-pandemic dating fatigue plus the Match Group narrative collapse moved an entire generation of paying users into <em>&ldquo;looking for an alternative&rdquo;</em> mode. Hinge is the only dating brand still growing — and it&rsquo;s still a swipe app underneath.</p>
+        </div>
+        <div class="step">
+          <div class="n">SHIFT 03 · TRUST</div>
+          <h4>Verification became a feature.</h4>
+          <p>Catfishing at scale, AI bot accounts, verification scandals at incumbents. Verified identity is suddenly something users <em>pay for</em>, not a nice-to-have. We built it into the substrate from day one.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">03 / 14</span></div>
+  </section>
+
+  <!-- 04 WEDGE -->
+  <section class="slide light">
+    <div class="toprule"><span><span class="dot"></span>Wedge</span><span>03</span></div>
+
+    <div class="grow">
+      <div class="eyebrow" style="color:#C8195F;">Who We Serve First</div>
+      <h2 style="font-size:72px;font-weight:800;letter-spacing:-.04em;line-height:.98;">Founders, operators,<br/>and the people who<br/><span style="color:#C8195F;">value their time at multiples</span> of $20/month.</h2>
+
+      <div class="grid-3" style="margin-top:20px;">
+        <div>
+          <div class="eyebrow" style="color:#7A7388;margin-bottom:8px;">Persona</div>
+          <p class="lede" style="font-size:17px;color:#2A2438;">Time-poor, signal-hungry. They pay <b>2–3×</b> the category median to skip the noise. They don&rsquo;t price-shop a product they actually use.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="color:#7A7388;margin-bottom:8px;">Under-served</div>
+          <p class="lede" style="font-size:17px;color:#2A2438;">Female founders &amp; senior operators drown in low-effort messages on swipe apps and churn quietly. Our gating structure makes their primary complaint <b>structurally impossible</b>.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="color:#7A7388;margin-bottom:8px;">The Bet</div>
+          <p class="lede" style="font-size:17px;color:#2A2438;">The wedge gives us brand and density at launch. The product generalizes to anyone who values outcomes over engagement. <b>The wedge is the entry point, not the ceiling.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome" style="color:#7A7388;"><span class="mark" style="color:#0B0915;">BIGGDATE</span><span class="num">04 / 14</span></div>
+  </section>
+
+  <!-- 05 SOLUTION — Five Primitives -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>The Product</span><span>04</span></div>
+
+    <div class="grow">
+      <h2 class="h1">Five primitives.<br/><span class="gradient-text">One relationship operating system.</span></h2>
+
+      <div class="grid-5" style="margin-top:8px;">
+        <div class="card">
+          <span class="label">01 · Self</span>
+          <h4>Two-Phase Onboarding</h4>
+          <p>AI-driven conversation extracts a 30-vector psychological profile — values, attachment, lifestyle, family. Not a 30-field form.</p>
+        </div>
+        <div class="card">
+          <span class="label">02 · Intent</span>
+          <h4>Soul Knock</h4>
+          <p>Replaces the swipe with an intent-forward question. Mutual answers unlock the thread. Photos unlock progressively.</p>
+        </div>
+        <div class="card">
+          <span class="label">03 · Clarity</span>
+          <h4>Maahi</h4>
+          <p>AI Companion with persistent emotional memory across 16 modes — rejection panic, projection, repair, decision clarity.</p>
+        </div>
+        <div class="card">
+          <span class="label">04 · Foresight</span>
+          <h4>Life Preview</h4>
+          <p>AI simulation of what dating this person could realistically look like — surfaces friction before the third date.</p>
+        </div>
+        <div class="card">
+          <span class="label">05 · Outcome</span>
+          <h4>Date Debrief</h4>
+          <p>Structured 3-prompt post-date reflection. Insights feed back into matching context and Maahi&rsquo;s memory.</p>
+        </div>
+      </div>
+
+      <p class="lede" style="margin-top:8px;font-size:18px;">Plus Pulse community, LinkedIn + selfie verification, Sightengine photo moderation, plan-gated Stripe billing — <b style="color:var(--cream);">all shipped, not aspirational.</b></p>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">05 / 14</span></div>
+  </section>
+
+  <!-- 06 SOUL KNOCK DEEP DIVE -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>Signature Mechanic</span><span>05</span></div>
+
+    <div class="spotlight">
+      <div>
+        <div class="eyebrow">Soul Knock</div>
+        <h2 class="h1" style="margin-top:12px;">Replace the swipe<br/>with the <span class="gradient-text">introduction.</span></h2>
+        <p class="lede" style="margin-top:16px;">A structured, intent-forward intro that filters low-effort openers <em>on both sides</em>. We measure the right denominator: not <b>intro &rarr; reply</b>, but <b style="color:var(--pink);">intro &rarr; real date.</b></p>
+
+        <div class="pullquote">It&rsquo;s not a hurdle. It&rsquo;s a filter. The users who lazy out aren&rsquo;t our customers.</div>
+      </div>
+
+      <div class="right">
+        <div class="row-item">
+          <div class="num">01</div>
+          <div class="desc">
+            <h5>Match preview</h5>
+            <p>User sees narrative compatibility signals &amp; friction points — not just photo + age.</p>
+          </div>
+        </div>
+        <div class="row-item">
+          <div class="num">02</div>
+          <div class="desc">
+            <h5>Soul Knock sent</h5>
+            <p>A real, intent-forward question — not a swipe, not &ldquo;hey.&rdquo; Plan-gated by design: Free 3/day · Premium 15/day.</p>
+          </div>
+        </div>
+        <div class="row-item">
+          <div class="num">03</div>
+          <div class="desc">
+            <h5>Recipient answers</h5>
+            <p>Accept · decline · pass. Same gating applies to the recipient — caps volume on both sides.</p>
+          </div>
+        </div>
+        <div class="row-item">
+          <div class="num">04</div>
+          <div class="desc">
+            <h5>Mutual &rarr; thread</h5>
+            <p>Thread unlocks; photos unlock progressively after mutual intent. Maahi prepares the first message.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">06 / 14</span></div>
+  </section>
+
+  <!-- 07 MAAHI -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>AI Companion</span><span>06</span></div>
+
+    <div class="spotlight">
+      <div>
+        <div class="eyebrow">Maahi</div>
+        <h2 class="h1" style="margin-top:12px;">Makes you <span class="gradient-text">sharper at dating</span><br/>— not just better at chatting.</h2>
+        <p class="lede" style="margin-top:16px;">Maahi is not a chatbot wrapped in prompts. It&rsquo;s a relationship companion with persistent emotional memory, integrated into match context, intro history, and post-date reflection.</p>
+
+        <ul class="bullets" style="margin-top:20px;">
+          <li><b style="color:var(--cream);">16 emotional modes</b> — rejection panic, projection, boundary collapse, repair, decision clarity. Each a distinct emotional contract, not a prompt.</li>
+          <li><b style="color:var(--cream);">Persistent session memory</b> — every conversation enriches the user&rsquo;s `session_memory`. Six months in, Maahi knows them better than any competitor starting fresh.</li>
+          <li><b style="color:var(--cream);">Grounded in user reality</b> — sees match data, intro history, date debriefs. Advice is specific, not theoretical.</li>
+        </ul>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card">
+          <span class="label">Defensibility</span>
+          <h4 style="color:var(--cream);">Switching cost grows linearly.</h4>
+          <p>Tomorrow&rsquo;s better foundation model makes Maahi better without re-architecture. The moat isn&rsquo;t the model — it&rsquo;s the per-user memory the model operates on.</p>
+        </div>
+        <div class="card" style="border-color:rgba(255,43,214,.30);background:linear-gradient(180deg,rgba(255,43,214,.08),var(--ink-2));">
+          <span class="label">Plan Gate</span>
+          <h4 style="color:var(--cream);">3 / 15 / unlimited sessions per week</h4>
+          <p>Free-tier AI burn is bounded at ~$0.10/user/month. Premium AI cost runs $0.40–0.80/user/month — a 3–5% cost line against $19.99 ARPU.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">07 / 14</span></div>
+  </section>
+
+  <!-- 08 OUTCOME LOOP — Life Preview + Debrief -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>The Outcome Loop</span><span>07</span></div>
+
+    <div class="grow">
+      <h2 class="h1">Every date makes<br/>the next match <span class="gradient-text">smarter.</span></h2>
+
+      <div class="loop" style="margin-top:14px;">
+        <div class="node">Verify</div>
+        <span class="arrow">→</span>
+        <div class="node">AI Matches</div>
+        <span class="arrow">→</span>
+        <div class="node accent">Soul Knock</div>
+        <span class="arrow">→</span>
+        <div class="node accent">Maahi prep</div>
+        <span class="arrow">→</span>
+        <div class="node">Date</div>
+        <span class="arrow">→</span>
+        <div class="node accent">Life Preview</div>
+        <span class="arrow">→</span>
+        <div class="node accent">Debrief</div>
+        <span class="arrow">↻</span>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="card">
+          <span class="label">Life Preview</span>
+          <h4>An AI simulation of dating this person.</h4>
+          <p>Surfaces value misalignments before the third date. Compresses a decision that would otherwise take three coffees. Free 0 · Premium 2/mo · Pro unlimited. Add-on: $2.99 single · $5.99 three-pack.</p>
+        </div>
+        <div class="card">
+          <span class="label">Date Debrief</span>
+          <h4>3-prompt post-date reflection.</h4>
+          <p>Captured insights enrich the user&rsquo;s matching context &amp; Maahi&rsquo;s memory — so the <em>next</em> match cycle learns from what worked. No other app captures outcomes explicitly.</p>
+        </div>
+      </div>
+
+      <div class="pullquote" style="margin-top:8px;font-size:20px;">The empirical claim isn&rsquo;t &ldquo;we predict marriage outcomes.&rdquo; It&rsquo;s <b style="color:var(--pink);font-style:normal;">&ldquo;we save you a wasted Thursday.&rdquo;</b></div>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">08 / 14</span></div>
+  </section>
+
+  <!-- 09 MARKET -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>Market</span><span>08</span></div>
+
+    <div class="grow">
+      <h2 class="h1">We size the segment,<br/><span class="muted-h">not the category.</span></h2>
+
+      <div class="tam" style="margin-top:16px;">
+        <div class="bar l1">
+          <span class="amt">$9.7B</span>
+          <span class="label">Global online dating — category anchor, <em>not</em> our TAM.</span>
+        </div>
+        <div class="bar l2">
+          <span class="amt">$2.5–3B</span>
+          <span class="label">Premium subscription tier (Hinge+ / Bumble Premium / Match Gold) — the only thing growing in the category.</span>
+        </div>
+        <div class="bar l3">
+          <span class="amt">$500M</span>
+          <span class="label">Our wedge: high-intent, time-poor adults in English-fluent metros willing to pay 2–3× median.</span>
+        </div>
+        <div class="bar l4">
+          <span class="amt">$25M ARR</span>
+          <span class="label">5% wedge capture at ~$20 ARPU. Series B territory — and that&rsquo;s the floor.</span>
+        </div>
+      </div>
+
+      <p class="lede" style="margin-top:8px;font-size:18px;"><b style="color:var(--cream);">India anchor:</b> $200M market growing 25%+ YoY. Arranged-marriage culture is fertile ground for intentional dating — the default is already &ldquo;dating with purpose.&rdquo; Diaspora &amp; English-fluent global metros follow.</p>
+    </div>
+
+    <div class="footnote">Sources: Statista 2025 Online Dating Outlook · public 10-Ks (Match Group, Bumble Inc.) · IBISWorld 2025. We treat $9.7B as anchor only — actual ARPU-bearing market is the premium subscription tier.</div>
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">09 / 14</span></div>
+  </section>
+
+  <!-- 10 BUSINESS MODEL -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>Business Model</span><span>09</span></div>
+
+    <div class="grow">
+      <h2 class="h1">Monetize the high-leverage moments.<br/><span class="muted-h">Not the attention.</span></h2>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <span class="label">Tier · Free</span>
+          <h4>$0</h4>
+          <p>Core profile, 5 daily matches, 3 Soul Knocks/day, 3 Maahi sessions/week. Messaging after accepted intros.</p>
+        </div>
+        <div class="card" style="border-color:rgba(255,111,174,.4);background:linear-gradient(180deg,rgba(255,43,214,.10),var(--ink-2));">
+          <span class="label" style="color:var(--pink);">Tier · Premium · 7-day free trial</span>
+          <h4 style="color:var(--pink);">$19.99 / mo &nbsp;·&nbsp; $149.99 / yr</h4>
+          <p>20 matches/day, 15 Soul Knocks, 15 Maahi/wk, 2 Life Previews/mo, full toolkit. Core revenue driver.</p>
+        </div>
+        <div class="card">
+          <span class="label">Tier · Pro</span>
+          <h4>Pricing pending</h4>
+          <p>Unlimited everything. Pricing held until we have operational cost data — we won&rsquo;t price what we can&rsquo;t model.</p>
+        </div>
+      </div>
+
+      <div class="stripe" style="margin-top:14px;">
+        <div>
+          <div class="n grad">$0.40–0.80</div>
+          <div class="l">AI inference cost per Premium user / month</div>
+        </div>
+        <div>
+          <div class="n">~85%</div>
+          <div class="l">Gross margin floor after Stripe + infra + email + moderation</div>
+        </div>
+        <div>
+          <div class="n">12–24 mo</div>
+          <div class="l">Premium LTV — serious-dating timelines are not 2-week swipe loops</div>
+        </div>
+        <div>
+          <div class="n">30–40%</div>
+          <div class="l">Industry add-on rev share at maturity — captured from day one</div>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:6px;">Add-ons: Boost $4.99 · Life Preview $2.99 / $5.99 (3-pack) · Super Like · Read Receipts · Incognito · Spotlight · Profile Review.</p>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">10 / 14</span></div>
+  </section>
+
+  <!-- 11 TRACTION -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>Where We Are</span><span>10</span></div>
+
+    <div class="grow">
+      <h2 class="h1">Feature-complete.<br/>Beta live. <span class="gradient-text">Mobile next.</span></h2>
+
+      <div class="grid-4" style="margin-top:18px;">
+        <div class="stat">
+          <div class="n grad">40</div>
+          <div class="l">Active beta users on web · founder-onboarded via WhatsApp</div>
+        </div>
+        <div class="stat">
+          <div class="n">100<span style="font-size:48px;">%</span></div>
+          <div class="l">Verified profiles · LinkedIn + selfie · Sightengine moderated</div>
+        </div>
+        <div class="stat">
+          <div class="n">50<span style="font-size:48px;">+</span></div>
+          <div class="l">78 production API routes · 36 migrations · RLS hardened</div>
+        </div>
+        <div class="stat">
+          <div class="n">∼0</div>
+          <div class="l">Days until iOS + Android beta — currently in QA</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;gap:32px;">
+        <div>
+          <div class="eyebrow subtle" style="margin-bottom:10px;">Already Shipped</div>
+          <ul class="bullets" style="font-size:14px;gap:8px;">
+            <li>Full Soul Knock + intro flow + plan gating · 16-mode Maahi with persistent memory</li>
+            <li>Life Preview · Date Debrief · Pulse anonymous community</li>
+            <li>LinkedIn + selfie verification · Sightengine photo moderation with audit ledger</li>
+            <li>Stripe billing · 7-day trial · webhook idempotency · Customer Portal</li>
+            <li>GEO/AEO surface (llms.txt, FAQ + HowTo + Organization JSON-LD) · ChatGPT &amp; Perplexity discoverable</li>
+            <li>CSP &amp; 2-year HSTS · rate-limited auth · Sentry · /api/health</li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow subtle" style="margin-bottom:10px;">90-Day Targets</div>
+          <ul class="bullets" style="font-size:14px;gap:8px;">
+            <li><b style="color:var(--cream);">Month 1</b> · 100 users · 50+ organic signups · 20+ matches</li>
+            <li><b style="color:var(--cream);">Month 2</b> · 500 users · 15% paid conversion · 70% D7 retention</li>
+            <li><b style="color:var(--cream);">Month 3</b> · <b style="color:var(--pink);">1,000 users · $1,500+ MRR · mobile live · 80% AI cost reduction</b></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">11 / 14</span></div>
+  </section>
+
+  <!-- 12 COMPETITION + MOAT -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>Why We Win</span><span>11</span></div>
+
+    <div class="grow">
+      <h2 class="h1">The only product with<br/>all five primitives.</h2>
+
+      <table class="compare" style="margin-top:14px;">
+        <thead>
+          <tr>
+            <th style="width:22%;">Product</th>
+            <th>Verified intent</th>
+            <th>AI companion + memory</th>
+            <th>Life Preview</th>
+            <th>Outcome debrief</th>
+            <th>Owned wedge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="cell">Tinder</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td class="cell">Bumble</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td class="cell">Hinge</td><td class="mid">Partial</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td class="cell">Match.com</td><td class="mid">Partial</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr class="us"><td>BiggDate</td><td class="yes">●</td><td class="yes">●</td><td class="yes">●</td><td class="yes">●</td><td class="yes">●</td></tr>
+        </tbody>
+      </table>
+
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="step">
+          <div class="n">MOAT 01</div>
+          <h4>User-specific memory</h4>
+          <p>Every Maahi conversation, debrief, &amp; match reaction enriches `session_memory`. Switching cost grows linearly with time on platform.</p>
+        </div>
+        <div class="step">
+          <div class="n">MOAT 02</div>
+          <h4>Outcome-labeled data</h4>
+          <p>The `couples` table + debrief reflections capture <em>which conversations became real relationships</em>. No other app captures outcomes explicitly.</p>
+        </div>
+        <div class="step">
+          <div class="n">MOAT 03</div>
+          <h4>Owned vocabulary</h4>
+          <p>&ldquo;Soul Knock&rdquo; · &ldquo;Life Preview&rdquo; · &ldquo;Maahi.&rdquo; When a category-defining product owns the vocabulary, the category moves toward it. See: <em>swipe</em>.</p>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:6px;font-style:italic;color:var(--cream-2);">Hinge can copy the mechanic. They can&rsquo;t ship Maahi-style depth without breaking their parent&rsquo;s reported KPIs. A 90-engineer org with a public-market parent ships dating features in 12–18 months. We ship in 12–18 days.</p>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">12 / 14</span></div>
+  </section>
+
+  <!-- 13 TEAM -->
+  <section class="slide light">
+    <div class="toprule"><span><span class="dot"></span>Team</span><span>12</span></div>
+
+    <div class="grow">
+      <h2 style="font-size:64px;font-weight:800;letter-spacing:-.035em;line-height:1;">Operator-first.<br/><span style="color:#C8195F;">Direct user contact</span> at a depth incumbents can&rsquo;t replicate.</h2>
+
+      <div class="grid-2" style="margin-top:16px;align-items:flex-start;">
+        <div class="card" style="background:#fff;border-color:rgba(11,9,21,.10);">
+          <span class="label" style="color:#C8195F;">Founder &amp; CEO</span>
+          <h4 style="color:#0B0915;font-size:28px;">Meet Patel</h4>
+          <p style="color:#2A2438;font-size:14.5px;line-height:1.55;">Previously founder at Finanshels (Stripe-grade fintech for SMBs across the GCC). Built and shipped BiggDate&rsquo;s entire MVP — 78 API routes, 36 migrations, full Soul Knock with AI quality scoring, Maahi, Life Preview, voice notes, date proposals, and the trust stack. Personally onboards every beta user via WhatsApp.</p>
+          <p class="small" style="color:#7A7388;margin-top:6px;">Sharp taste · direct user contact · strong product brain. The early-stage advantage is depth no Match Group PM will ever have.</p>
+        </div>
+
+        <div>
+          <div class="eyebrow" style="color:#7A7388;margin-bottom:14px;">Hiring Plan · Funded by Seed</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(11,9,21,.12);">
+              <div><b style="color:#0B0915;">Week 1</b> &nbsp;·&nbsp; <span style="color:#2A2438;">Native mobile engineer (iOS / Android)</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(11,9,21,.12);">
+              <div><b style="color:#0B0915;">Week 2</b> &nbsp;·&nbsp; <span style="color:#2A2438;">Trust &amp; safety ops lead</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(11,9,21,.12);">
+              <div><b style="color:#0B0915;">Week 6</b> &nbsp;·&nbsp; <span style="color:#2A2438;">AI / ML engineer (matching + Maahi)</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;">
+              <div><b style="color:#0B0915;">Week 12</b> &nbsp;·&nbsp; <span style="color:#2A2438;">Growth ops + content</span></div>
+            </div>
+          </div>
+          <p class="small" style="color:#7A7388;margin-top:14px;font-style:italic;">We&rsquo;re not pretending we have a Bumble veteran on the team. We&rsquo;re saying we&rsquo;ll hire one when the wedge is proven.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome" style="color:#7A7388;"><span class="mark" style="color:#0B0915;">BIGGDATE</span><span class="num">13 / 14</span></div>
+  </section>
+
+  <!-- 14 ASK + VISION -->
+  <section class="slide">
+    <div class="toprule"><span><span class="dot"></span>The Ask</span><span>13</span></div>
+
+    <div class="grow">
+      <div class="grid-2" style="align-items:flex-start;">
+        <div class="col" style="gap:20px;">
+          <span class="eyebrow">Raising</span>
+          <h2 style="font-size:128px;font-weight:800;letter-spacing:-.05em;line-height:.9;">$1.5M<br/><span class="gradient-text">Seed</span></h2>
+          <p class="lede" style="font-size:18px;">18-month runway. Partner with us from wedge to category. Open to YC, Sequoia Arc, Techstars, and category-aligned angel checks.</p>
+
+          <div style="margin-top:8px;">
+            <div class="eyebrow subtle" style="margin-bottom:10px;">Milestone to Series A · Month 18</div>
+            <ul class="bullets" style="font-size:14px;gap:8px;">
+              <li>50K MAU across India + global English diaspora</li>
+              <li>$50K MRR · 15%+ paid conversion · 70% D7 retention</li>
+              <li>Native mobile live on iOS &amp; Android · 80% AI cost reduction</li>
+              <li>3 geographies with full DPDP / GDPR compliance</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col" style="gap:14px;">
+          <span class="eyebrow subtle">Use of Funds</span>
+          <div class="card" style="padding:18px 22px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <h4 style="font-size:16px;font-weight:600;color:var(--cream);">Engineering · Mobile + AI cost reduction</h4>
+              <span class="tabular" style="font-weight:800;color:var(--pink);font-size:18px;">40%</span>
+            </div>
+            <p style="font-size:13px;color:var(--cream-2);">Native iOS/Android, AI caching &amp; fallback, realtime transport, Maahi fine-tuning on outcome data.</p>
+          </div>
+          <div class="card" style="padding:18px 22px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <h4 style="font-size:16px;font-weight:600;color:var(--cream);">Growth · Acquisition + AEO/SEO</h4>
+              <span class="tabular" style="font-weight:800;color:var(--pink);font-size:18px;">30%</span>
+            </div>
+            <p style="font-size:13px;color:var(--cream-2);">LinkedIn ads to wedge persona, comparison content, ChatGPT/Perplexity citation flywheel.</p>
+          </div>
+          <div class="card" style="padding:18px 22px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <h4 style="font-size:16px;font-weight:600;color:var(--cream);">Trust &amp; safety + compliance</h4>
+              <span class="tabular" style="font-weight:800;color:var(--pink);font-size:18px;">15%</span>
+            </div>
+            <p style="font-size:13px;color:var(--cream-2);">Legal review, government-ID verification (Veriff/Persona), 24/7 trust ops, multi-jurisdiction policy.</p>
+          </div>
+          <div class="card" style="padding:18px 22px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <h4 style="font-size:16px;font-weight:600;color:var(--cream);">G&amp;A + runway buffer</h4>
+              <span class="tabular" style="font-weight:800;color:var(--pink);font-size:18px;">15%</span>
+            </div>
+            <p style="font-size:13px;color:var(--cream-2);">Infra, tooling, contingency. We optimize for runway, not vanity.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome"><span class="mark">BIGGDATE</span><span class="num">14 / 14</span></div>
+  </section>
+
+  <!-- 15 VISION CLOSER -->
+  <section class="slide cover" style="background:radial-gradient(ellipse at 30% 40%,rgba(255,43,214,.22) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(43,200,255,.18) 0%,transparent 60%),var(--ink);">
+    <div class="wordmark">Bigg<span class="b">Date</span></div>
+
+    <div style="display:flex;flex-direction:column;justify-content:center;flex:1;gap:24px;">
+      <div class="eyebrow">In five years</div>
+      <h2 style="font-size:80px;font-weight:700;letter-spacing:-.035em;line-height:1.02;color:var(--cream);max-width:1100px;">
+        BiggDate is the <span class="gradient-text">relationship operating system</span> you stay on because each stage has a product —
+        <span style="color:var(--cream-2);">dating, engaged, married, repair.</span>
+      </h2>
+      <p class="lede" style="font-size:22px;max-width:880px;">The category reshapes around outcomes, not engagement. <em>&ldquo;Swipe&rdquo;</em> feels as dated as <em>&ldquo;long-distance phone call.&rdquo;</em></p>
+    </div>
+
+    <div class="meta">
+      <div class="left" style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);">
+        <span style="color:var(--cream);font-weight:700;letter-spacing:.20em;">Dating that respects your time.</span>
+        <span>We have built the product. We have 40 beta users today. We&rsquo;re looking for a partner to take it from wedge to category.</span>
+      </div>
+      <div class="right" style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);">
+        <span>meet@biggdate.app</span>
+        <span>biggdate.app</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="controls">
+  <button onclick="prevSlide()">← Prev</button>
+  <span class="sep">·</span>
+  <button onclick="nextSlide()">Next →</button>
+  <span class="sep">·</span>
+  <button onclick="window.print()">Print / PDF</button>
+</div>
+
+<script>
+  const slides = () => Array.from(document.querySelectorAll('.slide'));
+  let idx = 0;
+  function go(i){
+    const list = slides();
+    idx = Math.max(0, Math.min(list.length-1, i));
+    list[idx].scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function nextSlide(){ go(idx+1); }
+  function prevSlide(){ go(idx-1); }
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); nextSlide(); }
+    if (['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); prevSlide(); }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End') { e.preventDefault(); go(slides().length-1); }
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.5) {
+        idx = slides().indexOf(e.target);
+      }
+    });
+  }, {threshold:[0.5]});
+  slides().forEach(s => io.observe(s));
+</script>
+
+</body>
+</html>

@@ -167,27 +167,87 @@ User value:
 
 - Clear free-to-paid progression with premium leverage points.
 
+### 5.10 Voice Notes
+
+Capabilities:
+
+- Record and send up to 60-second voice notes inside threads (`MAX_VOICE_DURATION_SEC`).
+- Voice notes stored in the `voice-notes` Supabase bucket with RLS hardening (migrations `202605100001_voice_notes`, `202605140001_voice_notes_storage_rls`).
+- Maahi TTS playback for AI-generated content (commit `2aa04ba`).
+
+### 5.11 Push Notifications
+
+Capabilities:
+
+- Web Push via `web-push` and VAPID keys.
+- Subscriptions persisted to `push_subscriptions` (migration `202605100001`).
+- Trigger paths: new Soul Knock received, mutual match, daily prompt, date proposal updates.
+- Native push (APNS / FCM) deferred until the mobile clients ship.
+
+### 5.12 Date Proposals
+
+Capabilities:
+
+- In-thread date scheduler (commit `b89dd27`): propose a date, accept / counter, calendar handoff.
+- Backed by `date_proposals` (migration `202605170003`) and `POST /api/messages/[threadId]/proposal-response`.
+
+### 5.13 Commitment Tracking
+
+Capabilities:
+
+- Lightweight per-user commitment markers (migration `202605100003`, `POST /api/commitment`).
+- Used by Maahi context and the Date Concierge to ground advice in stated intent.
+
+### 5.14 Daily Soul Knock Email & Orchestrator
+
+Capabilities:
+
+- Vercel Cron entry at `/api/cron/daily-orchestrator` runs daily.
+- Generates the daily match batch, sends the **Daily Soul Knock email** (7 day-of-week variants — commit `a5aeab1`), and rolls forward usage counters.
+- All deliveries audited in `notification_log` (migration `202605170001`); user-facing unsubscribe at `/api/email/unsubscribe`.
+
+### 5.15 Experiments & A/B
+
+Capabilities:
+
+- Lightweight experiment assignment table (`experiments`, migration `202605150005`) with funnel-event tracking in `analytics_events` (migration `202605150003`).
+- Used to gate Soul Knock quality scoring soft-block, onboarding redesigns, and pricing experiments.
+
+### 5.16 AI Cost Instrumentation
+
+Capabilities:
+
+- Per-call cost logging into `ai_costs` (migration `202605150004`).
+- Surfaces include Maahi turn, Coach plan, Life Preview, match generation, profile derive, and Soul Knock scoring.
+- Daily roll-ups support per-user gross-margin tracking.
+
+### 5.17 Region Blocking & Age / Consent Capture
+
+Capabilities:
+
+- Requests from blocked jurisdictions are redirected to `/region-blocked` at the proxy boundary.
+- Signup captures DOB + explicit Terms / Privacy consent (migration `202605170004`, commit `f77b09f`).
+- Settings drawer exposes a Consent Reset link (commit `c5c974a`) for users who want to re-evaluate analytics opt-in.
+
 ## 6. Plan and Access Model
 
 Current gated actions:
 
 - soul_knock
 - maahi_session
+- maahi_turn
 - life_preview
 - daily_matches
 
 Configured limits:
 
-- soul_knock: free 3, premium 15, pro unlimited.
-- maahi_session: free 3, premium 15, pro unlimited.
-- life_preview: free 0, premium 2, pro unlimited.
-- daily_matches: free 5, premium 20, pro unlimited.
+- soul_knock: free 3, premium 15, pro unlimited (daily).
+- maahi_session: free 3, premium 15, pro unlimited (weekly).
+- maahi_turn: free 12, premium 100, pro unlimited (weekly).
+- life_preview: free 0, premium 2, pro unlimited (monthly).
+- daily_matches: free 5, premium 20, pro unlimited (daily).
 
-Period windows:
-
-- soul_knock and daily_matches: daily.
-- maahi_session: weekly.
-- life_preview: monthly.
+Limits are enforced in [src/lib/repo.ts](../../src/lib/repo.ts) via `requirePlan` + `incrementUsage`.
 
 ## 7. Product Success Metrics
 
@@ -234,15 +294,16 @@ Safety and trust:
 External dependencies:
 
 - Supabase Auth, Storage, and Postgres.
-- Stripe checkout + webhooks.
-- AI provider abstractions (Gemini/OpenAI/Ollama variants).
-- Optional moderation provider (Sightengine).
-- Resend for email notifications.
+- Stripe (subscription + add-ons) **or** Early Access redemption mode (`BILLING_MODE`).
+- AI provider abstraction with Gemini (default) and OpenAI fallback. Ollama paths were removed.
+- Sightengine for photo moderation (**fail-closed**).
+- Resend for transactional email; PostHog + Meta Pixel for analytics (consent-gated); web-push + VAPID for push.
 
 Operational constraints:
 
-- Some controls are best-effort by design (notifications, moderation fail-open).
-- Real-time messaging uses polling UX in current implementation.
+- Email and push are fire-and-forget; failures audited via `notification_log`.
+- Photo moderation is fail-closed — uploads are blocked on Sightengine outage rather than auto-approved.
+- Thread refresh and date-proposal acceptance are polling-based; realtime migration is queued.
 
 ## 10. Release Governance
 

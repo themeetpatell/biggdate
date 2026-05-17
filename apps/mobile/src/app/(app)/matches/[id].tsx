@@ -74,8 +74,9 @@ function MatchDetail({ match }: { match: Match }) {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <SafeAreaView edges={['top']} style={styles.body}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.flex}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.body}>
           <View style={styles.identity}>
             <ThemedText style={styles.emoji}>{match.emoji}</ThemedText>
             <ThemedText type="subtitle">
@@ -125,7 +126,7 @@ function MatchDetail({ match }: { match: Match }) {
           />
 
           {error ? (
-            <ThemedText type="small" style={styles.error}>
+            <ThemedText type="small" style={{ color: theme.error }}>
               {error}
             </ThemedText>
           ) : null}
@@ -149,8 +150,9 @@ function MatchDetail({ match }: { match: Match }) {
               />
             </View>
           )}
-        </SafeAreaView>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </ThemedView>
   );
 }
@@ -179,6 +181,7 @@ function Signal({ label, text }: { label: string; text: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  flex: { flex: 1 },
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -211,5 +214,4 @@ const styles = StyleSheet.create({
   },
   actions: { gap: Spacing.two },
   sentNote: { textAlign: 'center' },
-  error: { color: '#E5484D' },
 });

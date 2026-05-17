@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "8c284935-8316-4d1d-bb57-bf53c5051d81"
+      }
+    },
+    "android": {
+      "package": "com.themeetpatel.biggdatenext"
+    },
+    "ios": {
+      "bundleIdentifier": "com.themeetpatel.biggdatenext",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,7 +17,10 @@ export default function PulseScreen() {
   const feed = usePulseFeed('hot');
   const promptQuery = useTodayPrompt();
 
-  const posts = feed.data?.posts ?? [];
+  const posts = useMemo(
+    () => feed.data?.pages.flatMap((page) => page.posts) ?? [],
+    [feed.data],
+  );
   const prompt = promptQuery.data?.prompt ?? null;
 
   if (feed.isPending) {
@@ -29,11 +33,17 @@ export default function PulseScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView edges={['top']} style={styles.flex}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.flex}>
         <FlatList
           data={posts}
           keyExtractor={(post) => post.id}
           contentContainerStyle={styles.list}
+          onEndReached={() => {
+            if (feed.hasNextPage && !feed.isFetchingNextPage) {
+              void feed.fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.4}
           ListHeaderComponent={
             <View style={styles.header}>
               <View style={styles.titleRow}>
@@ -57,6 +67,13 @@ export default function PulseScreen() {
                 Be the first to share something honest with the community.
               </ThemedText>
             </View>
+          }
+          ListFooterComponent={
+            feed.isFetchingNextPage ? (
+              <View style={styles.footer}>
+                <ActivityIndicator />
+              </View>
+            ) : null
           }
           renderItem={({ item }) => <PulsePostCard post={item} />}
         />
@@ -90,4 +107,5 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.six,
   },
   emptyText: { lineHeight: 20 },
+  footer: { paddingVertical: Spacing.three, alignItems: 'center' },
 });

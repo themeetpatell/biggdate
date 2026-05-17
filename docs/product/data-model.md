@@ -1,23 +1,37 @@
 # Data Model
 
-Version: 1.0.0
-Date: 2026-05-01
+Version: 2.0.0
+Date: 2026-05-18
+
+The current schema spans **36 migrations** under [supabase/migrations/](../../supabase/migrations/). This document captures the conceptual model; the SQL files are source of truth.
 
 ## 1. Entity Overview
 
 Core entities:
 
-- AccountHandle: user identity projection (email, username, full name).
+- AccountHandle: user identity projection (email, username, full name, phone). Phone optional (commit `f77b09f`).
 - Profile: primary relationship and compatibility model.
 - Match: generated candidate payload with narrative and compatibility signals.
-- Intro and SoulKnockResponse: pre-chat intent exchange.
+- Intro and SoulKnockResponse: pre-chat intent exchange (`intros.id` is `text`; FK enforced on `soul_knock_responses.intro_id` per migration `202605140002`).
 - Thread and Message: post-mutual communication.
-- SessionMemory: companion memory state and emotional profile.
+- VoiceNote (storage object + thread message reference, bucket `voice-notes`).
+- DateProposal: in-thread date scheduler state (migration `202605170003`).
+- Commitment: per-user commitment markers (migration `202605100003`).
+- SessionMemory: Maahi memory state with TTL pruning (migrations `202604120002`, `202605030001`, `202605150002`).
 - DebriefReflection: structured post-date reflection.
-- UserPlan and UsageCounter: billing state and access control.
-- PulsePrompt, PulsePost, PulseReply, PulseReaction, PulseFlag.
+- UserPlan and UsageCounter: billing state and gated-action accounting.
+- UserAddon: per-user add-on entitlements (Boost, Read Receipts, Incognito, Spotlight, etc. — migration `202605150001`).
+- PulsePrompt, PulsePost, PulseReply, PulseReaction, PulseFlag (Pulse 2 redesign — migration `202605030006`).
 - Safety and moderation entities: reports, blocked_users, photo_moderation.
-- StripeEvents: webhook idempotency ledger.
+- VerificationRecord and verified-badge state.
+- PushSubscription: web-push endpoints + VAPID keys (migration `202605100001`).
+- NotificationLog: every transactional email / push delivery (migration `202605170001`).
+- DailySoulEmail: orchestration state for the day-of-week email rotation (migration `202605170002`).
+- AnalyticsEvent, AiCostLog, Experiment: instrumentation tables (migrations `202605150003`, `202605150004`, `202605150005`).
+- DashboardCheckin: lightweight check-in state for the dashboard surface (migrations `202605030007`, `202605090001`).
+- SignupConsent: DOB + Terms/Privacy acceptance ledger (migration `202605170004`).
+- StripeEvents: webhook idempotency ledger (Stripe mode only).
+- EarlyAccessRedemption: tracked through `user_plans.status='active'` with `stripe_subscription_id IS NULL`.
 
 ## 2. Relationship Map
 
@@ -51,24 +65,28 @@ Profile includes:
 
 GatedAction values:
 
-- soul_knock
-- maahi_session
-- life_preview
-- daily_matches
+- soul_knock (daily)
+- maahi_session (weekly)
+- maahi_turn (weekly)
+- life_preview (monthly)
+- daily_matches (daily)
 
 Require-plan resolution:
 
-- Plan determined from user_plan status.
-- Limit looked up from PLAN_LIMITS table in repo logic.
-- Usage counter checked by action + period_start.
-- Access granted if used < limit.
+- Plan determined from `user_plans.status` (`free` | `premium` | `pro` | early-access `active`).
+- Limit looked up from the `PLAN_LIMITS` table in [src/lib/repo.ts](../../src/lib/repo.ts).
+- Usage counter checked by `(action, period_start)`.
+- Access granted if `used < limit`.
+
+Add-on entitlements (Boost, Incognito, Read Receipts, Spotlight, Super Like, Profile Review, Life Preview credits) live in `user_addons` and are enforced server-side per surface.
 
 ## 5. Moderation and Safety Model
 
 Photo moderation:
 
-- Moderation result stores status, provider, scores, reason.
-- Flagged items feed admin moderation queue.
+- Sightengine integration is **fail-closed**: when the provider is unreachable or returns NSFW signals the upload is blocked and a 422 is returned to the client.
+- Every verdict persisted to `photo_moderation` with status, provider, scores, and reason.
+- Flagged items feed the admin moderation queue at `/admin/photo-moderation`.
 
 Pulse moderation:
 

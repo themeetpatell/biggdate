@@ -22,14 +22,6 @@ export async function POST(req: Request) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
-  const gate = await requirePlanAtomic(auth.userId, "life_preview");
-  if (!gate.allowed) {
-    return NextResponse.json(
-      { error: "Life Preview not available on your plan", gate },
-      { status: 403 }
-    );
-  }
-
   let body: { matchId?: unknown };
   try {
     body = await req.json();
@@ -41,6 +33,20 @@ export async function POST(req: Request) {
     typeof body.matchId === "string" ? body.matchId.trim() : "";
   if (!UUID_RE.test(matchId) && !/^match_\d+_\d+$/.test(matchId)) {
     return NextResponse.json({ error: "Invalid matchId" }, { status: 400 });
+  }
+
+  // Cache lookup runs *before* the plan gate so users can re-view a
+  // preview they already paid to generate without burning another seat
+  // from their plan budget.
+  const earlyCached = await getLifePreview(auth.userId, matchId);
+  if (earlyCached) return NextResponse.json(earlyCached);
+
+  const gate = await requirePlanAtomic(auth.userId, "life_preview");
+  if (!gate.allowed) {
+    return NextResponse.json(
+      { error: "Life Preview not available on your plan", gate },
+      { status: 403 }
+    );
   }
 
   const [profile, match] = await Promise.all([
@@ -55,7 +61,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Match not found" }, { status: 404 });
   }
 
-  // Return cached result if available
+  // Double-check between gate increment and AI call in case another
+  // request generated the same preview while this one was waiting.
   const cached = await getLifePreview(auth.userId, match.id);
   if (cached) return NextResponse.json(cached);
 

@@ -23,24 +23,34 @@ Open http://localhost:3000.
 - `npm run ci`: full CI check plus build
 - `npm run seed`: seed profile data
 - `npm run seed:reset`: reset and seed profile data
+- `npm run test:e2e`: Playwright end-to-end suite
+- `npm run sitemap:submit`: ping IndexNow / search engines with the current sitemap
 
 ## Architecture
 
 - `src/app`: Next App Router pages and route handlers
 - `src/components`: reusable UI and product components
-- `src/lib`: data access, providers, billing, auth, moderation, logging
-- `src/proxy.ts`: request proxy/auth boundary
-- `supabase/migrations`: database schema
-- `scripts`: repo and data operations
-- `docs`: user, developer, product, and standards docs
+- `src/lib`: data access, providers, billing, auth, moderation, logging, AI
+- `src/proxy.ts`: request proxy/auth boundary (Next 16 replacement for `middleware.ts`)
+- `supabase/migrations`: database schema (36 migrations)
+- `apps/`, `packages/`: npm workspaces — `@biggdate/shared` ships server/client primitives consumed by the main app and (eventually) the native client
+- `scripts`: repo, docs, seed, and sitemap operations
+- `docs`: user, developer, product, brand, and standards docs
+
+## Billing Modes
+
+BiggDate ships with two billing modes, controlled by `BILLING_MODE` / `NEXT_PUBLIC_BILLING_MODE`:
+
+- `early_access` (current default): Premium is unlocked by redeeming a founder-issued coupon code at `/settings/billing`. Stripe paths remain in the tree but are dormant. See [docs/launch-readiness.md](docs/launch-readiness.md#billing-model--early-access-active).
+- `stripe`: production subscription mode using Stripe Checkout, Customer Portal, and webhooks.
 
 ## Production Setup
 
 1. Configure all required env vars from `.env.example`.
-2. Apply `supabase/migrations` to Supabase.
-3. Configure Stripe products, prices, and webhook endpoint `/api/billing/webhook`.
-4. Configure Resend, Upstash Redis, AI provider keys, Sentry, and moderation provider.
-5. Deploy on Vercel and verify `/api/health`.
+2. Apply every file in `supabase/migrations/` to Supabase, in chronological order.
+3. (Stripe mode only) Configure Stripe products, prices, the Customer Portal, and the webhook endpoint `/api/billing/webhook`.
+4. Configure Resend, Upstash Redis, the AI provider key for `AI_PROVIDER`, Sentry, Sightengine, PostHog, and VAPID push keys.
+5. Deploy on Vercel (Fluid Compute) and verify `/api/health`.
 
 ## Documentation
 

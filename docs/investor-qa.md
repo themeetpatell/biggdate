@@ -80,7 +80,7 @@ It's not the moat. It's not the monetization. It's retention glue. If it doesn't
 
 ### Q12. Mobile-first wins dating. You're web-first. That's a serious red flag.
 
-The web app is the prototyping surface, not the destination. The 90-day plan calls for native mobile by week 6, and the data model + API surface is built to be client-agnostic from day one. We chose web-first to ship product depth fast — 70+ API routes, 27 migrations, 16 Maahi modes, full safety stack — at the velocity a two-platform team couldn't have matched.
+The web app is the prototyping surface, not the destination. The 90-day plan calls for native mobile by week 6, and the data model + API surface is built to be client-agnostic from day one. We chose web-first to ship product depth fast — 78 API routes, 36 migrations, 16 Maahi modes, full safety stack — at the velocity a two-platform team couldn't have matched.
 
 We agree this is a real risk until mobile ships. We don't pretend otherwise. The seed funds mobile native as the top engineering line item.
 
@@ -172,7 +172,7 @@ The early-stage advantage is direct user contact at a depth Match Group product 
 
 ### Q25. The engineering depth in the codebase is real, but is the team big enough to ship mobile + scale safety + iterate on AI?
 
-Today: not yet. The seed funds it. The hiring plan is concrete — mobile native engineer (week 1), trust ops lead (week 2), AI/ML engineer (week 6), growth ops (week 12). The codebase quality (RLS hardening, idempotent webhooks, observability, CSP/HSTS, 27 migrations) signals that the current team's engineering bar is high enough to onboard senior hires without rewriting the foundation.
+Today: not yet. The seed funds it. The hiring plan is concrete — mobile native engineer (week 1), trust ops lead (week 2), AI/ML engineer (week 6), growth ops (week 12). The codebase quality (RLS hardening, idempotent webhooks, fail-closed photo moderation, observability with PostHog + Sentry, CSP/HSTS, 36 migrations) signals that the current team's engineering bar is high enough to onboard senior hires without rewriting the foundation.
 
 ---
 
@@ -244,4 +244,4 @@ Beyond capital: Sequoia's brand signal to the wedge cohort we serve (founders, o
 
 We are not selling a swipe app. We are not selling AI-as-buzzword. We are selling a thesis: that the next category leader in dating will be the company that re-platforms it around outcomes, not engagement; that AI is the technology that finally makes outcome-grade relationship intelligence economically viable; and that the brand winner will be the one who built trust, verification, and intentionality into the substrate from day one.
 
-We have built that product. We have 14 beta users today. We are looking for a partner to take it from wedge to category.
+We have built that product. We have 40 beta users today across the web app, with native iOS and Android imminent. We are looking for a partner to take it from wedge to category.

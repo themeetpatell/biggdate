@@ -139,7 +139,53 @@ Success signals:
 - Checkout start rate after gate.
 - Paid conversion rate.
 
-## 6. Journey Instrumentation Checklist
+## 6. New-Surface Journeys
+
+### Journey J: Voice Note Send
+
+1. User opens a thread.
+2. Holds the microphone control and records up to 60s.
+3. Recorder auto-stops at the cap, uploads to the `voice-notes` bucket.
+4. Voice note appears inline in the thread; recipient gets a push if subscribed.
+
+### Journey K: In-Thread Date Proposal
+
+1. User sends a proposed date (time + place) inside an active thread.
+2. Counterpart accepts, counters, or declines via `/api/messages/[threadId]/proposal-response`.
+3. On accept, both users get a calendar handoff link and the proposal moves to `confirmed`.
+
+### Journey L: Daily Soul Knock Email → Reply
+
+1. Daily orchestrator cron picks the day-of-week variant and recipients.
+2. Email delivers via Resend; click-through opens the linked match.
+3. User sends the Soul Knock from the linked preview; the funnel event is logged to `analytics_events`.
+
+### Journey M: Push Subscription
+
+1. User taps "Enable notifications" in settings.
+2. Browser prompts for permission; on accept, `POST /api/push/subscribe` registers the subscription.
+3. Future intros, mutual matches, and proposals trigger web push.
+
+### Journey N: Early-Access Redemption
+
+1. User receives a code from the founder via WhatsApp.
+2. User enters the code at `/settings/billing`.
+3. `POST /api/billing/redeem` validates against `EARLY_ACCESS_CODES` and writes an `active` row to `user_plans` with `stripe_subscription_id = NULL`.
+4. Premium entitlements unlock.
+
+### Journey O: Region Block
+
+1. Incoming request hits the proxy.
+2. Geo check matches a blocked jurisdiction.
+3. User is redirected to `/region-blocked` with a contact path for waitlist signup.
+
+### Journey P: DOB + Consent at Signup
+
+1. User selects DOB on signup; under-18 is hard-blocked.
+2. User must check Terms + Privacy consent (stored in the signup consent ledger).
+3. Account creation proceeds only after both pass.
+
+## 7. Journey Instrumentation Checklist
 
 For each journey, capture:
 
@@ -148,3 +194,4 @@ For each journey, capture:
 - Drop-off reason taxonomy.
 - Time-to-complete distribution.
 - Plan segment breakdown.
+- PostHog event name (events ship through `src/lib/analytics.ts` after consent).

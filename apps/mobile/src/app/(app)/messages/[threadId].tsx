@@ -1,6 +1,6 @@
-import type { Message } from '@biggdate/shared';
+import type { Message, ThreadDetailResponse } from '@biggdate/shared';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -31,7 +31,10 @@ function messagePreview(message: Message): string {
 }
 
 export default function ThreadScreen() {
-  const { threadId } = useLocalSearchParams<{ threadId: string }>();
+  const rawParams = useLocalSearchParams<{ threadId: string | string[] }>();
+  const threadId = Array.isArray(rawParams.threadId)
+    ? rawParams.threadId[0]
+    : rawParams.threadId;
   const theme = useTheme();
   const { session } = useAuth();
   const threadQuery = useThread(threadId);
@@ -41,15 +44,31 @@ export default function ThreadScreen() {
 
   useEffect(() => {
     if (!threadId) return;
-    return subscribeToThreadMessages(threadId, () => {
-      void queryClient.invalidateQueries({ queryKey: threadQueryKey(threadId) });
+    const key = threadQueryKey(threadId);
+    return subscribeToThreadMessages(threadId, (message) => {
+      if (!message) {
+        // No payload available — fall back to a refetch.
+        void queryClient.invalidateQueries({ queryKey: key });
+        return;
+      }
+      // Optimistically append the new message to the cache so the user sees
+      // it without a network round-trip. Dedupe by id in case the same row
+      // arrives twice (realtime retry + our own send).
+      queryClient.setQueryData<ThreadDetailResponse>(key, (prev) => {
+        if (!prev) return prev;
+        if (prev.messages.some((existing) => existing.id === message.id)) {
+          return prev;
+        }
+        return { ...prev, messages: [...prev.messages, message] };
+      });
     });
   }, [threadId]);
 
   const myId = session?.user.id ?? '';
   const messages = threadQuery.data?.messages ?? [];
-  // FlatList is inverted, so render newest-first.
-  const ordered = [...messages].reverse();
+  // FlatList is inverted, so render newest-first. Memoize to avoid
+  // re-reversing on every draft / state change.
+  const ordered = useMemo(() => [...messages].reverse(), [messages]);
   const title = threadQuery.data?.thread.otherUserName ?? 'Conversation';
 
   async function handleSend() {
@@ -67,14 +86,14 @@ export default function ThreadScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.flex} edges={['top']}>
+      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <ThemedText type="smallBold">{title}</ThemedText>
         </View>
 
         <KeyboardAvoidingView
           style={styles.flex}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           {threadQuery.isPending ? (
             <View style={styles.centered}>
               <ActivityIndicator />
@@ -114,7 +133,7 @@ export default function ThreadScreen() {
           )}
 
           {error ? (
-            <ThemedText type="small" style={styles.error}>
+            <ThemedText type="small" style={[styles.error, { color: theme.error }]}>
               {error}
             </ThemedText>
           ) : null}
@@ -206,7 +225,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   error: {
-    color: '#E5484D',
     paddingHorizontal: Spacing.three,
   },
 });

@@ -10,6 +10,7 @@ import { Chip } from '@/components/ui/chip';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { MIN_AGE, ageInYears } from '@/lib/age';
 import { api } from '@/lib/api';
 import {
   GENDER_OPTIONS,
@@ -19,8 +20,6 @@ import {
 } from '@/lib/onboarding-options';
 import { queryClient } from '@/lib/query-client';
 import { PROFILE_STATUS_QUERY_KEY } from '@/lib/use-profile-status';
-
-const MIN_AGE = 18;
 
 const STEP_META = [
   { title: "When's your birthday?", subtitle: 'You must be 18 or older to use BiggDate.' },
@@ -57,7 +56,11 @@ export default function OnboardingScreen() {
   function currentStepError(): string | null {
     switch (step) {
       case 0:
-        return birthday ? null : 'Pick your date of birth.';
+        if (!birthday) return 'Pick your date of birth.';
+        if (ageInYears(birthday) < MIN_AGE) {
+          return `You must be at least ${MIN_AGE} to use BiggDate.`;
+        }
+        return null;
       case 1:
         return gender ? null : 'Choose how you identify.';
       case 2:
@@ -186,7 +189,7 @@ export default function OnboardingScreen() {
             {step === 4 ? renderChips(INTENT_OPTIONS, intent, setIntent) : null}
 
             {error ? (
-              <ThemedText type="small" style={styles.error}>
+              <ThemedText type="small" style={{ color: theme.error }}>
                 {error}
               </ThemedText>
             ) : null}
@@ -244,5 +247,4 @@ const styles = StyleSheet.create({
   },
   backButton: { flex: 1 },
   continueButton: { flex: 2 },
-  error: { color: '#E5484D' },
 });

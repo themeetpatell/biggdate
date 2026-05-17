@@ -61,7 +61,7 @@ export function PulsePostCard({ post }: { post: PulsePost }) {
           <Ionicons
             name={resonated ? 'heart' : 'heart-outline'}
             size={18}
-            color={resonated ? '#E5484D' : theme.textSecondary}
+            color={resonated ? theme.error : theme.textSecondary}
           />
           <ThemedText type="small" themeColor="textSecondary">
             {count}

@@ -9,6 +9,30 @@ A founder's punch list built from the full feature audit, the investor Q&A risks
 
 ---
 
+## Shipped since this punch-list was written (delta as of 2026-05-18)
+
+- ✅ **Photo moderation now fail-closed** for NSFW + infra-outage paths (commit `770934e`).
+- ✅ **Real age gate** at signup — DOB capture + 18+ enforcement (commit `f77b09f`, migration `202605170004`).
+- ✅ **Consent banner** gating PostHog + Meta Pixel + Microsoft Clarity (only loads after accept).
+- ✅ **A/B test infrastructure** — `experiments` table + assignment logic (commit `9fe93f8`, migration `202605150005`).
+- ✅ **Soul Knock question quality scoring** with experiment-gated soft-block (commit `96f276b`).
+- ✅ **AI cost instrumentation at every AI surface** — per-call rows in `ai_costs` (commits `71c5e77`, `fb03221`).
+- ✅ **Voice notes UI** wired into threads with a 60s cap (commits `b89dd27`, `f523646`).
+- ✅ **In-thread date scheduler** — propose, accept, calendar handoff (commit `b89dd27`).
+- ✅ **Daily Soul Knock email** — 7 day-of-week variants via the cron orchestrator (commit `a5aeab1`).
+- ✅ **Add-on entitlement enforcement** — Incognito + Read Receipts (commit `a05817e`).
+- ✅ **Removed AI provider fallbacks** — Ollama and Ollama Cloud dropped (commit `244001b`).
+- ✅ **Removed mood check-ins** (commit `244001b`).
+- ✅ **Stripped fake features** from marketing surfaces (commits `f67a501`, `a518f6e`).
+- ✅ **Push subscription endpoint** + table — APNS / FCM still deferred until mobile ships.
+- ✅ **Early Access billing pivot** — Premium unlocks via redemption code at `/settings/billing` (commit `ec2342c`).
+- ✅ **Dual-mode auth** — Bearer token or session cookie (commit `aeac1f1`).
+- ✅ **Self-serve data export** endpoint at `/api/auth/export` (commit `f77b09f`).
+- ✅ **Realtime messaging still polling** — migration to Supabase Realtime queued.
+- ✅ **DM moderation gate** on outbound messages (commit `004aa7a`).
+
+---
+
 ## FIX — Things that exist but aren't right
 
 ### P0 · Trust & launch readiness

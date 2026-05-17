@@ -2,7 +2,7 @@ import "react-native-url-polyfill/auto";
 
 import { createClient, type SupportedStorage } from "@supabase/supabase-js";
 import * as SecureStore from "expo-secure-store";
-import { AppState } from "react-native";
+import { AppState, type NativeEventSubscription } from "react-native";
 
 import { env } from "./env";
 
@@ -31,12 +31,22 @@ export const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
 
 /**
  * Supabase only refreshes tokens while the app is foregrounded. Pause the
- * refresh loop in the background and resume it on return.
+ * refresh loop in the background and resume it on return. Exposing the
+ * subscription lets the root layout tear it down on unmount (mostly relevant
+ * for tests and Fast Refresh — the listener would otherwise stack up).
  */
-AppState.addEventListener("change", (state) => {
-  if (state === "active") {
-    void supabase.auth.startAutoRefresh();
-  } else {
-    void supabase.auth.stopAutoRefresh();
-  }
-});
+let appStateSubscription: NativeEventSubscription | null = AppState.addEventListener(
+  "change",
+  (state) => {
+    if (state === "active") {
+      void supabase.auth.startAutoRefresh();
+    } else {
+      void supabase.auth.stopAutoRefresh();
+    }
+  },
+);
+
+export function teardownSupabaseAppStateListener(): void {
+  appStateSubscription?.remove();
+  appStateSubscription = null;
+}

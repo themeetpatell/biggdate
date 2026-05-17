@@ -8,12 +8,15 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/lib/auth-context';
 
 const MIN_PASSWORD_LENGTH = 10;
 const MIN_USERNAME_LENGTH = 3;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignUpScreen() {
+  const theme = useTheme();
   const { signUp } = useAuth();
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
@@ -32,7 +35,9 @@ export default function SignUpScreen() {
     if (!/^[a-z0-9._]+$/.test(username.trim().toLowerCase())) {
       return 'Username can use only letters, numbers, periods, and underscores.';
     }
-    if (!email.trim()) return 'Enter your email.';
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) return 'Enter your email.';
+    if (!EMAIL_PATTERN.test(trimmedEmail)) return 'Enter a valid email address.';
     if (password.length < MIN_PASSWORD_LENGTH) {
       return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
     }
@@ -121,7 +126,7 @@ export default function SignUpScreen() {
               />
 
               {error ? (
-                <ThemedText type="small" style={styles.error}>
+                <ThemedText type="small" style={{ color: theme.error }}>
                   {error}
                 </ThemedText>
               ) : null}
@@ -165,5 +170,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  error: { color: '#E5484D' },
 });

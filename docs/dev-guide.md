@@ -6,17 +6,22 @@ BiggDate is a Next.js App Router product backed by Supabase Postgres. It include
 
 ## Tech Stack
 
-- Next.js 16 App Router
+- Next.js 16 App Router (`src/proxy.ts` replaces `middleware.ts`)
 - React 19
 - TypeScript strict mode
-- Tailwind CSS 4
-- Supabase Auth and Postgres
+- Tailwind CSS 4 + shadcn/ui + framer-motion + base-ui/react
+- Supabase Auth, Postgres, and Storage
 - Direct Postgres access through `pg`
-- Stripe billing
-- AI SDK with Gemini, OpenAI, Ollama, and Ollama Cloud support
-- Resend email
-- Upstash Redis rate limiting
-- Sentry and Vercel Analytics
+- Stripe billing (subscription + add-ons) with an Early Access redemption mode (no Stripe required) toggled via `BILLING_MODE`
+- AI SDK v6 with Gemini (default — `gemini-2.5-flash`) and OpenAI fallback (Ollama paths were removed)
+- Resend transactional email
+- Upstash Redis rate limiting (in-memory sliding-window fallback for dev)
+- Sightengine photo moderation
+- Web Push (`web-push` + VAPID) for browser push notifications
+- Sentry (server + browser via `instrumentation.ts` and `instrumentation-client.ts`)
+- PostHog product analytics + Meta Pixel acquisition tracking (consent-gated)
+- Vercel Analytics and Vercel Fluid Compute hosting
+- npm workspaces (`apps/*`, `packages/*`) with `@biggdate/shared` for cross-target primitives
 
 ## Local Setup
 
@@ -83,13 +88,17 @@ npm run dev
 Use `.env.example` as the contract. Required production groups:
 
 - Application: `NEXT_PUBLIC_APP_URL`
-- Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_DB_URL`
-- AI: provider-specific key for `AI_PROVIDER`
-- Stripe: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, price IDs
+- Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_DB_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+- AI: `AI_PROVIDER` plus the matching key (`GEMINI_API_KEY` + `GEMINI_MODEL`, or `OPENAI_API_KEY` + `OPENAI_MODEL`)
+- Billing mode: `BILLING_MODE` and `NEXT_PUBLIC_BILLING_MODE` (`early_access` | `stripe`)
+- Stripe (when `BILLING_MODE=stripe`): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and every `NEXT_PUBLIC_STRIPE_PRICE_*` (Premium monthly/quarterly, Pro monthly/quarterly, and the seven add-on price IDs)
+- Early Access (when `BILLING_MODE=early_access`): `EARLY_ACCESS_CODES`, `ADDON_COUPON_CODES`, `NEXT_PUBLIC_EARLY_ACCESS_WHATSAPP`
 - Email: `RESEND_API_KEY`, `RESEND_FROM`
 - Redis: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- Moderation: `SIGHTENGINE_USER`, `SIGHTENGINE_SECRET`
-- Observability: Sentry DSNs and sample rates
+- Photo moderation: `SIGHTENGINE_USER`, `SIGHTENGINE_SECRET`
+- Web push: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`
+- Observability: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, sample-rate vars, PostHog/Meta Pixel keys (loaded only after consent)
+- Internal & operational: `INTERNAL_API_SECRET` (cron / signed internal calls), `PULSE_ANON_SECRET`, `ADMIN_USER_IDS`
 
 ## API Structure
 

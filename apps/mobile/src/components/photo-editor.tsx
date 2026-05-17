@@ -67,7 +67,14 @@ export function PhotoEditor({ photos, onChange }: PhotoEditorProps) {
             accessibilityLabel="Remove photo"
             onPress={() => handleRemove(url)}
             style={styles.tile}>
-            <Image source={{ uri: url }} style={styles.photo} contentFit="cover" />
+            <Image
+              source={{ uri: url }}
+              style={styles.photo}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              recyclingKey={url}
+              accessibilityLabel="Profile photo"
+            />
             <View style={[styles.removeBadge, { backgroundColor: theme.text }]}>
               <ThemedText type="smallBold" style={{ color: theme.background }}>
                 ×
@@ -96,7 +103,7 @@ export function PhotoEditor({ photos, onChange }: PhotoEditorProps) {
       </View>
 
       {error ? (
-        <ThemedText type="small" style={styles.error}>
+        <ThemedText type="small" style={{ color: theme.error }}>
           {error}
         </ThemedText>
       ) : null}
@@ -137,5 +144,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  error: { color: '#E5484D' },
 });

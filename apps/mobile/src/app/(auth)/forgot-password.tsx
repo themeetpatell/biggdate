@@ -8,9 +8,13 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/lib/auth-context';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function ForgotPasswordScreen() {
+  const theme = useTheme();
   const { requestPasswordReset } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -19,13 +23,18 @@ export default function ForgotPasswordScreen() {
 
   async function handleSubmit() {
     setError(null);
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       setError('Enter your email.');
+      return;
+    }
+    if (!EMAIL_PATTERN.test(trimmedEmail)) {
+      setError('Enter a valid email address.');
       return;
     }
     setSubmitting(true);
     try {
-      await requestPasswordReset(email);
+      await requestPasswordReset(trimmedEmail);
       setSent(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not send the reset email.');
@@ -64,7 +73,7 @@ export default function ForgotPasswordScreen() {
               />
 
               {error ? (
-                <ThemedText type="small" style={styles.error}>
+                <ThemedText type="small" style={{ color: theme.error }}>
                   {error}
                 </ThemedText>
               ) : null}
@@ -106,5 +115,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  error: { color: '#E5484D' },
 });

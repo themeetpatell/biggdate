@@ -6,6 +6,8 @@
  * `process.env`). Set these in `apps/mobile/.env` — see `.env.example`.
  */
 
+declare const __DEV__: boolean;
+
 function required(name: string, value: string | undefined): string {
   if (!value || value.length === 0) {
     throw new Error(
@@ -15,12 +17,23 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
+function apiUrlValue(): string | null {
+  const raw = process.env.EXPO_PUBLIC_API_URL;
+  if (raw && raw.length > 0) return raw;
+  if (!__DEV__) {
+    throw new Error(
+      'Missing required env var: EXPO_PUBLIC_API_URL. Production builds must point at a real backend.',
+    );
+  }
+  return null;
+}
+
 export const env = {
-  supabaseUrl: required("EXPO_PUBLIC_SUPABASE_URL", process.env.EXPO_PUBLIC_SUPABASE_URL),
+  supabaseUrl: required('EXPO_PUBLIC_SUPABASE_URL', process.env.EXPO_PUBLIC_SUPABASE_URL),
   supabaseAnonKey: required(
-    "EXPO_PUBLIC_SUPABASE_ANON_KEY",
+    'EXPO_PUBLIC_SUPABASE_ANON_KEY',
     process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   ),
-  /** Backend base URL. Defaults to localhost in dev when unset. */
-  apiUrl: process.env.EXPO_PUBLIC_API_URL ?? null,
+  /** Backend base URL. Defaults to localhost in dev when unset; required in production. */
+  apiUrl: apiUrlValue(),
 } as const;

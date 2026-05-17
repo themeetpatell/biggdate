@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { api } from "./api";
+import { queryClient } from "./query-client";
 import { supabase } from "./supabase";
 
 export interface SignUpInput {
@@ -40,11 +41,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        setSession(data.session);
+      })
+      .catch(() => {
+        // Keychain / SecureStore read can fail (locked device, corrupted
+        // entry on Android). Treat as no session rather than spinning forever.
+        if (!active) return;
+        setSession(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
     });
@@ -68,22 +79,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp: async (input) => {
         // Signup runs through the backend route — it creates the account
         // handle row and emits analytics that direct Supabase signUp skips.
-        const result = await api.post<{ status: string; message?: string }>(
-          "/api/auth/signup",
-          {
-            email: input.email.trim().toLowerCase(),
-            password: input.password,
-            fullName: input.fullName.trim(),
-            username: input.username.trim().toLowerCase(),
-            phone: input.phone?.trim() || undefined,
-          },
-        );
+        const result = await api.post<{
+          status: SignUpResult["status"];
+          message?: string;
+        }>("/api/auth/signup", {
+          email: input.email.trim().toLowerCase(),
+          password: input.password,
+          fullName: input.fullName.trim(),
+          username: input.username.trim().toLowerCase(),
+          phone: input.phone?.trim() || undefined,
+        });
         if (result.status === "pending_confirmation") {
           return {
             status: "pending_confirmation",
             message:
               result.message ?? "Check your inbox to confirm your email, then sign in.",
           };
+        }
+        if (result.status !== "authenticated") {
+          throw new Error(
+            `Unexpected signup status from server: ${String(result.status)}`,
+          );
         }
         // Account is live — obtain a native (token) session.
         const { error } = await supabase.auth.signInWithPassword({
@@ -95,6 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: async () => {
         await supabase.auth.signOut();
+        // Drop cached profile, matches, messages, intros so the next user
+        // on a shared device starts from a clean state.
+        queryClient.clear();
       },
       requestPasswordReset: async (email) => {
         const { error } = await supabase.auth.resetPasswordForEmail(

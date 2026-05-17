@@ -143,7 +143,7 @@ export function AiChat({
           />
 
           {error ? (
-            <ThemedText type="small" style={styles.error}>
+            <ThemedText type="small" style={[styles.error, { color: theme.error }]}>
               Something went wrong. Try sending that again.
             </ThemedText>
           ) : null}
@@ -240,7 +240,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   error: {
-    color: '#E5484D',
     paddingHorizontal: Spacing.three,
   },
 });

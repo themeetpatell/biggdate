@@ -41,10 +41,11 @@ BiggDate is an AI-assisted dating product built for **intentional relationships*
 - **Working mantra:** *Dating that respects your time.*
 - **Category:** Relationship-intelligence dating platform.
 - **Initial market:** India (Ahmedabad-anchored, India DPDP context). Designed for global English-speaking expansion.
-- **Current stage:** MVP feature-complete; private beta with ~14 test users; pre-public launch hardening underway.
-- **Plans:** Free / Premium ($19.99/mo or $149.99/yr) / Pro, with à la carte add-ons (Boost, Life Preview, Super Like, Read Receipts, Incognito, Profile Review, Spotlight). 7-day free trial on Premium.
+- **Current stage:** MVP feature-complete; open beta with **40 active web users** (founder-onboarded via WhatsApp); native iOS + Android in QA.
+- **Billing mode:** **Early Access** is the active mode — Premium unlocked via founder-issued redemption codes at `/settings/billing`. Stripe paths remain in the tree, dormant, and re-activate via `BILLING_MODE=stripe`.
+- **Plans:** Free / Premium ($19.99/mo or $54.99/quarter equivalent) / Pro (monthly + quarterly priced — TBD public), with à la carte add-ons (Boost, Life Preview, Super Like, Read Receipts, Incognito, Profile Review, Spotlight) — all seven now have live Stripe price IDs. 7-day free trial on Premium when Stripe mode is active.
 - **90-day target:** 1,000 real users, 15% paid conversion, $1,500+ MRR, 70% D7 retention.
-- **Tech:** Next.js 16 App Router, React 19, TypeScript strict, Supabase (Auth/Postgres/Storage), Stripe, Resend, Upstash, Sentry, Sightengine, Gemini/OpenAI/Ollama via abstraction.
+- **Tech:** Next.js 16 App Router (proxy boundary in `src/proxy.ts`), React 19, TypeScript strict, Supabase (Auth/Postgres/Storage), Stripe (dual-mode), Resend, Upstash Redis, Sentry, Sightengine, PostHog (consent-gated), Meta Pixel (consent-gated), web-push + VAPID, Gemini (default) + OpenAI fallback via `src/lib/ai.ts` abstraction. Ollama paths were removed.
 - **Differentiator:** Structured onboarding + Soul Knock + Life Preview + Maahi companion form a relationship-quality moat that volume-swipe apps cannot easily replicate.
 
 ---
@@ -176,7 +177,7 @@ This section covers every shipped feature domain with capability, surface area, 
 - Client-side compression before upload ([src/lib/photo-compress.ts](src/lib/photo-compress.ts)) — 5–20× reduction on typical phone photos.
 - Sightengine moderation; flagged photos return 422 so the client never commits the URL.
 - Every verdict logged to `photo_moderation` table for audit.
-- Fail-open behavior on infra errors so users are not blocked by a moderation outage.
+- **Fail-closed** behavior on infra errors (commit `770934e`): when Sightengine is unreachable or flags NSFW signals, the upload is blocked rather than auto-approved. Trust posture is preferred over upload latency on outage.
 
 ### 5.4 Matching & Soul Knock Intros
 
@@ -416,7 +417,7 @@ Stripe price IDs are environment-driven: `NEXT_PUBLIC_STRIPE_PRICE_MONTHLY`, `_A
 - **Styling:** Tailwind CSS 4, shadcn/ui, framer-motion, base-ui/react.
 - **Auth + DB:** Supabase Auth + Postgres + Storage; direct `pg` for server-side data access.
 - **Payments:** Stripe (Checkout + Customer Portal + Webhooks).
-- **AI:** AI SDK v6 with Gemini, OpenAI, Ollama, Ollama Cloud via [src/lib/ai.ts](src/lib/ai.ts) abstraction. Default provider: Gemini (`gemini-2.5-flash`).
+- **AI:** AI SDK v6 with Gemini (default — `gemini-2.5-flash`) and OpenAI as the premium / high-stakes fallback via [src/lib/ai.ts](src/lib/ai.ts) abstraction. Ollama and Ollama Cloud paths were removed (commit `244001b`) to reduce surface area pre-launch.
 - **Email:** Resend (`maahi@biggdate.app` sender).
 - **Rate limiting:** Upstash Redis with in-memory fallback for dev.
 - **Photo moderation:** Sightengine.
@@ -429,7 +430,7 @@ Stripe price IDs are environment-driven: `NEXT_PUBLIC_STRIPE_PRICE_MONTHLY`, `_A
 - [src/components](src/components) — shared UI and product components.
 - [src/lib](src/lib) — repositories, providers, auth, billing, AI, moderation, logging, utilities.
 - [src/proxy.ts](src/proxy.ts) — request proxy / auth boundary (Next 16 replaces middleware.ts with proxy.ts).
-- [supabase/migrations](supabase/migrations) — database schema migrations (12 currently).
+- [supabase/migrations](supabase/migrations) — database schema migrations (36 currently).
 - [scripts](scripts) — repo and docs checks plus seed scripts.
 - [docs](docs) — user, developer, product, brand, standards docs.
 
@@ -494,7 +495,7 @@ CSP and HSTS configured in [next.config.ts](next.config.ts). HSTS is 2-year with
 
 ## 10. API Surface
 
-The product exposes ~50 route handlers across these domains. Full endpoint list in [docs/product/api-reference.md](docs/product/api-reference.md).
+The product exposes **78 route handlers** across these domains. Full endpoint list in [docs/product/api-reference.md](docs/product/api-reference.md).
 
 ### 10.1 Health
 - `GET /api/health` — DB-checking health endpoint (200 with `{status, checks: {db}}`, 503 if DB unreachable). Wired for Vercel and external uptime monitors.
@@ -542,7 +543,7 @@ The product exposes ~50 route handlers across these domains. Full endpoint list 
 - Sightengine integration in [src/lib/photo-moderation.ts](src/lib/photo-moderation.ts).
 - Every verdict recorded to `photo_moderation` (status, provider, scores, reason).
 - Flagged uploads return 422 — the client never commits the URL.
-- Fail-open behavior on infra errors (better than blocking everyone during a Sightengine outage).
+- **Fail-closed** behavior on infra errors and NSFW signals (commit `770934e`) — uploads are blocked rather than auto-approved.
 - Admin moderation queue at `/admin/photo-moderation`.
 
 ### 11.2 Reporting & blocking
@@ -621,7 +622,7 @@ Tune post-launch using abuse rate, support tickets, signup conversion.
 - `/api/health` returns 200 with DB check, 503 if DB unreachable. Wired for Vercel and external uptime monitors (Better Stack, UptimeRobot recommended).
 
 ### 13.4 AI failure modes
-- AI provider abstraction supports Gemini / OpenAI / Ollama for fallback.
+- AI provider abstraction supports Gemini (default) and OpenAI fallback. Ollama paths were removed.
 - Match generation has a soft-fail JSON parse path returning empty list — watched via logs (`[matches/generate] JSON parse failed:`).
 - Companion / coach / life-preview routes are plan-gated to bound cost.
 
@@ -698,10 +699,10 @@ The product is built so AI assistants and search engines surface BiggDate when u
 ## 16. Operating Status & Traction
 
 ### 16.1 Today (2026-05-03)
-- ~14 test users (private beta). The team is explicitly **not** quoting waitlist numbers it cannot back up.
-- MVP feature-complete across onboarding, profile, matching, intros, messaging, companion, coach, life preview, pulse, verification, safety, billing, admin.
-- Public marketing pages live: home, /how-it-works, /compare, /faq, /about, /contact, /privacy, /terms.
-- 12 database migrations applied locally; production migration apply pending.
+- **40 active web beta users** (founder-onboarded via WhatsApp). Native iOS + Android in QA. The team is explicitly **not** quoting waitlist numbers it cannot back up.
+- MVP feature-complete across onboarding, profile, matching, intros (Soul Knock + quality scoring), messaging (with voice notes + DM moderation + date proposals), companion (Maahi 16 modes), coach, Life Preview, debrief, Pulse, verification, safety, billing (Early Access + Stripe), commitment tracking, push notifications, admin dashboard.
+- Public marketing pages live: home, /how-it-works, /compare, /faq, /about, /contact, /privacy, /terms, /glossary, /vs, /simulation, /community-guidelines, /scam-warning, /cookies, /imprint, /region-blocked.
+- **36 database migrations** applied locally; production migration apply tracked in `launch-readiness.md`.
 
 ### 16.2 Launch readiness — Wave 1 complete
 - ✅ Auth-provider redirect fix for partial-profile users.
@@ -889,10 +890,13 @@ ADMIN_USER_IDS                   # comma-separated user UUIDs
 | Stripe | Payments + subscription lifecycle | Webhook idempotency via `stripe_events` |
 | Resend | Transactional email | Fire-and-forget; never blocks user flow |
 | Upstash Redis | Rate limiting | In-memory sliding-window fallback |
-| Sightengine | Photo moderation | Fail-open with audit log |
+| Sightengine | Photo moderation | Fail-closed with audit log (`photo_moderation`) |
 | Sentry | Error monitoring | Optional via DSN |
 | Vercel Analytics | Pageview / web vitals | Optional |
-| Gemini / OpenAI / Ollama | AI generation | Provider abstraction, swap by env |
+| Gemini (default) / OpenAI (fallback) | AI generation | Provider abstraction in `src/lib/ai.ts`; Ollama removed |
+| PostHog | Product analytics + funnel events | Loaded only after consent |
+| Meta Pixel | Acquisition tracking | Loaded only after consent |
+| web-push (VAPID) | Browser push notifications | Fire-and-forget; failures logged |
 
 ### 20.3 Documentation index
 - [README.md](README.md)

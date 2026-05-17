@@ -10,6 +10,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useProfile, useUpdateProfile } from '@/lib/use-profile';
 
 export default function ProfileEditScreen() {
@@ -37,6 +38,7 @@ export default function ProfileEditScreen() {
 
 function ProfileEditForm({ profile }: { profile: Profile }) {
   const router = useRouter();
+  const theme = useTheme();
   const updateProfile = useUpdateProfile();
 
   const [photos, setPhotos] = useState<string[]>(profile.photos ?? []);
@@ -134,7 +136,7 @@ function ProfileEditForm({ profile }: { profile: Profile }) {
               />
 
               {error ? (
-                <ThemedText type="small" style={styles.error}>
+                <ThemedText type="small" style={{ color: theme.error }}>
                   {error}
                 </ThemedText>
               ) : null}
@@ -174,5 +176,4 @@ const styles = StyleSheet.create({
   },
   cancelButton: { flex: 1 },
   saveButton: { flex: 2 },
-  error: { color: '#E5484D' },
 });
