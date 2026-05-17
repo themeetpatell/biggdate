@@ -16,9 +16,18 @@ import {
 import { useAuth } from "@/components/auth-provider";
 import { trackSignUp, trackLogin } from "@/lib/gtm";
 import { COUNTRY_PHONE_OPTIONS, TIMEZONE_TO_ISO2 } from "@/lib/location-data";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+
+// Reads NEXT_PUBLIC_OAUTH_PROVIDERS to enable Apple/Google sign-in only after
+// the Supabase project has the provider configured. Default empty so we
+// never show a button that 500s for the user.
+const OAUTH_PROVIDERS = (process.env.NEXT_PUBLIC_OAUTH_PROVIDERS ?? "")
+  .split(",")
+  .map((p) => p.trim().toLowerCase())
+  .filter((p): p is "google" | "apple" => p === "google" || p === "apple");
 
 type AuthMode = "login" | "signup" | "forgot" | "reset";
 
@@ -59,15 +68,15 @@ const MODE_CONTENT: Record<
     subtitle:
       "Step back into your dashboard, date briefs, and coaching without the usual friction.",
     cta: "Log In",
-    hint: "Use your username and password.",
+    hint: "Use your username or email and password.",
   },
   signup: {
-    eyebrow: "Private beta access",
-    title: "Create the account behind your soul profile.",
+    eyebrow: "Early access",
+    title: "Create the account behind your Soul Profile.",
     subtitle:
       "We keep the entry flow minimal so you can get into onboarding and start building real match context fast.",
     cta: "Create Account",
-    hint: "Password must be at least 6 characters.",
+    hint: "Password must be at least 10 characters.",
   },
   forgot: {
     eyebrow: "Password recovery",
@@ -83,7 +92,7 @@ const MODE_CONTENT: Record<
     subtitle:
       "Choose a strong password to secure your account.",
     cta: "Update Password",
-    hint: "Password must be at least 6 characters.",
+    hint: "Password must be at least 10 characters.",
   },
 };
 
@@ -187,12 +196,10 @@ function AuthPageInner() {
 
   const content = MODE_CONTENT[mode];
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedPhone = normalizePhone(phone);
   const normalizedFullName = fullName.trim();
   const normalizedUsername = username.trim().toLowerCase();
-  const selectedPhoneOption =
-    COUNTRY_PHONE_OPTIONS.find((option) => option.iso2 === phoneCountryIso2) || COUNTRY_PHONE_OPTIONS[0];
-  const fullPhoneNumber = `${selectedPhoneOption.dialCode}${normalizedPhone}`;
+  // Phone normalization + country lookup happen lazily inside handleSubmit
+  // now that phone is optional and isn't part of the canSubmit gate.
   const fieldSurfaceStyle = {
     background: "var(--bd-surface)",
     border: "1px solid var(--bd-border)",
@@ -201,22 +208,26 @@ function AuthPageInner() {
       "inset 0 1px 0 var(--bd-surface-overlay), 0 12px 28px rgba(0,0,0,0.08)",
   } as const;
 
+  // Login keeps the legacy 6-char floor so users with existing passwords can
+  // still sign in. New signups and password resets require 10+.
+  const SIGNUP_MIN = 10;
+  const LOGIN_MIN = 6;
+
   let canSubmit = false;
   if (mode === "signup") {
     canSubmit =
       normalizedFullName.length > 0 &&
       normalizedUsername.length >= 3 &&
       normalizedEmail.length > 0 &&
-      isValidPhone(fullPhoneNumber) &&
-      password.length >= 6 &&
+      password.length >= SIGNUP_MIN &&
       ageConfirmed;
   } else if (mode === "login") {
     const loginValue = loginIdentifier.trim().toLowerCase();
-    canSubmit = (isValidEmail(loginValue) || loginValue.length >= 3) && password.length >= 6;
+    canSubmit = (isValidEmail(loginValue) || loginValue.length >= 3) && password.length >= LOGIN_MIN;
   } else if (mode === "forgot") {
     canSubmit = normalizedEmail.length > 0;
   } else if (mode === "reset") {
-    canSubmit = password.length >= 6 && confirmPassword.length >= 6;
+    canSubmit = password.length >= SIGNUP_MIN && confirmPassword.length >= SIGNUP_MIN;
   }
 
   const switchMode = (nextMode: AuthMode) => {
@@ -225,6 +236,33 @@ function AuthPageInner() {
     setNotice("");
     setPassword("");
     setConfirmPassword("");
+  };
+
+  const handleOAuth = async (provider: "google" | "apple") => {
+    setError("");
+    setLoading(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          // Route through /onboarding/basics — that page self-redirects to
+          // /onboarding (psych chat) once basics are filled, and to
+          // /dashboard once the full Soul Profile summary is saved.
+          redirectTo: `${origin}/auth/callback?next=/onboarding/basics`,
+        },
+      });
+      if (oauthError) {
+        setError("Could not start sign-in. Try email instead.");
+        setLoading(false);
+      }
+      // On success, the browser is redirected away. Don't toggle loading off
+      // — keep the button disabled until the redirect happens.
+    } catch {
+      setError("Could not start sign-in. Try email instead.");
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -251,8 +289,15 @@ function AuthPageInner() {
       setError("Username can only use letters, numbers, periods, and underscores.");
       return;
     }
-    if ((mode === "signup" || mode === "login" || mode === "reset") && password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    // Login keeps the legacy 6-char floor (existing accounts).
+    // Signup + reset require 10+ for new credentials.
+    const minLen = mode === "login" ? 6 : 10;
+    if ((mode === "signup" || mode === "login" || mode === "reset") && password.length < minLen) {
+      setError(
+        mode === "login"
+          ? "Password must be at least 6 characters."
+          : "Password must be at least 10 characters.",
+      );
       return;
     }
     if (mode === "reset" && password !== confirmPassword) {
@@ -263,8 +308,9 @@ function AuthPageInner() {
       setError("Enter a valid email address.");
       return;
     }
-    if (mode === "signup" && !isValidPhone(nextFullPhone)) {
-      setError("Enter a valid phone number.");
+    // Phone is optional at signup. If provided, validate format.
+    if (mode === "signup" && nextPhone && !isValidPhone(nextFullPhone)) {
+      setError("Enter a valid phone number or leave it empty.");
       return;
     }
     if (mode === "login" && !isValidEmail(nextLoginIdentifier) && nextLoginIdentifier.length < 3) {
@@ -333,8 +379,9 @@ function AuthPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: mode === "signup" ? nextEmail : undefined,
-          phone: mode === "signup" ? nextFullPhone : undefined,
-          phoneCountryIso2: mode === "signup" ? nextPhoneOption.iso2 : undefined,
+          // Only send phone fields when a phone was actually entered.
+          phone: mode === "signup" && nextPhone ? nextFullPhone : undefined,
+          phoneCountryIso2: mode === "signup" && nextPhone ? nextPhoneOption.iso2 : undefined,
           password,
           fullName: mode === "signup" ? nextFullName : undefined,
           username: mode === "signup" ? nextUsername : nextLoginIdentifier,
@@ -371,7 +418,14 @@ function AuthPageInner() {
       if (mode === "login") trackLogin();
 
       await refresh();
-      router.replace(me.hasProfile ? "/dashboard" : "/onboarding");
+      // Route by completion state, not "row exists". /onboarding/basics
+      // self-redirects to /onboarding once basics are saved, and /onboarding
+      // self-redirects to /soul-snapshot once summary is saved — so this is
+      // the only branch point we need.
+      const fullyOnboarded = Boolean(
+        (me as AuthResponse & { profile?: { summary?: string | null } }).profile?.summary,
+      );
+      router.replace(fullyOnboarded ? "/dashboard" : "/onboarding/basics");
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
@@ -491,6 +545,45 @@ function AuthPageInner() {
               </div>
             </div>
 
+            {(mode === "signup" || mode === "login") && OAUTH_PROVIDERS.length > 0 && (
+              <div className="mb-5 space-y-2">
+                {OAUTH_PROVIDERS.includes("google") && (
+                  <button
+                    type="button"
+                    onClick={() => handleOAuth("google")}
+                    disabled={loading}
+                    className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white text-[15px] font-semibold text-[#1a1a1a] transition hover:bg-white/95 disabled:opacity-60"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
+                      <path fill="#4285F4" d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.26h2.9c1.7-1.56 2.69-3.88 2.69-6.61z" />
+                      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.34A9 9 0 0 0 9 18z" />
+                      <path fill="#FBBC05" d="M3.95 10.7a5.41 5.41 0 0 1 0-3.41V4.96H.96a9 9 0 0 0 0 8.09l2.99-2.35z" />
+                      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.96l2.99 2.34C4.66 5.17 6.65 3.58 9 3.58z" />
+                    </svg>
+                    Continue with Google
+                  </button>
+                )}
+                {OAUTH_PROVIDERS.includes("apple") && (
+                  <button
+                    type="button"
+                    onClick={() => handleOAuth("apple")}
+                    disabled={loading}
+                    className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/12 bg-black text-[15px] font-semibold text-white transition hover:bg-black/90 disabled:opacity-60"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M17.05 12.04c-.03-2.79 2.28-4.13 2.39-4.2-1.31-1.91-3.34-2.17-4.05-2.2-1.72-.18-3.36 1.01-4.24 1.01-.88 0-2.22-.99-3.66-.96-1.88.03-3.62 1.09-4.59 2.77-1.96 3.4-.5 8.43 1.4 11.19.93 1.36 2.04 2.88 3.48 2.83 1.4-.06 1.93-.9 3.62-.9 1.69 0 2.17.9 3.66.87 1.51-.03 2.46-1.38 3.38-2.74 1.06-1.57 1.5-3.09 1.53-3.17-.03-.01-2.94-1.13-2.97-4.5zM14.4 4.04c.77-.94 1.29-2.24 1.15-3.54-1.11.04-2.46.74-3.26 1.67-.72.83-1.35 2.16-1.18 3.44 1.24.09 2.51-.63 3.29-1.57z" />
+                    </svg>
+                    Continue with Apple
+                  </button>
+                )}
+                <div className="flex items-center gap-3 pt-3 text-[11px] text-[var(--bd-text-faint)]">
+                  <div className="h-px flex-1 bg-white/8" />
+                  <span>or with email</span>
+                  <div className="h-px flex-1 bg-white/8" />
+                </div>
+              </div>
+            )}
+
             {(mode === "signup" || mode === "login") && (
               <div
                 className="mb-6 grid grid-cols-2 rounded-[22px] p-1.5"
@@ -592,8 +685,11 @@ function AuthPageInner() {
 
               {mode === "signup" && (
                 <label className="block space-y-2">
-                  <span className="pl-1 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
-                    Phone number
+                  <span className="flex items-center justify-between gap-2 pl-1 pr-1">
+                    <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
+                      Phone number
+                    </span>
+                    <span className="text-[12px] text-[var(--bd-text-muted)]">Optional</span>
                   </span>
                   <div className="grid grid-cols-[144px_1fr] gap-2">
                     <div className="relative">
@@ -619,7 +715,6 @@ function AuthPageInner() {
                       autoComplete="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      required
                       className="h-14 rounded-[1.8rem] pl-12 text-lg text-[var(--bd-text)] placeholder:text-[var(--bd-text-faint)] focus-visible:border-[rgba(255,0,255,0.3)] focus-visible:ring-2 focus-visible:ring-[rgba(255,0,255,0.08)]"
                       style={fieldSurfaceStyle}
                     />
@@ -671,7 +766,7 @@ function AuthPageInner() {
                     <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[var(--bd-text-faint)]" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder={mode === "signup" || mode === "reset" ? "At least 6 characters" : "Enter your password"}
+                      placeholder={mode === "signup" || mode === "reset" ? "At least 10 characters" : "Enter your password"}
                       autoComplete={mode === "signup" || mode === "reset" ? "new-password" : "current-password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

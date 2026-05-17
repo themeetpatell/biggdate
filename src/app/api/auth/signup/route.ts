@@ -55,10 +55,8 @@ export async function POST(req: Request) {
   if (!normalizedFullName) {
     return NextResponse.json({ error: "Full name required" }, { status: 400 });
   }
-  if (!normalizedPhone) {
-    return NextResponse.json({ error: "Phone number required" }, { status: 400 });
-  }
-  if (!/^\+?\d{8,15}$/.test(normalizedPhone)) {
+  // Phone is optional. If provided, validate format.
+  if (normalizedPhone && !/^\+?\d{8,15}$/.test(normalizedPhone)) {
     return NextResponse.json(
       { error: "Enter a valid phone number with country code if outside India" },
       { status: 400 }
@@ -73,8 +71,8 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  if (normalizedPassword.length < 6) {
-    return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+  if (normalizedPassword.length < 10) {
+    return NextResponse.json({ error: "Password must be at least 10 characters" }, { status: 400 });
   }
 
   try {

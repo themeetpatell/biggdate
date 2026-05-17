@@ -17,7 +17,9 @@ type Listener = (muted: boolean) => void;
 
 let ctx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
-let muted = false;
+// Default off. Cinematic audio is opt-in via a visible toggle — autoplaying
+// sound is hostile in public spaces and most mobile browsers gate it anyway.
+let muted = true;
 const listeners = new Set<Listener>();
 
 function ensure(): { ctx: AudioContext; master: GainNode } | null {

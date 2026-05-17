@@ -87,21 +87,27 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
           </p>
         </div>
 
-        {/* Harmony pill */}
-        <div
-          style={{
-            padding: "4px 10px",
-            borderRadius: 999,
-            background: "rgba(79,255,176,0.07)",
-            border: "1px solid rgba(79,255,176,0.15)",
-            fontSize: 11,
-            fontWeight: 600,
-            color: "#4FFFB0",
-            flexShrink: 0,
-          }}
-        >
-          {(match as unknown as { harmonyScore?: number }).harmonyScore || 82}%
-        </div>
+        {/* Harmony pill — only render when a real score is present */}
+        {(() => {
+          const score = (match as unknown as { harmonyScore?: number }).harmonyScore;
+          if (typeof score !== "number" || score <= 0) return null;
+          return (
+            <div
+              style={{
+                padding: "4px 10px",
+                borderRadius: 999,
+                background: "rgba(79,255,176,0.07)",
+                border: "1px solid rgba(79,255,176,0.15)",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#4FFFB0",
+                flexShrink: 0,
+              }}
+            >
+              {score}%
+            </div>
+          );
+        })()}
 
         <span
           style={{
@@ -232,19 +238,29 @@ export default function ConnectPage() {
   const [pendingIntros, setPendingIntros] = useState<SentIntro[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingLoading, setPendingLoading] = useState(true);
+  // null = no error. "ai" when the matching service is degraded, "network"
+  // for connectivity failures. We distinguish them so the UI can be honest
+  // about whether to ask the user to retry or wait it out.
+  const [fetchError, setFetchError] = useState<null | "ai" | "network">(null);
 
   const fetchMatches = useCallback(async () => {
+    setFetchError(null);
     try {
       const res = await fetch("/api/matches/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
+      if (!res.ok) {
+        setFetchError("ai");
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       const list = Array.isArray(data) ? data : (data.matches ?? []);
       if (Array.isArray(list)) setMatches(list);
     } catch {
-      // silent
+      setFetchError("network");
     }
     setLoading(false);
   }, []);
@@ -261,12 +277,18 @@ export default function ConnectPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({}),
         });
+        if (cancelled) return;
+        if (!res.ok) {
+          setFetchError("ai");
+          if (!cancelled) setLoading(false);
+          return;
+        }
         const data = await res.json();
         if (cancelled) return;
         const list = Array.isArray(data) ? data : (data.matches ?? []);
         if (Array.isArray(list)) setMatches(list);
       } catch {
-        // silent
+        if (!cancelled) setFetchError("network");
       }
       if (!cancelled) setLoading(false);
     })();
@@ -344,8 +366,9 @@ export default function ConnectPage() {
           <h1 style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>
             Connect
           </h1>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: "6px 0 0" }}>
-            Soul summaries first. Photos unlock after intention.
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: "6px 0 0", lineHeight: 1.55 }}>
+            Soul summaries first. Photos appear after you both answer a Soul Knock — that&apos;s how we
+            keep the focus on who someone is, not how they look in a single frame.
           </p>
         </div>
 
@@ -448,7 +471,47 @@ export default function ConnectPage() {
         )}
 
         {/* Match list */}
-        {loading ? (
+        {!loading && fetchError ? (
+          <div
+            style={{
+              padding: "24px 22px",
+              borderRadius: 18,
+              border: "1px solid rgba(245,200,66,0.18)",
+              background: "linear-gradient(145deg, rgba(28,22,12,0.95), rgba(20,16,8,0.98))",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 20 }}>⏳</span>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#F5C842" }}>
+                {fetchError === "ai" ? "Maahi is catching her breath" : "Can't reach BiggDate"}
+              </p>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+              {fetchError === "ai"
+                ? "Our matching service is briefly degraded. Your profile is safe and your existing connections are unaffected. Try again in a minute."
+                : "Looks like a network hiccup. Check your connection and try again."}
+            </p>
+            <button
+              onClick={fetchMatches}
+              style={{
+                marginTop: 4,
+                padding: "11px 0",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#0A0A0F",
+                background: "#F5C842",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        ) : loading ? (
           <div
             style={{
               display: "flex",
@@ -494,11 +557,11 @@ export default function ConnectPage() {
               </p>
             </div>
             <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
-              BiggDate is in early access — the pool is small and growing. Two ways to widen it:
+              Maahi is still curating your circle. Two ways to help her find people faster:
             </p>
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7 }}>
               <li>
-                Refine your{" "}
+                Sharpen your{" "}
                 <button
                   onClick={() => router.push("/profile")}
                   style={{
@@ -510,12 +573,12 @@ export default function ConnectPage() {
                     textDecoration: "underline",
                   }}
                 >
-                  profile preferences
+                  profile &amp; preferences
                 </button>{" "}
-                — wider age range or fewer dealbreakers means more pool.
+                — a fuller Soul Profile and a wider age range opens more matches.
               </li>
               <li>
-                Invite founders &amp; operators who&apos;d use this — every signup widens everyone&apos;s pool.
+                Invite someone you&apos;d love to see here — every thoughtful person widens the circle.
               </li>
             </ul>
             <button

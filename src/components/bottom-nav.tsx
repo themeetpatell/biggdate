@@ -4,19 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
-import { isPulseEnabled } from "@/lib/feature-flags";
 
-const ALL_NAV_ITEMS = [
+// Messages is in the nav because it's the single highest-frequency
+// destination for an engaged user. Pulse moved off the bottom rail —
+// community lives one tap deeper.
+const NAV_ITEMS = [
   { href: "/dashboard", icon: "home", label: "Today" },
   { href: "/matches", icon: "heart", label: "Connect" },
-  { href: "/pulse", icon: "pulse", label: "Pulse" },
+  { href: "/messages", icon: "message", label: "Chats" },
   { href: "/companion", icon: "sparkle", label: "Maahi" },
   { href: "/profile", icon: "user", label: "Profile" },
-];
-
-const NAV_ITEMS = ALL_NAV_ITEMS.filter(
-  (item) => item.href !== "/pulse" || isPulseEnabled(),
-);
+] as const;
 
 function HomeIcon({ active }: { active: boolean }) {
   return active ? (
@@ -77,12 +75,12 @@ function UserIcon({ active, avatarUrl }: { active: boolean; avatarUrl?: string }
   );
 }
 
-function PulseIcon({ active }: { active: boolean }) {
+function MessageIcon({ active }: { active: boolean }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="white" strokeWidth={active ? 2.2 : 1.7}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "white" : "none"}
+      stroke="white" strokeWidth={active ? 0 : 1.7}
       strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
     </svg>
   );
 }
@@ -91,17 +89,26 @@ export function BottomNav() {
   const pathname = usePathname();
   const { profile } = useAuth();
   const avatarUrl = profile?.photos?.[0];
-  const [hasPulse, setHasPulse] = useState(false);
+  const [unreadChats, setUnreadChats] = useState(0);
 
-  // Check for today's Pulse prompt (dot indicator). Skipped when Pulse is
-  // disabled — the route returns 404 and the nav item isn't rendered anyway.
+  // Poll the messages list for an unread badge. Cheap call — the API already
+  // sums unread per thread server-side. We refresh on path change so opening
+  // a thread clears the dot immediately.
   useEffect(() => {
-    if (!profile || !isPulseEnabled()) return;
-    fetch("/api/pulse/prompts/today")
+    if (!profile) return;
+    let cancelled = false;
+    fetch("/api/messages")
       .then((r) => r.json())
-      .then((d) => { if (d.prompt) setHasPulse(true); })
+      .then((d) => {
+        if (cancelled) return;
+        type ThreadLite = { unreadCount?: number };
+        const threads: ThreadLite[] = Array.isArray(d?.threads) ? d.threads : [];
+        const total = threads.reduce((sum, t) => sum + (t.unreadCount ?? 0), 0);
+        setUnreadChats(total);
+      })
       .catch(() => {});
-  }, [profile]);
+    return () => { cancelled = true; };
+  }, [profile, pathname]);
 
   if (
     pathname === "/" ||
@@ -162,15 +169,20 @@ export function BottomNav() {
             >
               {item.icon === "home" && <HomeIcon active={active} />}
               {item.icon === "heart" && <HeartIcon active={active} />}
-              {item.icon === "pulse" && (
+              {item.icon === "message" && (
                 <div style={{ position: "relative" }}>
-                  <PulseIcon active={active} />
-                  {hasPulse && !active && (
+                  <MessageIcon active={active} />
+                  {unreadChats > 0 && !active && (
                     <div style={{
-                      position: "absolute", top: -2, right: -2,
-                      width: 7, height: 7, borderRadius: "50%",
+                      position: "absolute", top: -4, right: -6,
+                      minWidth: 16, height: 16, padding: "0 4px",
+                      borderRadius: 999,
                       background: "#e91e8c", border: "2px solid #262626",
-                    }} />
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 9, fontWeight: 700, color: "#fff",
+                    }}>
+                      {unreadChats > 9 ? "9+" : unreadChats}
+                    </div>
                   )}
                 </div>
               )}

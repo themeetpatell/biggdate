@@ -109,20 +109,26 @@ function SealedCard({
                 <br />found for you today
               </p>
             </div>
-            {/* Compatibility orb */}
-            <div
-              style={{
-                padding: "6px 16px",
-                borderRadius: 999,
-                background: "rgba(79,255,176,0.06)",
-                border: "1px solid rgba(79,255,176,0.15)",
-                fontSize: 12,
-                color: "#4FFFB0",
-                fontWeight: 600,
-              }}
-            >
-              {(match as unknown as { harmonyScore?: number }).harmonyScore ?? (78 + (match.id.charCodeAt(match.id.length - 1) % 16))}% harmony
-            </div>
+            {/* Compatibility orb — only render when a real score is present */}
+            {(() => {
+              const score = (match as unknown as { harmonyScore?: number }).harmonyScore;
+              if (typeof score !== "number" || score <= 0) return null;
+              return (
+                <div
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: 999,
+                    background: "rgba(79,255,176,0.06)",
+                    border: "1px solid rgba(79,255,176,0.15)",
+                    fontSize: 12,
+                    color: "#4FFFB0",
+                    fontWeight: 600,
+                  }}
+                >
+                  {score}% harmony
+                </div>
+              );
+            })()}
           </div>
         ) : (
           /* Revealed state — soul summary only, no photo */
