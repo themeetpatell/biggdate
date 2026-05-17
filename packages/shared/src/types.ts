@@ -199,6 +199,44 @@ export interface ThreadDetailResponse {
   hasReadReceipts: boolean;
 }
 
+export type PulsePostType = "prompt_response" | "confession" | "question";
+export type PulseSort = "hot" | "new";
+
+export interface PulsePrompt {
+  id: string;
+  content: string;
+  publishedAt: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface PulsePost {
+  id: string;
+  type: PulsePostType;
+  promptId: string | null;
+  promptContent: string | null;
+  content: string;
+  isVerified: boolean;
+  isAuthor: boolean;
+  authorHandle: string;
+  resonateCount: number;
+  replyCount: number;
+  isResonated: boolean;
+  createdAt: string;
+}
+
+/** Response from `GET /api/pulse/posts`. */
+export interface PulseFeedResponse {
+  posts: PulsePost[];
+  nextCursor: string | null;
+}
+
+/** Response from `GET /api/pulse/prompts/today`. */
+export interface PulsePromptsResponse {
+  prompt: PulsePrompt | null;
+  prompts: PulsePrompt[];
+}
+
 export interface BillingAddon {
   addonId: string;
   usesRemaining: number | null;
