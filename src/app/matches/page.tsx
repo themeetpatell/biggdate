@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
+import { ValueChipAvatar } from "@/components/value-chip-avatar";
 import { trackMatchViewed, trackMatchConnect } from "@/lib/gtm";
 import type { Match } from "@/lib/types";
 
@@ -46,25 +47,9 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
           cursor: "pointer",
         }}
       >
-        {/* Avatar initial */}
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(212,104,138,0.25), rgba(180,140,255,0.15))",
-            border: "1px solid rgba(212,104,138,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 18,
-            fontWeight: 700,
-            color: "var(--bd-rose-warm)",
-            flexShrink: 0,
-          }}
-        >
-          {match.name?.[0] || "?"}
-        </div>
+        {/* Avatar — animated value-chip treatment (H7). */}
+        <ValueChipAvatar name={match.name} size={48} />
+
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
