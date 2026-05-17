@@ -49,6 +49,49 @@ exposed to users.
 - Moderation ownership is final: founder/operator owns daily user abuse review and support responses; CTO/founding engineer owns provider failures, security incidents, admin tooling, and data access issues.
 - Deletion/export expectations are final: account deletion is permanent and self-serve where exposed in settings; data export is support-assisted until self-serve export ships, with a target response within 7 calendar days.
 
+## 2026-05-17 Audit — Fixes shipped + still open
+
+**Shipped this pass:**
+- B1 positioning unified: "AI Dating App for Intentional Adults" across `<head>` metadata, hero, empty states. Removed "founders & operators" framing from `/matches` empty state.
+- B2 consent banner: `src/components/consent-banner.tsx` mounts globally; GTM, Meta Pixel, Microsoft Clarity now load **only** after the user accepts. `noscript` pixel fallbacks removed.
+- B3 viewport: `userScalable: true`, `maximumScale: 5` (WCAG 1.4.4).
+- B4 harmonyScore: fake `|| 82` / `charCodeAt % 16` fallbacks removed in `matches/page.tsx` and `dashboard/page.tsx`; orb only renders when a real score is present.
+- B5 password floor: signup + reset min 10 chars (login keeps 6 for legacy accounts).
+- B6 OAuth: Google + Apple buttons gated by `NEXT_PUBLIC_OAUTH_PROVIDERS` env (e.g. `google,apple`). Server callback already supports the code exchange. **Operator TODO:** enable Google + Apple providers in the Supabase dashboard before flipping the env on.
+- H1 photo-after proof: copy line added above the matches list explaining the unlock model.
+- H2 bottom nav: Pulse out, Chats (with unread badge) in.
+- H4 phone optional: removed from required signup fields client + server.
+- H5 dark theme: `forcedTheme` removed; system preference honored, dark still default.
+- H6 cinematic audio: defaults to muted; opt-in via the existing toggle.
+- H8 safety: `/matches/[id]/preview` kebab replaced with a clearly-recognizable shield icon + `aria-label`.
+- H9 AI-down fallback (matches surface): distinct "Maahi is catching her breath" UI when `/api/matches/generate` returns 5xx, separate from honest empty state. Retry CTA included.
+
+## 2026-05-17 Audit — Medium polish pass
+
+**Shipped (M1, M3, M5, M8, M9, M10, M11, M12):**
+- M1 `timeAgo` now rolls into weeks/months/years instead of "732d ago".
+- M3 already correct — `trackSignUp()` fires after the `pending_confirmation` early-return, so it never fires for unconfirmed signups.
+- M5 sentinel scrubbing: `stripChips` in `src/components/chat-message.tsx` now strips `__BEGIN__` and `__BEGIN_PHASE_2__` in addition to `PHASE_*_DONE`, so AI hallucinations of trigger strings can't leak to the UI.
+- M8 already shipped in the blocker pass — "Private beta access" → "Early access".
+- M9 voice notes capped at **60 seconds** (`MAX_VOICE_DURATION_SEC` in `src/app/messages/[threadId]/page.tsx`); UI shows `0:00 / 1:00`; recorder auto-stops at the cap.
+- M10 OG locale changed `en_IN → en` to avoid biasing social previews/indexing while the phone picker stays global. (WhatsApp default remains `+91` since founder/operator is in India — that's a phone format default, not a content-locale claim.)
+- M11 already shipped — login mode now hints "Use your username or email and password."
+- M12 already addressed by H2 — `/messages` is now in the nav with its own `startsWith` match, so Chats highlights correctly and Connect no longer claims the active state while the user is in a thread.
+
+**Deferred — needs design or vendor choice:**
+- **M2 theme tokens.** Hardcoded hex (`#0A0A0F`, `#a855f7`, `#262626`, etc.) scattered across `messages`, `matches`, `bottom-nav`, `messages/[threadId]`. Migration: codemod each file to use CSS vars (`var(--bd-bg)`, `var(--bd-accent)`, etc.). Half-day task per surface; do it during the next visual-polish sprint.
+- **M4 Soul Knock canned questions.** `/matches/[id]/preview` falls back to the same three questions for every match. Target: a per-match `openingQuestion` field generated alongside match scoring, with the three curated fallbacks as last resort. Requires a small `/api/intros/icebreakers` change to take match context and an upstream prompt tweak.
+- **M6 Selfie verification — no liveness, no expiry.** `/profile/verify` accepts a single file upload. Production-grade liveness requires a vendor (Persona, Veriff, FaceTec, or Sumsub). Cost: ~$0.15–$0.50 per check. Add an `expires_at` column to `verification_records` and re-prompt every 12 months for trust signals.
+- **M7 Profile page split.** `src/app/profile/page.tsx` is 3,019 lines in one file. Refactor into `<ProfileHero/>`, `<ProfileBasics/>`, `<ProfileLifestyle/>`, `<ProfileDating/>`, `<ProfileGallery/>`, `<ProfileVisibility/>` under `src/components/profile/`. Each section can lazy-load. Estimated 4–8h.
+
+**Still open — scope for next sprint:**
+
+- **H3 — Onboarding tap-first redesign.** Today: 17 free-form AI prompts (`BASIC_SPINE_LEN = 8`, `PSYCH_SPINE_LEN = 9`). Target: 6 tap-based basics (sliders + chips) before a teaser match, psych phase moved to a post-match "complete your Soul Profile" flow. Estimated lift: 25-40% completion. Touches `/onboarding/page.tsx`, `/api/chat`, and the chat tooling layer. Multi-day effort.
+- **H7 — Avatar polish.** Today: first letter on a gradient ring. Target: animated abstract avatar derived from the user's top 2 core values (chips on a soft-blur background). Cosmetic but improves perceived quality of match cards. Half-day effort.
+- **H9 extensions — AI-down fallback in onboarding + Maahi coach.** Matches surface done; the `useChat` flows in onboarding and `/companion` still swallow errors. Hook into `status === "error"` from `@ai-sdk/react` and show a retry + offline note.
+- **AI safety on user messages.** Outbound DMs are not filtered. Bumble-style harassment detector recommended before public launch.
+- **In-app date scheduling.** Calendar handoff for accepted intros would meaningfully reduce ghost-rate.
+
 ## UX Gaps
 
 - End-to-end QA for signup, onboarding, discovery, intro, messaging, billing, and delete account.
