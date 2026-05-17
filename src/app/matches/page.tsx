@@ -59,7 +59,7 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
             justifyContent: "center",
             fontSize: 18,
             fontWeight: 700,
-            color: "#d4688a",
+            color: "var(--bd-rose-warm)",
             flexShrink: 0,
           }}
         >
@@ -100,7 +100,7 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
                 border: "1px solid rgba(79,255,176,0.15)",
                 fontSize: 11,
                 fontWeight: 600,
-                color: "#4FFFB0",
+                color: "var(--bd-success)",
                 flexShrink: 0,
               }}
             >
@@ -161,9 +161,9 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
-                  { label: "Values", value: match.compatibilitySignals.values, color: "#4FFFB0" },
-                  { label: "Communication", value: match.compatibilitySignals.communication, color: "#d4688a" },
-                  { label: "Life Direction", value: match.compatibilitySignals.lifeDirection, color: "#F5C842" },
+                  { label: "Values", value: match.compatibilitySignals.values, color: "var(--bd-success)" },
+                  { label: "Communication", value: match.compatibilitySignals.communication, color: "var(--bd-rose-warm)" },
+                  { label: "Life Direction", value: match.compatibilitySignals.lifeDirection, color: "var(--bd-warning)" },
                 ].map(({ label, value, color }) => (
                   <div key={label} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                     <span
@@ -200,7 +200,7 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
                 marginBottom: 16,
               }}
             >
-              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#F5C842", margin: "0 0 4px" }}>
+              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--bd-warning)", margin: "0 0 4px" }}>
                 Worth knowing
               </p>
               <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5 }}>
@@ -217,7 +217,7 @@ function MatchRow({ match, onConnect }: { match: Match; onConnect: () => void })
               borderRadius: 999,
               fontSize: 14,
               fontWeight: 700,
-              color: "#0A0A0F",
+              color: "var(--bd-bg)",
               background: "linear-gradient(135deg, #e8927c, #d4688a)",
               border: "none",
               cursor: "pointer",
@@ -320,7 +320,7 @@ export default function ConnectPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0A0A0F",
+        background: "var(--bd-bg)",
         paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))",
       }}
     >
@@ -334,7 +334,7 @@ export default function ConnectPage() {
           width: 340,
           height: 340,
           borderRadius: "50%",
-          background: "#d4688a",
+          background: "var(--bd-rose-warm)",
           opacity: 0.06,
           filter: "blur(100px)",
           pointerEvents: "none",
@@ -357,7 +357,7 @@ export default function ConnectPage() {
               fontSize: 11,
               textTransform: "uppercase",
               letterSpacing: "0.15em",
-              color: "#d4688a",
+              color: "var(--bd-rose-warm)",
               margin: "0 0 6px",
             }}
           >
@@ -381,7 +381,7 @@ export default function ConnectPage() {
                     fontSize: 11,
                     textTransform: "uppercase",
                     letterSpacing: "0.12em",
-                    color: "#B48CFF",
+                    color: "var(--bd-lavender)",
                     margin: "0 0 4px",
                   }}
                 >
@@ -399,7 +399,7 @@ export default function ConnectPage() {
                   border: "1px solid rgba(180,140,255,0.15)",
                   fontSize: 11,
                   fontWeight: 700,
-                  color: "#B48CFF",
+                  color: "var(--bd-lavender)",
                 }}
               >
                 {pendingIntros.length}
@@ -433,7 +433,7 @@ export default function ConnectPage() {
                             fontWeight: 700,
                             textTransform: "uppercase",
                             letterSpacing: "0.08em",
-                            color: intro.status === "answered" ? "#4FFFB0" : "#F5C842",
+                            color: intro.status === "answered" ? "var(--bd-success)" : "var(--bd-warning)",
                             background: intro.status === "answered" ? "rgba(79,255,176,0.09)" : "rgba(245,200,66,0.09)",
                             border: intro.status === "answered" ? "1px solid rgba(79,255,176,0.18)" : "1px solid rgba(245,200,66,0.18)",
                           }}
@@ -485,7 +485,7 @@ export default function ConnectPage() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 20 }}>⏳</span>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#F5C842" }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--bd-warning)" }}>
                 {fetchError === "ai" ? "Maahi is catching her breath" : "Can't reach BiggDate"}
               </p>
             </div>
@@ -502,8 +502,8 @@ export default function ConnectPage() {
                 borderRadius: 999,
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#0A0A0F",
-                background: "#F5C842",
+                color: "var(--bd-bg)",
+                background: "var(--bd-warning)",
                 border: "none",
                 cursor: "pointer",
               }}
@@ -528,7 +528,7 @@ export default function ConnectPage() {
                 height: 36,
                 borderRadius: "50%",
                 border: "2px solid rgba(212,104,138,0.25)",
-                borderTopColor: "#d4688a",
+                borderTopColor: "var(--bd-rose-warm)",
                 animation: "spin 1s linear infinite",
               }}
             />
@@ -567,7 +567,7 @@ export default function ConnectPage() {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#d4688a",
+                    color: "var(--bd-rose-warm)",
                     padding: 0,
                     cursor: "pointer",
                     textDecoration: "underline",
@@ -589,7 +589,7 @@ export default function ConnectPage() {
                 borderRadius: 999,
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#0A0A0F",
+                color: "var(--bd-bg)",
                 background: "linear-gradient(135deg, #ff8cb8, #d4688a)",
                 border: "none",
                 cursor: "pointer",
@@ -641,7 +641,7 @@ export default function ConnectPage() {
             border: "1px solid rgba(180,140,255,0.1)",
           }}
         >
-          <p style={{ fontSize: 11, color: "#B48CFF", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          <p style={{ fontSize: 11, color: "var(--bd-lavender)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
             Maahi noticed
           </p>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0, lineHeight: 1.6 }}>

@@ -41,7 +41,7 @@ function SLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Pill({ children, color = "#4FFFB0" }: { children: React.ReactNode; color?: string }) {
+function Pill({ children, color = "var(--bd-success)" }: { children: React.ReactNode; color?: string }) {
   return (
     <span style={{ display: "inline-block", padding: "5px 13px", borderRadius: 999, fontSize: 12, fontWeight: 500, background: `${color}14`, color, border: `1px solid ${color}28` }}>
       {children}
@@ -71,7 +71,7 @@ function MatchHero({ match, onBack }: { match: Match; onBack: () => void }) {
           <div style={{
             padding: "5px 14px", borderRadius: 999, fontSize: 11, fontWeight: 600,
             background: match.intentAlignment === "High" ? "rgba(79,255,176,0.12)" : match.intentAlignment === "Medium" ? "rgba(245,200,66,0.12)" : "rgba(212,104,138,0.12)",
-            color: match.intentAlignment === "High" ? "#4FFFB0" : match.intentAlignment === "Medium" ? "#F5C842" : "#d4688a",
+            color: match.intentAlignment === "High" ? "var(--bd-success)" : match.intentAlignment === "Medium" ? "var(--bd-warning)" : "var(--bd-rose-warm)",
             border: `1px solid ${match.intentAlignment === "High" ? "rgba(79,255,176,0.22)" : match.intentAlignment === "Medium" ? "rgba(245,200,66,0.22)" : "rgba(212,104,138,0.22)"}`,
           }}>
             {match.intentAlignment} Intent Alignment
@@ -117,9 +117,9 @@ function SoulTab({ match }: { match: Match }) {
           <SLabel>Compatibility signals</SLabel>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {[
-              { label: "Values", value: match.compatibilitySignals.values, color: "#4FFFB0" },
-              { label: "Communication", value: match.compatibilitySignals.communication, color: "#d4688a" },
-              { label: "Life Direction", value: match.compatibilitySignals.lifeDirection, color: "#F5C842" },
+              { label: "Values", value: match.compatibilitySignals.values, color: "var(--bd-success)" },
+              { label: "Communication", value: match.compatibilitySignals.communication, color: "var(--bd-rose-warm)" },
+              { label: "Life Direction", value: match.compatibilitySignals.lifeDirection, color: "var(--bd-warning)" },
             ].filter(s => s.value).map(s => (
               <div key={s.label} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: `${s.color}12`, color: s.color, border: `1px solid ${s.color}25`, flexShrink: 0, marginTop: 1 }}>
@@ -194,7 +194,7 @@ function LifeTab({ match }: { match: Match }) {
       <div>
         <SLabel>Intent alignment</SLabel>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Pill color={match.intentAlignment === "High" ? "#4FFFB0" : match.intentAlignment === "Medium" ? "#F5C842" : "#d4688a"}>
+          <Pill color={match.intentAlignment === "High" ? "var(--bd-success)" : match.intentAlignment === "Medium" ? "var(--bd-warning)" : "var(--bd-rose-warm)"}>
             {match.intentAlignment} alignment
           </Pill>
         </div>
@@ -242,7 +242,7 @@ function AlreadySent({
       })
     : null;
   const isAnswered = intro.status === "answered";
-  const accent = isAnswered ? "#4FFFB0" : "#F5C842";
+  const accent = isAnswered ? "var(--bd-success)" : "var(--bd-warning)";
 
   return (
     <div style={{ padding: "20px 20px 0" }}>
@@ -435,7 +435,7 @@ function AlreadySent({
             background: isAnswered
               ? "linear-gradient(135deg, #4FFFB0, #2dd4bf)"
               : "rgba(255,255,255,0.06)",
-            color: isAnswered ? "#0A0A0F" : "rgba(255,255,255,0.65)",
+            color: isAnswered ? "var(--bd-bg)" : "rgba(255,255,255,0.65)",
             letterSpacing: "0.01em",
           }}
         >
@@ -533,7 +533,7 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
     return (
       <div style={{ padding: "20px 20px 0" }}>
         <div style={{ padding: "20px 22px", borderRadius: 20, background: "rgba(79,255,176,0.07)", border: "1px solid rgba(79,255,176,0.2)", textAlign: "center" }}>
-          <p style={{ fontSize: 16, fontWeight: 700, color: "#4FFFB0", margin: "0 0 4px" }}>Intention sent ✦</p>
+          <p style={{ fontSize: 16, fontWeight: 700, color: "var(--bd-success)", margin: "0 0 4px" }}>Intention sent ✦</p>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>
             {match.name} can see it now. This is pending on their side until they answer.
           </p>
@@ -562,7 +562,7 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
     <div style={{ padding: "20px 20px 0" }}>
       <div style={{ padding: "20px 20px 16px", borderRadius: 22, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-          <span style={{ fontSize: 14, color: "#d4688a" }}>✦</span>
+          <span style={{ fontSize: 14, color: "var(--bd-rose-warm)" }}>✦</span>
           <p style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", margin: 0 }}>
             Maahi suggests{suggestionsLoading ? " · tuning…" : ""}
           </p>
@@ -580,7 +580,7 @@ function SoulKnock({ match, onSend, onPass, sending, sent, onViewPending }: {
                 fontSize: 13, lineHeight: 1.5, transition: "all 0.15s ease",
                 display: "flex", alignItems: "flex-start", gap: 10,
               }}>
-              <span style={{ color: selected === i && !showCustom ? "#d4688a" : "rgba(255,255,255,0.2)", fontSize: 14, flexShrink: 0, marginTop: 1 }}>
+              <span style={{ color: selected === i && !showCustom ? "var(--bd-rose-warm)" : "rgba(255,255,255,0.2)", fontSize: 14, flexShrink: 0, marginTop: 1 }}>
                 {selected === i && !showCustom ? "●" : "○"}
               </span>
               {q}
@@ -691,7 +691,7 @@ function ReportSheet({
               borderRadius: 12,
               padding: "13px 16px",
               fontSize: 14,
-              color: selected === r ? "#a855f7" : "rgba(255,255,255,0.6)",
+              color: selected === r ? "var(--bd-violet)" : "rgba(255,255,255,0.6)",
               textAlign: "left",
               cursor: "pointer",
               fontWeight: selected === r ? 600 : 400,
@@ -705,7 +705,7 @@ function ReportSheet({
           disabled={!selected || submitting}
           style={{
             width: "100%",
-            background: selected ? "#ef4444" : "rgba(239,68,68,0.2)",
+            background: selected ? "var(--bd-danger)" : "rgba(239,68,68,0.2)",
             color: selected ? "#fff" : "rgba(255,255,255,0.3)",
             border: "none",
             borderRadius: 12,
@@ -899,8 +899,8 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
 
   if (loading || !match) {
     return (
-      <div style={{ minHeight: "100dvh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 40, height: 40, borderRadius: "50%", border: "2px solid rgba(212,104,138,0.3)", borderTopColor: "#d4688a", animation: "spin 1s linear infinite" }} />
+      <div style={{ minHeight: "100dvh", background: "var(--bd-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 40, height: 40, borderRadius: "50%", border: "2px solid rgba(212,104,138,0.3)", borderTopColor: "var(--bd-rose-warm)", animation: "spin 1s linear infinite" }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -913,8 +913,8 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
   ];
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#0A0A0F", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
-      <div aria-hidden style={{ position: "fixed", top: "-8%", right: "-12%", width: 300, height: 300, borderRadius: "50%", background: "#d4688a", opacity: 0.055, filter: "blur(90px)", pointerEvents: "none", zIndex: 0 }} />
+    <div style={{ minHeight: "100dvh", background: "var(--bd-bg)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
+      <div aria-hidden style={{ position: "fixed", top: "-8%", right: "-12%", width: 300, height: 300, borderRadius: "50%", background: "var(--bd-rose-warm)", opacity: 0.055, filter: "blur(90px)", pointerEvents: "none", zIndex: 0 }} />
 
       <div style={{ position: "relative", zIndex: 10, maxWidth: "var(--bd-app-max-w)", margin: "0 auto" }}>
         <MatchHero
@@ -926,7 +926,7 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
         />
 
         {/* Identity strip */}
-        <div style={{ position: "relative", zIndex: 10, padding: "22px 20px 0", background: "#0A0A0F" }}>
+        <div style={{ position: "relative", zIndex: 10, padding: "22px 20px 0", background: "var(--bd-bg)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.025em" }}>
@@ -969,7 +969,7 @@ export default function MatchProfilePage({ params }: { params: Promise<{ id: str
         <div style={{ display: "flex", background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: 3, gap: 2 }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ flex: 1, padding: "9px 0", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.15s ease", background: tab === t.key ? "#fff" : "transparent", color: tab === t.key ? "#0A0A0F" : "rgba(255,255,255,0.32)" }}>
+              style={{ flex: 1, padding: "9px 0", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.15s ease", background: tab === t.key ? "#fff" : "transparent", color: tab === t.key ? "var(--bd-bg)" : "rgba(255,255,255,0.32)" }}>
               {t.label}
             </button>
           ))}

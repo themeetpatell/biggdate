@@ -84,7 +84,7 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
 
   if (done) {
     return (
-      <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
+      <div style={{ minHeight: "100vh", background: "var(--bd-bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 380 }}>
           <div style={{ fontSize: 52, marginBottom: 20 }}>{mutual ? "💜" : "✨"}</div>
           {mutual ? (
@@ -97,7 +97,7 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
               </p>
               <button
                 onClick={() => threadId ? router.push(`/messages/${threadId}`) : router.push("/messages")}
-                style={{ background: "#a855f7", color: "#fff", border: "none", borderRadius: 12, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", width: "100%" }}
+                style={{ background: "var(--bd-violet)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", width: "100%" }}
               >
                 Open Chat
               </button>
@@ -124,7 +124,7 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0A0A0F", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bd-bg)", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
       {/* Ambient orb */}
       <div style={{ position: "fixed", top: "-5%", right: "-10%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(168,85,247,0.15), transparent 70%)", pointerEvents: "none" }} />
 
@@ -192,7 +192,7 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
           disabled={!response.trim() || submitting}
           style={{
             width: "100%",
-            background: response.trim() ? "#a855f7" : "rgba(168,85,247,0.2)",
+            background: response.trim() ? "var(--bd-violet)" : "rgba(168,85,247,0.2)",
             color: response.trim() ? "#fff" : "rgba(255,255,255,0.3)",
             border: "none",
             borderRadius: 14,
@@ -207,7 +207,7 @@ export default function RespondPage({ params }: { params: Promise<{ id: string }
         </button>
 
         {submitError && (
-          <p style={{ fontSize: 13, color: "#f87171", textAlign: "center", margin: "12px 0 0" }}>
+          <p style={{ fontSize: 13, color: "var(--bd-danger)", textAlign: "center", margin: "12px 0 0" }}>
             {submitError}
           </p>
         )}

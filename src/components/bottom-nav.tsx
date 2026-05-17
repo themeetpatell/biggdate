@@ -177,7 +177,7 @@ export function BottomNav() {
                       position: "absolute", top: -4, right: -6,
                       minWidth: 16, height: 16, padding: "0 4px",
                       borderRadius: 999,
-                      background: "#e91e8c", border: "2px solid #262626",
+                      background: "var(--bd-pink)", border: "2px solid #262626",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 9, fontWeight: 700, color: "#fff",
                     }}>
