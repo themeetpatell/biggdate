@@ -201,15 +201,35 @@ export default function OnboardingPage() {
     [],
   );
 
-  // Auto-start: fire __BEGIN__ once after auth is confirmed and user has no completed profile.
+  // Auto-start: fire __BEGIN__ once after auth is confirmed and user has no
+  // completed profile. New users coming from /onboarding/basics already have
+  // phase 1 saved — short-circuit straight to phase 2 so we don't re-ask the
+  // eight basics questions they just answered in the tap-first form.
   useEffect(() => {
     if (authLoading || !userId || profile?.summary) return;
     if (autoStarted.current) return;
+
+    const basicsAlreadySaved = Boolean(
+      profile?.birthday &&
+      profile?.gender &&
+      profile?.partnerGender &&
+      profile?.city &&
+      profile?.intent,
+    );
+
     const timer = setTimeout(() => {
       if (autoStarted.current) return;
       autoStarted.current = true;
       trackOnboardingStart();
-      sendMessage({ text: "__BEGIN__" });
+      if (basicsAlreadySaved) {
+        // Mark phase 1 derive as already handled so the phase-1 transcript
+        // derive doesn't try to run on an empty transcript later.
+        phase1DeriveStarted.current = true;
+        phase2BeginSent.current = true;
+        sendMessage({ text: "__BEGIN_PHASE_2__" });
+      } else {
+        sendMessage({ text: "__BEGIN__" });
+      }
     }, 1200);
     return () => clearTimeout(timer);
   }, [authLoading, userId, profile, sendMessage]);
