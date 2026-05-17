@@ -58,6 +58,49 @@ export interface ProfileResponse {
   profile: Profile | null;
 }
 
+export type IntentAlignment = "High" | "Medium" | "Low";
+
+export interface MatchCompatibilitySignals {
+  values: string;
+  communication: string;
+  lifeDirection: string;
+}
+
+/** A curated match, as returned by `GET /api/matches`. */
+export interface Match {
+  id: string;
+  name: string;
+  age: number;
+  city: string;
+  profession: string;
+  emoji: string;
+  matchedUserId?: string;
+  photos?: string[];
+  photosUnlocked?: boolean;
+  narrativeIntro: string;
+  connectionHook: string;
+  tensionPoint: string;
+  intentAlignment: IntentAlignment;
+  compatibilitySignals: MatchCompatibilitySignals;
+  frictionPoint: string;
+  openingQuestion: string;
+}
+
+export type IntroStatus = "pending" | "answered";
+
+/** An intro (Soul Knock) the user has sent, from `GET /api/intros`. */
+export interface Intro {
+  id: string;
+  matchId: string;
+  matchName: string;
+  matchedUserId: string | null;
+  soulKnockQuestion: string | null;
+  senderAnswered: boolean;
+  receiverAnswered: boolean;
+  createdAt: string;
+  status: IntroStatus;
+}
+
 export interface BillingAddon {
   addonId: string;
   usesRemaining: number | null;
