@@ -3,6 +3,7 @@ import { runPulsePromptBlast } from "@/lib/jobs/pulse-prompt-blast";
 import { runMatchOfTheDay } from "@/lib/jobs/match-of-the-day";
 import { runMatchCacheRefresh } from "@/lib/jobs/match-cache-refresh";
 import { runReactivationWorker } from "@/lib/jobs/reactivation-worker";
+import { runDailySoulEmail } from "@/lib/jobs/daily-soul-email";
 import { log } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -33,20 +34,25 @@ export async function GET(req: Request) {
 
   const startedAt = Date.now();
 
-  // Pulse + reactivation are independent and run in parallel. Match-of-the-
-  // day depends on the cache being warm for today, so cache refresh runs
-  // first and MOTD runs immediately after — wrapped together as a single
-  // settled branch so a refresh failure doesn't take down the rest.
+  // Pulse, reactivation, and the daily email blast are independent and run
+  // in parallel. Match-of-the-day depends on the cache being warm for today,
+  // so cache refresh runs first and MOTD runs immediately after — wrapped as
+  // a single settled branch so a refresh failure doesn't take down the rest.
+  //
+  // The daily soul-email blast intentionally runs in parallel with the
+  // match chain — when matches haven't been refreshed yet, the email
+  // gracefully falls back to non-personalized copy rather than blocking.
   const matchChain = (async () => {
     const refresh = await runMatchCacheRefresh();
     const motd = await runMatchOfTheDay();
     return { refresh, motd };
   })();
 
-  const [pulse, reactivation, match] = await Promise.allSettled([
+  const [pulse, reactivation, match, dailyEmail] = await Promise.allSettled([
     runPulsePromptBlast(),
     runReactivationWorker(),
     matchChain,
+    runDailySoulEmail(),
   ]);
 
   const result = {
@@ -59,6 +65,7 @@ export async function GET(req: Request) {
       ? { status: "ok" as const, value: match.value.motd }
       : { status: "error" as const, error: errMsg(match.reason) },
     reactivation: settled(reactivation),
+    dailySoulEmail: settled(dailyEmail),
   };
 
   log.info("cron: daily orchestrator complete", result);

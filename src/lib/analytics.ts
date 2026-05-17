@@ -47,7 +47,9 @@ export type AnalyticsEventName =
   | "pulse_prompt_pushed"
   | "match_of_the_day_pushed"
   | "admin_reactivation_targeted"
-  | "admin_reactivation_delivered";
+  | "admin_reactivation_delivered"
+  | "daily_soul_email_sent"
+  | "email_unsubscribed";
 
 export type AnalyticsClient = "web" | "ios" | "android" | "server";
 

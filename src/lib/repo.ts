@@ -1570,6 +1570,26 @@ export async function getNotificationPreferences(userId: string): Promise<Record
   return row.notification_preferences ?? { matchReady: true, soulKnock: true, mutualMatch: true };
 }
 
+// Flip a single boolean key in profiles.notification_preferences. Used by the
+// one-click email unsubscribe route. jsonb_set creates the key if absent and
+// updates in place otherwise — never wipes neighboring prefs.
+export async function setNotificationPreference(
+  userId: string,
+  key: string,
+  value: boolean,
+): Promise<void> {
+  await sql`
+    UPDATE profiles
+    SET notification_preferences = jsonb_set(
+      COALESCE(notification_preferences, '{}'::jsonb),
+      ARRAY[${key}]::text[],
+      to_jsonb(${value}::boolean),
+      true
+    )
+    WHERE user_id = ${userId}
+  `;
+}
+
 // ─── Helpers ───
 
 function safeParseJson<T>(str: string | null | undefined, fallback: T): T {
