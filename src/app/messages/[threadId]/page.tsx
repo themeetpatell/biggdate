@@ -8,6 +8,11 @@ import { trackMessageSent } from "@/lib/gtm";
 import { subscribeToThreadMessages } from "@/lib/realtime";
 import type { Thread, Message } from "@/lib/types";
 
+// Voice notes are capped at 60 seconds. Hard limit at the recorder level so a
+// pocket-dialed mic never produces a 20-minute upload and so abuse vectors
+// (long, hostile rants) have a structural ceiling. Matches Hinge's cap.
+const MAX_VOICE_DURATION_SEC = 60;
+
 function formatDuration(totalSec: number | null | undefined) {
   if (!totalSec || totalSec < 1) return "0:00";
   const mins = Math.floor(totalSec / 60);
@@ -292,7 +297,15 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       setRecording(true);
       recordingTimerRef.current = setInterval(() => {
         if (!recordingStartedAtRef.current) return;
-        setRecordingTimeSec(Math.max(1, Math.floor((Date.now() - recordingStartedAtRef.current) / 1000)));
+        const elapsedSec = Math.max(
+          1,
+          Math.floor((Date.now() - recordingStartedAtRef.current) / 1000),
+        );
+        setRecordingTimeSec(elapsedSec);
+        // Hard cap. recorder.onstop will fire and clean up the timer.
+        if (elapsedSec >= MAX_VOICE_DURATION_SEC && recorder.state === "recording") {
+          recorder.stop();
+        }
       }, 250);
     } catch {
       stopActiveStream();
@@ -440,7 +453,9 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fb7185", boxShadow: "0 0 0 6px rgba(251,113,133,0.18)" }} />
               <div>
                 <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#fff" }}>Recording voice note</p>
-                <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.64)" }}>{formatDuration(recordingTimeSec)}</p>
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.64)" }}>
+                  {formatDuration(recordingTimeSec)} / {formatDuration(MAX_VOICE_DURATION_SEC)}
+                </p>
               </div>
             </div>
             <button

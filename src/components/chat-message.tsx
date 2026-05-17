@@ -34,6 +34,10 @@ function stripChips(text: string): string {
     .replace(/\[FOLLOWUP\]/g, "")
     .replace(/\bPHASE_1_DONE\b/g, "")
     .replace(/\bPHASE_2_DONE\b/g, "")
+    // Trigger sentinels. The user fires these to advance the chat — if the AI
+    // hallucinates them back into its own reply, never let them reach the UI.
+    .replace(/__BEGIN_PHASE_2__/g, "")
+    .replace(/__BEGIN__/g, "")
     // Defensive: strip leaked internal-state phrases. The prompt already forbids
     // these, but if the AI slips, the user should never see scaffolding.
     .replace(/\s*\(?\s*Follow[- ]?ups?\s+remaining[:\s]*\d+\s*\)?\.?/gi, "")
