@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { getSessionFromCookies } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { upsertProfile, getProfileByUserId, getMatchForUser } from "@/lib/repo";
 import { sql } from "@/lib/db";
 import { randomUUID } from "node:crypto";
 
 export async function POST(req: Request) {
   try {
-    const session = await getSessionFromCookies();
+    const session = await getSession();
     if (!session?.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

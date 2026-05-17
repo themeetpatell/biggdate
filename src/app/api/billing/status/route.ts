@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getSessionFromCookies } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { getUserPlan, getActiveAddons } from "@/lib/repo";
 
 export async function GET() {
-  const session = await getSessionFromCookies();
+  const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }

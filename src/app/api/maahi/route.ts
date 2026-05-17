@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { getSessionFromCookies } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { runMaahiTurn } from "@/lib/maahi/engine";
 import type { MaahiScene } from "@/lib/maahi/scenes";
 import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Messages required" }, { status: 400 });
   }
 
-  const session = await getSessionFromCookies();
+  const session = await getSession();
   const userId = session?.userId ?? null;
   const scene: MaahiScene = userId ? "general" : "landing";
 

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getSessionFromCookies } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { inferCountryIso2FromPhone } from "@/lib/location-data";
 import { getAccountHandleByUserId, getProfileByUserId } from "@/lib/repo";
 
 export async function GET() {
-  const session = await getSessionFromCookies();
+  const session = await getSession();
   if (!session) {
     return NextResponse.json(
       {
