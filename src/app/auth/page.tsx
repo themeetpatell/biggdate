@@ -17,9 +17,11 @@ import { useAuth } from "@/components/auth-provider";
 import { trackSignUp, trackLogin } from "@/lib/gtm";
 import { COUNTRY_PHONE_OPTIONS, TIMEZONE_TO_ISO2 } from "@/lib/location-data";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { MIN_AGE, isUnderageBirthday } from "@/lib/age";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { DateOfBirth } from "@/components/ui/date-of-birth";
 
 // Reads NEXT_PUBLIC_OAUTH_PROVIDERS to enable Apple/Google sign-in only after
 // the Supabase project has the provider configured. Default empty so we
@@ -170,7 +172,12 @@ function AuthPageInner() {
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  // Split consents: termsAccepted = required (Terms + Privacy + 18+),
+  // marketingConsent = optional (product/marketing emails). Persisted as
+  // separate timestamps server-side for DPDPA / GDPR / CAN-SPAM proof.
+  const [dob, setDob] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [sessionLoadFailed, setSessionLoadFailed] = useState(false);
   const [retryingSession, setRetryingSession] = useState(false);
 
@@ -213,6 +220,9 @@ function AuthPageInner() {
   const SIGNUP_MIN = 10;
   const LOGIN_MIN = 6;
 
+  const dobLooksValid =
+    typeof dob === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dob) && !isUnderageBirthday(dob);
+
   let canSubmit = false;
   if (mode === "signup") {
     canSubmit =
@@ -220,7 +230,8 @@ function AuthPageInner() {
       normalizedUsername.length >= 3 &&
       normalizedEmail.length > 0 &&
       password.length >= SIGNUP_MIN &&
-      ageConfirmed;
+      dobLooksValid &&
+      termsAccepted;
   } else if (mode === "login") {
     const loginValue = loginIdentifier.trim().toLowerCase();
     canSubmit = (isValidEmail(loginValue) || loginValue.length >= 3) && password.length >= LOGIN_MIN;
@@ -317,8 +328,16 @@ function AuthPageInner() {
       setError("Enter your username or email.");
       return;
     }
-    if (mode === "signup" && !ageConfirmed) {
-      setError("You must confirm you are 18 or older to use BiggDate.");
+    if (mode === "signup" && !dob) {
+      setError("Enter your date of birth.");
+      return;
+    }
+    if (mode === "signup" && dob && isUnderageBirthday(dob)) {
+      setError(`You must be ${MIN_AGE} or older to use BiggDate.`);
+      return;
+    }
+    if (mode === "signup" && !termsAccepted) {
+      setError("You must accept the Terms and Privacy Policy to create an account.");
       return;
     }
 
@@ -385,6 +404,9 @@ function AuthPageInner() {
           password,
           fullName: mode === "signup" ? nextFullName : undefined,
           username: mode === "signup" ? nextUsername : nextLoginIdentifier,
+          dob: mode === "signup" ? dob : undefined,
+          termsAccepted: mode === "signup" ? termsAccepted : undefined,
+          marketingConsent: mode === "signup" ? marketingConsent : undefined,
         }),
       });
       const data = await readAuthResponse(res);
@@ -811,34 +833,73 @@ function AuthPageInner() {
               )}
 
               {mode === "signup" && (
-                <label
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3 text-[13px] leading-snug transition-colors"
-                  style={{
-                    border: `1px solid ${ageConfirmed ? "var(--bd-border-glow)" : "var(--bd-border)"}`,
-                    background: ageConfirmed
-                      ? "var(--bd-accent-soft)"
-                      : "var(--bd-surface-sunken)",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={ageConfirmed}
-                    onChange={(e) => setAgeConfirmed(e.target.checked)}
-                    className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[#e527e0]"
-                    aria-label="Confirm you are 18 or older and agree to terms"
-                  />
-                  <span style={{ color: "var(--bd-text-muted)" }}>
-                    I confirm I am 18 or older and I agree to the{" "}
-                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--bd-text)" }}>
-                      Terms
-                    </a>{" "}
-                    and{" "}
-                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--bd-text)" }}>
-                      Privacy Policy
-                    </a>
-                    .
-                  </span>
-                </label>
+                <>
+                  <label className="block space-y-2">
+                    <span className="flex items-center justify-between gap-2 pl-1 pr-1">
+                      <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--bd-text)]">
+                        Date of birth
+                      </span>
+                      <span className="text-[12px] text-[var(--bd-text-muted)]">
+                        {MIN_AGE}+ only
+                      </span>
+                    </span>
+                    <DateOfBirth
+                      value={dob}
+                      onChange={(next) => setDob(next)}
+                    />
+                  </label>
+
+                  <label
+                    className="flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3 text-[13px] leading-snug transition-colors"
+                    style={{
+                      border: `1px solid ${termsAccepted ? "var(--bd-border-glow)" : "var(--bd-border)"}`,
+                      background: termsAccepted
+                        ? "var(--bd-accent-soft)"
+                        : "var(--bd-surface-sunken)",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[#e527e0]"
+                      aria-label="Accept Terms and Privacy Policy"
+                      required
+                    />
+                    <span style={{ color: "var(--bd-text-muted)" }}>
+                      I agree to BiggDate&apos;s{" "}
+                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--bd-text)" }}>
+                        Terms
+                      </a>{" "}
+                      and{" "}
+                      <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--bd-text)" }}>
+                        Privacy Policy
+                      </a>
+                      .
+                    </span>
+                  </label>
+
+                  <label
+                    className="flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3 text-[13px] leading-snug transition-colors"
+                    style={{
+                      border: `1px solid ${marketingConsent ? "var(--bd-border-glow)" : "var(--bd-border)"}`,
+                      background: marketingConsent
+                        ? "var(--bd-accent-soft)"
+                        : "var(--bd-surface-sunken)",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={marketingConsent}
+                      onChange={(e) => setMarketingConsent(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[#e527e0]"
+                      aria-label="Opt in to marketing emails"
+                    />
+                    <span style={{ color: "var(--bd-text-muted)" }}>
+                      Send me Maahi&apos;s daily nudges, product tips, and matchmaking news by email. <span style={{ color: "var(--bd-text-faint)" }}>(Optional — you can change this any time in settings.)</span>
+                    </span>
+                  </label>
+                </>
               )}
 
               {(error || notice) && (

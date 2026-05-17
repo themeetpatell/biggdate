@@ -7,6 +7,7 @@ import {
 } from "@/lib/location-data";
 import { checkRateLimit, clientIp, rateLimitResponse } from "@/lib/rate-limit";
 import { track } from "@/lib/analytics";
+import { isUnderageBirthday, UNDERAGE_ERROR } from "@/lib/age";
 
 export async function POST(req: Request) {
   // 3 signups per IP per hour blocks the most common abuse vector — burst
@@ -25,13 +26,26 @@ export async function POST(req: Request) {
     username?: string;
     phone?: string;
     phoneCountryIso2?: string;
+    dob?: string;
+    termsAccepted?: boolean;
+    marketingConsent?: boolean;
   };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
-  const { email, password, fullName, username, phone, phoneCountryIso2 } = body;
+  const {
+    email,
+    password,
+    fullName,
+    username,
+    phone,
+    phoneCountryIso2,
+    dob,
+    termsAccepted,
+    marketingConsent,
+  } = body;
   const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   const normalizedPassword = typeof password === "string" ? password : "";
   const normalizedFullName = typeof fullName === "string" ? fullName.trim() : "";
@@ -49,8 +63,29 @@ export async function POST(req: Request) {
   const normalizedPhoneCountryIso2 =
     normalizeCountryIso2(phoneCountryIso2) ?? inferCountryIso2FromPhone(normalizedPhone);
 
+  // Compliance: DOB + Terms/Privacy acceptance are non-negotiable. Marketing
+  // is the only OPTIONAL consent — null when the user did not opt in.
+  const normalizedDob = typeof dob === "string" ? dob.trim() : "";
+  const hasTermsAccepted = termsAccepted === true;
+  const hasMarketingConsent = marketingConsent === true;
+
   if (!normalizedEmail || !normalizedPassword) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
+  }
+  if (!hasTermsAccepted) {
+    return NextResponse.json(
+      { error: "You must accept the Terms and Privacy Policy to create an account." },
+      { status: 400 },
+    );
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalizedDob)) {
+    return NextResponse.json(
+      { error: "Enter your date of birth in YYYY-MM-DD format." },
+      { status: 400 },
+    );
+  }
+  if (isUnderageBirthday(normalizedDob)) {
+    return NextResponse.json({ error: UNDERAGE_ERROR }, { status: 400 });
   }
   if (!normalizedFullName) {
     return NextResponse.json({ error: "Full name required" }, { status: 400 });
@@ -120,6 +155,8 @@ export async function POST(req: Request) {
     );
   }
 
+  const consentTimestamp = new Date();
+
   try {
     await upsertAccountHandle({
       userId: data.user.id,
@@ -127,6 +164,10 @@ export async function POST(req: Request) {
       username: normalizedUsername,
       fullName: normalizedFullName,
       phoneNumber: normalizedPhone,
+      dob: normalizedDob,
+      dobVerifiedAt: consentTimestamp,
+      termsAcceptedAt: consentTimestamp,
+      marketingConsentAt: hasMarketingConsent ? consentTimestamp : null,
     });
   } catch (handleError) {
     const message =

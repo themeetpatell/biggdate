@@ -106,21 +106,42 @@ export async function upsertAccountHandle({
   username,
   fullName,
   phoneNumber,
+  dob,
+  dobVerifiedAt,
+  termsAcceptedAt,
+  marketingConsentAt,
 }: {
   userId: string;
   email: string;
   username: string;
   fullName: string;
   phoneNumber?: string | null;
+  // Compliance fields — only set at first signup. The ON CONFLICT clause
+  // uses COALESCE so a later upsert can never overwrite the original
+  // recorded consent timestamps (audit trail integrity).
+  dob?: string | null;
+  dobVerifiedAt?: Date | null;
+  termsAcceptedAt?: Date | null;
+  marketingConsentAt?: Date | null;
 }) {
   await sql`
-    INSERT INTO account_handles (user_id, email, username, full_name, phone_number)
-    VALUES (${userId}, ${email}, ${username}, ${fullName}, ${phoneNumber ?? null})
+    INSERT INTO account_handles (
+      user_id, email, username, full_name, phone_number,
+      dob, dob_verified_at, terms_accepted_at, marketing_consent_at
+    )
+    VALUES (
+      ${userId}, ${email}, ${username}, ${fullName}, ${phoneNumber ?? null},
+      ${dob ?? null}, ${dobVerifiedAt ?? null}, ${termsAcceptedAt ?? null}, ${marketingConsentAt ?? null}
+    )
     ON CONFLICT (user_id) DO UPDATE SET
       email = EXCLUDED.email,
       username = EXCLUDED.username,
       full_name = EXCLUDED.full_name,
       phone_number = EXCLUDED.phone_number,
+      dob = COALESCE(account_handles.dob, EXCLUDED.dob),
+      dob_verified_at = COALESCE(account_handles.dob_verified_at, EXCLUDED.dob_verified_at),
+      terms_accepted_at = COALESCE(account_handles.terms_accepted_at, EXCLUDED.terms_accepted_at),
+      marketing_consent_at = COALESCE(account_handles.marketing_consent_at, EXCLUDED.marketing_consent_at),
       updated_at = NOW()
   `;
 }

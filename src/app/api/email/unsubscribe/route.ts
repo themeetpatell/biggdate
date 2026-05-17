@@ -12,7 +12,19 @@ import { log } from "@/lib/log";
 // POST → mailbox provider RFC 8058 one-click unsubscribe path. Same body,
 //        plaintext response.
 
-const KNOWN_KINDS = new Set<string>(["daily_soul_email"]);
+// Map of unsubscribe-link kind → key in profiles.notification_preferences.
+// Each kind we mint a signed link for here must have a corresponding pref key
+// — otherwise the unsubscribe is silently no-op and the user keeps getting
+// emails. CAN-SPAM § 5(a)(3) + GDPR R64 + DPDPA § 7 require the opt-out to
+// actually take effect within ten business days; we honour it immediately.
+const KIND_TO_PREF_KEY: Record<string, string> = {
+  daily_soul_email: "dailyEmail",
+  match_ready: "matchReady",
+  soul_knock: "soulKnock",
+  mutual_match: "mutualMatch",
+};
+
+const KNOWN_KINDS = new Set<string>(Object.keys(KIND_TO_PREF_KEY));
 
 function getSecret(): string {
   return (
@@ -56,7 +68,7 @@ async function handle(req: Request): Promise<NextResponse> {
     return html(403, errorPage("This link can't be verified", "Please use the link from your most recent email."));
   }
 
-  const prefKey = kind === "daily_soul_email" ? "dailyEmail" : kind;
+  const prefKey = KIND_TO_PREF_KEY[kind] ?? kind;
   try {
     await setNotificationPreference(userId, prefKey, false);
     await track({

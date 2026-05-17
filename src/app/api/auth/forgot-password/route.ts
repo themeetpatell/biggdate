@@ -23,12 +23,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  const origin = req.headers.get("origin") || "";
+  // Canonical site URL wins so the redirect always matches what's allow-listed
+  // in Supabase. Falling back to the request Origin (or localhost in dev) only
+  // when the env var is missing keeps local development working.
+  const siteUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    req.headers.get("origin") ||
+    "http://localhost:3000";
   const supabase = await createSupabaseServerClient();
 
   // Always return 200 to avoid email enumeration
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/auth?mode=reset")}`,
+    redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/auth?mode=reset")}`,
   });
 
   return NextResponse.json({
