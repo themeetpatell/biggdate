@@ -1,4 +1,4 @@
-import type { Thread } from '@biggdate/shared';
+import type { ReceivedIntro, Thread } from '@biggdate/shared';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useReceivedIntros } from '@/lib/use-intros';
 import { useThreads } from '@/lib/use-messages';
 
 export default function MessagesScreen() {
@@ -29,11 +30,7 @@ export default function MessagesScreen() {
           data={threads}
           keyExtractor={(thread) => thread.id}
           contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            <ThemedText type="subtitle" style={styles.heading}>
-              Messages
-            </ThemedText>
-          }
+          ListHeaderComponent={<MessagesHeader />}
           ListEmptyComponent={
             <View style={styles.empty}>
               <ThemedText type="smallBold">No conversations yet</ThemedText>
@@ -46,6 +43,58 @@ export default function MessagesScreen() {
         />
       </SafeAreaView>
     </ThemedView>
+  );
+}
+
+function MessagesHeader() {
+  const theme = useTheme();
+  const router = useRouter();
+  const receivedQuery = useReceivedIntros();
+  const data = receivedQuery.data;
+  const pending = (data?.intros ?? []).filter((intro) => !intro.receiverAnswered);
+
+  return (
+    <View style={styles.header}>
+      <ThemedText type="subtitle">Messages</ThemedText>
+
+      {data?.locked ? (
+        <View style={[styles.lockedCard, { backgroundColor: theme.backgroundElement }]}>
+          <ThemedText type="smallBold">Someone may have knocked</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Upgrade to BiggDate Premium to see who has sent you a Soul Knock.
+          </ThemedText>
+        </View>
+      ) : pending.length > 0 ? (
+        <View style={styles.knocks}>
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            SOUL KNOCKS
+          </ThemedText>
+          {pending.map((intro) => (
+            <KnockRow key={intro.id} intro={intro} onPress={() =>
+              router.push({ pathname: '/messages/respond', params: { introId: intro.id } })
+            } />
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function KnockRow({ intro, onPress }: { intro: ReceivedIntro; onPress: () => void }) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.knockRow,
+        { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.85 : 1 },
+      ]}>
+      <ThemedText type="smallBold">{intro.senderName}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        Knocked on you — tap to answer
+      </ThemedText>
+    </Pressable>
   );
 }
 
@@ -96,7 +145,21 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.three,
   },
-  heading: { marginBottom: Spacing.one },
+  header: {
+    gap: Spacing.three,
+    marginBottom: Spacing.one,
+  },
+  lockedCard: {
+    gap: Spacing.one,
+    padding: Spacing.three,
+    borderRadius: Spacing.three,
+  },
+  knocks: { gap: Spacing.two },
+  knockRow: {
+    gap: Spacing.half,
+    padding: Spacing.three,
+    borderRadius: Spacing.three,
+  },
   empty: {
     gap: Spacing.two,
     paddingVertical: Spacing.six,

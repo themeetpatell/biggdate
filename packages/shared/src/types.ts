@@ -101,6 +101,32 @@ export interface Intro {
   status: IntroStatus;
 }
 
+/** A Soul Knock the user has received, from `GET /api/intros/received`. */
+export interface ReceivedIntro {
+  id: string;
+  senderUserId: string;
+  senderName: string;
+  senderPhotos: string[];
+  matchId: string;
+  matchName: string;
+  soulKnockQuestion: string | null;
+  senderAnswered: boolean;
+  receiverAnswered: boolean;
+  createdAt: string;
+}
+
+/** Response from `GET /api/intros/received`. Free-plan users get `locked`. */
+export interface ReceivedIntrosResponse {
+  intros?: ReceivedIntro[];
+  locked?: boolean;
+}
+
+/** Response from `POST /api/intros/respond`. */
+export interface RespondResult {
+  mutual: boolean;
+  thread: { id: string } | null;
+}
+
 /** A messaging thread, as returned by `GET /api/messages`. */
 export interface Thread {
   id: string;
