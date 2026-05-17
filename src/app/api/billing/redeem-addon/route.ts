@@ -93,7 +93,7 @@ export async function POST(request: Request) {
   if (!addonId) {
     log.warn("billing/redeem-addon invalid code", { userId: auth.userId });
     return NextResponse.json(
-      { error: "That code didn't work. Double-check or DM us on WhatsApp." },
+      { error: "That code didn't work. Double-check or email us at meet@biggventures.com." },
       { status: 400 },
     );
   }

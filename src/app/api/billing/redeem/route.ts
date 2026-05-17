@@ -6,7 +6,7 @@ import { log } from "@/lib/log";
 
 // Early-access redemption endpoint.
 //
-// During pre-launch we hand out coupon codes via WhatsApp instead of charging
+// During pre-launch we hand out coupon codes via email instead of charging
 // through Stripe. Each code is validated against EARLY_ACCESS_CODES (a
 // comma-separated env list) and grants premium on the user's plan row.
 //
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   if (!validCodes.has(code)) {
     log.warn("billing/redeem invalid code", { userId: auth.userId });
     return NextResponse.json(
-      { error: "That code didn't work. Double-check or DM us on WhatsApp." },
+      { error: "That code didn't work. Double-check or email us at meet@biggventures.com." },
       { status: 400 },
     );
   }

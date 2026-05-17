@@ -11,33 +11,6 @@ import {
 
 type IconProps = SVGProps<SVGSVGElement> & { className?: string };
 
-export function WhatsAppIcon({ className, ...props }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={cn("size-4", className)}
-      {...props}
-    >
-      <path
-        d="M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L4 20l.7-4A8.5 8.5 0 1 1 20.5 11.8Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.2 8.9c.2-.5.4-.5.7-.5h.6c.2 0 .5 0 .7.5l.3 1c.1.4.1.6-.1.8l-.4.5c-.1.1-.2.3 0 .6.3.5.9 1.1 1.4 1.4.3.2.5.1.6 0l.5-.4c.2-.2.4-.2.8-.1l1 .3c.5.2.5.5.5.7v.6c0 .3 0 .5-.5.7-.6.2-1.3.2-1.8 0-.9-.3-2-.9-3.1-2-.9-.9-1.5-1.9-1.8-2.7-.2-.6-.2-1.3 0-1.9Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export function MediumIcon({ className, ...props }: IconProps) {
   return (
     <svg
@@ -65,11 +38,6 @@ export type MarketingSocialLink = {
 };
 
 export const MARKETING_SOCIAL_LINKS: readonly MarketingSocialLink[] = [
-  {
-    label: "WhatsApp",
-    href: "https://api.whatsapp.com/send?text=Hello%20BiggDate",
-    Icon: WhatsAppIcon,
-  },
   {
     label: "Email",
     href: "mailto:meet@biggventures.com",

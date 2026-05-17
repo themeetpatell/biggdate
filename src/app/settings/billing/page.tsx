@@ -6,11 +6,11 @@ export const metadata: Metadata = {
   description: "Early access membership and access code redemption.",
 };
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_EARLY_ACCESS_WHATSAPP ?? "+919824341414";
+const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "meet@biggventures.com";
 const BILLING_MODE = (process.env.NEXT_PUBLIC_BILLING_MODE ?? "early_access") as
   | "early_access"
   | "stripe";
 
 export default function Page() {
-  return <BillingPage mode={BILLING_MODE} whatsappNumber={WHATSAPP_NUMBER} />;
+  return <BillingPage mode={BILLING_MODE} supportEmail={SUPPORT_EMAIL} />;
 }

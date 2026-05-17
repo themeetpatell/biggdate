@@ -32,20 +32,19 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   target: AddonRedemptionTarget | null;
-  whatsappNumber: string;
+  supportEmail: string;
   onRedeemed: (result: RedeemResponse) => void;
 }
 
-function whatsappLink(number: string, message: string): string {
-  const cleaned = number.replace(/[^\d]/g, "");
-  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+function mailtoLink(email: string, subject: string): string {
+  return `mailto:${email}?subject=${encodeURIComponent(subject)}`;
 }
 
 export function AddonRedemptionDialog({
   open,
   onOpenChange,
   target,
-  whatsappNumber,
+  supportEmail,
   onRedeemed,
 }: Props) {
   const [code, setCode] = useState("");
@@ -62,8 +61,10 @@ export function AddonRedemptionDialog({
 
   if (!target) return null;
 
-  const whatsappMessage = `Hi! I'd like a code for ${target.name} on BiggDate.`;
-  const waHref = whatsappLink(whatsappNumber, whatsappMessage);
+  const mailtoHref = mailtoLink(
+    supportEmail,
+    `BiggDate · ${target.name} access code`,
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -126,15 +127,13 @@ export function AddonRedemptionDialog({
             Step 1 · Get your code
           </p>
           <p className="mt-1 text-[13px] text-white/70 leading-snug">
-            DM us on WhatsApp and we&apos;ll send you a free code for {target.name}.
+            Email us and we&apos;ll send you a free code for {target.name}.
           </p>
           <a
-            href={waHref}
-            target="_blank"
-            rel="noreferrer"
+            href={mailtoHref}
             className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:bg-white/[0.08]"
           >
-            Message us on WhatsApp
+            Email us
             <ExternalLink className="size-3" aria-hidden />
           </a>
         </div>

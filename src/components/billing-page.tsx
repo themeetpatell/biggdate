@@ -18,24 +18,14 @@ type StatusBody = {
 
 interface Props {
   mode: BillingMode;
-  whatsappNumber: string;
+  supportEmail: string;
 }
 
-function whatsappLink(number: string, message: string): string {
-  const cleaned = number.replace(/[^\d]/g, "");
-  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+function mailtoLink(email: string, subject: string): string {
+  return `mailto:${email}?subject=${encodeURIComponent(subject)}`;
 }
 
-function displayNumber(number: string): string {
-  // Light formatting for India numbers: +91 98243 41414
-  const digits = number.replace(/[^\d]/g, "");
-  if (digits.length === 12 && digits.startsWith("91")) {
-    return `+91 ${digits.slice(2, 7)} ${digits.slice(7)}`;
-  }
-  return number;
-}
-
-export function BillingPage({ mode, whatsappNumber }: Props) {
+export function BillingPage({ mode, supportEmail }: Props) {
   const [status, setStatus] = useState<StatusBody | null>(null);
   const [statusLoading, setStatusLoading] = useState(true);
   const [code, setCode] = useState("");
@@ -94,8 +84,7 @@ export function BillingPage({ mode, whatsappNumber }: Props) {
   const isPremium = status?.isPremium ?? false;
   const planLabel = status?.plan ?? "free";
 
-  const message = `Hi! I'd like an early-access code for BiggDate.`;
-  const wa = whatsappLink(whatsappNumber, message);
+  const mailto = mailtoLink(supportEmail, "BiggDate early-access code");
 
   return (
     <>
@@ -186,19 +175,17 @@ export function BillingPage({ mode, whatsappNumber }: Props) {
               Don&apos;t have a code yet?
             </h2>
             <p className="mt-1 text-sm text-[var(--bd-text-muted)]">
-              DM us on WhatsApp and we&apos;ll send you one personally.
+              Email us and we&apos;ll send you one personally.
             </p>
             <a
-              href={wa}
-              target="_blank"
-              rel="noreferrer"
+              href={mailto}
               className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--bd-border)] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[var(--bd-text)] transition hover:bg-white/[0.08]"
             >
-              Message us on WhatsApp
+              Email us
               <ExternalLink className="size-3.5" aria-hidden />
             </a>
             <p className="mt-3 text-xs text-[var(--bd-text-faint)]">
-              {displayNumber(whatsappNumber)}
+              {supportEmail}
             </p>
           </section>
 

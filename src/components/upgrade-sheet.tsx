@@ -128,8 +128,8 @@ const ENV_MAP: Record<string, string | undefined> = {
 const BILLING_MODE =
   process.env.NEXT_PUBLIC_BILLING_MODE === "stripe" ? "stripe" : "early_access";
 
-const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_EARLY_ACCESS_WHATSAPP ?? "+919824341414";
+const SUPPORT_EMAIL =
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "meet@biggventures.com";
 
 function getPriceId(envKey: string): string {
   return ENV_MAP[envKey] ?? "";
@@ -588,7 +588,7 @@ export function UpgradeSheet({
           if (!v) setRedemptionTarget(null);
         }}
         target={redemptionTarget}
-        whatsappNumber={WHATSAPP_NUMBER}
+        supportEmail={SUPPORT_EMAIL}
         onRedeemed={handleAddonRedeemed}
       />
 
