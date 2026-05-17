@@ -13,6 +13,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.186",
     "@biggdate/shared": "*",
     "@react-native-community/datetimepicker": "8.6.0",
     "@react-navigation/bottom-tabs": "^7.15.5",
@@ -20,6 +21,7 @@
     "@react-navigation/native": "^7.1.33",
     "@supabase/supabase-js": "^2.105.4",
     "@tanstack/react-query": "^5.100.10",
+    "ai": "^6.0.184",
     "expo": "~55.0.24",
     "expo-constants": "~55.0.16",
     "expo-device": "~55.0.17",

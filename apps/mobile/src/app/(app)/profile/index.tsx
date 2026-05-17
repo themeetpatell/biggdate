@@ -122,6 +122,11 @@ export default function ProfileScreen() {
           <View style={styles.actions}>
             <Button label="Edit profile" onPress={() => router.push('/profile/edit')} />
             <Button
+              label="Relationship Coach"
+              variant="secondary"
+              onPress={() => router.push('/profile/coach')}
+            />
+            <Button
               label="Sign out"
               variant="secondary"
               loading={signingOut}

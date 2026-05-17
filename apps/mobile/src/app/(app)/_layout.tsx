@@ -20,9 +20,9 @@ export default function AppTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Maahi',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" color={color} size={size} />
+            <Ionicons name="sparkles" color={color} size={size} />
           ),
         }}
       />
