@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionFromCookies } from "./auth";
+import { getSession } from "./auth";
 import { log } from "./log";
 
 const ADMIN_USER_IDS = new Set(
@@ -13,7 +13,7 @@ const ADMIN_USER_IDS = new Set(
 export async function requireAdmin(action: string): Promise<
   { userId: string; error?: never } | { userId?: never; error: NextResponse }
 > {
-  const session = await getSessionFromCookies();
+  const session = await getSession();
   if (!session) {
     return { error: NextResponse.json({ error: "Not authenticated" }, { status: 401 }) };
   }

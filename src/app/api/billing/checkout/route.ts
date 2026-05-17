@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionFromCookies } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { getUserPlan, upsertUserPlan } from "@/lib/repo";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { log } from "@/lib/log";
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Billing is not configured" }, { status: 503 });
   }
 
-  const session = await getSessionFromCookies();
+  const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }

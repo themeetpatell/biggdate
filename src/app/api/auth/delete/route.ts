@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { getSessionFromCookies, clearSessionCookie } from "@/lib/auth";
+import { getSession, clearSessionCookie } from "@/lib/auth";
 
 export async function DELETE() {
-  const session = await getSessionFromCookies();
+  const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }

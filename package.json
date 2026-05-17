@@ -2,11 +2,15 @@
   "name": "biggdate-next",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --ignore-pattern apps --ignore-pattern packages",
     "typecheck": "tsc --noEmit",
     "repo:check": "node scripts/check-repo-structure.mjs",
     "docs:check": "node scripts/check-docs.mjs",
@@ -66,6 +70,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
+    "turbo": "^2.5.0",
     "typescript": "^5"
   }
 }
