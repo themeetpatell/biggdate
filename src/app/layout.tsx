@@ -107,6 +107,13 @@ export default function RootLayout({
           the JS tags. Loading them unconditionally would defeat the consent
           gate (they're tracking pixels too, just without JS).
         */}
+        {/* Skip-to-content link for keyboard / screen-reader users (WCAG 2.4.1). */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-[var(--bd-text)] focus:px-4 focus:py-2 focus:text-[var(--bd-bg)] focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -115,7 +122,9 @@ export default function RootLayout({
         >
           <TooltipProvider>
             <AuthProvider>
-              {children}
+              <div id="main-content" tabIndex={-1}>
+                {children}
+              </div>
               <PushSubscriber />
               <ProfileLauncher />
               <BottomNav />

@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/loading-screen";
 import { DateOfBirth } from "@/components/ui/date-of-birth";
 import { trackOnboardingStart } from "@/lib/gtm";
+import posthog from "posthog-js";
 
 const GENDER_CHOICES = [
   "Woman", "Man", "Non-binary", "Trans woman", "Trans man", "Genderqueer",
@@ -104,6 +105,7 @@ export default function BasicsPage() {
       }
       // No client-side phase tracker here — the server fires
       // `onboarding_phase1_complete` via trackFirst inside the route.
+      posthog.capture("onboarding_basics_submitted", { gender, partner_gender: partnerGender, city, intent });
       await refresh();
       router.replace("/onboarding");
     } catch {

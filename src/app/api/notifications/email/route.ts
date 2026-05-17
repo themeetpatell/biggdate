@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getAccountHandleByUserId, getNotificationPreferences } from "@/lib/repo";
@@ -7,6 +8,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM || "Maahi from BiggDate <maahi@biggdate.app>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://biggdate.app";
 
+// Welcome is transactional (account confirmation). The rest can be unsubscribed
+// from individually — each maps to a `kind` understood by /api/email/unsubscribe.
+type UnsubscribeKind = "match_ready" | "soul_knock" | "mutual_match";
+
 type EmailEvent =
   | { event: "welcome"; toUserId: string }
   | { event: "match_ready"; toUserId: string }
@@ -14,7 +19,46 @@ type EmailEvent =
   | { event: "soul_knock_answered"; toUserId: string; responderName: string }
   | { event: "mutual_match"; toUserId: string; otherName: string; threadId: string };
 
-function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
+function getUnsubscribeSecret(): string {
+  return (
+    process.env.EMAIL_UNSUBSCRIBE_SECRET ||
+    process.env.INTERNAL_API_SECRET ||
+    process.env.CRON_SECRET ||
+    ""
+  );
+}
+
+// Signed one-click unsubscribe URL. Same HMAC scheme as
+// src/lib/jobs/daily-soul-email.ts so /api/email/unsubscribe can verify the
+// token regardless of which sender minted it.
+function unsubscribeUrlFor(userId: string, kind: UnsubscribeKind): string | null {
+  const secret = getUnsubscribeSecret();
+  if (!secret) return null;
+  const sig = createHmac("sha256", secret).update(`${userId}:${kind}`).digest("base64url");
+  const params = new URLSearchParams({ u: userId, k: kind, s: sig });
+  return `${APP_URL}/api/email/unsubscribe?${params.toString()}`;
+}
+
+function unsubscribeKindFor(event: EmailEvent["event"]): UnsubscribeKind | null {
+  switch (event) {
+    case "match_ready":
+      return "match_ready";
+    case "soul_knock_received":
+    case "soul_knock_answered":
+      return "soul_knock";
+    case "mutual_match":
+      return "mutual_match";
+    case "welcome":
+      return null;
+  }
+}
+
+function buildEmail(
+  body: EmailEvent,
+  toEmail: string,
+  toName: string,
+  unsubscribeUrl: string | null,
+) {
   switch (body.event) {
     case "welcome":
       return {
@@ -25,6 +69,7 @@ function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
           "You're in. Maahi is your guide here — she'll ask the questions that actually matter, build your soul profile, and only show you people worth meeting. Tap below to start when you're ready.",
           "Start Onboarding",
           `${APP_URL}/onboarding`,
+          unsubscribeUrl,
         ),
       };
     case "match_ready":
@@ -36,6 +81,7 @@ function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
           "Maahi has found people worth meeting. Head back to see who she picked for you today.",
           "See My Matches",
           `${APP_URL}/dashboard`,
+          unsubscribeUrl,
         ),
       };
     case "soul_knock_received":
@@ -47,6 +93,7 @@ function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
           `They asked: <em>"${body.question}"</em><br/><br/>Answer their question to open the conversation.`,
           "Answer the Knock",
           `${APP_URL}/dashboard`,
+          unsubscribeUrl,
         ),
       };
     case "soul_knock_answered":
@@ -58,6 +105,7 @@ function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
           "They responded to your Soul Knock. Answer their question too to unlock the chat.",
           "See Their Answer",
           `${APP_URL}/dashboard`,
+          unsubscribeUrl,
         ),
       };
     case "mutual_match":
@@ -69,12 +117,22 @@ function buildEmail(body: EmailEvent, toEmail: string, toName: string) {
           "Both of you answered each other's Soul Knock. Your chat is now open.",
           "Open Chat",
           `${APP_URL}/messages/${body.threadId}`,
+          unsubscribeUrl,
         ),
       };
   }
 }
 
-function emailHtml(heading: string, body: string, ctaLabel: string, ctaUrl: string) {
+function emailHtml(
+  heading: string,
+  body: string,
+  ctaLabel: string,
+  ctaUrl: string,
+  unsubscribeUrl: string | null,
+) {
+  const footer = unsubscribeUrl
+    ? `<p style="margin:0;color:#555;font-size:12px;line-height:1.55;">You're receiving this because you have notifications enabled. <a href="${APP_URL}/settings" style="color:#a855f7;">Manage preferences</a> &nbsp;·&nbsp; <a href="${unsubscribeUrl}" style="color:#777;text-decoration:underline;">Unsubscribe</a></p>`
+    : `<p style="margin:0;color:#555;font-size:12px;line-height:1.55;">You're receiving this because you have notifications enabled. <a href="${APP_URL}/settings" style="color:#a855f7;">Manage preferences</a></p>`;
   return `<!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -96,7 +154,7 @@ function emailHtml(heading: string, body: string, ctaLabel: string, ctaUrl: stri
         </tr>
         <tr>
           <td style="padding:20px 32px 32px;border-top:1px solid #222;margin-top:24px;">
-            <p style="margin:0;color:#555;font-size:12px;">You're receiving this because you have notifications enabled. <a href="${APP_URL}/settings" style="color:#a855f7;">Manage preferences</a></p>
+            ${footer}
           </td>
         </tr>
       </table>
@@ -143,9 +201,20 @@ export async function POST(req: Request) {
   }
 
   const toName = handle.fullName?.split(" ")[0] || "there";
-  const email = buildEmail(body, handle.email, toName);
+  const unsubKind = unsubscribeKindFor(body.event);
+  const unsubscribeUrl = unsubKind ? unsubscribeUrlFor(body.toUserId, unsubKind) : null;
+  const email = buildEmail(body, handle.email, toName, unsubscribeUrl);
 
-  await resend.emails.send({ from: FROM, ...email });
+  // RFC 8058: List-Unsubscribe + List-Unsubscribe-Post lets Gmail/Yahoo show
+  // the native unsubscribe button and POST to our endpoint for instant opt-out.
+  // Required by Gmail & Yahoo bulk-sender rules and recommended by CAN-SPAM.
+  const headers: Record<string, string> = {};
+  if (unsubscribeUrl) {
+    headers["List-Unsubscribe"] = `<${unsubscribeUrl}>`;
+    headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
+  }
+
+  await resend.emails.send({ from: FROM, ...email, headers });
 
   return NextResponse.json({ sent: true });
 }

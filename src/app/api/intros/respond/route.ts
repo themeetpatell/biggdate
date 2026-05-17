@@ -9,6 +9,7 @@ import { sendPushToUser } from "@/lib/push";
 import { sendNotification } from "@/lib/notifications";
 import { log } from "@/lib/log";
 import { track, trackFirst } from "@/lib/analytics";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: Request) {
   const auth = await requireAuth();
@@ -60,6 +61,11 @@ export async function POST(req: Request) {
       name: "first_thread_unlocked",
       userId: intro.matchedUserId,
       properties: { threadId: thread?.id ?? null },
+    });
+    getPostHogClient().capture({
+      distinctId: auth.userId,
+      event: "thread_unlocked",
+      properties: { thread_id: thread?.id ?? null, intro_id: introId },
     });
 
     // Notify both users

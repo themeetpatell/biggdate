@@ -155,12 +155,20 @@ export async function runDailySoulEmail(): Promise<DailyEmailStats> {
 
       const rendered = renderDailySoulEmail(ctx);
 
+      // RFC 8058 one-click unsubscribe headers — required by Gmail/Yahoo bulk
+      // sender rules and reinforces CAN-SPAM compliance. The footer link is
+      // user-facing; these headers are for mailbox providers.
+      const unsubscribeUrl = ctx.unsubscribeUrl;
       const sendResult = await client.emails.send({
         from: FROM,
         to: r.email,
         subject: rendered.subject,
         html: rendered.html,
         text: rendered.text,
+        headers: {
+          "List-Unsubscribe": `<${unsubscribeUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
       });
 
       // Resend SDK returns { data, error }. Treat any error as a failed send

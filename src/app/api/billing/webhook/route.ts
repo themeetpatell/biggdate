@@ -9,6 +9,7 @@ import {
 import { log } from "@/lib/log";
 import { getStripe, getStripeWebhookSecret, isStripeWebhookConfigured } from "@/lib/stripe";
 import { track, trackFirst } from "@/lib/analytics";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 // Stripe's newer API versions reorganized subscription period fields.
 // We access them safely via dynamic lookup to avoid SDK version drift.
@@ -61,6 +62,11 @@ async function handleSubscription(stripe: Stripe, subscription: Stripe.Subscript
       name: "first_paid",
       userId: existing.userId,
       properties: { plan: "premium", status },
+    });
+    getPostHogClient().capture({
+      distinctId: existing.userId,
+      event: "subscription_activated",
+      properties: { plan: "premium", status, stripe_subscription_id: subscription.id },
     });
   }
 }
