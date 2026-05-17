@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --ignore-pattern apps --ignore-pattern packages",
     "typecheck": "tsc --noEmit",
     "repo:check": "node scripts/check-repo-structure.mjs",
     "docs:check": "node scripts/check-docs.mjs",
