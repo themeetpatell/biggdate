@@ -86,6 +86,25 @@ export interface Match {
   openingQuestion: string;
 }
 
+export interface LifePreviewCompatibilityMap {
+  valuesOverlap: string[];
+  communicationFit: string;
+  conflictStyle: string;
+  growthTrajectory: string;
+}
+
+/** Response from `POST /api/life-preview` — an AI "life together" preview. */
+export interface LifePreview {
+  matchId: string;
+  match: Match;
+  storyArc: string;
+  dayInTheLife: string;
+  compatibilityMap: LifePreviewCompatibilityMap;
+  hardTruth: string;
+  growthScore: number;
+  transformationNote: string;
+}
+
 export type IntroStatus = "pending" | "answered";
 
 /** An intro (Soul Knock) the user has sent, from `GET /api/intros`. */

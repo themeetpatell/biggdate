@@ -113,6 +113,17 @@ function MatchDetail({ match }: { match: Match }) {
             <ThemedText>{match.openingQuestion}</ThemedText>
           </View>
 
+          <Button
+            label="Preview a life together"
+            variant="secondary"
+            onPress={() =>
+              router.push({
+                pathname: '/matches/life-preview',
+                params: { matchId: match.id },
+              })
+            }
+          />
+
           {error ? (
             <ThemedText type="small" style={styles.error}>
               {error}

@@ -17,6 +17,8 @@ export type {
   IntentAlignment,
   Intro,
   IntroStatus,
+  LifePreview,
+  LifePreviewCompatibilityMap,
   Match,
   MatchCompatibilitySignals,
   Message,
