@@ -51,9 +51,27 @@ const FOUNDERS: {
   {
     name: "Aariv Patel",
     initials: "AP",
-    title: "Founder & CEO",
+    title: "Founder / CEO",
     focus:
-      "Owns product vision and the systems layer alike — matching logic, AI intelligence, growth, and community — while personally onboarding every early user so the product stays one conversation away from the people it's built for.",
+      "Owns product vision, brand conviction, and the standard for a dating experience that feels premium without becoming performative.",
+    accentVar: "var(--bd-pink)",
+    avatarGradient: "from-[#ff1493] to-[#d4688a]",
+  },
+  {
+    name: "Dipen Patel",
+    initials: "DP",
+    title: "Founder / CTO",
+    focus:
+      "Builds the systems layer: matching logic, AI intelligence, and the infrastructure that keeps the experience sharp, fast, and trustworthy.",
+    accentVar: "var(--bd-blue)",
+    avatarGradient: "from-[#7b9fff] to-[#a855f7]",
+  },
+  {
+    name: "Drashty Soni",
+    initials: "DS",
+    title: "Founder / CGO",
+    focus:
+      "Drives growth, partnerships, and community loops so the product reaches the right people instead of chasing empty top-of-funnel volume.",
     accentVar: "var(--bd-accent)",
     avatarGradient: "from-[#ff6ac7] to-[#f04fb8]",
   },
@@ -276,10 +294,10 @@ export default function AboutPage() {
             className="text-[11px] font-semibold uppercase tracking-[0.3em]"
             style={{ color: "var(--bd-accent)" }}
           >
-            Founder
+            Founding team
           </span>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.02em] sm:text-4xl">
-            One founder. One standard.
+            Three distinct founder seats, one shared standard.
           </h2>
         </div>
 
