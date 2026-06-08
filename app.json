@@ -6,10 +6,10 @@
       }
     },
     "android": {
-      "package": "com.themeetpatel.biggdatenext"
+      "package": "com.biggdate.app"
     },
     "ios": {
-      "bundleIdentifier": "com.themeetpatel.biggdatenext",
+      "bundleIdentifier": "com.biggdate.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

@@ -166,7 +166,7 @@ The honest answer: we plan for paid-driven growth in years 1–2 and earned-driv
 
 ### Q24. Why is this the founder for dating? Have you built a marketplace before?
 
-Meet Patel is operator-first — the founder who personally onboards every beta user via WhatsApp. The bet is not "first-time-marketplace-founder figures out two-sided liquidity." The bet is "operator with sharp taste, direct user contact, and a strong product brain ships a product that the segment actually wants, then hires marketplace specialists once the wedge is proven."
+Aariv Patel is operator-first — the founder who personally onboards every beta user via WhatsApp. The bet is not "first-time-marketplace-founder figures out two-sided liquidity." The bet is "operator with sharp taste, direct user contact, and a strong product brain ships a product that the segment actually wants, then hires marketplace specialists once the wedge is proven."
 
 The early-stage advantage is direct user contact at a depth Match Group product managers will never have. The risk is the marketplace mechanics phase — which is exactly when seed capital + a Sequoia partner add the most leverage. We're not pretending we have a Bumble veteran on the team. We're saying we'll hire one when we need them.
 

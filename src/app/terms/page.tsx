@@ -21,7 +21,7 @@ export default function TermsPage() {
       <Section title="1. Who we are and where we operate">
         <p>
           BiggDate (&quot;the Service&quot;) is operated by{" "}
-          <strong>Meet Patel</strong>, sole proprietor, trading as
+          <strong>Aariv Patel</strong>, sole proprietor, trading as
           &quot;BiggDate&quot;, with principal place of business at
           [BUSINESS_ADDRESS], Ahmedabad, Gujarat, India (&quot;we&quot;, &quot;us&quot;).
           The Service is offered in India, the UAE, and the United States.{" "}

@@ -20,7 +20,7 @@ export default function ImprintPage() {
 
       <Section title="Operator">
         <ul className="list-none space-y-1 pl-0">
-          <li><strong>Name:</strong> Meet Patel</li>
+          <li><strong>Name:</strong> Aariv Patel</li>
           <li><strong>Trading as:</strong> BiggDate</li>
           <li><strong>Form:</strong> Sole proprietorship (India)</li>
           <li><strong>Principal place of business:</strong> [BUSINESS_ADDRESS], Ahmedabad, Gujarat, India</li>
@@ -49,7 +49,7 @@ export default function ImprintPage() {
 
       <Section title="Grievance Officer (India IT Rules 2021 §4, DPDPA §13)">
         <ul className="list-none space-y-1 pl-0">
-          <li><strong>Name:</strong> Meet Patel</li>
+          <li><strong>Name:</strong> Aariv Patel</li>
           <li><strong>Designation:</strong> Founder and Grievance Officer</li>
           <li><strong>Email:</strong> <a href="mailto:grievance@biggdate.com" className="underline">grievance@biggdate.com</a></li>
           <li><strong>Postal address:</strong> [BUSINESS_ADDRESS], Ahmedabad, Gujarat, India</li>
